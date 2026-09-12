@@ -4,6 +4,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- Pre-push follow-up: FP-001 mobile anchor offset and FP-002 stale status text corrected locally; focused independent Medium re-review found no new actionable findings. Original mobile reproduction verified; full cross-viewport settled-scroll matrix has a hidden-browser tooling limitation. [Review rounds and evidence](reviews/foundation-pre-push.md). Fixes and review record are included with this handover change; consult Git history for commit/publication state.
+
 - Complete: removed the uncommitted dev.py launcher; root Docker Compose now supports up --build/up/down with a single local migration gate. Fresh-clone secret initialization remains explicit. Independent Medium review clean; live build/start, repeat startup and 53 tests passed. [Review and verification](reviews/root-compose-workflow.md).
 
 - Complete: scope, design reference and submission scaffolding exist. Scope/design were pushed in commit `c7ed9d1`.

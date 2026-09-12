@@ -29,6 +29,7 @@
     --space-8: 5.6rem;
     --space-9: 6.4rem;
     --gutter: 1.6rem;
+    --anchor-offset: 7.2rem;
     --content-max: 144rem;
     --card-radius: 1.2rem;
     --pill-radius: 50rem;
@@ -41,6 +42,13 @@
 html {
     font-size: 62.5%;
     scroll-behavior: smooth;
+}
+
+#main-content,
+.hero,
+.intro-section,
+.states-section {
+    scroll-margin-top: var(--anchor-offset);
 }
 
 body {
@@ -1012,6 +1020,7 @@ h1 {
 @media (min-width: 768px) {
     :root {
         --gutter: 2.4rem;
+        --anchor-offset: 8.3rem;
     }
 
     .site-header__inner {
@@ -1022,6 +1031,7 @@ h1 {
 @media (min-width: 1024px) {
     :root {
         --gutter: 4rem;
+        --anchor-offset: 9.9rem;
     }
 
     .site-header__inner {
@@ -1033,6 +1043,10 @@ h1 {
     .site-header__inner {
         flex-wrap: wrap;
         padding-block: 1.2rem;
+    }
+
+    :root {
+        --anchor-offset: 13.6rem;
     }
 
     .site-nav {

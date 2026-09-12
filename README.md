@@ -138,7 +138,7 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 ## Current limitations and continuation
 
 - AWS permissions, exact costs and HTTPS prerequisites remain unverified.
-- Dataset validation, ecommerce/analytics workflows, frontend and cloud evidence remain pending; local foundation results are linked in the quickstart.
+- Dataset validation, ecommerce/analytics workflows and cloud evidence remain pending. Local backend and presentation-only frontend foundation evidence is available; business-frontend workflow evidence awaits those later features. See the quickstart and [frontend foundation evidence](evidence/frontend-foundation.md).
 - DOC-001/002 are resolved at the foundation contract/persistence boundary and DOC-003 is corrected. Import-after-checkout and analytics-recompute regressions remain required when those workflows are implemented.
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
