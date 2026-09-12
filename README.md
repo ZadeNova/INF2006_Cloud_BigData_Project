@@ -1,45 +1,132 @@
-# [Project Title] — TODO
+# INF2006: E-Commerce Core with Sales and Inventory Analytics
 
-> Entry point for markers. Keep this in sync with `project_manifest.yaml`.
+A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-## Problem statement
-TODO: one paragraph describing the user problem this service solves.
+**Status:** Planning and submission scaffolding are in place; application development has not yet been verified. Features and architecture below are the agreed implementation plan, not claims of delivered functionality. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+
+**Module:** INF2006 Cloud Computing & Big Data
+
+**Submission:** 11 October 2026, 23:59 Singapore time
+
+**Team:** Five members; two primary developers and three members supporting testing, reporting and administration.
 
 ## Team members
+
+To be completed by the team. Keep final details consistent with the manifest and contribution record.
+
 | Name | Student ID | Role |
 |---|---|---|
 | TODO | TODO | TODO |
+| TODO | TODO | TODO |
+| TODO | TODO | TODO |
+| TODO | TODO | TODO |
+| TODO | TODO | TODO |
 
-## Quickstart
-TODO: exact commands a marker can run on a clean machine (or state unavoidable cloud prerequisites and expected cost).
+## Planned features
 
+- Registration, login/logout and shared database-backed sessions.
+- Product catalogue and persistent shopping cart.
+- Simulated checkout with server-side prices, transactional stock updates and duplicate-request protection.
+- Owner-only order confirmation and history.
+- Operator-only sales and inventory dashboard with reporting dates, freshness and interpretable replenishment flags.
+
+Payments are simulated; no real payment-card data is collected. Analytics is required; customer-segmentation ML is optional. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
+
+## Analytics and data
+
+The required analytics reports daily/category sales, top-selling products, previous-seven-complete-day average sales, estimated stock coverage and replenishment flags. Calculations use completed orders and historical line prices, with independently checked fixtures and documented limitations.
+
+Selected historical source: [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce), with [downloadable files](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce/tree/main) for customers, products, orders and order items. The publisher describes the source as fully synthetic and MIT-licensed; downloaded-file validation and provenance review are still pending. Only synthetic data is permitted by this project's chosen data policy.
+
+Generate missing stock snapshots, lead times and demo account/cart fixtures separately. Preserve source identities, document date alignment and prevent reimports from overwriting live state. See the [data pipeline contract](docs/DATA_PIPELINE.md), [data documentation](data/README.md) and [analytics contract](docs/ANALYTICS.md).
+
+## Planned technology and architecture
+
+| Area | Selection |
+|---|---|
+| Backend | Django |
+| Frontend | Django templates, HTML/CSS, HTMX and minimal JavaScript |
+| Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
+| Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
+| Analytics | Django management commands/SQL; pandas where useful |
+| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch |
+| Access and secrets | IAM roles and Secrets Manager where the student lab permits |
+| Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
+
+```text
+Browser -> HTTPS ALB -> Django containers in EC2 Auto Scaling Group -> private RDS
+                            |
+                            +-> packaged static assets via WhiteNoise
+
+Private S3 -> validated dataset import -> RDS -> analytics summaries -> operator dashboard
+CloudWatch <- sanitised application logs and infrastructure metrics
 ```
-# example
-git clone <repo>
-cd <repo>
-# ... setup / run commands
+
+Application instances share database sessions and carts; no sticky sessions. Baseline autoscaling uses ALB request count per target. A final labelled architecture image, including trust boundaries, is planned at `evidence/architecture.png`; it is not yet supplied.
+
+See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRASTRUCTURE.md) for boundaries, deployment gates and trade-offs. RDS Single-AZ and one-instance normal operation are budget compromises; they do not provide uninterrupted availability. Failure demonstrations require two healthy application instances.
+
+## Getting started
+
+There is no verified application quickstart yet. Dependency versions, environment setup and executable Docker/Django commands will be added during foundation work after they have been tested. Do not treat planning examples as working commands.
+
+For development, begin with:
+
+1. [AGENTS.md](AGENTS.md): task routing, targeted reading and model/review rules.
+2. Relevant sections of [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md): agreed requirements and boundaries.
+3. [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md): current task, blockers and phase status.
+4. Only the relevant feature contracts listed below.
+
+The delivered application must run locally without paid AWS access for marking. Cloud deployment will require verified student-account permissions, available credits, region and an HTTPS certificate arrangement. Treat USD 40 per member as separate balances, not a pooled deployment budget. Develop locally and capture cloud evidence in bounded sessions before teardown.
+
+## Documentation index
+
+| Document | Purpose |
+|---|---|
+| [Project scope](PROJECT_SCOPE_INF2006.md) | Requirements, phase dates, risks, rubric coverage and team roles |
+| [Implementation tracker](docs/IMPLEMENTATION_PLAN.md) | Current status, next tasks and blockers |
+| [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |
+| [Schema](docs/SCHEMA.md) / [API](docs/API.md) | Data constraints, checkout semantics and route contracts |
+| [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md) | Provenance, import behaviour, metrics and validation |
+| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) | Component responsibilities, AWS deployment and operations |
+| [Security](docs/SECURITY.md) / [testing](docs/TESTING.md) | Controls, verification and evidence requirements |
+| [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
+| [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
+
+Backend implementation uses Astra Low and independent Astra Medium diff review. Low fixes logged findings; a repeated unresolved issue after its fix attempt stops the task for user-controlled Medium escalation. Frontend work uses Luna Max. Detailed assignment and targeted-reading rules are in AGENTS.md.
+
+## Testing and submission evidence
+
+Planned verification covers functional workflows, security controls, data/analytics correctness, concurrent checkout, scaling, recovery/session continuity, private S3 access and monitoring. Actual commands and results belong in [tests](tests/README.md), [analytics](analytics/README.md) and [evidence](evidence/README.md). Existing templates are not completed test evidence.
+
+Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
+
+## Repository layout
+
+```text
+AGENTS.md                    Agent entry point
+PROJECT_SCOPE_INF2006.md      Agreed scope and delivery phases
+DESIGN.md                    Visual reference
+README.md                    Human/marker entry point
+project_manifest.yaml        Submission metadata and evidence index
+docs/                        Contracts, tracker and review records
+src/                         Application/infrastructure scaffolding
+data/                        Dataset documentation and eventual fixtures
+analytics/                   Analytics documentation and eventual implementation
+tests/                       Test documentation and eventual repeatable checks
+evidence/                    Evidence templates and eventual dated results
+TEAM_CONTRIBUTIONS.md         Contribution record
+AI_USE_DECLARATION.md         Tools, verification, licences and attribution
 ```
 
-## Architecture
-See [evidence/architecture.png](evidence/architecture.png) for the full diagram (users, components, cloud services, trust boundaries, data stores, observability, data flows).
+The final `report.pdf` and required implementation/evidence artefacts are delivery outputs, not all present yet.
 
-## Technology list
-TODO: cloud provider, compute/deployment model, data layer, analytics/ML stack, security controls.
+## Current limitations and continuation
 
-## Known limitations
-TODO.
+- AWS permissions, exact costs and HTTPS prerequisites remain unverified.
+- Dataset validation, application functionality and test results are pending.
+- The planning review identifies dated inventory persistence, safe reimport behaviour and consistent autoscaling guidance to resolve before dependent implementation.
+- Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
+- Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 
-## Repository structure
-```
-README.md                 Entry point (this file)
-project_manifest.yaml     Machine-readable summary (Appendix A schema)
-report.pdf                8-12 page report (Section 7 headings)
-src/                       Runnable application + infra/config + .env.example
-data/                       Synthetic/sample data + DATA_DICTIONARY.md
-analytics/                 Notebook(s)/script(s) for the data-driven feature
-evidence/                   Named, dated evidence artefacts cited by the manifest
-tests/                       Automated tests / API collection / test scripts
-TEAM_CONTRIBUTIONS.md      Contribution matrix
-AI_USE_DECLARATION.md      AI tool use, sources, licences
-video_link.txt              Optional presentation link
-```
+After INF2006 submission, preserve the exact ZIP and tag the commit. INF2003 will extend that baseline with local Docker databases, substantial NoSQL functionality and database benchmarking, removing AWS dependencies and optional ML. That expansion is outside the current development scope.
