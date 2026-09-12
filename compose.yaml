@@ -1,0 +1,3 @@
+name: inf2006-foundation
+include:
+  - src/compose.yaml

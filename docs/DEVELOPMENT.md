@@ -1,6 +1,6 @@
 # Development conventions
 
-Status: foundation batch 1 establishes pip with exact direct/transitive pins in src/requirements.txt (refresh input: requirements.in), Python 3.13.15 and Django 5.2.17. Local Compose services web/db use the inf2006-foundation project; verified commands are in src/README.md. No CI gate is established. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
+Status: foundation batch 1 establishes pip with exact direct/transitive pins in src/requirements.txt (refresh input: requirements.in), Python 3.13.15 and Django 5.2.17. Local Compose services web/db use the inf2006-foundation project; root compose.yaml provides standard `docker compose up --build`, `up` and `down`; a one-off local migration service gates web startup. First-clone secret initialization remains explicit. Verified commands are in src/README.md. No CI gate is established. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
 
 ## Setup and layout
 

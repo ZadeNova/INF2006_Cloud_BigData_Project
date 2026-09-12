@@ -4,6 +4,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- Complete: removed the uncommitted dev.py launcher; root Docker Compose now supports up --build/up/down with a single local migration gate. Fresh-clone secret initialization remains explicit. Independent Medium review clean; live build/start, repeat startup and 53 tests passed. [Review and verification](reviews/root-compose-workflow.md).
+
 - Complete: scope, design reference and submission scaffolding exist. Scope/design were pushed in commit `c7ed9d1`.
 - Complete: agent entry point and focused planning documents drafted. This is documentation, not application delivery.
 - Complete: all four backend foundation batches passed independent review and local verification (48 tests). See the bounded batch table below for evidence and review records. Dataset download/validation, business workflows, analytics and AWS deployment remain unimplemented/unverified; the frontend foundation is complete locally after its independent Astra Medium review.

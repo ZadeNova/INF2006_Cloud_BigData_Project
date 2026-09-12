@@ -2,7 +2,7 @@
 
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-**Status:** The local backend foundation has verified Docker/PostgreSQL startup, initial migrations and health/readiness checks. Ecommerce features, frontend, dataset/analytics and AWS delivery remain planned; foundation completion does not complete all Phase 1 requirements. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+**Status:** The local backend foundation has verified Docker/PostgreSQL startup, initial migrations and health/readiness checks. The presentation-only frontend foundation is also delivered locally. Ecommerce features, dataset/analytics and AWS delivery remain planned; foundation completion does not complete all Phase 1 requirements. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
 
 **Module:** INF2006 Cloud Computing & Big Data
 
@@ -68,7 +68,21 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation verification](evidence/foundation-batch-4.md) for local configuration, startup and checks. Business routes and the frontend are separate follow-ups; this does not complete Phase 1.
+The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation verification](evidence/foundation-batch-4.md) for local configuration, startup and checks. The presentation-only frontend foundation is also available; business routes remain follow-ups and this does not complete Phase 1.
+
+With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
+
+```powershell
+python src/tools/init_env.py
+```
+
+```powershell
+docker compose up --build  # First run or after code changes
+docker compose up          # Normal startup using the existing image
+docker compose down        # Stop; preserve database data
+```
+
+Open http://127.0.0.1:8000/ (default port). Add `-d` to run in the background. A one-off local migration service completes before web starts. Use `--build` after pulling code/dependency/migration changes. See [the Docker quickstart](src/README.md) for tests, configuration and a Docker-only initializer alternative. No dev.py wrapper is required.
 
 For development, begin with:
 

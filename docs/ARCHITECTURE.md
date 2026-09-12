@@ -26,3 +26,5 @@ If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded
 - CloudFront omitted for current workload/budget; private S3 retained for datasets/exports.
 
 Create the submission diagram during implementation with users, services, trust boundaries, flows and observability. Planned output: `evidence/architecture.png`; do not claim it exists before creation. INF2003 extends the preserved submission later.
+
+Local startup uses root compose.yaml to include src/compose.yaml (Compose 2.20+). The one-off migrate service waits for healthy PostgreSQL; web waits for migration success. This preserves the existing local project/volume and does not change the separate AWS coordinated-migration strategy.

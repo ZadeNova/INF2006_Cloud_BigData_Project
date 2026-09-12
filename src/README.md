@@ -1,6 +1,35 @@
-# Local backend foundation
+# Local development
 
-Run commands from the repository root with Docker Desktop using Linux containers. Python 3 is needed for the optional host-side environment initializer; the application and tests run in Docker.
+Run commands from the repository root with Docker Desktop using Linux containers and Docker Compose 2.20 or later (root configuration uses Compose include). Python 3 is needed only for the optional host-side, one-time environment initializer; the application and dependencies run in Docker. A Docker-only initializer is shown below.
+
+## Startup
+
+Run from the repository root with Docker Desktop running. On a fresh clone only, generate local configuration (existing files are preserved):
+
+```powershell
+python src/tools/init_env.py
+```
+
+Then use standard Docker Compose:
+
+```powershell
+docker compose up --build  # First start or after code/dependency/migration changes
+docker compose up          # Start an already-built checkout
+docker compose down        # Stop and remove containers; preserve database data
+```
+
+Use `docker compose up --build -d` to run in the background. Open http://127.0.0.1:8000/ (or your configured APP_PORT). Root Compose uses the configuration under src/ and its local .env. A one-off migration service must finish successfully before web starts; migrations do not run in every web worker. This is local development behaviour, not the AWS deployment strategy.
+
+Tests and diagnostics are separate from startup:
+
+```powershell
+docker compose run --rm web pytest -q -p no:cacheprovider /app/tests
+docker compose run --rm web python manage.py check_database
+```
+
+No dev.py wrapper is needed. Do not use `down --volumes` unless deliberately deleting the disposable project's data.
+
+## Optional editor setup
 
 For VS Code/Pylance source analysis, create the ignored project-local editor environment once, then reload the window or select `.venv\\Scripts\\python.exe` as the interpreter:
 
@@ -11,14 +40,12 @@ python -m venv .venv
 
 The workspace settings point Pylance at this environment and add `src/` for project imports. Docker remains the supported application/runtime environment.
 
+## Configuration and additional checks
+
+To run the Django system check independently:
+
 ```powershell
-python src/tools/init_env.py
-docker compose -f src/compose.yaml build
-docker compose -f src/compose.yaml run --rm web python manage.py migrate --noinput
-docker compose -f src/compose.yaml up -d --wait --wait-timeout 60 web
-docker compose -f src/compose.yaml run --rm web python manage.py check
-docker compose -f src/compose.yaml run --rm web python manage.py check_database
-docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests
+docker compose run --rm web python manage.py check
 ```
 
 The initializer creates src/.env once, generates random local secrets without printing them, and preserves an existing file. Docker-only initializer alternative in PowerShell:
@@ -29,15 +56,15 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. Run the same migrate command after rebuilding; no business routes are added.
+Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. The local migration service applies pending migrations before web starts; no business routes are added.
 
 ```powershell
-docker compose -f src/compose.yaml down
+docker compose down
 ```
 
-Down removes these containers/network and preserves the local database volume. Do not use down --volumes unless deliberately deleting this disposable project's data. Credentials are initialized on a fresh volume only: editing .env does not rotate an existing database password. Use a coordinated role change or a deliberate disposable reset if necessary. Re-run migrate explicitly after pulling migration changes; migrations never race on web startup.
+Down removes these containers/network and preserves the local database volume. Do not use down --volumes unless deliberately deleting this disposable project's data. Credentials are initialized on a fresh volume only: editing .env does not rotate an existing database password. Use a coordinated role change or a deliberate disposable reset if necessary. After pulling migration changes, use `docker compose up --build`; the single local migration service gates web startup. Coordinate shared-database changes separately; do not run concurrent Compose deployments against the same local database.
 
-Services: web and db, project inf2006-foundation. PostgreSQL has no published port. Web binds only to 127.0.0.1. The application role is non-superuser and owns its local database; CREATEDB is allowed locally for pytest's isolated test databases. The bootstrap password is supplied only to db, not web. This is a local Compose configuration, not an AWS deployment: production uses a suitably restricted runtime role, secure external configuration, verify-full PostgreSQL TLS with POSTGRES_SSLROOTCERT, explicit hosts and HTTPS. DJANGO_ENV defaults to production outside Compose; debug is forbidden there. Proxy trust is opt-in only behind a proxy that strips/replaces forwarded headers.
+Services: web, db and a one-off migration service, project inf2006-foundation. PostgreSQL has no published port. Web binds only to 127.0.0.1. The application role is non-superuser and owns its local database; CREATEDB is allowed locally for pytest's isolated test databases. The bootstrap password is supplied only to db, not web. This is a local Compose configuration, not an AWS deployment: production uses a suitably restricted runtime role, secure external configuration, verify-full PostgreSQL TLS with POSTGRES_SSLROOTCERT, explicit hosts and HTTPS. DJANGO_ENV defaults to production outside Compose; debug is forbidden there. Proxy trust is opt-in only behind a proxy that strips/replaces forwarded headers.
 
 Dependencies: exact direct/transitive pip pins in requirements.txt; requirements.in is only for deliberate lock refreshes. Python and PostgreSQL images are digest-pinned. Docker packages static files at build time without application secrets; the process runs as UID 10001. Django sessions use PostgreSQL, expire after 14 days and need a later designated clearsessions maintenance runner.
 

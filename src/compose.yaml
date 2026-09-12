@@ -19,7 +19,8 @@ services:
       retries: 20
   web:
     build: .
-    environment:
+    image: inf2006-foundation-app
+    environment: &app-environment
       DJANGO_ENV: local
       DJANGO_DEBUG: ${DJANGO_DEBUG:-false}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Run tools/init_env.py first}
@@ -34,6 +35,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"
     healthcheck:
@@ -44,5 +47,14 @@ services:
       start_period: 10s
     volumes:
       - ../tests:/app/tests:ro
+  migrate:
+    build: .
+    image: inf2006-foundation-app
+    environment: *app-environment
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 volumes:
   postgres_data:
