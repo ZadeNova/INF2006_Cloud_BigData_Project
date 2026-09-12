@@ -76,6 +76,7 @@ Reviewers must flag unnecessary complexity, duplicated logic and dead code with 
 - Review Terraform plans and verify deployed behaviour, not merely a successful apply; see infrastructure guidance for shared-state coordination.
 - Include migrations with model changes. Update affected schema, API and analytics contracts in the same change.
 - Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline.
+- Every agent-created commit must have a concise subject and a non-empty descriptive body explaining what was fixed or changed, why, and the verification performed. Apply this to checkpoint and documentation commits too; see DEVELOPMENT.md for the format.
 - Never commit credentials, sensitive logs, real personal data or secret-containing Terraform state. Maintain attribution and AI-use records.
 - Run appropriate checks and disclose unrun checks. Placeholder evidence, planned commands and code existence are not successful results.
 - Update the implementation plan when work completes, blocks or is reordered. Keep requirements in the scope and status in the plan.

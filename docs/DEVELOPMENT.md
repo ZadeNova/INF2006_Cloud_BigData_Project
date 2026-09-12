@@ -28,6 +28,23 @@ Update affected contracts, executable instructions and implementation status tog
 
 Follow the user's authorised Git scope. Make atomic commits with concrete messages such as `docs: define checkout contract`; inspect staged paths/diff and avoid broad staging. Do not mix unrelated changes or discard another contributor's work. Default new branch prefix is `CL/` when needed. No force-push/history rewrite without explicit authorisation.
 
+Every future agent-created commit must include both a concise subject and a non-empty description body, separated by a blank line. This applies to Codex, Claude and other agents, including small checkpoint, feature, fix and documentation commits. Explain the concrete problem or purpose, what changed and the resulting behaviour, then record relevant verification and any material untested limitation. For non-fix work, describe what was added or changed rather than inventing a bug. Keep the body proportionate and factual; avoid vague descriptions such as "updated files" and never claim tests passed unless they ran.
+
+Example:
+
+```text
+fix: keep mobile anchor headings below sticky navigation
+
+Add responsive scroll offsets so navigation targets remain visible below
+sticky headers on mobile, tablet and desktop layouts.
+
+Validation: focused frontend tests passed and the original mobile States
+navigation case was verified in the browser. Full viewport coverage is
+limited as documented in the review record.
+```
+
+Write multiline commit messages to a temporary UTF-8 text file and use `git commit --file <path>` when that avoids shell-quoting ambiguity. Inspect the staged diff before writing the message and verify the resulting subject/body with `git log -1 --format=%B` before pushing. Do not rewrite existing commit history solely to retrofit this rule unless the user explicitly requests it.
+
 PRs describe the problem/result, validation and material limitations; follow templates if present. One agent stages/commits per shared working tree. These rules are not blanket permission to publish future work; honour the actual commit/push request and destination.
 
 Maintain source licences and AI-use records. Documentation creation does not itself authorise building the app or provisioning AWS. Follow the current task and phase tracker.
