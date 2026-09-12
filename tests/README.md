@@ -1,5 +1,9 @@
-# tests/
+# Foundation tests
 
-Automated tests, API test collection, or repeatable test scripts.
+Run from repository root after the Docker quickstart in ../src/README.md:
 
-TODO: add tests here and document how to run them (should back up the evidence files in `evidence/`).
+```powershell
+docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests/test_settings.py
+```
+
+Batch 2 verifies configuration failure cases, production cookie/TLS defaults and a real PostgreSQL non-superuser connection. pytest creates and drops its own test database. Tests are mounted read-only at /app/tests; no SQLite substitute. Other correctness/security/load suites remain pending. Actual evidence: ../evidence/foundation-batch-2.md.

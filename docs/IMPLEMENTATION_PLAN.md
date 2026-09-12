@@ -111,7 +111,7 @@ User-authorised local-only scope, base f719c67. No AWS provisioning or push. Pre
 | Batch | Status | Verification / review |
 |---|---|---|
 | 1. Skeleton and dependencies | Complete; review round 2 passed, B1-001 resolved | [Checks](../evidence/foundation-batch-1.md), [review](reviews/foundation-batch-1.md) |
-| 2. Docker/PostgreSQL and environment | Draft only; not verified | Starts after batch 1 passes |
+| 2. Docker/PostgreSQL and environment | Complete; review round 1 passed, no findings | [Checks](../evidence/foundation-batch-2.md), [review](reviews/foundation-batch-2.md); base fca20e7 |
 | 3. Schema and migrations | Contract/model drafts only; DOC-001/002 correction pending review | Starts after batch 2 passes |
 | 4. Health and foundation verification | Draft only; not verified | Starts after batch 3 passes |
 

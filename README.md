@@ -68,7 +68,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-There is no verified application quickstart yet. Dependency versions, environment setup and executable Docker/Django commands will be added during foundation work after they have been tested. Do not treat planning examples as working commands.
+The local backend foundation is being delivered in reviewed batches. See [the Docker quickstart](src/README.md) and [batch verification](evidence/foundation-batch-2.md) for local configuration, startup and checks. Business routes, schema and health are tracked separately; this does not complete Phase 1.
 
 For development, begin with:
 
