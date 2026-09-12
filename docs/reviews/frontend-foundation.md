@@ -4,7 +4,7 @@
 
 - Task: INF2006 Phase 1 frontend foundation.
 - Required scope: Django templates, shared CSS/layout/components, responsive navigation, form/button/message/empty/error states, a presentation-only HTMX interaction, keyboard accessibility, visible focus, mobile layout and live HTTP/browser verification. Business routes remain reserved.
-- Specifications reviewed: [AGENTS.md](../../AGENTS.md), [DESIGN.md](../../DESIGN.md), [FRONTEND.md](../FRONTEND.md), [API.md](../API.md), [ARCHITECTURE.md](../ARCHITECTURE.md), [SECURITY.md](../SECURITY.md), [DEVELOPMENT.md](../DEVELOPMENT.md), and [frontend-foundation.md](../../evidence/frontend-foundation.md).
+- Specifications reviewed: [AGENTS.md](../../AGENTS.md), [DESIGN.md](../../DESIGN.md), [FRONTEND.md](../FRONTEND.md), [API.md](../API.md), [ARCHITECTURE.md](../ARCHITECTURE.md), [SECURITY.md](../SECURITY.md), [DEVELOPMENT.md](../DEVELOPMENT.md), and `evidence/frontend-foundation.md` (historical record, removed).
 - Backend handover baseline: `51e4ec1`; first frontend implementation checkpoint: `d081007`.
 - Round 1 reviewed snapshot: `d081007..54d02cf` (working tree clean at review time).
 - Remediation checkpoint for Round 2: `c59b162` (complete corrected implementation diff is `51e4ec1..c59b162`).
@@ -32,4 +32,6 @@
 
 ## Round 2
 
-Round 2 completed on 12 September 2026. The same independent Astra Medium reviewer inspected the complete corrected task scope from `51e4ec1` through `6e94aec894e4afe384bec1a47ac2d8cfd2b005a8`, preserved finding IDs, and found F-001 through F-005 resolved with no new actionable findings and no substantive backend findings. The reviewer’s browser limitation is explicit above; coordinator browser evidence is recorded in [frontend-foundation.md](../../evidence/frontend-foundation.md). Conclusion: clean; the frontend foundation may be marked complete.
+Round 2 completed on 12 September 2026. The same independent Astra Medium reviewer inspected the complete corrected task scope from `51e4ec1` through `6e94aec894e4afe384bec1a47ac2d8cfd2b005a8`, preserved finding IDs, and found F-001 through F-005 resolved with no new actionable findings and no substantive backend findings. The reviewer’s browser limitation is explicit above; coordinator browser evidence is recorded in `evidence/frontend-foundation.md` (historical record, removed). Conclusion: clean; the frontend foundation may be marked complete.
+
+Record retention: the separate foundation verification Markdown and raw output files were deleted at the user's request on 12 September 2026. References above identify historical inputs available in Git history; this review summary is retained.

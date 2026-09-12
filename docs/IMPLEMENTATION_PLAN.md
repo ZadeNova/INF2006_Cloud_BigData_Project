@@ -4,6 +4,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- Documentation cleanup: removed nine separate foundation verification/output files at the user's request. Existing reviews in `docs/reviews/` are retained; supporting historical records remain in Git history. Required submission evidence templates remain in `evidence/`.
+
 - Complete locally: added [GitHub Actions CI](../.github/workflows/ci.yml) for pull requests and main pushes, reusing pinned Docker/PostgreSQL. Image build, fresh isolated migrations, Django checks, missing-migration check and all 53 tests passed on 12 September; validation resources cleaned up. Hosted Ubuntu execution remains to be confirmed in Actions after push; Linux initializer ownership is configured but not reproduced locally. User explicitly waived independent review for this CI-only task; the general backend review rule remains unchanged.
 
 - Pre-push follow-up: FP-001 mobile anchor offset and FP-002 stale status text corrected locally; focused independent Medium re-review found no new actionable findings. Original mobile reproduction verified; full cross-viewport settled-scroll matrix has a hidden-browser tooling limitation. [Review rounds and evidence](reviews/foundation-pre-push.md). Fixes and review record are included with this handover change; consult Git history for commit/publication state.
@@ -33,8 +35,8 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 ### Phase 1: foundation and feasibility
 
 **Application**
-- [x] Scaffold Django modules, pinned dependencies, Docker/Compose PostgreSQL, environment settings, initial migrations and health endpoint; local database connectivity verified. [Final evidence](../evidence/foundation-batch-4.md), [review](reviews/foundation-batch-4.md).
-- [x] Render a base Django template with shared styling and HTMX through HTTP; record actual run/test commands. Implementation and browser evidence are recorded in [frontend foundation](../evidence/frontend-foundation.md); independent Astra Medium review is clean in [frontend review](reviews/frontend-foundation.md).
+- [x] Scaffold Django modules, pinned dependencies, Docker/Compose PostgreSQL, environment settings, initial migrations and health endpoint; local database connectivity verified. [Review and check summary](reviews/foundation-batch-4.md).
+- [x] Render a base Django template with shared styling and HTMX through HTTP; record actual run/test commands. Implementation and browser evidence are recorded in [frontend foundation](reviews/frontend-foundation.md); independent Astra Medium review is clean in [frontend review](reviews/frontend-foundation.md).
 
 **Infrastructure**
 - [ ] Verify lab permissions, balance, region, shared Terraform state ownership and HTTPS arrangement; follow the [infrastructure setup order](AWS_INFRASTRUCTURE.md#setup-order-and-verification).
@@ -74,7 +76,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 ## Next work
 
 1. Backend foundation is complete. Use [Docker quickstart](../src/README.md); local verification used the web/db services and the PostgreSQL volume is retained. Remaining Phase 1 work follows below.
-2. Frontend foundation is complete at implementation checkpoint `c59b162` plus review/evidence checkpoint `6e94aec`; continue with the separate backend authentication task. Evidence: [frontend foundation](../evidence/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
+2. Frontend foundation is complete at implementation checkpoint `c59b162` plus review/evidence checkpoint `6e94aec`; continue with the separate backend authentication task. Evidence: [frontend foundation](reviews/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
 3. Separate backend authentication task: registration/login/logout and session security; independent review required.
 4. Separate catalogue/cart task: active product pagination, persistent owner-scoped mutations and validation; independent review required. Checkout/history follow afterwards.
 5. Data track: accept/pin dataset, verify actual mapping/date policy, implement create-only import and regression tests per DOC-001/002 contracts; then analytics.
@@ -101,7 +103,7 @@ Update this file with substantive changes: status, evidence/commit references, b
 - 12 Sep 2026: backend Astra Low, frontend Luna Max; user controls backend Medium escalation.
 - 12 Sep 2026: frontend foundation batch 1 added the live presentation shell and representative page; Django checks passed and HTTP verification returned 200 for `/` and `/health/`. Component states, responsive navigation and HTMX remain open for the next batches.
 - 12 Sep 2026: frontend foundation batch 2 added shared state components, responsive navigation and `GET /foundation/design-notes/`; focused tests passed, fragment HTTP returned 200, and browser verification confirmed the HTMX swap/focus handoff with no console errors at desktop and mobile viewports.
-- 12 Sep 2026: frontend foundation batch 3 added shared informational/error message presentation and `404.html`; focused tests passed 4/4, the full suite passed 52/52, and browser/HTTP evidence was recorded in [frontend-foundation.md](../evidence/frontend-foundation.md). Round 1 Astra Medium review identified F-001 through F-005; `c59b162` remediated them with the validation sample, 503/retry preview, visible swap focus, 44px mobile controls and corrected evidence baseline. Focused tests passed 5/5, the full suite passed 53/53, and Round 2 independent Astra Medium review through `6e94aec` was clean with no new actionable findings. The frontend foundation is complete; dataset and AWS gates remain open.
+- 12 Sep 2026: frontend foundation batch 3 added shared informational/error message presentation and `404.html`; focused tests passed 4/4, the full suite passed 52/52, and browser/HTTP evidence was recorded in [frontend-foundation.md](reviews/frontend-foundation.md). Round 1 Astra Medium review identified F-001 through F-005; `c59b162` remediated them with the validation sample, 503/retry preview, visible swap focus, 44px mobile controls and corrected evidence baseline. Focused tests passed 5/5, the full suite passed 53/53, and Round 2 independent Astra Medium review through `6e94aec` was clean with no new actionable findings. The frontend foundation is complete; dataset and AWS gates remain open.
 
 - 12 Sep 2026: retain the complete technical scope with two primary developers and three testing/report/admin members. The user leads backend/frontend and both developers share infrastructure; remaining data/analytics and test-script ownership must be assigned. Contribution records must reflect actual work.
 
@@ -117,9 +119,9 @@ User-authorised local-only scope, base f719c67. Four sequential reviewed checkpo
 
 | Batch | Status | Verification / review |
 |---|---|---|
-| 1. Skeleton and dependencies (fca20e7) | Complete; review round 2 passed, B1-001 resolved | [Checks](../evidence/foundation-batch-1.md), [review](reviews/foundation-batch-1.md) |
-| 2. Docker/PostgreSQL and environment (b137d63) | Complete; review round 1 passed, no findings | [Checks](../evidence/foundation-batch-2.md), [review](reviews/foundation-batch-2.md); base fca20e7 |
-| 3. Schema and migrations (dd10f3a) | Complete; review round 1 passed; DOC-001/002 resolved at contract/persistence boundary | [Checks](../evidence/foundation-batch-3.md), [review](reviews/foundation-batch-3.md); base b137d63 |
-| 4. Health and foundation verification | Complete; 48 tests; review round 1 passed, no findings | [Checks](../evidence/foundation-batch-4.md), [review](reviews/foundation-batch-4.md); base dd10f3a |
+| 1. Skeleton and dependencies (fca20e7) | Complete; review round 2 passed, B1-001 resolved | [Review and check summary](reviews/foundation-batch-1.md) |
+| 2. Docker/PostgreSQL and environment (b137d63) | Complete; review round 1 passed, no findings | [Review and check summary](reviews/foundation-batch-2.md); base fca20e7 |
+| 3. Schema and migrations (dd10f3a) | Complete; review round 1 passed; DOC-001/002 resolved at contract/persistence boundary | [Review and check summary](reviews/foundation-batch-3.md); base b137d63 |
+| 4. Health and foundation verification | Complete; 48 tests; review round 1 passed, no findings | [Review and check summary](reviews/foundation-batch-4.md); base dd10f3a |
 
 Follow-up tasks remain separate: authentication; catalogue/cart; data acceptance/import/analytics; AWS feasibility/deployment. The frontend foundation is completed in the frontend checkpoints and review record above; none of these remaining tasks is completed by the backend foundation.

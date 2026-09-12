@@ -7,3 +7,5 @@ Round 1: no actionable findings. Reviewed complete models/migrations/guard funct
 Independent git diff --cached --check passed. Reviewer did not independently rerun runtime tests/migrations; relied on coordinator evidence: ../../evidence/foundation-batch-3.md, 40 tests, migration application/no drift and guard reversal/reapplication. This is a limitation, not an independent runtime pass.
 
 Required follow-ups remain: importer after checkout preserves live stock/orders/carts/authentication; historical aggregation recomputation after live purchase preserves coverage; controlled reset and import conflict/isolation tests. Those workflows do not exist yet and are not marked verified. Batch 3 passes without completing all Phase 1 work.
+
+Record retention: the separate foundation verification Markdown and raw output files were deleted at the user's request on 12 September 2026. References above identify historical inputs available in Git history; this review summary is retained.

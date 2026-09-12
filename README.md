@@ -68,7 +68,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation verification](evidence/foundation-batch-4.md) for local configuration, startup and checks. The presentation-only frontend foundation is also available; business routes remain follow-ups and this does not complete Phase 1.
+The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation review](docs/reviews/foundation-batch-4.md) for local configuration, startup and checks. The presentation-only frontend foundation is also available; business routes remain follow-ups and this does not complete Phase 1.
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -142,7 +142,7 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 ## Current limitations and continuation
 
 - AWS permissions, exact costs and HTTPS prerequisites remain unverified.
-- Dataset validation, ecommerce/analytics workflows and cloud evidence remain pending. Local backend and presentation-only frontend foundation evidence is available; business-frontend workflow evidence awaits those later features. See the quickstart and [frontend foundation evidence](evidence/frontend-foundation.md).
+- Dataset validation, ecommerce/analytics workflows and cloud evidence remain pending. Local backend and presentation-only frontend foundation review summaries are available; business-frontend workflow evidence awaits those later features. See the quickstart and [frontend foundation review](docs/reviews/frontend-foundation.md).
 - DOC-001/002 are resolved at the foundation contract/persistence boundary and DOC-003 is corrected. Import-after-checkout and analytics-recompute regressions remain required when those workflows are implemented.
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.

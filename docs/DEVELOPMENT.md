@@ -59,6 +59,8 @@ This is the canonical review procedure required by [AGENTS.md](../AGENTS.md). Th
 
 ### Review handoff
 
+Keep one Markdown file per review task in `docs/reviews/`, containing all review rounds, findings, fixes and concise verification results. Do not create separate review verification Markdown files or raw `.txt` output files in `evidence/` or `docs/reviews/`. The rubric's submission evidence remains separate from agent review records.
+
 - Record the task's starting commit and owned paths; identify pre-existing/unrelated changes. Freeze the review snapshot while the reviewer examines it. Include tracked edits and newly created task files; plain git diff alone omits untracked files.
 - Give the independent reviewer `gpt-6-astra` / `medium`, the user requirement, relevant spec sections, exact diff/snapshot, changed paths and check outputs. Use explicit bounded context rather than a full-history fork when model overrides require it.
 - Reviewer must not have authored the implementation. It performs read-only inspection and may run focused non-mutating checks where supported; no edits, staging, commits, deployment or further delegation.
