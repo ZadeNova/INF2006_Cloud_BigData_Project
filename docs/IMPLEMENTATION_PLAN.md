@@ -19,9 +19,54 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 | 4. Reproduction and packaging | 2-8 Oct | Not started | Clean-machine rehearsal, report, manifest and declarations complete |
 | 5. Submission and preservation | 9-11 Oct | Not started | Submit by 11 Oct 23:59 SGT; archive ZIP and tag exact commit |
 
+## Phase checklists
+
+These are parallel work tracks, not extra staffing assumptions: the user leads backend/frontend, both developers share infrastructure, and three members support testing/reporting/admin. At each phase start, break only that phase into bounded tasks tied to its exit condition or a required rubric outcome. Keep future phases at checklist level. Agents check an item only after linking actual verification; do not turn this file into a transcript.
+
+### Phase 1: foundation and feasibility
+
+**Application**
+- [ ] Scaffold Django modules, pinned dependencies, Docker/Compose PostgreSQL, environment settings and health endpoint; verify local database connectivity.
+- [ ] Render a base Django template with shared styling and HTMX through HTTP; record actual run/test commands.
+
+**Infrastructure**
+- [ ] Verify lab permissions, balance, region, shared Terraform state ownership and HTTPS arrangement; follow the [infrastructure setup order](AWS_INFRASTRUCTURE.md#setup-order-and-verification).
+- [ ] Deploy a minimal application through ALB/EC2 and demonstrate RDS connectivity. A placeholder page is an intermediate smoke check, not completion of the Phase 1 database requirement.
+
+**Data and evidence**
+- [ ] Resolve relevant planning-review prerequisites before dependent implementation.
+- [ ] Download/pin the dataset, validate fields/relationships and record provenance/checksums; accept it or document the synthetic fallback.
+- [ ] Define source mapping, dated inventory and safe reimport rules; capture evidence and review links as work completes.
+
+### Phase 2: ecommerce and analytics
+
+- [ ] Application: registration/login/logout, catalogue, persistent cart, atomic/idempotent checkout and owner-only history work end to end.
+- [ ] Frontend: integrate routes, forms, validation/retry states and the protected analytics dashboard using DESIGN.
+- [ ] Infrastructure: real app image, private S3 import, secure config, logs and cross-instance sessions work with no stickiness; HTTPS precedes credential-bearing traffic.
+- [ ] Data: idempotent import preserves live state; analytics matches hand-checkable fixtures and shows reporting dates/freshness.
+- [ ] Verification: independent backend review gates and relevant functional/security/data tests pass; supporting members record results and report notes.
+
+### Phase 3: scaling and recovery
+
+- [ ] Measure fixed-capacity baseline then request-count autoscaling; capture latency, throughput, errors, healthy capacity and delay.
+- [ ] With two healthy instances, demonstrate failure/session continuity and safe retry of uncertain checkout.
+- [ ] Exercise analytics scheduler-host loss in a controlled test and verify restart/re-run without duplicate or partial summaries; record interruption and recovery.
+- [ ] Complete security/storage/analytics tests and an actual monitoring query/alert; diagnose failures honestly.
+- [ ] Evaluate optional cache/ML only after core work is solid; preserve the existing conditional scope and freeze features by 1 October.
+
+### Phase 4: reproduction and packaging
+
+- [ ] Fix defects and have a teammate reproduce the app/analytics from README on a clean setup.
+- [ ] Complete the report's required headings, manifest links, contribution/AI declarations and traceable evidence; check every claim against actual output.
+
+### Phase 5: submission and preservation
+
+- [ ] Validate ZIP structure, required artefacts, links and absence of secrets/personal data.
+- [ ] Submit by the deadline; preserve the exact ZIP and tag the INF2006 baseline for later INF2003 work.
+
 ## Next work
 
-Outstanding documentation prerequisites: [independent planning review](reviews/planning-suite-review.md), findings DOC-001 through DOC-003. Resolve historical stock persistence, safe reimport rules and the autoscaling-policy inconsistency before dependent implementation. All three remain open; no remediation/re-review has occurred.
+Outstanding documentation prerequisites: [independent planning review](reviews/planning-suite-review.md), findings DOC-001 through DOC-003. Resolve historical stock persistence, safe reimport rules and the autoscaling-policy inconsistency before dependent implementation. DOC-001 and DOC-002 remain open. DOC-003 has been corrected in the infrastructure contract; see the review record for the documentation check.
 
 1. Use role-based ownership; verify actual AWS permissions, region, credits and HTTPS arrangement. Do not block development on member names.
 2. Pin supported dependencies/runtime and scaffold Django with Docker PostgreSQL. Add verified commands to README.
@@ -56,3 +101,5 @@ Update this file with substantive changes: status, evidence/commit references, b
 - Role-based ownership only: do not ask for or invent member names. Keep this tracker concise with task-specific file paths and check references; agents use targeted reads rather than routine repository-wide scans.
 
 - Backend completion gate: independent Astra Medium reviews each backend task diff; Astra Low fixes logged findings. A repeated issue after its Low fix attempt stops the task for user-controlled Medium implementation escalation. Procedure: [development review gate](DEVELOPMENT.md#backend-review-gate). No implementation reviews have run yet.
+
+- Adopted from teammate reference: phase checklists split application/infrastructure/data work, task-to-exit-condition traceability and progressive infrastructure verification. Preserve Phase 1 RDS/HTTPS gates and current model/review rules.

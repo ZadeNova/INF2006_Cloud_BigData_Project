@@ -22,7 +22,7 @@ Define lightweight app health checks and dependency policy. Avoid replacing all 
 
 Deploy repeatable images and run migrations once through a coordinated step, not racing on every instance boot. Test compatibility/recovery before rollout. Terraform state can contain secrets and stays outside source/submission.
 
-Use target tracking with a measured request-count or CPU target. Fix numeric targets before final comparison. Record desired/in-service/healthy capacity, latency percentiles, throughput, errors and scaling delay. Allow startup and health checks. Scale-in drains requests; abrupt crashes can still fail them.
+Use target tracking with ALBRequestCountPerTarget as the scoped baseline. CPU target tracking is an alternative requiring a documented scope decision. Fix numeric targets before final comparison. Record desired/in-service/healthy capacity, latency percentiles, throughput, errors and scaling delay. Allow startup and health checks. Scale-in drains requests; abrupt crashes can still fail them.
 
 ## Conditional cache
 
@@ -35,3 +35,23 @@ Explicitly handle cache read/write connection failures and timeouts; fall back t
 Monitor latency/errors, target health, DB pressure and analytics freshness. Capture dated outputs and interpretation for an operational query/alert. Start with a USD 30 planning cap against the integration account's initial USD 40, reserve USD 10, and recalculate actual remaining funds.
 
 Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs and secrets. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
+
+## Setup order and verification
+
+Use dependency order and small reviewable changes, not an unexamined full deployment. Console exploration may help understanding but should not create unmanaged resources. Team-managed resources belong in Terraform; pre-existing lab roles/resources must be recorded as external dependencies rather than recreated. Record authorised emergency/manual changes and reconcile configuration afterwards.
+
+| Stage | Work and verification |
+|---|---|
+| 1. Access and bootstrap | Verify account/region/permissions and HTTPS path; configure provider, variables, version pins and state handling. Ignore state files and secret-bearing plans from the start. |
+| 2. Network and runtime access | Create VPC/subnets/security groups and permitted instance-role/logging setup. Check actual SG references: public ALB to app only, app to private RDS on 5432. Use port 80 only for redirect or a non-sensitive placeholder probe, never login traffic. |
+| 3. Persistent services/configuration | Create private Single-AZ RDS, private S3 and permitted secret storage/access. Establish a bounded backup/retention policy and costs. Verify allowed connectivity from the intended app role/SG and denied anonymous S3 access; one successful DB connection does not prove isolation. |
+| 4. Minimal app smoke deployment | Deploy ALB/ASG with a minimal app image, health checks and logs; prove application-to-RDS connectivity during Phase 1. A static placeholder can isolate routing problems but is not the final smoke acceptance test. |
+| 5. Real workflow | Roll out the app with coordinated migrations, tested HTTPS, secure session settings and S3 import; verify permissions, shared sessions and app behaviour. HTTPS must be ready before exposing authentication or credentials. |
+| 6. Scaling/recovery evidence | Measure the fixed-capacity baseline then autoscaling, failure and monitoring outcomes. Keep cost and permission limits visible. |
+| 7. Conditional enhancements | Consider ElastiCache only after required services/tests work and its selection is justified. Use the documented cache-aside pattern, not an assumed automatic database fallback. |
+
+IAM/runtime credentials and logs must exist before dependent verification; do not postpone all observability to the final stage. Reuse an authorised smoke instance for probes where practical instead of adding unnecessary disposable infrastructure.
+
+Before an AWS mutation, inspect the Terraform plan for creations/replacements/deletions, broad IAM, public exposure, unexpected NAT gateways, Multi-AZ DB choices, capacity and costs. Terraform success is not functional/security evidence. Honour existing user authorisation; if a plan exceeds it or disrupts shared resources, present the concrete plan and obtain the missing approval before applying. No blanket apply/destroy permission is implied by this document.
+
+With two infrastructure developers, choose one state owner/writer per environment. Prefer appropriately secured shared state with locking when lab capabilities permit. If using local state, agree custody and secure backup/handover; never create independent states managing the same resources. State/plan files may contain secrets and must not be committed or submitted. After any approved change, preserve a sanitised record, verify expected behaviour and coordinate teardown with the other developer.

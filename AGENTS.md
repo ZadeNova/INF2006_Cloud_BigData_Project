@@ -1,5 +1,7 @@
 # Agent entry point
 
+Shared repository guidance for coding agents. Keep durable constraints here and current tasks in the implementation tracker. Tool-specific entry files should point here rather than maintain competing instructions. Model assignments apply where the tool supports the named models; report a capability mismatch instead of silently substituting.
+
 ## Required reading
 
 Before work, consult the current status/next-step entry in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) and only the task-relevant sections of [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md), then select the relevant contracts below. Linked documents are not automatically loaded. Reuse material already read in the current context unless it changed. Inspect relevant existing files and Git status before editing; preserve unrelated changes.
@@ -62,6 +64,8 @@ Five members remain: the user and one teammate lead technical implementation; th
 - Derive prices/owner on server; use transactional stock updates and user-scoped idempotency. Enforce order ownership and operator permissions.
 - Sessions/carts persist in shared PostgreSQL. No sticky sessions or authoritative instance-local state.
 - S3 required; CloudFront excluded; ElastiCache conditional and disposable, never authoritative for checkout.
+- Preserve downloaded raw data unchanged; apply transformations through reproducible scripts.
+- Review Terraform plans and verify deployed behaviour, not merely a successful apply; see infrastructure guidance for shared-state coordination.
 - Include migrations with model changes. Update affected schema, API and analytics contracts in the same change.
 - Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline.
 - Never commit credentials, sensitive logs, real personal data or secret-containing Terraform state. Maintain attribution and AI-use records.

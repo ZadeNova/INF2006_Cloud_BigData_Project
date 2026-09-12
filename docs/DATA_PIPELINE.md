@@ -6,7 +6,7 @@ Download original Parquet files from the [Files tab](https://huggingface.co/data
 
 ## Reproducible processing
 
-1. Pin source revision; record licence/card, download date and SHA-256 checksums in data/README.md. Preserve raw inputs under data/raw/; choose a suitable submission sample with reproduction instructions.
+1. Pin source revision; record licence/card, download date and SHA-256 checksums in data/README.md. Never hand-edit downloaded raw files; preserve source bytes and implement transformations as repeatable code with separate outputs. Preserve raw inputs under data/raw/; choose a suitable submission sample with reproduction instructions.
 2. Validate unique IDs, relationships, finite/nonnegative money, positive quantities, statuses and chronology. Report rejected rows/counts/reasons, never silently repair or discard them.
 3. Map namespaced source identities to [application schema](SCHEMA.md). Record actual source fields and transformations in data/DATA_DICTIONARY.md.
 4. Import idempotently, reconcile row counts/decimal totals and test repeated import. Historical import bypasses checkout stock deduction.

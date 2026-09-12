@@ -12,6 +12,8 @@ Preserve submission layout: src/ owns app/dependencies/infrastructure; data/ sou
 
 Follow AGENTS.md targeted-reading rules: consult relevant sections and scoped code/tests, reuse current context, and avoid routine recursive repository scans. Widen searches only when narrower inspection cannot resolve the task. Inspect patterns/status first, keep edits focused and preserve unrelated work. Prefer ordinary Django forms/ORM and explicit business functions over speculative abstractions. Use readable names and cohesive functions; document non-obvious transaction/date/idempotency decisions. Add useful boundary type annotations.
 
+Do not make ad-hoc schema edits outside versioned migrations. Before applying a potentially destructive or incompatible migration to a shared database, inspect its effect on data and other developers, establish recovery/backup and coordinate timing within existing user authorisation; obtain missing approval when necessary. Routine local migrations need no extra ceremony.
+
 Include migrations with model changes; do not casually rewrite shared applied migrations. Use decimal money and aware timestamps; validate database-specific behaviour on PostgreSQL.
 
 Use the configured project environment once established. Do not install unrelated global dependencies or claim example commands are a working standard. Start only needed local services; clean up services started by this task when appropriate, not unrelated existing services. Avoid publicly exposed development servers.
