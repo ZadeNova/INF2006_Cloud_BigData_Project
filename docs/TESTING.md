@@ -20,6 +20,12 @@ Run/monitor load generators outside app instances. Keep workloads comparable and
 
 Verify frontend workflows through actual Django HTTP routes, including error/keyboard states. Screenshots alone do not demonstrate behaviour.
 
+## Continuous integration
+
+[CI](../.github/workflows/ci.yml) builds the application (including packaged static files), waits for healthy PostgreSQL, applies migrations, runs Django system checks, checks for missing migrations with `makemigrations --check --dry-run`, and runs the existing pytest suite at `/app/tests`. Each command must succeed. The job uses the Compose non-superuser application role and an isolated, disposable database; it requires no repository secrets or AWS credentials. Cleanup removes only the CI project's containers and volume.
+
+CI runs on pull requests and pushes to main. Inspect the GitHub Actions run for the tested commit and actual result; a local pass does not prove the hosted runner passed. This job does not deploy or verify AWS, browser workflows, load, or recovery, and branch protection must be configured separately if a passing check is to be required before merge.
+
 ## Evidence and final gate
 
 Every record includes objective, setup/versions, exact commands/steps, inputs/seed, expected/actual result, date, raw artefact links and interpretation. Report failed/unrun checks honestly. Never fabricate metrics.

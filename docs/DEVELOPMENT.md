@@ -1,6 +1,10 @@
 # Development conventions
 
-Status: foundation batch 1 establishes pip with exact direct/transitive pins in src/requirements.txt (refresh input: requirements.in), Python 3.13.15 and Django 5.2.17. Local Compose services web/db use the inf2006-foundation project; root compose.yaml provides standard `docker compose up --build`, `up` and `down`; a one-off local migration service gates web startup. First-clone secret initialization remains explicit. Verified commands are in src/README.md. No CI gate is established. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
+Status: foundation batch 1 establishes pip with exact direct/transitive pins in src/requirements.txt (refresh input: requirements.in), Python 3.13.15 and Django 5.2.17. Local Compose services web/db use the inf2006-foundation project; root compose.yaml provides standard `docker compose up --build`, `up` and `down`; a one-off local migration service gates web startup. First-clone secret initialization remains explicit. Verified commands are in src/README.md. The GitHub Actions CI workflow is defined below. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
+
+## Continuous integration
+
+[GitHub Actions CI](../.github/workflows/ci.yml) runs on pull requests and pushes to main. It reuses the local Compose stack, digest-pinned Python/PostgreSQL images and exact requirements.txt dependency pins. See [CI checks](TESTING.md#continuous-integration) for coverage and limits.
 
 ## Setup and layout
 

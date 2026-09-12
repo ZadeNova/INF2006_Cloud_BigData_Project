@@ -4,6 +4,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- Complete locally: added [GitHub Actions CI](../.github/workflows/ci.yml) for pull requests and main pushes, reusing pinned Docker/PostgreSQL. Image build, fresh isolated migrations, Django checks, missing-migration check and all 53 tests passed on 12 September; validation resources cleaned up. Hosted Ubuntu execution remains to be confirmed in Actions after push; Linux initializer ownership is configured but not reproduced locally. User explicitly waived independent review for this CI-only task; the general backend review rule remains unchanged.
+
 - Pre-push follow-up: FP-001 mobile anchor offset and FP-002 stale status text corrected locally; focused independent Medium re-review found no new actionable findings. Original mobile reproduction verified; full cross-viewport settled-scroll matrix has a hidden-browser tooling limitation. [Review rounds and evidence](reviews/foundation-pre-push.md). Fixes and review record are included with this handover change; consult Git history for commit/publication state.
 
 - Complete: removed the uncommitted dev.py launcher; root Docker Compose now supports up --build/up/down with a single local migration gate. Fresh-clone secret initialization remains explicit. Independent Medium review clean; live build/start, repeat startup and 53 tests passed. [Review and verification](reviews/root-compose-workflow.md).
