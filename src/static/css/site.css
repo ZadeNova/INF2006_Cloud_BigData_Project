@@ -371,6 +371,40 @@ textarea:disabled {
     font-size: 1.8rem;
 }
 
+.auth-page {
+    display: grid;
+    min-height: calc(100vh - 25rem);
+    place-items: center;
+    padding: var(--space-9) var(--gutter);
+}
+
+.auth-page__card {
+    width: min(100%, 48rem);
+    padding: clamp(3.2rem, 7vw, 4.8rem);
+    border-radius: var(--card-radius);
+    background: var(--color-white);
+    box-shadow: var(--card-shadow);
+}
+
+.auth-page__card h1 {
+    margin-bottom: var(--space-5);
+    font-size: clamp(2.8rem, 4vw, 3.6rem);
+}
+
+.auth-form {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.auth-form .button {
+    justify-self: start;
+    margin-top: var(--space-2);
+}
+
+.auth-page__card > .form-note {
+    padding-top: var(--space-5);
+}
+
 .message {
     display: flex;
     align-items: flex-start;
@@ -380,10 +414,17 @@ textarea:disabled {
     padding: var(--space-3);
 }
 
-.message--info {
+.message--info,
+.message--success {
     margin-top: var(--space-5);
     border-color: rgba(11, 96, 71, 0.18);
     background: var(--color-mint);
+}
+
+.messages {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5) var(--gutter) 0;
 }
 
 .message--error {

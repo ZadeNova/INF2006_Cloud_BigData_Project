@@ -96,4 +96,5 @@ if boolean("DJANGO_TRUST_PROXY"):
 SECURE_REDIRECT_EXEMPT = [r"^health/$"]
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/products/"
+LOGOUT_REDIRECT_URL = "/"
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
