@@ -1,5 +1,13 @@
 from django.http import JsonResponse
+from django.shortcuts import render
 from django.views.decorators.http import require_safe
+
+
+@require_safe
+def home(request):
+    """Presentation-only frontend foundation preview until business routes land."""
+    return render(request, "foundation/home.html")
+
 
 @require_safe
 def health(request):

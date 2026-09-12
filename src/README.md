@@ -1,6 +1,15 @@
 # Local backend foundation
 
-Run commands from the repository root with Docker Desktop using Linux containers. Python 3 is needed only for the optional host-side environment initializer; the application and tests run in Docker.
+Run commands from the repository root with Docker Desktop using Linux containers. Python 3 is needed for the optional host-side environment initializer; the application and tests run in Docker.
+
+For VS Code/Pylance source analysis, create the ignored project-local editor environment once, then reload the window or select `.venv\\Scripts\\python.exe` as the interpreter:
+
+```powershell
+python -m venv .venv
+.venv\\Scripts\\python.exe -m pip install -r src\\requirements.txt
+```
+
+The workspace settings point Pylance at this environment and add `src/` for project imports. Docker remains the supported application/runtime environment.
 
 ```powershell
 python src/tools/init_env.py
@@ -20,7 +29,7 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves http://127.0.0.1:8000/health/ (200 JSON status ok). GET / returns 404 because the frontend shell is intentionally not implemented. Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. Run the same migrate command after rebuilding; no business routes are added.
+Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. Run the same migrate command after rebuilding; no business routes are added.
 
 ```powershell
 docker compose -f src/compose.yaml down
@@ -32,7 +41,7 @@ Services: web and db, project inf2006-foundation. PostgreSQL has no published po
 
 Dependencies: exact direct/transitive pip pins in requirements.txt; requirements.in is only for deliberate lock refreshes. Python and PostgreSQL images are digest-pinned. Docker packages static files at build time without application secrets; the process runs as UID 10001. Django sessions use PostgreSQL, expire after 14 days and need a later designated clearsessions maintenance runner.
 
-Package paths: config holds settings/URLs/WSGI; accounts, catalogue, cart, orders and reporting are domain packages. Built-in Django User is retained. Frontend-owned templates/ and static/ are intentionally empty for Luna Max; API.md owns future route/form contracts. Batch verification records live under ../evidence/.
+Package paths: config holds settings/URLs/WSGI; accounts, catalogue, cart, orders and reporting are domain packages. Built-in Django User is retained. Frontend-owned templates/ contains the shared shell and foundation preview; static/ contains the shared stylesheet. The remaining component/HTMX work and future route/form contracts are owned by API.md. Batch verification records live under ../evidence/.
 
 Health is liveness only and stays 200 during shared database failure. check_database is the separate connectivity/applied-migration gate and returns nonzero sanitized errors on failure. See ../evidence/foundation-batch-4.md for local failure/recovery and container-recreation results. Neither check demonstrates an ecommerce workflow or AWS availability. A later deployment must configure and test the ALB probe Host/allowed-host policy.
 

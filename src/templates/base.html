@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Northstar Market frontend foundation preview">
+    <title>{% block title %}Northstar Market{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <header class="site-header">
+        <div class="site-header__inner">
+            <a class="brand" href="{% url 'home' %}" aria-label="Northstar Market home">
+                <span class="brand__mark" aria-hidden="true">✦</span>
+                <span class="brand__name">Northstar <span>Market</span></span>
+            </a>
+
+            <nav class="site-nav" aria-label="Primary navigation">
+                <a href="{% url 'home' %}#overview">Overview</a>
+                <a href="{% url 'home' %}#patterns">Patterns</a>
+            </nav>
+
+            <div class="site-header__meta">
+                <span class="status-chip"><span class="status-chip__dot" aria-hidden="true"></span>Foundation preview</span>
+                <a class="button button--dark button--compact" href="{% url 'health' %}">System status</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__inner">
+            <div>
+                <p class="site-footer__brand">Northstar Market</p>
+                <p class="site-footer__copy">A calm foundation for a useful storefront.</p>
+            </div>
+            <p class="site-footer__meta">Phase 1 · Django templates + HTMX</p>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

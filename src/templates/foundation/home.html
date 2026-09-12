@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Foundation preview · Northstar Market{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+    <section class="hero" id="overview" aria-labelledby="hero-title">
+        <div class="hero__copy">
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Phase 1 · frontend foundation</p>
+            <h1 id="hero-title">A storefront with room for what comes next.</h1>
+            <p class="hero__lead">Northstar Market is the working visual foundation for the INF2006 ecommerce experience: warm surfaces, clear states and an interface that stays useful when the network or the catalogue is having a hard day.</p>
+            <div class="hero__actions">
+                <a class="button button--light" href="#patterns">Explore the foundation <span aria-hidden="true">↓</span></a>
+                <a class="button button--outline-light" href="#patterns">See the patterns</a>
+            </div>
+            <p class="hero__note"><span aria-hidden="true">✦</span> Presentation sample · no catalogue, account or checkout data is connected yet.</p>
+        </div>
+
+        <div class="hero-visual" aria-hidden="true">
+            <div class="hero-visual__halo"></div>
+            <div class="hero-visual__card hero-visual__card--back"></div>
+            <div class="hero-visual__card hero-visual__card--front">
+                <span class="hero-visual__label">N / 01</span>
+                <span class="hero-visual__star">✦</span>
+                <span class="hero-visual__caption">Make useful things<br>feel effortless.</span>
+            </div>
+            <div class="hero-visual__orbit hero-visual__orbit--one"></div>
+            <div class="hero-visual__orbit hero-visual__orbit--two"></div>
+        </div>
+    </section>
+
+    <section class="intro-section" id="patterns" aria-labelledby="patterns-title">
+        <div class="section-heading">
+            <p class="eyebrow">The point of view</p>
+            <h2 id="patterns-title">Simple signals. Thoughtful details.</h2>
+            <p>Every shared choice should make the next feature easier to understand, test and trust.</p>
+        </div>
+
+        <div class="pattern-grid">
+            <article class="pattern-card">
+                <span class="pattern-card__number">01</span>
+                <h3>Warm by default</h3>
+                <p>Cream canvas, ceramic surfaces and layered greens give the storefront a confident, grounded rhythm.</p>
+            </article>
+            <article class="pattern-card">
+                <span class="pattern-card__number">02</span>
+                <h3>Clear under pressure</h3>
+                <p>Empty, validation and dependency states are designed as first-class moments instead of afterthoughts.</p>
+            </article>
+            <article class="pattern-card">
+                <span class="pattern-card__number">03</span>
+                <h3>Ready for real data</h3>
+                <p>Presentation samples are labelled plainly so live catalogue and account work can slot in without guesswork.</p>
+            </article>
+        </div>
+    </section>
+</div>
+{% endblock %}
