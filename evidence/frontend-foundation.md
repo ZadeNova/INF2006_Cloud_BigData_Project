@@ -55,4 +55,4 @@ Desktop and mobile captures were emitted inline from the browser verification in
 
 ## Review gate
 
-Round 1 independent Astra Medium review identified F-001 through F-005. The remediation is implemented in `c59b162` and verified above; the same reviewer must re-review the complete corrected diff from `51e4ec1` through `c59b162` read-only against `DESIGN.md`, `docs/FRONTEND.md`, `docs/API.md`, `docs/ARCHITECTURE.md`, `docs/SECURITY.md`, and the actual verification above. The review log and Round 2 outcome belong in `docs/reviews/frontend-foundation.md` before the frontend foundation is marked complete.
+Round 1 independent Astra Medium review identified F-001 through F-005. The same reviewer completed Round 2 against the full corrected scope `51e4ec1..6e94aec894e4afe384bec1a47ac2d8cfd2b005a8` and found all five resolved, with no new actionable findings or substantive backend findings. Browser claims remain distinguished as coordinator-performed evidence because the reviewer did not repeat browser checks. Full outcome: [frontend review](../docs/reviews/frontend-foundation.md).
