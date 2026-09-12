@@ -6,7 +6,7 @@ Read [DESIGN.md](../DESIGN.md), [API](API.md) and [security](SECURITY.md). Imple
 
 Django templates, HTML/CSS, HTMX and minimal JavaScript. No React/Next, client-side auth store or separate frontend deployment. Pages: registration/login, catalogue, cart/checkout, confirmation/history and protected analytics.
 
-Use a shared base template, reusable forms/product components and named HTMX fragments. Confirm actual template/static paths during scaffolding. Backend owns routes, permission checks and business logic; frontend owns presentation and interactions. Agree fragment contracts first.
+Use a shared base template, reusable forms/product components and named HTMX fragments. Foundation paths are src/templates/ and src/static/; settings and build-time WhiteNoise collection are ready. See [reserved integration contracts](API.md#foundation-handover-to-frontend-and-later-backend-tasks). Business URL names are not yet registered; foundation implements only health. Backend owns routes, permission checks and business logic; frontend owns presentation and interactions. Agree fragment contracts first.
 
 ## Design and states
 

@@ -1,2 +1,4 @@
-# Business and health routes are added in their separately reviewed batches.
-urlpatterns = []
+from django.urls import path
+from .views import health
+
+urlpatterns = [path("health/", health, name="health")]

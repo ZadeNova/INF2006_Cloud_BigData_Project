@@ -18,7 +18,7 @@ Initial/minimum ASG capacity one, default test maximum two. Have two healthy tar
 
 Verify region, service/role permissions, instance types, quotas and actual balance. Credits are separate, not a pooled USD 200. Establish hostname/certificate validation for HTTPS; the generated ALB hostname is not a team-owned certificate arrangement.
 
-Define lightweight app health checks and dependency policy. Avoid replacing all app instances merely because shared RDS is down. Record final thresholds/timeouts/warmup against measured startup behaviour.
+Foundation supplies GET/HEAD /health/ as database-independent process liveness (200, no-store), with allowed-host validation and internal HTTPS-redirect exemption. The separate check_database management command verifies PostgreSQL and applied migrations for operator/deployment readiness. Never use database readiness to replace all app instances during shared RDS failure. Local Compose uses a 10s probe interval, 2s request timeout, 3s process timeout, three retries and 10s start period; local startup was verified, but these are not calibrated AWS settings. The later deployment must resolve ALB probe Host/allowed-host handling (default probes may use target IPs), and measure its own thresholds/timeouts/warmup. No AWS deployment is claimed.
 
 Deploy repeatable images and run migrations once through a coordinated step, not racing on every instance boot. Test compatibility/recovery before rollout. Terraform state can contain secrets and stays outside source/submission.
 

@@ -2,7 +2,7 @@
 
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-**Status:** Planning and submission scaffolding are in place; application development has not yet been verified. Features and architecture below are the agreed implementation plan, not claims of delivered functionality. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+**Status:** The local backend foundation has verified Docker/PostgreSQL startup, initial migrations and health/readiness checks. Ecommerce features, frontend, dataset/analytics and AWS delivery remain planned; foundation completion does not complete all Phase 1 requirements. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
 
 **Module:** INF2006 Cloud Computing & Big Data
 
@@ -68,7 +68,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-The local backend foundation is being delivered in reviewed batches. See [the Docker quickstart](src/README.md) and [batch verification](evidence/foundation-batch-2.md) for local configuration, startup and checks. Business routes, schema and health are tracked separately; this does not complete Phase 1.
+The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation verification](evidence/foundation-batch-4.md) for local configuration, startup and checks. Business routes and the frontend are separate follow-ups; this does not complete Phase 1.
 
 For development, begin with:
 
@@ -124,8 +124,8 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 ## Current limitations and continuation
 
 - AWS permissions, exact costs and HTTPS prerequisites remain unverified.
-- Dataset validation, application functionality and test results are pending.
-- The planning review identifies dated inventory persistence, safe reimport behaviour and consistent autoscaling guidance to resolve before dependent implementation.
+- Dataset validation, ecommerce/analytics workflows, frontend and cloud evidence remain pending; local foundation results are linked in the quickstart.
+- DOC-001/002 are resolved at the foundation contract/persistence boundary and DOC-003 is corrected. Import-after-checkout and analytics-recompute regressions remain required when those workflows are implemented.
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 

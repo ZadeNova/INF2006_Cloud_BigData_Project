@@ -1,0 +1,6 @@
+Healthy HTTP: 200 {"status": "ok"}
+Database stopped HTTP: 200 {"status": "ok"}
+CommandError: Database unavailable.
+{"database": "ok", "migrations": "applied"}
+Migration records preserved after container recreation: 21
+{"database": "ok", "migrations": "applied"}

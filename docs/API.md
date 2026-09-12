@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: proposed routes, not implemented endpoints. Django HTML/HTMX is the baseline, not a separate REST service. Finalise route names in the first implementation and update this contract.
+Status: only GET/HEAD /health/ (URL name health) is implemented by the foundation. All business routes below are reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|
@@ -16,7 +16,7 @@ Status: proposed routes, not implemented endpoints. Django HTML/HTMX is the base
 | GET `/orders/` | Authenticated | Owner's order history |
 | GET `/orders/<id>/` | Owner | Persisted order confirmation/detail |
 | GET `/analytics/` | Operator | Period-labelled sales/inventory analytics |
-| GET `/health/` | Infrastructure | Lightweight app readiness; final dependency policy documented in infrastructure |
+| GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation |
 
 ## Inputs and responses
 
@@ -29,3 +29,28 @@ Use 403 for forbidden operator/CSRF access, 404 for inaccessible foreign cart/or
 Equivalent checkout replay returns the existing order; changed payload with the same key conflicts. Preserve the key after uncertain network outcomes. Never create a new key automatically solely because a response timed out. See [schema](SCHEMA.md).
 
 Return only public/owner/operator-appropriate fields. Authorise before accessing cached operator results; never share personalised fragments across users.
+
+## Foundation handover to frontend and later backend tasks
+
+Paths: src/templates/base.html is the reserved shared shell; page templates live under accounts/, registration/, catalogue/ and cart/ inside src/templates/. Shared assets live in src/static/ (suggested css/site.css and js/site.js). Django app-template discovery and WhiteNoise manifest static storage are configured; rebuild the Docker image after changing templates/static files. No base template, styling, HTMX library or business views were created by foundation work. Template inheritance may reserve title, content and extra_scripts blocks. Luna Max owns presentation and live visual verification.
+
+Reserved integration contracts (to implement and verify in the named backend follow-up):
+
+| Follow-up | Reserved URL name / template | Form or query fields |
+|---|---|---|
+| Authentication | accounts:register / accounts/register.html | username, password1, password2; framework password validation |
+| Authentication | accounts:login / registration/login.html | username, password, optional safe next |
+| Authentication | accounts:logout | POST with CSRF; no owner/user ID supplied |
+| Catalogue | catalogue:product_list / catalogue/product_list.html | page: positive integer; backend-bounded pagination |
+| Cart | cart:detail / cart/detail.html | GET owner cart; no owner ID supplied |
+| Cart add | cart:add | product_id, quantity integer 1..999 |
+| Cart update | cart:update | URL item ID, quantity integer 1..999 |
+| Cart delete | cart:delete | URL item ID; POST with CSRF |
+
+These names cannot be reversed until their follow-up URL modules exist. Do not add fake authentication or cart routes merely to render the shell. Checkout/history/analytics names and payload details will be finalized with their backend tasks before dependent frontend integration.
+
+Future cart HTMX responses target id cart-content using outerHTML and template cart/_content.html; full HTML uses cart/detail.html. Backend will pass cart and validated form/errors, derive totals/prices/owner, and keep the fragment wrapper stable. Authentication expiry should return an HX-Redirect to login rather than login HTML in the fragment. Error fragment handling (including 409/503) must be explicitly wired and tested by the later backend/frontend integration. This is a contract, not implemented HTMX behaviour.
+
+Health validates DJANGO_ALLOWED_HOSTS and remains exempt from HTTPS redirection for internal probes; it exposes no dependency diagnostics, credentials or sessions. Use python manage.py check_database for operator readiness: exit 0 with database/migrations status, nonzero sanitized error for unavailable PostgreSQL or unapplied migrations. Do not use database readiness as an ASG replacement trigger during a shared RDS outage. Actual ALB probe Host/allowed-host handling is a later infrastructure integration gate.
+
+The later catalogue/cart backend must select an explicit demo fixture namespace server-side and reject cross-namespace cart contents before checkout. Do not accept a namespace from a browser as authority; actual namespace selection follows dataset/fixture acceptance.

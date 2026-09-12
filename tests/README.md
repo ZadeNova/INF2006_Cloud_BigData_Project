@@ -15,3 +15,11 @@ docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /a
 ```
 
 See ../evidence/foundation-batch-3.md. These are persistence/constraint tests, not checkout/import/analytics workflow evidence.
+
+Full current foundation suite:
+
+```powershell
+docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests
+```
+
+Health/readiness and live Docker outage/recreation results: ../evidence/foundation-batch-4.md. No business workflow, frontend or AWS verification is implied.

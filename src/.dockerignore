@@ -4,5 +4,3 @@
 __pycache__
 .pytest_cache
 staticfiles
-# Preserve future-batch drafts outside this batch's runtime image.
-config/views.py

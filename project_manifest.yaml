@@ -35,8 +35,16 @@ security:
   secrets_handling: ""
 
 run:
-  prerequisites: []
-  commands: []
+  prerequisites:
+    - "Docker Desktop with Linux containers and Docker Compose"
+    - "Python 3 for the optional host environment initializer; Docker-only alternative in src/README.md"
+  commands:
+    - "python src/tools/init_env.py"
+    - "docker compose -f src/compose.yaml build"
+    - "docker compose -f src/compose.yaml run --rm web python manage.py migrate --noinput"
+    - "docker compose -f src/compose.yaml up -d --wait --wait-timeout 60 web"
+    - "docker compose -f src/compose.yaml run --rm web python manage.py check_database"
+    - "docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests"
 
 declarations:
   ai_use: "AI_USE_DECLARATION.md"
