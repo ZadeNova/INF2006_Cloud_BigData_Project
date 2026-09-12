@@ -116,4 +116,4 @@ User-authorised local-only scope, base f719c67. Four sequential reviewed checkpo
 | 3. Schema and migrations (dd10f3a) | Complete; review round 1 passed; DOC-001/002 resolved at contract/persistence boundary | [Checks](../evidence/foundation-batch-3.md), [review](reviews/foundation-batch-3.md); base b137d63 |
 | 4. Health and foundation verification | Complete; 48 tests; review round 1 passed, no findings | [Checks](../evidence/foundation-batch-4.md), [review](reviews/foundation-batch-4.md); base dd10f3a |
 
-Follow-up tasks remain separate: authentication; catalogue/cart; frontend styling/HTMX in the user's Luna Max chat; data acceptance/import/analytics; AWS feasibility/deployment. None of those is completed by the backend foundation.
+Follow-up tasks remain separate: authentication; catalogue/cart; data acceptance/import/analytics; AWS feasibility/deployment. The frontend foundation is completed in the frontend checkpoints and review record above; none of these remaining tasks is completed by the backend foundation.
