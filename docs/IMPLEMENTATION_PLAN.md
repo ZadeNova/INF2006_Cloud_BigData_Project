@@ -21,6 +21,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 ## Next work
 
+Outstanding documentation prerequisites: [independent planning review](reviews/planning-suite-review.md), findings DOC-001 through DOC-003. Resolve historical stock persistence, safe reimport rules and the autoscaling-policy inconsistency before dependent implementation. All three remain open; no remediation/re-review has occurred.
+
 1. Use role-based ownership; verify actual AWS permissions, region, credits and HTTPS arrangement. Do not block development on member names.
 2. Pin supported dependencies/runtime and scaffold Django with Docker PostgreSQL. Add verified commands to README.
 3. Download/accept the synthetic dataset and reconcile actual fields with schema/date policy.
