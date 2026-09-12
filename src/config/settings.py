@@ -34,6 +34,7 @@ CSRF_TRUSTED_ORIGINS = [v.strip() for v in os.environ.get("DJANGO_CSRF_TRUSTED_O
 INSTALLED_APPS = [
     "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions",
     "django.contrib.messages", "django.contrib.staticfiles",
+    "accounts", "catalogue", "cart", "orders", "reporting",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

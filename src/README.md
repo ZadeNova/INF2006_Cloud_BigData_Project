@@ -13,7 +13,7 @@ docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /a
 
 The initializer creates src/.env once, generates random local secrets without printing them, and preserves an existing file. If Python is unavailable on the host, run the same initializer in the pinned Python container with src mounted at /work (the app itself does not require host Python). Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Batch 2 starts Gunicorn at http://127.0.0.1:8000; routes are empty so GET / returns 404. Health is batch 4. Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Schema migrations follow in batch 3.
+Batch 2 starts Gunicorn at http://127.0.0.1:8000; routes are empty so GET / returns 404. Health is batch 4. Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. Run the same migrate command after rebuilding; no business routes are added.
 
 ```powershell
 docker compose -f src/compose.yaml down

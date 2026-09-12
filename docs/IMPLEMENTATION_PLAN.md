@@ -66,7 +66,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 
 ## Next work
 
-Outstanding documentation prerequisites: [independent planning review](reviews/planning-suite-review.md), findings DOC-001 through DOC-003. Resolve historical stock persistence, safe reimport rules and the autoscaling-policy inconsistency before dependent implementation. DOC-001 and DOC-002 remain open. DOC-003 has been corrected in the infrastructure contract; see the review record for the documentation check.
+Outstanding documentation prerequisites: [independent planning review](reviews/planning-suite-review.md), findings DOC-001 through DOC-003. Resolve historical stock persistence, safe reimport rules and the autoscaling-policy inconsistency before dependent implementation. DOC-001 and DOC-002 are resolved at the contract/persistence boundary by foundation batch 3; future importer/checkout/aggregation regressions remain required. DOC-003 has been corrected in the infrastructure contract; see the review record for the documentation check.
 
 1. Use role-based ownership; verify actual AWS permissions, region, credits and HTTPS arrangement. Do not block development on member names.
 2. Pin supported dependencies/runtime and scaffold Django with Docker PostgreSQL. Add verified commands to README.
@@ -112,7 +112,7 @@ User-authorised local-only scope, base f719c67. No AWS provisioning or push. Pre
 |---|---|---|
 | 1. Skeleton and dependencies | Complete; review round 2 passed, B1-001 resolved | [Checks](../evidence/foundation-batch-1.md), [review](reviews/foundation-batch-1.md) |
 | 2. Docker/PostgreSQL and environment | Complete; review round 1 passed, no findings | [Checks](../evidence/foundation-batch-2.md), [review](reviews/foundation-batch-2.md); base fca20e7 |
-| 3. Schema and migrations | Contract/model drafts only; DOC-001/002 correction pending review | Starts after batch 2 passes |
+| 3. Schema and migrations | Complete; review round 1 passed; DOC-001/002 resolved at contract/persistence boundary | [Checks](../evidence/foundation-batch-3.md), [review](reviews/foundation-batch-3.md); base b137d63 |
 | 4. Health and foundation verification | Draft only; not verified | Starts after batch 3 passes |
 
 Follow-up tasks remain separate: authentication; catalogue/cart; frontend styling/HTMX in the user's Luna Max chat; data acceptance/import/analytics; AWS feasibility/deployment. None of those is completed by the backend foundation.

@@ -15,6 +15,8 @@ Exclude refunded/cancelled orders; this metric is completed-sales value, not acc
 
 Zero sales means coverage unavailable, not infinity or a confident recommendation. Label insufficient history; do not silently change the denominator. Example: 35 units/seven days = five/day; 30 stock = six days; seven-day lead time means flagged.
 
+Historical inventory selection (DOC-001): require an explicit immutable snapshot namespace/version/cutoff matching the reporting cutoff, with a row for every reported product. Use its stock and lead time, never mutable Product values. Missing/misaligned snapshots are validation errors. Persist the selection on AnalyticsRun. InventoryVersion must be sealed before a run can reference it; snapshot rows include stock and lead time. DailyProductSales is unique per run/date/product so versioned publication does not overwrite a prior run; readers must select one completed run, never sum across versions. A live stock or lead-time change must leave historical coverage and flags unchanged on recomputation; test this when aggregation is implemented. Snapshot persistence is owned by [schema](SCHEMA.md#foundation-decisions-doc-001-and-doc-002).
+
 ## Processing and validation
 
 Implement a repeatable aggregation command with upserts/recomputation, a database-backed job lock and transactionally published completed summaries/run version. Prevent half-refreshed dashboard results and double counting. Document the refresh window and recompute dates affected by status changes.
