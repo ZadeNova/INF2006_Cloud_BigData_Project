@@ -7,6 +7,7 @@
 - Specifications reviewed: [AGENTS.md](../../AGENTS.md), [DESIGN.md](../../DESIGN.md), [FRONTEND.md](../FRONTEND.md), [API.md](../API.md), [ARCHITECTURE.md](../ARCHITECTURE.md), [SECURITY.md](../SECURITY.md), [DEVELOPMENT.md](../DEVELOPMENT.md), and [frontend-foundation.md](../../evidence/frontend-foundation.md).
 - Backend handover baseline: `51e4ec1`; first frontend implementation checkpoint: `d081007`.
 - Round 1 reviewed snapshot: `d081007..54d02cf` (working tree clean at review time).
+- Remediation checkpoint for Round 2: `c59b162` (complete corrected implementation diff is `51e4ec1..c59b162`).
 - Owned paths: frontend templates/assets/tests, minimal presentation-serving URL/view integration, related API/README/tracker/evidence documentation and `.vscode/settings.json`.
 
 ## Review metadata

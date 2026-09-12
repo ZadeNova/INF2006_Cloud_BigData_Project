@@ -68,7 +68,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 ## Next work
 
 1. Backend foundation is complete. Use [Docker quickstart](../src/README.md); services are stopped and the local PostgreSQL volume is retained. Remaining Phase 1 work follows below.
-2. Frontend foundation implementation is checkpointed through the review-remediation batch after `ffbe975`; complete the same Astra Medium re-review before marking the Phase 1 application item complete. Evidence: [frontend foundation](../evidence/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
+2. Frontend foundation implementation is checkpointed through `c59b162` after `ffbe975`; complete the same Astra Medium re-review before marking the Phase 1 application item complete. Evidence: [frontend foundation](../evidence/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
 3. Separate backend authentication task: registration/login/logout and session security; independent review required.
 4. Separate catalogue/cart task: active product pagination, persistent owner-scoped mutations and validation; independent review required. Checkout/history follow afterwards.
 5. Data track: accept/pin dataset, verify actual mapping/date policy, implement create-only import and regression tests per DOC-001/002 contracts; then analytics.
