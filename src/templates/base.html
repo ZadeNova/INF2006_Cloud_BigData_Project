@@ -19,9 +19,15 @@
                 <span class="brand__name">Northstar <span>Market</span></span>
             </a>
 
-            <nav class="site-nav" aria-label="Primary navigation">
+            <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+                <span class="menu-toggle__label">Menu</span>
+                <span class="menu-toggle__icon" aria-hidden="true"><span></span><span></span><span></span></span>
+            </button>
+
+            <nav class="site-nav" id="primary-navigation" aria-label="Primary navigation">
                 <a href="{% url 'home' %}#overview">Overview</a>
                 <a href="{% url 'home' %}#patterns">Patterns</a>
+                <a href="{% url 'home' %}#states">States</a>
             </nav>
 
             <div class="site-header__meta">
@@ -45,6 +51,8 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+    <script src="{% static 'js/site.js' %}" defer></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -11,7 +11,7 @@
             <p class="hero__lead">Northstar Market is the working visual foundation for the INF2006 ecommerce experience: warm surfaces, clear states and an interface that stays useful when the network or the catalogue is having a hard day.</p>
             <div class="hero__actions">
                 <a class="button button--light" href="#patterns">Explore the foundation <span aria-hidden="true">↓</span></a>
-                <a class="button button--outline-light" href="#patterns">See the patterns</a>
+                <a class="button button--outline-dark" href="#patterns">See the patterns</a>
             </div>
             <p class="hero__note"><span aria-hidden="true">✦</span> Presentation sample · no catalogue, account or checkout data is connected yet.</p>
         </div>
@@ -53,6 +53,91 @@
                 <p>Presentation samples are labelled plainly so live catalogue and account work can slot in without guesswork.</p>
             </article>
         </div>
+    </section>
+
+    <section class="feature-band" aria-labelledby="feature-title">
+        <div class="feature-band__inner">
+            <div class="feature-band__copy">
+                <p class="eyebrow eyebrow--light">Shared system</p>
+                <h2 id="feature-title">The next layer should feel inevitable.</h2>
+                <p>These tokens, components and states are deliberately small. They make room for real account, catalogue and checkout work without asking every page to reinvent its language.</p>
+            </div>
+            <div class="feature-band__stats" aria-label="Foundation qualities">
+                <div class="feature-stat">
+                    <strong>HTTP-first</strong>
+                    <span>Rendered by Django</span>
+                </div>
+                <div class="feature-stat">
+                    <strong>Token-led</strong>
+                    <span>Shared CSS vocabulary</span>
+                </div>
+                <div class="feature-stat">
+                    <strong>Mobile-ready</strong>
+                    <span>Keyboard-friendly layout</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="states-section" id="states" aria-labelledby="states-title">
+        <div class="section-heading">
+            <p class="eyebrow">Built for the whole journey</p>
+            <h2 id="states-title">States are part of the product.</h2>
+            <p>Presentation samples below show the visual language for moments that will become live once the corresponding backend contracts exist.</p>
+        </div>
+
+        <div class="state-grid">
+            <article class="state-card state-card--empty" role="status">
+                <span class="state-card__icon" aria-hidden="true">○</span>
+                <p class="state-card__label">Empty state</p>
+                <h3>No saved items yet</h3>
+                <p>A quiet starting point makes it clear what belongs here when a real account is connected.</p>
+                <span class="state-card__meta">Presentation sample · no action attached</span>
+            </article>
+
+            <article class="state-card state-card--error" role="alert">
+                <span class="state-card__icon" aria-hidden="true">!</span>
+                <p class="state-card__label">Dependency error</p>
+                <h3>We could not load this area.</h3>
+                <p>Keep the reason visible, protect the user’s context and leave room for a safe retry when a live dependency is available.</p>
+                <span class="state-card__meta">Presentation sample · retry arrives with a real route</span>
+            </article>
+
+            <article class="state-card state-card--form">
+                <div class="state-card__header">
+                    <div>
+                        <p class="state-card__label">Form sample</p>
+                        <h3>Keep the next step clear.</h3>
+                    </div>
+                    <span class="sample-badge">Preview</span>
+                </div>
+                <form class="sample-form" aria-describedby="sample-form-note">
+                    <div class="form-field">
+                        <label for="sample-email">Email for a sample update</label>
+                        <input id="sample-email" type="email" placeholder="you@example.com" disabled>
+                    </div>
+                    <button class="button button--dark" type="button" disabled>Save sample</button>
+                </form>
+                <p class="form-note" id="sample-form-note">Disabled until the authentication and notification contracts land.</p>
+            </article>
+        </div>
+
+        <section class="htmx-callout" aria-labelledby="htmx-title">
+            <div class="htmx-callout__header">
+                <div>
+                    <p class="eyebrow">Small live interaction</p>
+                    <h3 id="htmx-title">Load the design notes without leaving the page.</h3>
+                </div>
+                <span class="sample-badge sample-badge--green">HTMX GET</span>
+            </div>
+            <div class="htmx-callout__body" id="design-note" aria-live="polite">
+                <p class="htmx-placeholder">Press the button to load a presentation fragment from Django.</p>
+            </div>
+            <div class="htmx-callout__actions">
+                <button class="button button--dark" type="button" hx-get="{% url 'design-notes' %}" hx-target="#design-note" hx-swap="innerHTML" hx-indicator="#design-note-loading" hx-disabled-elt="this" aria-controls="design-note">Load design notes</button>
+                <span class="htmx-indicator" id="design-note-loading" role="status">Loading…</span>
+            </div>
+        </section>
     </section>
 </div>
 {% endblock %}

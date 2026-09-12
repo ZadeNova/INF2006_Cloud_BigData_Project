@@ -8,6 +8,7 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 - Complete: agent entry point and focused planning documents drafted. This is documentation, not application delivery.
 - Complete: all four backend foundation batches passed independent review and local verification (48 tests). See the bounded batch table below for evidence and review records. Dataset download/validation, business workflows, frontend/HTMX, analytics and AWS deployment remain unimplemented/unverified.
 - In progress: frontend foundation batch 1 now serves the shared shell and representative presentation page through Django HTTP; component states, responsive navigation and HTMX remain in the next batches.
+- In progress: frontend foundation batch 2 adds reusable empty/error/form states, the responsive navigation, shared mobile styles and a live presentation-only HTMX fragment; browser verification and evidence capture remain in batch 3.
 - No cloud resources are established by creating these documents.
 
 ## Phases
@@ -94,6 +95,7 @@ Update this file with substantive changes: status, evidence/commit references, b
 - 12 Sep 2026: one tracker combines active work, blockers and completed-history references.
 - 12 Sep 2026: backend Astra Low, frontend Luna Max; user controls backend Medium escalation.
 - 12 Sep 2026: frontend foundation batch 1 added the live presentation shell and representative page; Django checks passed and HTTP verification returned 200 for `/` and `/health/`. Component states, responsive navigation and HTMX remain open for the next batches.
+- 12 Sep 2026: frontend foundation batch 2 added shared state components, responsive navigation and `GET /foundation/design-notes/`; focused tests passed, fragment HTTP returned 200, and browser verification confirmed the HTMX swap/focus handoff with no console errors at desktop and mobile viewports.
 
 - 12 Sep 2026: retain the complete technical scope with two primary developers and three testing/report/admin members. The user leads backend/frontend and both developers share infrastructure; remaining data/analytics and test-script ownership must be assigned. Contribution records must reflect actual work.
 

@@ -10,6 +10,12 @@ def home(request):
 
 
 @require_safe
+def design_notes(request):
+    """Return the small presentation fragment used to prove the HTMX wiring."""
+    return render(request, "foundation/_design-notes.html")
+
+
+@require_safe
 def health(request):
     """Process liveness, deliberately independent of shared database availability."""
     request.get_host()  # Apply the explicit host policy even for this minimal response.

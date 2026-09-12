@@ -41,7 +41,7 @@ Services: web and db, project inf2006-foundation. PostgreSQL has no published po
 
 Dependencies: exact direct/transitive pip pins in requirements.txt; requirements.in is only for deliberate lock refreshes. Python and PostgreSQL images are digest-pinned. Docker packages static files at build time without application secrets; the process runs as UID 10001. Django sessions use PostgreSQL, expire after 14 days and need a later designated clearsessions maintenance runner.
 
-Package paths: config holds settings/URLs/WSGI; accounts, catalogue, cart, orders and reporting are domain packages. Built-in Django User is retained. Frontend-owned templates/ contains the shared shell and foundation preview; static/ contains the shared stylesheet. The remaining component/HTMX work and future route/form contracts are owned by API.md. Batch verification records live under ../evidence/.
+Package paths: config holds settings/URLs/WSGI; accounts, catalogue, cart, orders and reporting are domain packages. Built-in Django User is retained. Frontend-owned templates/ contains the shared shell, foundation preview and presentation fragment; static/ contains the shared stylesheet and minimal navigation/HTMX focus script. Future business route/form contracts are owned by API.md. Batch verification records live under ../evidence/.
 
 Health is liveness only and stays 200 during shared database failure. check_database is the separate connectivity/applied-migration gate and returns nonzero sanitized errors on failure. See ../evidence/foundation-batch-4.md for local failure/recovery and container-recreation results. Neither check demonstrates an ecommerce workflow or AWS availability. A later deployment must configure and test the ALB probe Host/allowed-host policy.
 

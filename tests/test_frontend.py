@@ -11,6 +11,7 @@ def test_foundation_home_renders_live_shell_and_representative_page():
     assert "Presentation sample" in response.content.decode()
     assert response.templates[0].name == "foundation/home.html"
     assert get_template("base.html")
+    assert "hx-get=\"/foundation/design-notes/\"" in response.content.decode()
 
 
 def test_foundation_home_is_safe_read_only_page():
@@ -18,3 +19,14 @@ def test_foundation_home_is_safe_read_only_page():
 
     assert client.head(reverse("home")).status_code == 200
     assert client.post(reverse("home")).status_code == 405
+
+
+def test_design_notes_renders_a_presentation_fragment():
+    client = Client()
+
+    response = client.get(reverse("design-notes"), HTTP_HX_REQUEST="true")
+
+    assert response.status_code == 200
+    assert response.templates[0].name == "foundation/_design-notes.html"
+    assert "HTMX response received" in response.content.decode()
+    assert client.post(reverse("design-notes")).status_code == 405

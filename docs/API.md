@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: GET/HEAD /health/ (URL name health) and the presentation-only GET/HEAD / foundation preview are implemented. All business routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
+Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview and the presentation-only GET/HEAD /foundation/design-notes/ fragment are implemented. All business routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|
@@ -18,6 +18,7 @@ Status: GET/HEAD /health/ (URL name health) and the presentation-only GET/HEAD /
 | GET `/analytics/` | Operator | Period-labelled sales/inventory analytics |
 | GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation |
 | GET, HEAD `/` | Public preview | Presentation-only frontend foundation page; no account, catalogue or checkout data |
+| GET, HEAD `/foundation/design-notes/` | Public preview | Presentation-only HTMX fragment; no business state or user data |
 
 ## Inputs and responses
 
@@ -33,7 +34,7 @@ Return only public/owner/operator-appropriate fields. Authorise before accessing
 
 ## Foundation handover to frontend and later backend tasks
 
-Paths: src/templates/base.html is the shared shell and the presentation-only foundation preview lives at src/templates/foundation/home.html; future page templates live under accounts/, registration/, catalogue/ and cart/ inside src/templates/. Shared assets live in src/static/ (css/site.css and js/site.js). Django app-template discovery and WhiteNoise manifest static storage are configured; rebuild the Docker image after changing templates/static files. No authentication, catalogue, cart, checkout or analytics views were created by the foundation preview. Template inheritance reserves title, content, head and scripts blocks. Luna Max owns presentation and live visual verification.
+Paths: src/templates/base.html is the shared shell and the presentation-only foundation preview lives at src/templates/foundation/home.html; future page templates live under accounts/, registration/, catalogue/ and cart/ inside src/templates/. Shared assets live in src/static/ (css/site.css and js/site.js); HTMX 2.0.4 is loaded from a version-pinned jsDelivr URL in the shell. Django app-template discovery and WhiteNoise manifest static storage are configured; rebuild the Docker image after changing templates/static files. No authentication, catalogue, cart, checkout or analytics views were created by the foundation preview. Template inheritance reserves title, content, head and scripts blocks. Luna Max owns presentation and live visual verification.
 
 Reserved integration contracts (to implement and verify in the named backend follow-up):
 
