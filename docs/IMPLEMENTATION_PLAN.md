@@ -103,3 +103,16 @@ Update this file with substantive changes: status, evidence/commit references, b
 - Backend completion gate: independent Astra Medium reviews each backend task diff; Astra Low fixes logged findings. A repeated issue after its Low fix attempt stops the task for user-controlled Medium implementation escalation. Procedure: [development review gate](DEVELOPMENT.md#backend-review-gate). No implementation reviews have run yet.
 
 - Adopted from teammate reference: phase checklists split application/infrastructure/data work, task-to-exit-condition traceability and progressive infrastructure verification. Preserve Phase 1 RDS/HTTPS gates and current model/review rules.
+
+## Active backend foundation batches
+
+User-authorised local-only scope, base f719c67. No AWS provisioning or push. Preserve later drafts outside each staged review snapshot.
+
+| Batch | Status | Verification / review |
+|---|---|---|
+| 1. Skeleton and dependencies | Complete; review round 2 passed, B1-001 resolved | [Checks](../evidence/foundation-batch-1.md), [review](reviews/foundation-batch-1.md) |
+| 2. Docker/PostgreSQL and environment | Draft only; not verified | Starts after batch 1 passes |
+| 3. Schema and migrations | Contract/model drafts only; DOC-001/002 correction pending review | Starts after batch 2 passes |
+| 4. Health and foundation verification | Draft only; not verified | Starts after batch 3 passes |
+
+Follow-up tasks remain separate: authentication; catalogue/cart; frontend styling/HTMX in the user's Luna Max chat; data acceptance/import/analytics; AWS feasibility/deployment. None of those is completed by the backend foundation.

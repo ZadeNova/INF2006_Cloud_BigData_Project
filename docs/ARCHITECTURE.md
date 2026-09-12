@@ -10,7 +10,7 @@ Status: planned, not deployed. Read the [scope](../PROJECT_SCOPE_INF2006.md).
 - CloudWatch collects sanitised logs and infrastructure metrics.
 - Django database sessions and persistent carts are shared by all instances with shared signing configuration. Stickiness disabled.
 
-Proposed logical Django modules: accounts, catalogue, cart, orders and reporting. Confirm concrete package paths during scaffolding. Use explicit business functions callable from views/commands; avoid signals that deduct stock during historical import.
+Foundation package paths: src/config/ holds project configuration/WSGI; src/accounts/, src/catalogue/, src/cart/, src/orders/ and src/reporting/ are domain packages. Frontend-owned directories are src/templates/ and src/static/. Batch 1 establishes the package skeleton only; application startup awaits batch 2 and business behaviour remains follow-up work. Use explicit business functions callable from views/commands; avoid signals that deduct stock during historical import.
 
 Configuration selects local PostgreSQL/files or AWS RDS/S3 without duplicate business implementations. Backend validates all state transitions; frontend presents outcomes.
 

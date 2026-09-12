@@ -1,6 +1,6 @@
 # Development conventions
 
-Status: pre-implementation. Package manager, runtime/framework versions, Compose service names and CI gates are not established. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
+Status: foundation batch 1 establishes pip with exact direct/transitive pins in src/requirements.txt (refresh input: requirements.in), Python 3.13.15 and Django 5.2.17. Compose service names and application startup await batch 2; no CI gate is established. Do not copy devenv/uv/SPA commands or fixture accounts from the unrelated senior-engineer reference.
 
 ## Setup and layout
 
