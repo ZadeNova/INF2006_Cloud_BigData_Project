@@ -30,3 +30,11 @@ def test_design_notes_renders_a_presentation_fragment():
     assert response.templates[0].name == "foundation/_design-notes.html"
     assert "HTMX response received" in response.content.decode()
     assert client.post(reverse("design-notes")).status_code == 405
+
+
+def test_missing_route_uses_branded_error_state():
+    response = Client().get("/not-a-live-route/")
+
+    assert response.status_code == 404
+    assert response.templates[0].name == "404.html"
+    assert "This path is not ready yet." in response.content.decode()
