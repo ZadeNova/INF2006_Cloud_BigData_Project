@@ -6,9 +6,8 @@ Status checked: 12 September 2026. This file owns implementation status; [scope]
 
 - Complete: scope, design reference and submission scaffolding exist. Scope/design were pushed in commit `c7ed9d1`.
 - Complete: agent entry point and focused planning documents drafted. This is documentation, not application delivery.
-- Complete: all four backend foundation batches passed independent review and local verification (48 tests). See the bounded batch table below for evidence and review records. Dataset download/validation, business workflows, analytics and AWS deployment remain unimplemented/unverified; the frontend foundation is implemented locally and awaiting its independent final review gate.
-- In progress: frontend foundation batch 1 now serves the shared shell and representative presentation page through Django HTTP; component states, responsive navigation and HTMX remain in the next batches.
-- In progress: frontend foundation batch 2 adds reusable empty/error/form states, the responsive navigation, shared mobile styles and a live presentation-only HTMX fragment; batch 3 adds the branded 404/message states and records browser evidence. Independent Astra Medium review is pending before completion.
+- Complete: all four backend foundation batches passed independent review and local verification (48 tests). See the bounded batch table below for evidence and review records. Dataset download/validation, business workflows, analytics and AWS deployment remain unimplemented/unverified; the frontend foundation is implemented locally and its independent review remediation is ready for the required Astra Medium re-review.
+- Complete locally: frontend foundation batches 1-3 serve the shared shell, representative presentation page, reusable states, responsive navigation, HTMX success/failure preview and branded 404/message states through Django HTTP. Final independent Astra Medium re-review is pending.
 - No cloud resources are established by creating these documents.
 
 ## Phases
@@ -29,7 +28,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 
 **Application**
 - [x] Scaffold Django modules, pinned dependencies, Docker/Compose PostgreSQL, environment settings, initial migrations and health endpoint; local database connectivity verified. [Final evidence](../evidence/foundation-batch-4.md), [review](reviews/foundation-batch-4.md).
-- [ ] Render a base Django template with shared styling and HTMX through HTTP; record actual run/test commands.
+- [ ] Render a base Django template with shared styling and HTMX through HTTP; record actual run/test commands. Implementation and browser evidence are recorded in [frontend foundation](../evidence/frontend-foundation.md); final independent review is pending.
 
 **Infrastructure**
 - [ ] Verify lab permissions, balance, region, shared Terraform state ownership and HTTPS arrangement; follow the [infrastructure setup order](AWS_INFRASTRUCTURE.md#setup-order-and-verification).
@@ -69,7 +68,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 ## Next work
 
 1. Backend foundation is complete. Use [Docker quickstart](../src/README.md); services are stopped and the local PostgreSQL volume is retained. Remaining Phase 1 work follows below.
-2. Frontend foundation implementation is checkpointed through `ffbe975`; complete the independent Astra Medium review and any required frontend remediation before marking the Phase 1 application item complete. Evidence: [frontend foundation](../evidence/frontend-foundation.md).
+2. Frontend foundation implementation is checkpointed through the review-remediation batch after `ffbe975`; complete the same Astra Medium re-review before marking the Phase 1 application item complete. Evidence: [frontend foundation](../evidence/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
 3. Separate backend authentication task: registration/login/logout and session security; independent review required.
 4. Separate catalogue/cart task: active product pagination, persistent owner-scoped mutations and validation; independent review required. Checkout/history follow afterwards.
 5. Data track: accept/pin dataset, verify actual mapping/date policy, implement create-only import and regression tests per DOC-001/002 contracts; then analytics.
@@ -96,7 +95,7 @@ Update this file with substantive changes: status, evidence/commit references, b
 - 12 Sep 2026: backend Astra Low, frontend Luna Max; user controls backend Medium escalation.
 - 12 Sep 2026: frontend foundation batch 1 added the live presentation shell and representative page; Django checks passed and HTTP verification returned 200 for `/` and `/health/`. Component states, responsive navigation and HTMX remain open for the next batches.
 - 12 Sep 2026: frontend foundation batch 2 added shared state components, responsive navigation and `GET /foundation/design-notes/`; focused tests passed, fragment HTTP returned 200, and browser verification confirmed the HTMX swap/focus handoff with no console errors at desktop and mobile viewports.
-- 12 Sep 2026: frontend foundation batch 3 added shared informational/error message presentation and `404.html`; focused tests passed 4/4, the full suite passed 52/52, and browser/HTTP evidence was recorded in [frontend-foundation.md](../evidence/frontend-foundation.md). Independent Astra Medium final review is required before completion.
+- 12 Sep 2026: frontend foundation batch 3 added shared informational/error message presentation and `404.html`; focused tests passed 4/4, the full suite passed 52/52, and browser/HTTP evidence was recorded in [frontend-foundation.md](../evidence/frontend-foundation.md). Round 1 Astra Medium review then identified F-001 through F-005; remediation adds the validation sample, 503/retry preview, visible swap focus, 44px mobile controls and corrected evidence baseline. Focused tests passed 5/5 and the full suite passed 53/53; Round 2 review is pending.
 
 - 12 Sep 2026: retain the complete technical scope with two primary developers and three testing/report/admin members. The user leads backend/frontend and both developers share infrastructure; remaining data/analytics and test-script ownership must be assigned. Contribution records must reflect actual work.
 

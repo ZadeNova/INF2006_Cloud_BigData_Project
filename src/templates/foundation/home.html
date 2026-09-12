@@ -106,15 +106,16 @@
             <article class="state-card state-card--form">
                 <div class="state-card__header">
                     <div>
-                        <p class="state-card__label">Form sample</p>
+                        <p class="state-card__label">Validation sample</p>
                         <h3>Keep the next step clear.</h3>
                     </div>
                     <span class="sample-badge">Preview</span>
                 </div>
-                <form class="sample-form" aria-describedby="sample-form-note">
-                    <div class="form-field">
+                <form class="sample-form" aria-describedby="sample-form-note" novalidate>
+                    <div class="form-field form-field--invalid">
                         <label for="sample-email">Email for a sample update</label>
-                        <input id="sample-email" type="email" placeholder="you@example.com" disabled>
+                        <input id="sample-email" type="email" value="not-an-email" readonly aria-invalid="true" aria-describedby="sample-email-error sample-form-note">
+                        <p class="form-error" id="sample-email-error">Enter a valid email address. Presentation sample only.</p>
                     </div>
                     <button class="button button--dark" type="button" disabled>Save sample</button>
                 </form>
@@ -142,7 +143,8 @@
                 <p class="htmx-placeholder">Press the button to load a presentation fragment from Django.</p>
             </div>
             <div class="htmx-callout__actions">
-                <button class="button button--dark" type="button" hx-get="{% url 'design-notes' %}" hx-target="#design-note" hx-swap="innerHTML" hx-indicator="#design-note-loading" hx-disabled-elt="this" aria-controls="design-note">Load design notes</button>
+                <button class="button button--dark" id="design-notes-retry" type="button" data-design-notes-trigger="true" data-design-notes-success="true" data-default-label="Load design notes" hx-get="{% url 'design-notes' %}" hx-target="#design-note" hx-swap="innerHTML" hx-indicator="#design-note-loading" hx-disabled-elt="this" aria-controls="design-note">Load design notes</button>
+                <button class="button button--outline-dark" type="button" data-design-notes-trigger="true" hx-get="{% url 'design-notes-unavailable' %}" hx-target="#design-note" hx-swap="innerHTML" hx-indicator="#design-note-loading" hx-disabled-elt="this" aria-controls="design-note">Preview failure state</button>
                 <span class="htmx-indicator" id="design-note-loading" role="status">Loading…</span>
             </div>
         </section>

@@ -209,12 +209,14 @@ textarea:disabled {
     display: none;
     align-items: center;
     gap: 0.8rem;
+    min-height: 4.4rem;
     border: 0;
     background: transparent;
     color: var(--color-spruce);
     cursor: pointer;
     font-size: 1.3rem;
     font-weight: 700;
+    padding: 0.8rem 0.4rem;
 }
 
 .menu-toggle__icon {
@@ -797,6 +799,22 @@ h1 {
     opacity: 1;
 }
 
+.form-field--invalid label {
+    color: var(--color-error);
+}
+
+.form-field input[aria-invalid="true"] {
+    border: 0.2rem solid var(--color-error);
+    background: var(--color-error-tint);
+}
+
+.form-error {
+    margin: 0;
+    color: var(--color-error);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
 .sample-form .button {
     justify-self: start;
 }
@@ -855,7 +873,13 @@ h1 {
 }
 
 .design-note h3:focus {
-    outline: none;
+    outline: 0.3rem solid var(--color-accent);
+    outline-offset: 0.4rem;
+    border-radius: 0.4rem;
+}
+
+.design-note--error .eyebrow {
+    color: var(--color-error);
 }
 
 .design-note > p:not(.eyebrow):not(.fragment-meta) {
@@ -1086,7 +1110,7 @@ h1 {
     }
 
     .site-header__meta .button {
-        min-height: 3.8rem;
+        min-height: 4.4rem;
         padding-inline: 1.2rem;
     }
 

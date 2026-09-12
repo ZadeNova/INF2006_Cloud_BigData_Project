@@ -16,6 +16,12 @@ def design_notes(request):
 
 
 @require_safe
+def design_notes_unavailable(request):
+    """Return a presentation-only 503 fragment for exercising HTMX failure UI."""
+    return render(request, "foundation/_design-notes-unavailable.html", status=503)
+
+
+@require_safe
 def health(request):
     """Process liveness, deliberately independent of shared database availability."""
     request.get_host()  # Apply the explicit host policy even for this minimal response.

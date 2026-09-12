@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview and the presentation-only GET/HEAD /foundation/design-notes/ fragment are implemented. All business routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
+Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. All business routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|
@@ -19,6 +19,7 @@ Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / fo
 | GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation |
 | GET, HEAD `/` | Public preview | Presentation-only frontend foundation page; no account, catalogue or checkout data |
 | GET, HEAD `/foundation/design-notes/` | Public preview | Presentation-only HTMX fragment; no business state or user data |
+| GET, HEAD `/foundation/design-notes-unavailable/` | Public preview | Presentation-only 503 HTMX failure fragment used to verify retry/error presentation; no business state or user data |
 
 ## Inputs and responses
 

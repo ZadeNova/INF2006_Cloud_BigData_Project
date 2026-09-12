@@ -45,12 +45,69 @@
         });
     }
 
+    var getDesignNotesRetry = function () {
+        return document.querySelector("[data-design-notes-success='true']");
+    };
+
+    var restoreDesignNotesLabel = function () {
+        var retry = getDesignNotesRetry();
+        if (retry) {
+            retry.textContent = retry.getAttribute("data-default-label") || "Load design notes";
+        }
+    };
+
+    var showDesignNotesError = function () {
+        var target = document.getElementById("design-note");
+        if (!target) {
+            return;
+        }
+
+        target.setAttribute("role", "alert");
+        target.setAttribute("aria-live", "assertive");
+        target.replaceChildren();
+
+        var note = document.createElement("div");
+        note.className = "design-note design-note--error";
+
+        var eyebrow = document.createElement("p");
+        eyebrow.className = "eyebrow";
+        eyebrow.textContent = "Dependency unavailable";
+
+        var heading = document.createElement("h3");
+        heading.tabIndex = -1;
+        heading.textContent = "We could not load the design notes.";
+
+        var message = document.createElement("p");
+        message.textContent = "Check the connection and use the retry button below. This is a presentation-only failure preview.";
+
+        note.append(eyebrow, heading, message);
+        target.append(note);
+
+        var retry = getDesignNotesRetry();
+        if (retry) {
+            retry.textContent = "Retry design notes";
+        }
+        heading.focus();
+    };
+
+    document.body.addEventListener("htmx:afterRequest", function (event) {
+        var detail = event.detail || {};
+        var trigger = detail.elt;
+        if (!trigger || trigger.getAttribute("data-design-notes-trigger") !== "true" || detail.successful) {
+            return;
+        }
+        showDesignNotesError();
+    });
+
     document.body.addEventListener("htmx:afterSwap", function (event) {
         var target = event.detail && event.detail.target;
         if (!target || target.id !== "design-note") {
             return;
         }
 
+        target.setAttribute("role", "status");
+        target.setAttribute("aria-live", "polite");
+        restoreDesignNotesLabel();
         var heading = target.querySelector("h3");
         if (heading) {
             heading.focus();
