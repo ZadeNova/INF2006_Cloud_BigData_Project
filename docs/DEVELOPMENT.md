@@ -10,6 +10,8 @@ Preserve submission layout: src/ owns app/dependencies/infrastructure; data/ sou
 
 ## Code and verification
 
+Follow the shared [simplicity rule](../AGENTS.md#simplicity-and-maintainability): choose the smallest clear solution that meets the current spec. Reuse existing/framework capabilities; avoid unnecessary wrappers, duplicated business logic, speculative layers and extra dependencies. Remove confirmed dead or replaced code in the touched scope. Simplify where correctness and security remain intact, and verify behaviour rather than expanding into unrelated cleanup.
+
 Follow AGENTS.md targeted-reading rules: consult relevant sections and scoped code/tests, reuse current context, and avoid routine recursive repository scans. Widen searches only when narrower inspection cannot resolve the task. Inspect patterns/status first, keep edits focused and preserve unrelated work. Prefer ordinary Django forms/ORM and explicit business functions over speculative abstractions. Use readable names and cohesive functions; document non-obvious transaction/date/idempotency decisions. Add useful boundary type annotations.
 
 Do not make ad-hoc schema edits outside versioned migrations. Before applying a potentially destructive or incompatible migration to a shared database, inspect its effect on data and other developers, establish recovery/backup and coordinate timing within existing user authorisation; obtain missing approval when necessary. Routine local migrations need no extra ceremony.
@@ -39,7 +41,7 @@ This is the canonical review procedure required by [AGENTS.md](../AGENTS.md). Th
 - Record the task's starting commit and owned paths; identify pre-existing/unrelated changes. Freeze the review snapshot while the reviewer examines it. Include tracked edits and newly created task files; plain git diff alone omits untracked files.
 - Give the independent reviewer `gpt-6-astra` / `medium`, the user requirement, relevant spec sections, exact diff/snapshot, changed paths and check outputs. Use explicit bounded context rather than a full-history fork when model overrides require it.
 - Reviewer must not have authored the implementation. It performs read-only inspection and may run focused non-mutating checks where supported; no edits, staging, commits, deployment or further delegation.
-- Check correctness, specification gaps, security, failure handling, dead/unreachable or obsolete code introduced/affected by the task, migrations and meaningful test coverage. Trace relevant callers/dependencies before declaring code dead. Do not turn stylistic preferences or unrelated legacy issues into invented blockers.
+- Check correctness, specification gaps, security, failure handling, duplicated logic, unnecessary complexity, dead/unreachable or obsolete code introduced/affected by the task, migrations and meaningful test coverage. Recommend the simplest correct approach when fewer moving parts can satisfy the same requirement; do not mistake needed safeguards for overengineering. Trace relevant callers/dependencies before declaring code dead. Do not turn stylistic preferences or unrelated legacy issues into invented blockers.
 
 ### Findings and remediation
 

@@ -57,6 +57,14 @@ Use supported explicit model settings when assigning agents; do not imply the ac
 
 Five members remain: the user and one teammate lead technical implementation; three members lead test execution, reports, evidence organisation and submission administration. Developers support test setup, implement automated checks and fix defects; the other members run documented tests, check results and retest fixes. Keep the technical scope unchanged. See scope section 11 for role responsibilities; do not assume five parallel developers or invent completed contributions. The user primarily owns backend and frontend; both developers jointly set up infrastructure. Keep ownership role-based; do not request or invent the five members' names. Remaining task allocation can be described by role when needed.
 
+## Simplicity and maintainability
+
+Applies to every coding agent, including Codex and Claude: use the simplest implementation that satisfies the current requirement and preserves correctness, security and testability. Prefer existing framework features, standard tooling and established project patterns over custom wrappers, extra services or speculative abstractions. Do not build for hypothetical future requirements.
+
+Reuse suitable existing code instead of duplicating business rules or maintaining parallel implementations. Remove dead, obsolete or replaced code within the task's scope after checking its callers and usage. If an approach can be simplified without weakening required behaviour, simplify it and verify the result. Do not force unrelated concepts into a shared abstraction just to eliminate superficially similar lines, and do not turn a small task into an unrelated refactor.
+
+Reviewers must flag unnecessary complexity, duplicated logic and dead code with concrete evidence and a simpler corrective direction. Simplicity is about fewer moving parts and clearer behaviour, not the shortest possible code; retain necessary validation, error handling, transactions and tests.
+
 ## Shared rules
 
 - Locked baseline: Django templates/HTMX, PostgreSQL, Docker and scoped AWS services. Do not add a SPA, DRF, JWT, Celery, NoSQL or payment gateway without a scope decision.
