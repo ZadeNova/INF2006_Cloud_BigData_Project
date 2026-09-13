@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. All business routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
+Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. GET/POST /register/, GET/POST /login/ and POST /logout/ (accounts:register/login/logout) and GET /products/ (catalogue:product_list) are also implemented. Cart, checkout, order history and analytics routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|

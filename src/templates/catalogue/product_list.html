@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Products — Northstar Market{% endblock %}
+{% block content %}
+<section class="section-heading">
+    <h1>Products</h1>
+</section>
+
+{% if products %}
+<div class="pattern-grid">
+    {% for product in products %}
+    <article class="pattern-card">
+        <p class="eyebrow">{{ product.category }}</p>
+        <h3>{{ product.name }}</h3>
+        <p>S${{ product.price }}</p>
+        {% if product.stock > 0 %}
+        <p class="form-note">{{ product.stock }} in stock (indicative)</p>
+        {% else %}
+        <p class="form-note">Currently out of stock (indicative)</p>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+
+<nav aria-label="Product pages">
+    {% if page_obj.has_previous %}
+    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</nav>
+{% else %}
+<p>No products available yet.</p>
+{% endif %}
+{% endblock %}
