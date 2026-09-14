@@ -80,6 +80,13 @@ not equivalent to the independent Astra review gate.
 If the user asks for a self-review, clearly label it as a Claude self-review
 and do not represent it as the Astra review.
 
+When a self-review (requested, or run via the code-review skill as part of
+finishing a task) surfaces code smells, bugs or other findings, report every
+finding to the user before fixing anything. The user reviews each finding and
+decides whether it needs to be fixed. Only implement a fix after that
+decision, unless the user has explicitly authorised fixing self-review
+findings autonomously for that specific task.
+
 ## Git
 
 Whenever creating a commit, ensure that it is authored to the User.
