@@ -5,9 +5,37 @@
     <h1>Manage products</h1>
 </section>
 
-<div class="pattern-grid">
+<div class="surface-card operator-table">
+    <div class="operator-row operator-row--header">
+        <span>Product</span>
+        <span>Category</span>
+        <span style="text-align: right;">Price</span>
+        <span style="text-align: right;">Stock</span>
+        <span>Status</span>
+        <span></span>
+    </div>
     {% for product in products %}
-    {% include "catalogue/_product_card.html" with show_operator_controls=True %}
+    <div class="operator-row">
+        <span class="operator-row__name">{{ product.name }}</span>
+        <span class="operator-row__category">{{ product.category }}</span>
+        <span class="operator-row__price">{{ product.display_price }}</span>
+        <span class="operator-row__stock{% if product.stock_status != "in-stock" %} operator-row__stock--{{ product.stock_status }}{% endif %}">{{ product.stock }}</span>
+        <span class="operator-row__status">
+            {% if product.active %}
+            <span class="operator-row__status-dot operator-row__status-dot--active"></span>
+            <span>Active</span>
+            {% else %}
+            <span class="operator-row__status-dot operator-row__status-dot--inactive"></span>
+            <span>Inactive</span>
+            {% endif %}
+        </span>
+        <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
+                {% if product.active %}Deactivate{% else %}Activate{% endif %}
+            </button>
+        </form>
+    </div>
     {% endfor %}
 </div>
 

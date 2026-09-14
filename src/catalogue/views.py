@@ -7,6 +7,11 @@ from django.views.generic import ListView, View
 from .models import Product
 
 
+class OperatorPermissionRequiredMixin(PermissionRequiredMixin):
+    permission_required = "catalogue.toggle_product_active"
+    raise_exception = True
+
+
 class ProductListView(ListView):
     model = Product
     template_name = "catalogue/product_list.html"
@@ -20,9 +25,7 @@ class ProductListView(ListView):
         ).order_by("name", "pk")
 
 
-class ProductManageListView(PermissionRequiredMixin, ListView):
-    permission_required = "catalogue.toggle_product_active"
-    raise_exception = True
+class ProductManageListView(OperatorPermissionRequiredMixin, ListView):
     model = Product
     template_name = "catalogue/manage_list.html"
     context_object_name = "products"
@@ -34,10 +37,7 @@ class ProductManageListView(PermissionRequiredMixin, ListView):
         ).order_by("name", "pk")
 
 
-class ProductToggleActiveView(PermissionRequiredMixin, View):
-    permission_required = "catalogue.toggle_product_active"
-    raise_exception = True
-
+class ProductToggleActiveView(OperatorPermissionRequiredMixin, View):
     def post(self, request, pk):
         with transaction.atomic():
             product = get_object_or_404(

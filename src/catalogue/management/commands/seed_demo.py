@@ -6,7 +6,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from catalogue.models import Product
 
@@ -60,15 +60,24 @@ class Command(BaseCommand):
         self.stdout.write(f"Created {created} demo product(s); {len(DEMO_PRODUCTS) - created} already existed.")
 
         group, _ = Group.objects.get_or_create(name="store_operator")
-        permission = Permission.objects.get(codename="toggle_product_active", content_type__app_label="catalogue")
-        group.permissions.add(permission)
+        try:
+            permission = Permission.objects.get(codename="toggle_product_active", content_type__app_label="catalogue")
+        except Permission.DoesNotExist:
+            raise CommandError(
+                "catalogue.toggle_product_active permission not found — run 'manage.py migrate' before seed_demo."
+            ) from None
+        if not group.permissions.filter(pk=permission.pk).exists():
+            group.permissions.add(permission)
 
         User = get_user_model()
         operator, operator_created = User.objects.get_or_create(username="demo-operator")
         if operator_created:
+            # Local-dev convenience only: never run this command against a shared/staging/production
+            # database without setting DEMO_OPERATOR_PASSWORD, since this fallback is a public, checked-in string.
             operator.set_password(os.environ.get("DEMO_OPERATOR_PASSWORD", "Str0ngDemoOperator!2026"))
             operator.save()
-        operator.groups.add(group)
+        if not operator.groups.filter(pk=group.pk).exists():
+            operator.groups.add(group)
         self.stdout.write(
             "Created demo-operator account with a fresh password."
             if operator_created

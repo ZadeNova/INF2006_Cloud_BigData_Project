@@ -1,18 +1,21 @@
-<article class="pattern-card">
-    <p class="eyebrow">{{ product.category }}</p>
-    <h3>{{ product.name }}</h3>
-    <p>S${{ product.price }}</p>
-    {% if product.stock > 0 %}
-    <p class="form-note">{{ product.stock }} in stock (indicative){% if show_operator_controls %} — {% if product.active %}Active{% else %}Inactive{% endif %}{% endif %}</p>
-    {% else %}
-    <p class="form-note">Currently out of stock (indicative){% if show_operator_controls %} — {% if product.active %}Active{% else %}Inactive{% endif %}{% endif %}</p>
-    {% endif %}
-    {% if show_operator_controls %}
-    <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
-        {% csrf_token %}
-        <button type="submit" class="button button--compact">
-            {% if product.active %}Deactivate{% else %}Activate{% endif %}
-        </button>
-    </form>
-    {% endif %}
+<article class="surface-card product-card">
+    <div class="product-card__media">
+        <span class="product-card__badge">{{ product.category }}</span>
+        <span class="product-card__stock-dot product-card__stock-dot--{{ product.stock_status }}" title="{{ product.stock_status }}"></span>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--color-ink-soft);" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+            <circle cx="9" cy="10" r="1.5"></circle>
+            <path d="M21 15l-5-5-9 9"></path>
+        </svg>
+        <span class="product-card__media-label">Image coming soon</span>
+    </div>
+    <div class="product-card__body">
+        <h3 class="product-card__name">{{ product.name }}</h3>
+        <p class="product-card__price">{{ product.display_price }}</p>
+        {% if product.stock_status == "out-of-stock" %}
+        <p class="product-card__stock-line">Currently out of stock (indicative)</p>
+        {% else %}
+        <p class="product-card__stock-line">{{ product.stock }} in stock (indicative)</p>
+        {% endif %}
+    </div>
 </article>

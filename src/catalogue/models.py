@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import Q
 
+LOW_STOCK_THRESHOLD = 10
+
 class Product(models.Model):
     namespace = models.CharField(max_length=160)
     external_id = models.CharField(max_length=100)
@@ -11,6 +13,18 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     lead_time_days = models.PositiveIntegerField()
     active = models.BooleanField(default=True)
+
+    @property
+    def stock_status(self):
+        if self.stock == 0:
+            return "out-of-stock"
+        if self.stock <= LOW_STOCK_THRESHOLD:
+            return "low-stock"
+        return "in-stock"
+
+    @property
+    def display_price(self):
+        return f"S${self.price}"
 
     class Meta:
         constraints = [

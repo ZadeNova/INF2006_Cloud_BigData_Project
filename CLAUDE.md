@@ -87,6 +87,19 @@ decides whether it needs to be fixed. Only implement a fix after that
 decision, unless the user has explicitly authorised fixing self-review
 findings autonomously for that specific task.
 
+## Cost and Agent Usage
+
+The user has limited credits. Minimize subagent and parallel-agent usage.
+
+- Do not launch multiple Explore/Plan agents in parallel by default. Use
+  direct tools (Read, Grep, Bash) for scoped investigation. Only use
+  multi-agent exploration when the task's scope is genuinely large or
+  uncertain, and prefer the minimum number of agents needed.
+- For self-reviews (the code-review skill), default to "low" or "medium"
+  effort rather than "high"/"xhigh"/"max"/"ultra" — the higher levels spawn
+  many parallel finder agents and cost significantly more. Only use a
+  higher effort level when the user explicitly asks for a deeper review.
+
 ## Git
 
 Whenever creating a commit, ensure that it is authored to the User.
