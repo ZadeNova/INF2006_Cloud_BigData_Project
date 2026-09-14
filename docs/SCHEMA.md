@@ -10,7 +10,7 @@ All domain primary keys are BigAutoField unless stated. Foreign keys are NOT NUL
 |---|---|
 | Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions. No auth routes yet. Source profiles are optional for locally registered users. |
 | CustomerProfile | One-to-one User (PROTECT); namespace/external ID; aware source_signup_at distinct from User.date_joined; channel/country up to 100 characters. |
-| Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. |
+| Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. Custom permission `catalogue.toggle_product_active` gates operator activate/deactivate; no other field is operator-writable. |
 | Cart | One-to-one owner User (CASCADE); one persistent cart per user, emptied after later checkout rather than keeping multiple active carts. |
 | CartItem | Cart (CASCADE), Product (PROTECT), quantity 1..999; unique cart/product. No stock reservation. |
 | Order | Owner User (PROTECT); namespace, nullable external_id; status completed/cancelled/refunded; finite nonnegative decimal(14,2) total; aware placed_at; nullable UUID idempotency_key; request_fingerprint up to 64 characters. Indexed owner/date and namespace/status/date. |

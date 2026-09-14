@@ -8,16 +8,7 @@
 {% if products %}
 <div class="pattern-grid">
     {% for product in products %}
-    <article class="pattern-card">
-        <p class="eyebrow">{{ product.category }}</p>
-        <h3>{{ product.name }}</h3>
-        <p>S${{ product.price }}</p>
-        {% if product.stock > 0 %}
-        <p class="form-note">{{ product.stock }} in stock (indicative)</p>
-        {% else %}
-        <p class="form-note">Currently out of stock (indicative)</p>
-        {% endif %}
-    </article>
+    {% include "catalogue/_product_card.html" %}
     {% endfor %}
 </div>
 

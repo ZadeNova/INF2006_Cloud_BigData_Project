@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Manage products — Northstar Market{% endblock %}
+{% block content %}
+<section class="section-heading">
+    <h1>Manage products</h1>
+</section>
+
+<div class="pattern-grid">
+    {% for product in products %}
+    {% include "catalogue/_product_card.html" with show_operator_controls=True %}
+    {% endfor %}
+</div>
+
+<nav aria-label="Product pages">
+    {% if page_obj.has_previous %}
+    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</nav>
+{% endblock %}

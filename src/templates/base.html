@@ -33,6 +33,9 @@
             <div class="site-header__meta">
                 <span class="status-chip"><span class="status-chip__dot" aria-hidden="true"></span>Foundation preview</span>
                 <a class="button button--dark button--compact" href="{% url 'health' %}">System status</a>
+                {% if perms.catalogue.toggle_product_active %}
+                <a class="button button--compact" href="{% url 'catalogue:manage_list' %}">Manage products</a>
+                {% endif %}
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                     {% csrf_token %}

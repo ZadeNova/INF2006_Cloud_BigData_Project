@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. GET/POST /register/, GET/POST /login/ and POST /logout/ (accounts:register/login/logout) and GET /products/ (catalogue:product_list) are also implemented. Cart, checkout, order history and analytics routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
+Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. GET/POST /register/, GET/POST /login/ and POST /logout/ (accounts:register/login/logout) and GET /products/ (catalogue:product_list) are also implemented. GET /products/manage/ and POST /products/manage/<id>/toggle-active/ (catalogue:manage_list/product_toggle_active) are a deliberate, narrow scope addition beyond the assessed brief — see PROJECT_SCOPE_INF2006.md's "Outside INF2006" note and docs/IMPLEMENTATION_PLAN.md for status. Cart, checkout, order history and analytics routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|
@@ -8,6 +8,8 @@ Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / fo
 | GET, POST `/login/` | Public | Framework session authentication |
 | POST `/logout/` | Authenticated | Invalidate session; CSRF required |
 | GET `/products/` | Public | Paginated active catalogue; indicative stock |
+| GET `/products/manage/` | Operator | All products including inactive ones; scope addition beyond the assessed brief |
+| POST `/products/manage/<id>/toggle-active/` | Operator | Activate/deactivate a product; CSRF required; no create/edit |
 | GET `/cart/` | Authenticated | Owner's persistent cart |
 | POST `/cart/items/` | Authenticated | Add product/positive quantity |
 | POST `/cart/items/<id>/update/` | Owner | Replace quantity with bounds validation |

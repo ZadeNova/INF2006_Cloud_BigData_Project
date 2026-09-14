@@ -1,8 +1,11 @@
-"""Deterministic demo catalogue products; create-only, safe to re-run."""
+"""Deterministic demo catalogue products and store_operator role; create-only, safe to re-run."""
+import os
 import random
 from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand
 
 from catalogue.models import Product
@@ -55,3 +58,19 @@ class Command(BaseCommand):
             )
             created += was_created
         self.stdout.write(f"Created {created} demo product(s); {len(DEMO_PRODUCTS) - created} already existed.")
+
+        group, _ = Group.objects.get_or_create(name="store_operator")
+        permission = Permission.objects.get(codename="toggle_product_active", content_type__app_label="catalogue")
+        group.permissions.add(permission)
+
+        User = get_user_model()
+        operator, operator_created = User.objects.get_or_create(username="demo-operator")
+        if operator_created:
+            operator.set_password(os.environ.get("DEMO_OPERATOR_PASSWORD", "Str0ngDemoOperator!2026"))
+            operator.save()
+        operator.groups.add(group)
+        self.stdout.write(
+            "Created demo-operator account with a fresh password."
+            if operator_created
+            else "demo-operator already existed; password left unchanged."
+        )

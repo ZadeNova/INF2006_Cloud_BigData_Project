@@ -1,0 +1,18 @@
+<article class="pattern-card">
+    <p class="eyebrow">{{ product.category }}</p>
+    <h3>{{ product.name }}</h3>
+    <p>S${{ product.price }}</p>
+    {% if product.stock > 0 %}
+    <p class="form-note">{{ product.stock }} in stock (indicative){% if show_operator_controls %} — {% if product.active %}Active{% else %}Inactive{% endif %}{% endif %}</p>
+    {% else %}
+    <p class="form-note">Currently out of stock (indicative){% if show_operator_controls %} — {% if product.active %}Active{% else %}Inactive{% endif %}{% endif %}</p>
+    {% endif %}
+    {% if show_operator_controls %}
+    <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="button button--compact">
+            {% if product.active %}Deactivate{% else %}Activate{% endif %}
+        </button>
+    </form>
+    {% endif %}
+</article>

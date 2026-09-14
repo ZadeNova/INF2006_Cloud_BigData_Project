@@ -1,5 +1,8 @@
 from django.conf import settings
-from django.views.generic import ListView
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db import transaction
+from django.shortcuts import get_object_or_404, redirect
+from django.views.generic import ListView, View
 
 from .models import Product
 
@@ -12,5 +15,37 @@ class ProductListView(ListView):
 
     def get_queryset(self):
         return Product.objects.filter(
-            namespace=settings.DEMO_NAMESPACE, active=True
+            namespace=settings.DEMO_NAMESPACE,
+            active=True,
         ).order_by("name", "pk")
+
+
+class ProductManageListView(PermissionRequiredMixin, ListView):
+    permission_required = "catalogue.toggle_product_active"
+    raise_exception = True
+    model = Product
+    template_name = "catalogue/manage_list.html"
+    context_object_name = "products"
+    paginate_by = 12
+
+    def get_queryset(self):
+        return Product.objects.filter(
+            namespace=settings.DEMO_NAMESPACE,
+        ).order_by("name", "pk")
+
+
+class ProductToggleActiveView(PermissionRequiredMixin, View):
+    permission_required = "catalogue.toggle_product_active"
+    raise_exception = True
+
+    def post(self, request, pk):
+        with transaction.atomic():
+            product = get_object_or_404(
+                Product.objects.select_for_update(),
+                pk=pk,
+                namespace=settings.DEMO_NAMESPACE,
+            )
+            product.active = not product.active
+            product.save(update_fields=["active"])
+
+        return redirect("catalogue:manage_list")

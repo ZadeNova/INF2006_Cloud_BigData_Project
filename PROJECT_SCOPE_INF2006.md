@@ -36,7 +36,7 @@ The user problem is twofold: customers need reliable order placement, and a smal
 
 - Real payment processing or storing payment-card details.
 - Fraud detection, recommendation engines, reviews, seller marketplaces or delivery integration.
-- Full product-management tooling; the operator page is read-only and products are seeded.
+- Full product-management tooling; products are seeded, not authored through a UI. Narrowly extended on 14 Sep 2026: the operator page is no longer strictly read-only — the store_operator role (already named in section 1 for analytics) may activate/deactivate existing products as a moderation action, but it cannot create or edit products, which remain seeded/imported only. See docs/IMPLEMENTATION_PLAN.md for status and review.
 - MongoDB, database-engine benchmarking and extensive catalogue/search features.
 - SQS, ElastiCache, Kubernetes or a separate ML microservice unless a later measured need justifies a deliberate scope revision.
 

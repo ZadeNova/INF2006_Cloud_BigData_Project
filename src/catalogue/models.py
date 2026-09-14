@@ -18,3 +18,4 @@ class Product(models.Model):
             models.CheckConstraint(condition=Q(price__gte=0) & Q(price__lte="9999999999.99") & Q(cost__gte=0) & Q(cost__lte="9999999999.99"), name="product_money_nonnegative"),
             models.CheckConstraint(condition=~Q(namespace="") & ~Q(external_id=""), name="product_identity_nonempty"),
         ]
+        permissions = [("toggle_product_active", "Can activate or deactivate catalogue products")]
