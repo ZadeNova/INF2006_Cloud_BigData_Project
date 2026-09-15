@@ -3,7 +3,9 @@ import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
-from django.test import Client
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.test import Client, override_settings
 from django.urls import reverse
 
 from catalogue.models import Product
@@ -142,12 +144,83 @@ def test_operator_can_deactivate_and_reactivate_a_product():
     url = reverse("catalogue:product_toggle_active", args=[product.pk])
     public_url = reverse("catalogue:product_list")
 
-    client.post(url)
+    client.post(url, {"active": "false"})
     product.refresh_from_db()
     assert product.active is False
     assert product.external_id not in [p.external_id for p in Client().get(public_url).context["products"]]
 
-    client.post(url)
+    client.post(url, {"active": "true"})
     product.refresh_from_db()
     assert product.active is True
     assert product.external_id in [p.external_id for p in Client().get(public_url).context["products"]]
+
+
+def test_toggle_rejects_invalid_active_value():
+    product = make_product("p1", active=True)
+    client = Client()
+    client.force_login(make_operator())
+    url = reverse("catalogue:product_toggle_active", args=[product.pk])
+
+    response = client.post(url, {"active": "maybe"})
+
+    assert response.status_code == 400
+    product.refresh_from_db()
+    assert product.active is True
+
+
+def test_deactivate_is_idempotent_under_double_submit():
+    product = make_product("p1", active=True)
+    client = Client()
+    client.force_login(make_operator())
+    url = reverse("catalogue:product_toggle_active", args=[product.pk])
+
+    client.post(url, {"active": "false"})
+    client.post(url, {"active": "false"})
+
+    product.refresh_from_db()
+    assert product.active is False
+
+
+def test_activate_is_idempotent_under_double_submit():
+    product = make_product("p1", active=False)
+    client = Client()
+    client.force_login(make_operator())
+    url = reverse("catalogue:product_toggle_active", args=[product.pk])
+
+    client.post(url, {"active": "true"})
+    client.post(url, {"active": "true"})
+
+    product.refresh_from_db()
+    assert product.active is True
+
+
+def test_seed_demo_refuses_to_promote_an_existing_customer(monkeypatch):
+    monkeypatch.setenv("DEMO_OPERATOR_PASSWORD", "irrelevant-for-existing-user")
+    customer = get_user_model().objects.create_user(username="demo-operator", password="customer-pass")
+
+    with pytest.raises(CommandError):
+        call_command("seed_demo")
+
+    customer.refresh_from_db()
+    assert customer.groups.count() == 0
+    assert customer.check_password("customer-pass")
+
+
+def test_seed_demo_requires_password_outside_local(monkeypatch):
+    monkeypatch.delenv("DEMO_OPERATOR_PASSWORD", raising=False)
+
+    with override_settings(LOCAL=False), pytest.raises(CommandError):
+        call_command("seed_demo")
+
+    assert Product.objects.count() == 0
+    assert not get_user_model().objects.filter(username="demo-operator").exists()
+
+
+def test_seed_demo_allows_fallback_password_in_local(monkeypatch):
+    monkeypatch.delenv("DEMO_OPERATOR_PASSWORD", raising=False)
+
+    with override_settings(LOCAL=True):
+        call_command("seed_demo")
+
+    operator = get_user_model().objects.get(username="demo-operator")
+    assert operator.check_password("Str0ngDemoOperator!2026")

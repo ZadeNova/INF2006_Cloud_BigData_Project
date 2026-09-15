@@ -31,7 +31,7 @@
         </span>
         <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
             {% csrf_token %}
-            <button type="submit" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
+            <button type="submit" name="active" value="{% if product.active %}false{% else %}true{% endif %}" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
                 {% if product.active %}Deactivate{% else %}Activate{% endif %}
             </button>
         </form>

@@ -1159,7 +1159,7 @@ h1 {
 }
 
 .operator-table {
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .operator-row {
@@ -1169,6 +1169,7 @@ h1 {
     gap: var(--space-3);
     padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border);
+    min-width: 60rem;
 }
 
 .operator-row:last-child {
@@ -1300,6 +1301,10 @@ h1 {
     }
 
     .pattern-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .product-grid {
         grid-template-columns: 1fr;
     }
 

@@ -39,6 +39,12 @@ class Command(BaseCommand):
         parser.add_argument("--seed", type=int, default=42)
 
     def handle(self, *args, **options):
+        operator_password = os.environ.get("DEMO_OPERATOR_PASSWORD")
+        if not operator_password and not settings.LOCAL:
+            raise CommandError(
+                "DEMO_OPERATOR_PASSWORD must be set outside local environments; refusing to seed."
+            )
+
         rng = random.Random(options["seed"])
         created = 0
         for index, (name, category) in enumerate(DEMO_PRODUCTS, start=1):
@@ -72,12 +78,14 @@ class Command(BaseCommand):
         User = get_user_model()
         operator, operator_created = User.objects.get_or_create(username="demo-operator")
         if operator_created:
-            # Local-dev convenience only: never run this command against a shared/staging/production
-            # database without setting DEMO_OPERATOR_PASSWORD, since this fallback is a public, checked-in string.
-            operator.set_password(os.environ.get("DEMO_OPERATOR_PASSWORD", "Str0ngDemoOperator!2026"))
+            operator.set_password(operator_password or "Str0ngDemoOperator!2026")
             operator.save()
-        if not operator.groups.filter(pk=group.pk).exists():
             operator.groups.add(group)
+        elif not operator.groups.filter(pk=group.pk).exists():
+            raise CommandError(
+                "'demo-operator' already exists and is not a seed-provisioned operator; "
+                "refusing to grant privileges."
+            )
         self.stdout.write(
             "Created demo-operator account with a fresh password."
             if operator_created
