@@ -17,5 +17,15 @@
         {% else %}
         <p class="product-card__stock-line">{{ product.stock }} in stock (indicative)</p>
         {% endif %}
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'cart:add' %}">
+            {% csrf_token %}
+            <input type="hidden" name="product_id" value="{{ product.pk }}">
+            <input type="number" name="quantity" value="1" min="1" max="999" style="width: 6rem;">
+            <button type="submit" class="button button--compact button--dark">Add to cart</button>
+        </form>
+        {% else %}
+        <a class="button button--compact" href="{% url 'accounts:login' %}">Log in to add to cart</a>
+        {% endif %}
     </div>
 </article>
