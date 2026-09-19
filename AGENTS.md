@@ -17,6 +17,7 @@ Follow system/developer instructions and the user's current instructions. These 
 | Data import/generation | [Data pipeline](docs/DATA_PIPELINE.md), [schema](docs/SCHEMA.md), [analytics](docs/ANALYTICS.md) |
 | Analytics | [Analytics](docs/ANALYTICS.md), [data pipeline](docs/DATA_PIPELINE.md), [schema](docs/SCHEMA.md) |
 | AWS, caching, deployment | [Infrastructure](docs/AWS_INFRASTRUCTURE.md), [architecture](docs/ARCHITECTURE.md), [security](docs/SECURITY.md) |
+| Changes near INF2003 seams (AWS/ML isolation, analytics SQL, dataset retention, ER diagram, local run path) | [INF2003 baseline](docs/INF2003_BASELINE.md) |
 | Tests/evidence | [Testing](docs/TESTING.md), relevant feature contracts and existing evidence records |
 | Commits/PRs | [Development](docs/DEVELOPMENT.md) |
 
@@ -75,7 +76,7 @@ Reviewers must flag unnecessary complexity, duplicated logic and dead code with 
 - Preserve downloaded raw data unchanged; apply transformations through reproducible scripts.
 - Review Terraform plans and verify deployed behaviour, not merely a successful apply; see infrastructure guidance for shared-state coordination.
 - Include migrations with model changes. Update affected schema, API and analytics contracts in the same change.
-- Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline.
+- Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline; see [INF2003 baseline](docs/INF2003_BASELINE.md) for the guardrails that keep it extensible.
 - Every agent-created commit must have a concise subject and a non-empty descriptive body explaining what was fixed or changed, why, and the verification performed. Apply this to checkpoint and documentation commits too; see DEVELOPMENT.md for the format.
 - Never commit credentials, sensitive logs, real personal data or secret-containing Terraform state. Maintain attribution and AI-use records.
 - Run appropriate checks and disclose unrun checks. Placeholder evidence, planned commands and code existence are not successful results.
@@ -83,4 +84,4 @@ Reviewers must flag unnecessary complexity, duplicated logic and dead code with 
 
 ## Documentation ownership
 
-Schema owns application fields; API owns routes; analytics owns formulas; DESIGN owns visual reference; infrastructure owns AWS configuration; implementation plan owns status. Link rather than duplicate. Data dictionaries describe actual source fields and transformations. README and evidence describe the delivered system, not aspirations.
+Schema owns application fields; API owns routes; analytics owns formulas; DESIGN owns visual reference; infrastructure owns AWS configuration; INF2003 baseline owns INF2003-readiness guardrails; implementation plan owns status. Link rather than duplicate. Data dictionaries describe actual source fields and transformations. README and evidence describe the delivered system, not aspirations.
