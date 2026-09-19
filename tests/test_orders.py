@@ -354,6 +354,74 @@ def test_concurrent_checkouts_same_idempotency_key_create_exactly_one_order():
     assert len({order.pk for order in results}) == 1
 
 
+# --- order history (Batch 5) ---
+
+
+def test_order_list_requires_login():
+    response = Client().get(reverse("orders:list"))
+
+    assert response.status_code == 302
+    assert response.url.startswith(settings.LOGIN_URL)
+
+
+def test_order_list_shows_only_the_owners_orders_most_recent_first():
+    owner = make_user("owner")
+    other = make_user("other")
+    product = make_product("p1", stock=10)
+
+    item1 = add_item(get_cart(owner), product, 1)
+    older = services.checkout(owner, str(uuid.uuid4()), [item1.pk])
+    item2 = add_item(get_cart(owner), product, 1)
+    newer = services.checkout(owner, str(uuid.uuid4()), [item2.pk])
+
+    other_item = add_item(get_cart(other), product, 1)
+    services.checkout(other, str(uuid.uuid4()), [other_item.pk])
+
+    response = logged_in_client(owner).get(reverse("orders:list"))
+
+    assert response.status_code == 200
+    order_pks = [order.pk for order in response.context["orders"]]
+    assert order_pks == [newer.pk, older.pk]
+
+
+def test_order_list_item_count_is_distinct_line_items_not_total_quantity():
+    user = make_user()
+    product_a = make_product("p1", stock=10)
+    product_b = make_product("p2", stock=10)
+    item_a = add_item(get_cart(user), product_a, 5)
+    item_b = add_item(get_cart(user), product_b, 3)
+    order = services.checkout(user, str(uuid.uuid4()), [item_a.pk, item_b.pk])
+
+    response = logged_in_client(user).get(reverse("orders:list"))
+
+    listed = next(o for o in response.context["orders"] if o.pk == order.pk)
+    assert listed.item_count == 2
+
+
+def test_order_list_pagination_boundary():
+    user = make_user()
+    product = make_product("p1", stock=20)
+    for _ in range(11):
+        item = add_item(get_cart(user), product, 1)
+        services.checkout(user, str(uuid.uuid4()), [item.pk])
+
+    client = logged_in_client(user)
+    page1 = client.get(reverse("orders:list"))
+    page2 = client.get(reverse("orders:list"), {"page": 2})
+
+    assert len(page1.context["orders"]) == 10
+    assert len(page2.context["orders"]) == 1
+
+
+def test_order_list_empty_state():
+    client = logged_in_client(make_user())
+
+    response = client.get(reverse("orders:list"))
+
+    assert response.status_code == 200
+    assert "haven't placed any orders" in response.content.decode()
+
+
 @pytest.mark.django_db(transaction=True)
 def test_concurrent_checkouts_different_users_racing_last_unit_of_stock():
     product = make_product("p1", stock=1)

@@ -1,6 +1,6 @@
 # Route and interaction contract
 
-Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. GET/POST /register/, GET/POST /login/ and POST /logout/ (accounts:register/login/logout) and GET /products/ (catalogue:product_list) are also implemented. GET /products/manage/ and POST /products/manage/<id>/toggle-active/ (catalogue:manage_list/product_toggle_active) are a deliberate, narrow scope addition beyond the assessed brief — see PROJECT_SCOPE_INF2006.md's "Outside INF2006" note and docs/IMPLEMENTATION_PLAN.md for status. GET /cart/, POST /cart/items/, POST /cart/items/<id>/update/ and POST /cart/items/<id>/delete/ (cart:detail/add/update/delete) are also implemented, including the HTMX fragment/HX-Redirect contract described below. GET/POST /checkout/ and GET /orders/<id>/ (orders:checkout/detail) are also implemented, per docs/plans/batch-04-checkout.md. Order history (GET /orders/) and analytics routes below remain reserved contracts for follow-up tasks, not callable endpoints. Django HTML/HTMX is the baseline, not a separate REST service.
+Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / foundation preview, the presentation-only GET/HEAD /foundation/design-notes/ fragment and the presentation-only 503 failure preview are implemented. GET/POST /register/, GET/POST /login/ and POST /logout/ (accounts:register/login/logout) and GET /products/ (catalogue:product_list) are also implemented. GET /products/manage/ and POST /products/manage/<id>/toggle-active/ (catalogue:manage_list/product_toggle_active) are a deliberate, narrow scope addition beyond the assessed brief — see PROJECT_SCOPE_INF2006.md's "Outside INF2006" note and docs/IMPLEMENTATION_PLAN.md for status. GET /cart/, POST /cart/items/, POST /cart/items/<id>/update/ and POST /cart/items/<id>/delete/ (cart:detail/add/update/delete) are also implemented, including the HTMX fragment/HX-Redirect contract described below. GET/POST /checkout/, GET /orders/<id>/ and GET /orders/ (orders:checkout/detail/list) are also implemented, per docs/plans/batch-04-checkout.md and docs/plans/batch-05-order-history.md. Analytics routes below remain a reserved contract for a follow-up task, not a callable endpoint. Django HTML/HTMX is the baseline, not a separate REST service.
 
 | Method / route | Access | Behaviour |
 |---|---|---|
@@ -15,7 +15,7 @@ Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / fo
 | POST `/cart/items/<id>/update/` | Owner | Replace quantity with bounds validation |
 | POST `/cart/items/<id>/delete/` | Owner | Remove item |
 | GET, POST `/checkout/` | Authenticated | Read-only review page; session-derived idempotency key/fingerprint and atomic simulated checkout |
-| GET `/orders/` | Authenticated | Owner's order history |
+| GET `/orders/` | Authenticated | Owner's paginated order history, most recent first |
 | GET `/orders/<id>/` | Owner | Persisted order confirmation/detail |
 | GET `/analytics/` | Operator | Period-labelled sales/inventory analytics |
 | GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation |
@@ -53,8 +53,9 @@ Reserved integration contracts (to implement and verify in the named backend fol
 | Cart delete | cart:delete | URL item ID; POST with CSRF |
 | Checkout | orders:checkout / orders/checkout.html | GET renders the review page (no fields); POST with CSRF only — idempotency key and pinned cart item IDs are session-derived, not submitted by the client |
 | Order detail | orders:detail / orders/detail.html | URL order ID; GET, owner-only |
+| Order history | orders:list / orders/list.html | GET owner's orders; page: positive integer; backend-bounded pagination (10 per page) |
 
-These names cannot be reversed until their follow-up URL modules exist. Do not add fake authentication or cart routes merely to render the shell. History/analytics names and payload details will be finalized with their backend tasks before dependent frontend integration.
+These names cannot be reversed until their follow-up URL modules exist. Do not add fake authentication or cart routes merely to render the shell. Analytics names and payload details will be finalized with that backend task before dependent frontend integration.
 
 Future cart HTMX responses target id cart-content using outerHTML and template cart/_content.html; full HTML uses cart/detail.html. Backend will pass cart and validated form/errors, derive totals/prices/owner, and keep the fragment wrapper stable. Authentication expiry should return an HX-Redirect to login rather than login HTML in the fragment. Error fragment handling (including 409/503) must be explicitly wired and tested by the later backend/frontend integration. This is a contract, not implemented HTMX behaviour.
 

@@ -3,9 +3,10 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import View
+from django.views.generic import ListView, View
 
 from . import services
 from .models import Order
@@ -90,6 +91,20 @@ class CheckoutView(LoginRequiredMixin, View):
 
         self._clear_session(request)
         return redirect("orders:detail", pk=order.pk)
+
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = Order
+    template_name = "orders/list.html"
+    context_object_name = "orders"
+    paginate_by = 10
+
+    def get_queryset(self):
+        return (
+            Order.objects.filter(owner=self.request.user)
+            .annotate(item_count=Count("items"))
+            .order_by("-placed_at", "-pk")
+        )
 
 
 class OrderDetailView(LoginRequiredMixin, View):
