@@ -106,8 +106,8 @@ The operator dashboard answers: **What sold, which products are running low, and
 |---|---|---|
 | Daily sales and category performance | Sum units and historical line-item amounts from completed orders | Understand sales trends |
 | Top-selling products | Rank by completed units sold over a selected period | Identify high-demand items |
-| Recent average daily sales | Completed units over the previous 7 complete business days divided by 7 | Explain the sales rate |
-| Estimated stock coverage | Current stock divided by average daily sales | Estimate days remaining under unchanged sales behaviour |
+| Recent average daily sales | Completed units over the previous 7 complete business dates divided by 7 | Explain the sales rate |
+| Estimated stock coverage | Stock at the reporting cutoff (sealed inventory snapshot) divided by average daily sales | Estimate days remaining under unchanged sales behaviour |
 | Replenishment flag | Coverage less than or equal to configured lead time | Prioritise a stock check |
 
 Display the processing timestamp, period, units, formula and reason for each flag. Use Singapore business dates consistently; store timestamps with timezone awareness. For zero sales, display 'No recent sales; coverage unavailable'. If there is insufficient history, identify it rather than silently changing the denominator.
