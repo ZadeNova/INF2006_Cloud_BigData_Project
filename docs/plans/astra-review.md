@@ -9,7 +9,7 @@ Rules that matter for the reviewer:
 - Do not turn style preferences or legacy issues in other tasks into blockers. Do flag mistakes, spec gaps, security issues, unhandled failure paths, duplicated logic, dead code and missing or weak tests.
 - Do not re-litigate the recorded decisions below unless you can show a defect. A genuine spec ambiguity goes to the user.
 
-Verification recorded by the author at the last commit (`a11247b`): full suite 135 passed, `manage.py check` clean, `makemigrations --check --dry-run` reports no changes, run through Docker Compose (`docker compose run --rm web pytest -q`). The reviewer should rerun what it can rather than trusting these.
+Verification recorded by the author: at `a11247b` (end of the ecommerce tasks) the full suite was 135 passed; at `788f545` (analytics through the read queries) it was 301 passed. `manage.py check` was clean and `makemigrations --check --dry-run` reported no changes at both, run through Docker Compose (`docker compose run --rm web pytest -q`). After changing anything under `src/`, run `docker compose build web` first: the image copies `src/` at build time and only `tests/` is mounted. The reviewer should rerun what it can rather than trusting these.
 
 Frontend and visual work (templates, CSS) is outside this backend gate. The checkout, receipt and order-history pages are functional-only by design; a design pass is deferred and is not a finding.
 
@@ -22,9 +22,11 @@ Frontend and visual work (templates, CSS) is outside this backend gate. The chec
 | `cart` | Persistent cart | `0c13334` | `c0c1bfb` |
 | `checkout` | Cart to order, atomic and idempotent (highest risk) | `ce174af` | `0c13334` |
 | `order-history` | Owner order list | `a11247b` | `ce174af` |
-| `security-gap-check` | Cross-cutting check against `docs/SECURITY.md` | working tree at `9e32dde` | n/a |
+| `analytics-refresh` | SQL view, date ranges, `refresh_analytics` (batch 6b, parts 1 and 2) | `470becd` (includes `41ea463`) | `91ba04e` (docs only) |
+| `analytics-queries` | `snapshot_inventory` and the dashboard read queries (batch 6b, part 3) | `788f545` | `470becd` |
+| `security-gap-check` | Cross-cutting check against `docs/SECURITY.md` | branch tip at the time of review | n/a |
 
-Suggested order: checkout first (most complexity and risk), then cart, catalogue-operator, auth-registration, order-history, then the cross-cutting security check. For a snapshot use `git diff <base>..<snapshot> -- <owned paths>`; all reviewed code is committed, so nothing untracked is missed. Ignore the documentation-only and `CLAUDE.md` commits between them.
+Suggested order: checkout first (most complexity and risk), then analytics-refresh and analytics-queries, then cart, catalogue-operator, auth-registration, order-history, then the cross-cutting security check. For a snapshot use `git diff <base>..<snapshot> -- <owned paths>`; all reviewed code is committed, so nothing untracked is missed. Ignore the documentation-only and `CLAUDE.md` commits between them.
 
 ## `checkout`
 
@@ -75,6 +77,36 @@ Suggested order: checkout first (most complexity and risk), then cart, catalogue
 - **Decisions:** a plain `ListView` (no service function); ten per page; item count means distinct lines, not total units; ordering is `-placed_at, -pk` so pagination is stable.
 - **Scrutinise:** ownership isolation, that the annotation cannot multiply rows or totals, index use against `order_owner_date`, and pagination bounds handling.
 
+## `analytics-refresh`
+
+- **Owned paths:** `src/reporting/migrations/0003_completed_sale_lines_view.py`, `src/reporting/ranges.py`, the refresh half of `src/reporting/services.py`, `src/reporting/management/commands/refresh_analytics.py` and `_args.py`; tests `tests/test_analytics_ranges.py`, `test_analytics_view.py`, `test_analytics_refresh.py` and the shared `tests/analytics_helpers.py`.
+- **Specs:** [ANALYTICS.md](../ANALYTICS.md) (Definitions, Reporting range, Calendar correctness, Processing and validation), [SCHEMA.md](../SCHEMA.md) (AnalyticsRun, DailyProductSales, inventory versions and DOC-001), plan [batch-06b-analytics-refresh.md](batch-06b-analytics-refresh.md). SCHEMA.md does not yet describe the view; that is a known documentation gap, not a finding to report as new.
+- **Decisions already made:** `--as-of D` sets the cutoff to 00:00 Asia/Singapore, so the last complete date L is D minus one; every run is a full recompute of a 366-date window ending at L; daily rows are stored sparsely (absent means zero); a Postgres advisory lock guards the command and a concurrent invocation skips with exit 0; the run row is created and committed first, the rows and the completion are written in one transaction, and a failure marks the run failed; any run left `running` is marked failed once the lock is held; retention keeps the newest N completed runs per namespace (minimum 2, never the new one) and deletes older ones after commit; the statement timeout is transaction-local; aggregation is SQL, never the ORM; every product in the namespace must have a row in the sealed inventory.
+- **Scrutinise:**
+  - The view: `placed_at AT TIME ZONE 'Asia/Singapore'` on a `timestamptz`, the completed-only filter, and the join.
+  - `PUBLISH_SQL`: do the counts and the inserted rows really come from one snapshot, and are the `placed_at` range and the `business_date` bounds equivalent for a midnight cutoff?
+  - The lock lifecycle: released on every path, session-level locks with pooled or reused connections, and what happens if the connection dies.
+  - Failure handling: a mid-publish error, `_mark_failed`, and the orphan cleanup, which is global and only safe because the lock is global.
+  - Retention: the ordering, the per-namespace scope, and the race with a reader who has just selected a run (the design relies on always keeping at least two).
+  - Date arithmetic in `ranges.py` around leap years and month ends, bucket clipping, and shifted comparison buckets; the `zoneinfo` dependency in the slim image.
+  - Test strength: would the lock, boundary, rollback and retention tests fail if the guarded behaviour were removed?
+- **Not defects:** no incremental refresh (deliberate), no scheduler design yet (infrastructure phase), not yet run on real data (the dataset is gated).
+
+## `analytics-queries`
+
+- **Owned paths:** `src/reporting/queries.py`, the snapshot half of `src/reporting/services.py`, `src/reporting/management/commands/snapshot_inventory.py`; tests `tests/test_analytics_queries.py`, `test_analytics_snapshot.py`.
+- **Specs:** [ANALYTICS.md](../ANALYTICS.md) (Metrics, Partial history, Compare, Range independence), [SCHEMA.md](../SCHEMA.md) inventory sections, plan [batch-06b-analytics-refresh.md](batch-06b-analytics-refresh.md).
+- **Decisions already made:** coverage and flags use the sealed inventory snapshot, never live stock, over the seven complete dates ending at L regardless of the dashboard range; the flag is exact integer arithmetic (`stock * 7 <= lead_time * units`); states are flagged, ok, unavailable and insufficient_history; results are ordered by urgency in SQL; top sellers break ties on the lower product ID; category totals use each product's current category; the comparison series reuses the selected buckets shifted back by the span length; `snapshot_inventory` is create-only and its option is `--name` because Django reserves `--version`.
+- **Known open item (KO-1, user decision pending):** `snapshot_inventory` captures live stock when it runs but accepts any past `--as-of`, so a past date labels current stock with an old cutoff. Recommended fix: allow only today's Singapore date, or require an explicit `--allow-past`. Tracked in [analytics-status.md](analytics-status.md). Please assess its severity and confirm the proposed fix; do not report it again as a new finding.
+- **Scrutinise:**
+  - `COVERAGE_SQL`: the NULL behaviour of `flagged` (it must never be NULL), the boolean and integer parameters, rounding for display versus the exact threshold, and ordering with `NULLS LAST`.
+  - The sufficiency rule for history (`earliest <= first`) at the six and seven date boundary.
+  - `bucket_sales`: the dynamically built `VALUES` list (placeholders only, no interpolated values), the left join and zero-filling, and behaviour for an empty bucket list.
+  - `top_sellers`: the window function combined with `GROUP BY`, and ordering stability.
+  - `snapshot_inventory`: the nested atomic and `IntegrityError` handling, `_verify_existing`, and how it interacts with the append-only database guards.
+  - Query budgets: each function should use a fixed number of statements regardless of product count.
+  - Test strength around the exact threshold, the leap-day window and snapshot immutability.
+
 ## `security-gap-check`
 
 A cross-cutting review of the implemented code against [SECURITY.md](../SECURITY.md); findings only, fixes need user approval. Items the author already suspects are gaps (verify, do not assume):
@@ -87,9 +119,9 @@ A cross-cutting review of the implemented code against [SECURITY.md](../SECURITY
 - Sessions use the database backend (`SESSION_ENGINE = "django.contrib.sessions.backends.db"`), which matches the shared-state rule. Cross-instance behaviour cannot be verified until a multi-instance deployment exists; record that as a limitation.
 - Negative tests required by the contract: unauthenticated checkout, foreign cart or order access, non-operator analytics (not built yet), missing or invalid CSRF, quantity or price manipulation, duplicate checkout, anonymous S3 access (cloud, not yet). Map each to an existing test or record it as missing.
 
-## Upcoming review queue (not implemented yet)
+## Upcoming review queue (not implemented or not yet committed)
 
-These will need the same gate when they exist, in this order: `analytics-data-import` (batch 6a, [plan](batch-06a-data-import.md)), `analytics-refresh` (batch 6b, [plan](batch-06b-analytics-refresh.md)), and the backend part of the analytics dashboard (batch 6c, outlined at the end of the 6b plan). Add them to the table above with their commit hashes when they land. Infrastructure changes are backend-owned work and also require the gate before being marked complete.
+`analytics-refresh` and `analytics-queries` are already in the queue above. Still to come, each needing the same gate: `analytics-data-import` (batch 6a, [plan](batch-06a-data-import.md)) with the optional dataset generator ([plan](batch-06a-dataset-generator.md)), and the backend part of the analytics dashboard (batch 6c, [plan](batch-06c-dashboard.md)). Add them to the table above with their commit hashes when they land; current status is in [analytics-status.md](analytics-status.md). Infrastructure changes are backend-owned work and also require the gate before being marked complete.
 
 ## Reviewer output checklist
 
