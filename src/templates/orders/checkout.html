@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Northstar Market{% endblock %}
+{% block content %}
+<section class="section-heading">
+    <h1>Checkout</h1>
+    <p>Review your order before placing it. Payment is simulated — no real charge occurs.</p>
+</section>
+
+{% if error %}
+<div class="message message--error" role="alert">
+    <span class="message__icon" aria-hidden="true">!</span>
+    <div><p>{{ error }}</p></div>
+</div>
+{% endif %}
+
+<div class="surface-card operator-table">
+    {% if lines %}
+    <div class="operator-row operator-row--header">
+        <span>Product</span>
+        <span style="text-align: right;">Price</span>
+        <span>Quantity</span>
+        <span style="text-align: right;">Line total</span>
+    </div>
+    {% for line in lines %}
+    <div class="operator-row">
+        <span class="operator-row__name">
+            {{ line.product.name }}{% if line.warning %} <span class="form-note">({{ line.warning }})</span>{% endif %}
+        </span>
+        <span class="operator-row__price">{{ line.product.display_price }}</span>
+        <span>{{ line.item.quantity }}</span>
+        <span class="operator-row__price">S${{ line.line_total }}</span>
+    </div>
+    {% endfor %}
+    <p class="form-note">Total: S${{ subtotal }}</p>
+    {% else %}
+    <p>Your cart is empty. <a href="{% url 'catalogue:product_list' %}">Continue shopping</a>.</p>
+    {% endif %}
+</div>
+
+{% if lines %}
+<a class="button button--compact button--outline-neutral" href="{% url 'cart:detail' %}">Back to cart</a>
+<form method="post" action="{% url 'orders:checkout' %}">
+    {% csrf_token %}
+    <button type="submit" class="button button--dark">Place order</button>
+</form>
+{% endif %}
+{% endblock %}

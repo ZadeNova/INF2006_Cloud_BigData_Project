@@ -4,6 +4,7 @@ from .views import design_notes, design_notes_unavailable, health, home
 urlpatterns = [
     path("", home, name="home"),
     path("", include("accounts.urls")),
+    path("", include("orders.urls")),
     path("products/", include("catalogue.urls")),
     path("cart/", include("cart.urls")),
     path("foundation/design-notes/", design_notes, name="design-notes"),
