@@ -16,51 +16,20 @@ from django.core.management.base import CommandError
 from django.db import DatabaseError, connection
 from django.test.utils import CaptureQueriesContext
 
+from analytics_helpers import (
+    DEFAULT_CUTOFF, NS, OTHER_NS, SGT, add_order, at, make_inventory, make_products)
 from catalogue.models import Product
-from orders.models import Order, OrderItem
-from reporting import ranges, services
-from reporting.models import AnalyticsRun, DailyProductSales, InventorySnapshot, InventoryVersion
+from reporting import services
+from reporting.models import AnalyticsRun, DailyProductSales
 
 pytestmark = pytest.mark.django_db
-SGT = ranges.BUSINESS_TZ
-NS = "synthetic/revision-a/historical/v1"
-OTHER_NS = "synthetic/revision-a/other/v1"
 AS_OF = date(2024, 3, 8)
-CUTOFF = datetime(2024, 3, 8, tzinfo=SGT)
-
-
-def at(year, month, day, hour=12, minute=0):
-    return datetime(year, month, day, hour, minute, tzinfo=SGT)
+CUTOFF = DEFAULT_CUTOFF
 
 
 @pytest.fixture
 def owner():
     return get_user_model().objects.create_user(username="refresh-user")
-
-
-def make_products(namespace=NS, names=("alpha", "beta", "gamma")):
-    return {name: Product.objects.create(namespace=namespace, external_id=name, name=name.title(), category="Tools",
-                                         price="10.00", cost="4.00", stock=50, lead_time_days=7) for name in names}
-
-
-def make_inventory(products, cutoff=CUTOFF, version="inv-1", namespace=NS, seal=True):
-    inventory = InventoryVersion.objects.create(namespace=namespace, version=version, cutoff=cutoff)
-    InventorySnapshot.objects.bulk_create(
-        InventorySnapshot(inventory=inventory, product=product, stock=50, lead_time_days=7) for product in products.values())
-    if seal:
-        InventoryVersion.objects.filter(pk=inventory.pk).update(sealed=True)
-        inventory.refresh_from_db()
-    return inventory
-
-
-def add_order(owner, external_id, lines, placed_at, status="completed", namespace=NS):
-    total = sum(quantity * Decimal(price) for _, quantity, price in lines)
-    order = Order.objects.create(owner=owner, namespace=namespace, external_id=external_id, status=status,
-                                 total=total, placed_at=placed_at)
-    OrderItem.objects.bulk_create(
-        OrderItem(order=order, product=product, quantity=quantity, unit_price=price, external_id=f"{external_id}-{n}")
-        for n, (product, quantity, price) in enumerate(lines))
-    return order
 
 
 def standard_orders(owner, p):

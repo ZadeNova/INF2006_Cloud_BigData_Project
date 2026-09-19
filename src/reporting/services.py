@@ -9,13 +9,13 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime, time as clock
 
-from django.db import connection, transaction
+from django.db import IntegrityError, connection, transaction
 from django.utils import timezone
 
 from catalogue.models import Product
 
 from . import ranges
-from .models import AnalyticsRun, InventoryVersion
+from .models import AnalyticsRun, InventorySnapshot, InventoryVersion
 
 # Fixed key identifying the refresh job to PostgreSQL advisory locks (any constant bigint).
 REFRESH_LOCK_KEY = 2006_0601
@@ -47,6 +47,10 @@ class RefreshError(Exception):
     """A refresh cannot start or complete for a reason the operator can act on."""
 
 
+class SnapshotError(Exception):
+    """An inventory snapshot cannot be created or verified for a reason the operator can act on."""
+
+
 @dataclass
 class RefreshResult:
     skipped: bool = False
@@ -63,7 +67,7 @@ def refresh_analytics(*, namespace, as_of, inventory_version=None, keep=5, timeo
         raise RefreshError(f"keep must be at least {MIN_KEEP}")
     if timeout < 1:
         raise RefreshError("timeout must be at least one second")
-    cutoff = datetime.combine(as_of, clock.min, tzinfo=ranges.BUSINESS_TZ)
+    cutoff = _cutoff_for(as_of)
     if cutoff > timezone.now():
         raise RefreshError("as-of date is in the future; that cutoff has not happened yet")
 
@@ -93,6 +97,11 @@ def refresh_analytics(*, namespace, as_of, inventory_version=None, keep=5, timeo
     run.refresh_from_db()
     return RefreshResult(run=run, lines_processed=lines, rows_written=rows, pruned=pruned,
                          seconds=time.monotonic() - started)
+
+
+def _cutoff_for(as_of):
+    """The cutoff for an as-of date: 00:00 Asia/Singapore, so the last complete business date is the day before."""
+    return datetime.combine(as_of, clock.min, tzinfo=ranges.BUSINESS_TZ)
 
 
 @contextmanager
@@ -182,3 +191,57 @@ def _prune(run, namespace, keep):
     if stale:
         AnalyticsRun.objects.filter(pk__in=stale).delete()   # cascades to their daily rows
     return len(stale)
+
+
+@dataclass
+class SnapshotResult:
+    version: InventoryVersion
+    rows: int
+    created: bool
+
+
+def snapshot_inventory(*, namespace, as_of, version=None):
+    """Seal the CURRENT stock and lead times of every product in `namespace` as an immutable inventory version.
+
+    The cutoff is 00:00 Asia/Singapore on `as_of`, matching refresh_analytics, and must not be in the future.
+    This captures live values at the moment it runs, so use a cutoff at or near now; a historical import
+    seals its generated stock at import time instead. Create-only: an existing version of the same name is
+    verified against the current values and reported unchanged, or rejected if anything differs.
+    """
+    cutoff = _cutoff_for(as_of)
+    if cutoff > timezone.now():
+        raise SnapshotError("as-of date is in the future; that cutoff has not happened yet")
+    name = version or f"live-{as_of.isoformat()}"
+
+    with transaction.atomic():
+        products = list(Product.objects.filter(namespace=namespace).order_by("pk")
+                        .values_list("pk", "stock", "lead_time_days"))
+        if not products:
+            raise SnapshotError(f"Namespace {namespace!r} has no products to snapshot")
+
+        existing = InventoryVersion.objects.filter(namespace=namespace, version=name).first()
+        if existing is not None:
+            return _verify_existing(existing, cutoff, products)
+
+        try:
+            with transaction.atomic():
+                inventory = InventoryVersion.objects.create(namespace=namespace, version=name, cutoff=cutoff)
+        except IntegrityError:
+            raise SnapshotError(f"Inventory version {name!r} was created concurrently; re-run to verify it") from None
+        InventorySnapshot.objects.bulk_create(
+            InventorySnapshot(inventory=inventory, product_id=product_id, stock=stock, lead_time_days=lead)
+            for product_id, stock, lead in products)
+        InventoryVersion.objects.filter(pk=inventory.pk).update(sealed=True)   # the guard requires rows before sealing
+    inventory.refresh_from_db()
+    return SnapshotResult(version=inventory, rows=len(products), created=True)
+
+
+def _verify_existing(existing, cutoff, products):
+    if existing.cutoff != cutoff:
+        raise SnapshotError(f"Inventory version {existing.version!r} already exists for cutoff "
+                            f"{existing.cutoff.isoformat()}, not {cutoff.isoformat()}")
+    stored = set(existing.items.values_list("product_id", "stock", "lead_time_days"))
+    if stored != set(products):
+        raise SnapshotError(f"Inventory version {existing.version!r} already exists with different values "
+                            "(stock or lead times have changed since); use a new version name")
+    return SnapshotResult(version=existing, rows=len(products), created=False)

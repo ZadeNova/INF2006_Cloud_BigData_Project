@@ -1,18 +1,10 @@
 """Recompute and publish an analytics run; safe to re-run (each run is a full recompute)."""
-import argparse
-from datetime import date
-
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from reporting import ranges, services
 
-
-def iso_date(value):
-    try:
-        return date.fromisoformat(value)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f"{value!r} is not a YYYY-MM-DD date") from None
+from ._args import iso_date
 
 
 class Command(BaseCommand):
