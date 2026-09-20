@@ -11,7 +11,7 @@ services:
       APP_DB_PASSWORD: ${POSTGRES_PASSWORD:?Run tools/init_env.py first}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/10-local-role.sh:/docker-entrypoint-initdb.d/10-local-role.sh:ro
+      - ./docker/10-local-role.sh:/docker-entrypoint-initdb.d/10-local-role.sh:ro,z
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 3s
@@ -46,7 +46,7 @@ services:
       retries: 3
       start_period: 10s
     volumes:
-      - ../tests:/app/tests:ro
+      - ../tests:/app/tests:ro,z
   migrate:
     build: .
     image: inf2006-foundation-app
