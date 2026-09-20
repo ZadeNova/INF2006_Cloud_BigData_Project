@@ -17,6 +17,18 @@ def csrf_token_from(response):
     return match.group(1)
 
 
+@pytest.mark.parametrize("route, template", [
+    ("accounts:register", "accounts/register.html"),
+    ("accounts:login", "registration/login.html"),
+])
+def test_anonymous_visitors_can_open_the_auth_pages(route, template):
+    # A different path from the POST re-render tests below: this is the GET a visitor makes to reach the form.
+    response = Client().get(reverse(route))
+
+    assert response.status_code == 200
+    assert response.templates[0].name == template
+
+
 def test_registration_creates_user_with_usable_password_and_no_profile():
     client = Client()
 
