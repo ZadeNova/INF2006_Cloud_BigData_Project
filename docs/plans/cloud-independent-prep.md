@@ -28,6 +28,8 @@ Open decision: which endpoints count as "the workload" for the autoscaling compa
 
 ## B2: Structured application logging
 
+**Implemented** as review fix SEC-001 (`config/jsonlog.py`, `RequestLoggingMiddleware`, the `LOGGING` setting, `tests/test_request_logging.py`); the field list is in [SECURITY.md](../SECURITY.md). Still to do in the cloud phase: confirm the lines reach CloudWatch Logs and write a Logs Insights query as monitoring evidence. The original plan follows.
+
 `docs/SECURITY.md` requires request IDs, durations and sanitised errors, and no credentials, cookies or raw personal payloads. `src/config/settings.py` currently has no `LOGGING` configuration.
 
 - JSON or key-value logs to stdout (containers and CloudWatch both read it): timestamp, request ID, method, path (no query string values that could carry secrets), status, duration, user ID (not name or email), and exception class for errors.

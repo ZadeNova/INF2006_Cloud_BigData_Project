@@ -111,7 +111,7 @@ Suggested order: checkout first (most complexity and risk), then analytics-refre
 
 A cross-cutting review of the implemented code against [SECURITY.md](../SECURITY.md); findings only, fixes need user approval. Items the author already suspects are gaps (verify, do not assume):
 
-- No application logging configuration exists (`LOGGING` is absent from `settings.py`), so the request ID, duration and sanitised-error requirement is unimplemented.
+- (Fixed after round 1 as SEC-001: request logging now exists; see [security-gap-check.md](../reviews/security-gap-check.md).) Originally: no application logging configuration existed, so the request ID, duration and sanitised-error requirement was unimplemented.
 - No login throttling or lockout was added. It is not required by the contract but is a common expectation; classify severity accordingly.
 - Expired-session cleanup is required by the contract ("plan expired-session cleanup") and has no mechanism yet.
 - Session lifetime is 14 days (`SESSION_COOKIE_AGE`); confirm this is intended.
