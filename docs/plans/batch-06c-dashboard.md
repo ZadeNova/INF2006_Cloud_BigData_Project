@@ -55,7 +55,7 @@ Fixtures build a tiny sealed inventory and a run through the real 6b `refresh_an
 - **Ranges:** each preset shows the expected span dates and totals at the fixed cutoff; invalid `range` shows the default and a message; `compare` other than `1` is ignored.
 - **Compare:** correct differences; "n/a" when the previous span has no sales; "insufficient history" when the span precedes the history start (including year to date on 2024-only data); flags and coverage are identical across ranges and with compare on or off.
 - **Charts:** parse the `json_script` payload: series length and values match, the comparison series aligns bucket by bucket including a weekly case; category totals equal the summary total.
-- **Tables:** top sellers order and tie break; replenishment ordering, cap of 25 and the counts; states for zero sales and insufficient history are labelled, never shown as a number or infinity.
+- **Tables:** top sellers order and tie break; replenishment ordering, cap of 25 and the counts; states for zero sales and insufficient history are labelled, never shown as a number or infinity. In the `insufficient_history` state the page must also hide the average daily units, because `queries.coverage` still returns a numeric average with that status (raised in the [analytics-queries review](../reviews/analytics-queries.md)); a test asserts that no average, coverage or flag appears for those rows.
 - **Safety:** a product name containing markup is escaped; `assertNumQueries` bounds the query count and does not grow with the number of products.
 - **Permissions plumbing:** `seed_demo` grants the permission to the operator group and is safe to re-run.
 
