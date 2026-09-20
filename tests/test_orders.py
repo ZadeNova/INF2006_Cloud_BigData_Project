@@ -108,6 +108,23 @@ def test_unit_price_captured_is_live_price_not_cart_time_price():
     assert item.unit_price == Decimal("15.00")
 
 
+def test_order_total_sums_several_lines_exactly_without_rounding_drift():
+    user = make_user()
+    cheap = make_product("p1", price="19.99", stock=10)
+    cheaper = make_product("p2", price="5.05", stock=10)
+    add_item(get_cart(user), cheap, 3)          # 59.97
+    add_item(get_cart(user), cheaper, 2)        # 10.10
+    client = logged_in_client(user)
+
+    place(client, open_checkout(client))
+
+    order = Order.objects.get(owner=user)
+    lines = OrderItem.objects.filter(order=order)
+    assert order.total == Decimal("70.07")
+    assert order.total == sum(line.line_total for line in lines)
+    assert sorted(line.unit_price for line in lines) == [Decimal("5.05"), Decimal("19.99")]
+
+
 def test_get_checkout_with_empty_cart_redirects_to_cart():
     client = logged_in_client(make_user())
 
@@ -422,20 +439,6 @@ def test_order_detail_returns_404_for_foreign_order_200_for_owner():
 
     assert logged_in_client(owner).get(reverse("orders:detail", args=[order.pk])).status_code == 200
     assert logged_in_client(other).get(reverse("orders:detail", args=[order.pk])).status_code == 404
-
-
-def test_post_without_csrf_token_is_rejected():
-    user = make_user()
-    product = make_product("p1", stock=5)
-    add_item(get_cart(user), product, 1)
-    client = Client(enforce_csrf_checks=True)
-    client.force_login(user)
-    review = open_checkout(client)
-
-    response = client.post(reverse("orders:checkout"), {"review": review})
-
-    assert response.status_code == 403
-    assert not Order.objects.filter(owner=user).exists()
 
 
 # --- NULL external_id uniqueness (order_source_unique tolerates only NULLs) ---

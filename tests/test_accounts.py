@@ -3,6 +3,7 @@ import re
 
 import pytest
 from django.contrib.auth import get_user_model
+from django.contrib.sessions.models import Session
 from django.test import Client
 from django.urls import reverse
 
@@ -166,6 +167,21 @@ def test_logout_clears_session_and_redirects_home():
     assert response.status_code == 302
     assert response.url == "/"
     assert "_auth_user_id" not in client.session
+
+
+def test_logout_deletes_the_session_server_side_not_just_in_the_browser():
+    client = Client()
+    client.force_login(get_user_model().objects.create_user(username="logoutuser"))
+    session_key = client.cookies["sessionid"].value
+    assert Session.objects.filter(session_key=session_key).exists()
+
+    client.post(reverse("accounts:logout"))
+
+    assert not Session.objects.filter(session_key=session_key).exists()
+    replay = Client()                                   # the cookie a browser (or an attacker) kept
+    replay.cookies["sessionid"] = session_key
+    # an authenticated client is redirected away from the login page; 200 means this one is anonymous
+    assert replay.get(reverse("accounts:login")).status_code == 200
 
 
 def test_logout_without_csrf_token_is_rejected():

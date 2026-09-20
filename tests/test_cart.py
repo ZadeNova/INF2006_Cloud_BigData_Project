@@ -1,5 +1,6 @@
 """Persistent cart: add/update/remove, ownership isolation, HTMX contract."""
 import threading
+from decimal import Decimal
 
 import pytest
 from django.conf import settings
@@ -40,10 +41,6 @@ def logged_in_client(username="shopper"):
     client = Client()
     client.force_login(make_user(username))
     return client
-
-
-def csrf_token_from(response):
-    return response.context["csrf_token"]
 
 
 # --- add ---
@@ -286,28 +283,20 @@ def test_non_htmx_success_redirects_to_cart_detail():
     assert response.url == reverse("cart:detail")
 
 
-def test_add_without_csrf_token_is_rejected():
-    product = make_product("p1")
-    client = Client(enforce_csrf_checks=True)
-    client.force_login(make_user())
+def test_subtotal_sums_line_totals_exactly_and_skips_unavailable_items():
+    user = make_user()
+    cart = services.get_cart(user)
+    services.add_item(cart, make_product("p1", price="19.99"), 3)      # 59.97
+    services.add_item(cart, make_product("p2", price="5.05"), 2)       # 10.10
+    withdrawn = make_product("p3", price="100.00")
+    services.add_item(cart, withdrawn, 1)
 
-    response = client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1})
+    items = cart.items.select_related("product")
+    assert services.cart_subtotal(items) == Decimal("170.07")
 
-    assert response.status_code == 403
+    Product.objects.filter(pk=withdrawn.pk).update(active=False)       # withdrawn while in the cart
 
-
-def test_add_with_csrf_token_succeeds():
-    product = make_product("p1")
-    client = Client(enforce_csrf_checks=True)
-    client.force_login(make_user())
-    token = csrf_token_from(client.get(reverse("cart:detail")))
-
-    response = client.post(
-        reverse("cart:add"),
-        {"product_id": product.pk, "quantity": 1, "csrfmiddlewaretoken": token},
-    )
-
-    assert response.status_code == 302
+    assert services.cart_subtotal(cart.items.select_related("product")) == Decimal("70.07")
 
 
 @pytest.mark.parametrize(

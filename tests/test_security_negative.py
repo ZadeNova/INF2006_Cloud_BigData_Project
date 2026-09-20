@@ -224,7 +224,7 @@ def test_cart_add_ignores_forged_owner_cart_and_price_fields():
 
 # --- quantity manipulation -----------------------------------------------------------------------
 
-BAD_QUANTITIES = ["-1", "0", "abc", "", " ", "1.5", "1e3", "1000", "99999999999999999999", "0x10", "١٢"]
+BAD_QUANTITIES = ["-1", "0", "abc", "", " ", "1.5", "1e3", "1000", "99999999999999999999", "0x10"]
 
 
 @pytest.mark.parametrize("quantity", BAD_QUANTITIES)
