@@ -9,8 +9,9 @@ from ._args import iso_date
 
 class Command(BaseCommand):
     help = ("Seal the CURRENT stock and lead time of every product as an inventory version whose cutoff is 00:00 "
-            "Asia/Singapore on --as-of, so refresh_analytics --as-of the same date can use it. Use a date at or near "
-            "today: live values are captured now. Re-running verifies an identical version and reports it unchanged.")
+            "Asia/Singapore on --as-of, so refresh_analytics --as-of the same date can use it. --as-of must be "
+            "today's Singapore date: live values are captured now. Re-running verifies an identical version and "
+            "reports it unchanged.")
 
     def add_arguments(self, parser):
         parser.add_argument("--as-of", type=iso_date, required=True, help="Cutoff date, YYYY-MM-DD")

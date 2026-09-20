@@ -99,6 +99,11 @@ def refresh_analytics(*, namespace, as_of, inventory_version=None, keep=5, timeo
                          seconds=time.monotonic() - started)
 
 
+def _today():
+    """Today's business date (Singapore calendar date)."""
+    return timezone.now().astimezone(ranges.BUSINESS_TZ).date()
+
+
 def _cutoff_for(as_of):
     """The cutoff for an as-of date: 00:00 Asia/Singapore, so the last complete business date is the day before."""
     return datetime.combine(as_of, clock.min, tzinfo=ranges.BUSINESS_TZ)
@@ -203,14 +208,19 @@ class SnapshotResult:
 def snapshot_inventory(*, namespace, as_of, version=None):
     """Seal the CURRENT stock and lead times of every product in `namespace` as an immutable inventory version.
 
-    The cutoff is 00:00 Asia/Singapore on `as_of`, matching refresh_analytics, and must not be in the future.
-    This captures live values at the moment it runs, so use a cutoff at or near now; a historical import
-    seals its generated stock at import time instead. Create-only: an existing version of the same name is
-    verified against the current values and reported unchanged, or rejected if anything differs.
+    The cutoff is 00:00 Asia/Singapore on `as_of`, matching refresh_analytics, and `as_of` must be today's
+    Singapore date (KO-1): live values are captured when this runs, so it can only describe today's cutoff.
+    That is a disclosed approximation: sales between midnight and now are already deducted from stock, and
+    because nothing in the application raises stock, the captured stock is at most the true midnight stock,
+    so coverage errs low (flags slightly early), never late. A historical import seals its generated stock at
+    import time instead. Create-only: an existing version of the same name must be sealed and is verified
+    against the current values and reported unchanged, or rejected if anything differs.
     """
+    today = _today()
+    if as_of != today:
+        raise SnapshotError(f"as-of must be today's date in Singapore ({today.isoformat()}): a snapshot captures "
+                            "live stock when it runs, so it cannot describe another cutoff")
     cutoff = _cutoff_for(as_of)
-    if cutoff > timezone.now():
-        raise SnapshotError("as-of date is in the future; that cutoff has not happened yet")
     name = version or f"live-{as_of.isoformat()}"
 
     with transaction.atomic():
@@ -237,6 +247,9 @@ def snapshot_inventory(*, namespace, as_of, version=None):
 
 
 def _verify_existing(existing, cutoff, products):
+    if not existing.sealed:
+        raise SnapshotError(f"Inventory version {existing.version!r} already exists but is not sealed, so "
+                            "refresh_analytics cannot use it; use a new version name")
     if existing.cutoff != cutoff:
         raise SnapshotError(f"Inventory version {existing.version!r} already exists for cutoff "
                             f"{existing.cutoff.isoformat()}, not {cutoff.isoformat()}")

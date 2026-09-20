@@ -35,7 +35,7 @@ The reporting tables (`InventoryVersion`, `InventorySnapshot`, `AnalyticsRun`, `
 
 No cache and no ORM aggregation. Re-running for the same inputs creates a new run with identical daily rows (full refresh, idempotent by content).
 
-**`snapshot_inventory`** (`--namespace`, `--version`, `--cutoff`): builds an `InventoryVersion`, one `InventorySnapshot` per `Product` from current `stock` and `lead_time_days`, verifies completeness, then seals, all in one transaction. Create-only: an existing version with the same name is an error unless every row matches, then it is reported as unchanged.
+**`snapshot_inventory`** (`--as-of` today's Singapore date only, `--namespace`, `--name`; `--version` is reserved by Django, and only today is accepted because live stock cannot describe another cutoff, see KO-1 in [ANALYTICS.md](../ANALYTICS.md)): builds an `InventoryVersion`, one `InventorySnapshot` per `Product` from current `stock` and `lead_time_days`, verifies completeness, then seals, all in one transaction. Create-only: an existing version with the same name is an error unless every row matches, then it is reported as unchanged.
 
 **`queries.py`** (read side; every function takes the run and dates, never selects across runs; all SQL, no Python aggregation):
 

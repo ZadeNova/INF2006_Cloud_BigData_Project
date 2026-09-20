@@ -57,8 +57,9 @@ LIMIT %s
 """
 
 # Stock and lead time come from the run's sealed snapshot, never from mutable Product values. The flag
-# compares stock / (units / 7) <= lead time as stock * 7 <= lead_time * units, so the threshold is exact
-# integer arithmetic. `sufficient` is false when the run has fewer than seven complete dates of history.
+# compares stock / (units / 7) <= lead time as stock * 7 <= lead_time * units, so the threshold is exact.
+# stock is cast to numeric first: a PostgreSQL integer stock * 7 overflows above about 307 million, which
+# the schema allows (AQRY-001). `sufficient` is false when the run has fewer than seven complete dates.
 COVERAGE_SQL = """
 SELECT p.id, p.external_id, p.name, p.category, s.stock, s.lead_time_days,
        COALESCE(w.units, 0) AS units_7d,
@@ -66,7 +67,7 @@ SELECT p.id, p.external_id, p.name, p.category, s.stock, s.lead_time_days,
        CASE WHEN %(sufficient)s AND COALESCE(w.units, 0) > 0
             THEN ROUND(s.stock * %(dates)s::numeric / w.units, 2) END AS coverage_days,
        (%(sufficient)s AND COALESCE(w.units, 0) > 0
-            AND s.stock * %(dates)s <= s.lead_time_days * w.units) AS flagged
+            AND s.stock::numeric * %(dates)s <= s.lead_time_days * w.units) AS flagged
 FROM reporting_inventorysnapshot s
 JOIN catalogue_product p ON p.id = s.product_id
 LEFT JOIN (

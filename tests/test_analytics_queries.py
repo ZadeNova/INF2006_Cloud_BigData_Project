@@ -218,6 +218,19 @@ def test_seven_complete_dates_of_history_are_required(first_date, expected):
         assert row.coverage_days is None and row.units_7d == 7      # the units are still reported; no number, no flag
 
 
+@pytest.mark.parametrize("stock, lead, expected", [
+    (400_000_000, 7, "ok"),                       # stock * 7 would overflow a PostgreSQL integer (AQRY-001)
+    (2_147_483_647, 2_147_483_647, "flagged"),    # largest valid stock and lead time; exactly at the threshold
+])
+def test_very_large_valid_stock_does_not_overflow_the_flag_arithmetic(stock, lead, expected):
+    products = make_products(names=("alpha",))
+    inventory = make_inventory(products, values={"alpha": (stock, lead)})
+    run = make_run(inventory, [(D(2024, 3, 1), products["alpha"], 7, "70.00")])     # 1 unit a day
+    (row,) = queries.coverage(run)
+    assert row.coverage_days == Decimal(stock).quantize(Decimal("0.01"))
+    assert row.status == expected
+
+
 def test_a_run_with_no_sales_at_all_has_insufficient_history():
     products = make_products(names=("alpha", "beta"))
     run = make_run(make_inventory(products), [])

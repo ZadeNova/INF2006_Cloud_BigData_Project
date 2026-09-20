@@ -28,7 +28,7 @@ Commands (all run inside the web container, for example `docker compose run --rm
 
 Ordered by dependency. Sizes: S under an hour, M a session, L several.
 
-1. **Decision pending (user): guard `snapshot_inventory` against past dates.** It captures live stock when run but accepts any past `--as-of`, so a past date would label current stock with an old cutoff (the trap DATA_PIPELINE warns about). Recommended fix: allow only today's Singapore date (tests then freeze `timezone.now`), or an explicit `--allow-past` flag. Not implemented.
+1. **Done, awaiting re-review: `snapshot_inventory` today-only guard (KO-1).** The owner chose today's Singapore date only, with the live-stock approximation disclosed in ANALYTICS.md and the dashboard footer (6c). AQRY-001 (integer overflow in the flag arithmetic) and AQRY-002 (unsealed existing versions) were fixed in the same change. See [docs/reviews/analytics-queries.md](../reviews/analytics-queries.md).
 2. **A9, S:** `seed_demo --no-products` (create the demo operator without the 14 hand-written products). See [6a decision 5](batch-06a-data-import.md).
 3. **A7, L: dashboard (batch 6c).** Fully planned in [batch-06c-dashboard.md](batch-06c-dashboard.md); its prerequisites (A5) exist. Includes: move `HtmxLoginRequiredMixin` to `accounts/mixins.py`, the `reporting.view_analytics` permission (options-only migration `0004`) granted in `seed_demo`, the view and `#analytics-panel` fragment, vendored Chart.js (verify `collectstatic` accepts it), templates, tests. Buildable and testable without the dataset.
 4. **A8, M to L: deterministic generator.** Planned in [batch-06a-dataset-generator.md](batch-06a-dataset-generator.md). The fallback if dataset access does not arrive by about 22 September, also the source of realistic data for the dashboard walkthrough, the cross-check and load fixtures. Needs the `../data:/app/data:ro` Compose mount and `pyarrow` in `requirements.in`.
@@ -65,7 +65,7 @@ The scheduler that triggers `refresh_analytics` periodically is deliberately **n
 
 | Decision | Recommendation | Where |
 |---|---|---|
-| `snapshot_inventory` past-date guard | today's Singapore date only | above, item 1 |
+| `snapshot_inventory` past-date guard | decided: today's Singapore date only, disclosed approximation | resolved, item 1 |
 | Dataset: wait for access or switch to the generator | decide by about 22 September | [6a plan](batch-06a-data-import.md) |
 | Commit raw dataset files or only checksums | decide after download | 6a decision 7 |
 | Move `HtmxLoginRequiredMixin` (touches cart code awaiting review) | move it | [6c plan](batch-06c-dashboard.md) decision 1 |
