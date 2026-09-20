@@ -4,6 +4,9 @@ One JSON object per line on standard output, which container runtimes and CloudW
 Exceptions are reduced to their class name and a short list of stack frames (file, line, function). The
 exception message, the source lines, local variables, request bodies, cookies and headers are never
 included, because messages routinely echo user input or database detail (for example a duplicate key value).
+The same applies to the message text of Django's own security records (`django.security.*`): the CSRF check
+logs the rejected Referer including its query string, and DisallowedHost logs the raw Host header. Those
+messages are replaced by a fixed one; the logger name still says which check rejected the request.
 """
 import json
 import logging
@@ -12,6 +15,8 @@ import traceback
 from datetime import datetime, timezone
 
 FRAME_LIMIT = 8
+SECURITY_LOGGER = "django.security"
+SECURITY_MESSAGE = "Django security rejection"
 
 
 class JsonFormatter(logging.Formatter):
@@ -22,6 +27,10 @@ class JsonFormatter(logging.Formatter):
             "logger": record.name,
             "message": record.getMessage(),
         }
+        if record.name.startswith(SECURITY_LOGGER):
+            payload["message"] = SECURITY_MESSAGE
+            if getattr(record, "status_code", None) is not None:
+                payload["status"] = record.status_code
         payload.update(getattr(record, "fields", None) or {})
         request = getattr(record, "request", None)     # Django attaches the request to its error records
         if request is not None and "request_id" not in payload:

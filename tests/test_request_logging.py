@@ -163,6 +163,18 @@ def test_client_errors_are_logged_at_info_with_their_status(logs):
     assert (line["status"], line["level"]) == (404, "INFO")
 
 
+def test_a_rejected_referer_is_not_echoed_into_the_security_log(logs):
+    client = Client(enforce_csrf_checks=True)
+
+    response = client.post(reverse("accounts:login"), {"username": "x", "password": "y"}, secure=True,
+                           HTTP_REFERER="https://untrusted.example/reset?token=REVIEW_SENTINEL")
+
+    assert response.status_code == 403
+    (rejection,) = logs.records("django.security.csrf")
+    assert rejection["message"] == "Django security rejection" and rejection["status"] == 403
+    assert "REVIEW_SENTINEL" not in logs.raw and "untrusted.example" not in logs.raw
+
+
 # --- formatter and configuration -----------------------------------------------------------------
 
 def test_the_formatter_emits_one_line_and_reduces_exceptions_to_class_and_frames():
@@ -179,6 +191,19 @@ def test_the_formatter_emits_one_line_and_reduces_exceptions_to_class_and_frames
     assert payload["exception"] == "KeyError" and payload["frames"]
     assert "secret" not in output and "multiline value" not in output
     assert payload["message"] == "multi\nline message"
+
+
+def test_the_formatter_replaces_the_message_of_every_django_security_logger():
+    for name in ("django.security", "django.security.DisallowedHost", "django.security.csrf"):
+        record = logging.LogRecord(name, logging.WARNING, __file__, 1, "Invalid HTTP_HOST header: %r", ("SENTINEL-HOST",), None)
+
+        payload = json.loads(JsonFormatter().format(record))
+
+        assert payload["logger"] == name and payload["message"] == "Django security rejection"
+        assert "SENTINEL-HOST" not in json.dumps(payload)
+
+    other = logging.LogRecord("northstar.errors", logging.WARNING, __file__, 1, "kept %s", ("as written",), None)
+    assert json.loads(JsonFormatter().format(other))["message"] == "kept as written"
 
 
 def test_the_formatter_tolerates_values_that_are_not_json_serialisable():
