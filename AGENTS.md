@@ -66,6 +66,8 @@ Reuse suitable existing code instead of duplicating business rules or maintainin
 
 Reviewers must flag unnecessary complexity, duplicated logic and dead code with concrete evidence and a simpler corrective direction. Simplicity is about fewer moving parts and clearer behaviour, not the shortest possible code; retain necessary validation, error handling, transactions and tests.
 
+The same standard applies to tests. Cover each rule once, at the layer the rule lives in: business rules at the service level, HTTP contracts at the view level, invariants at the database level. Parametrise only across inputs that reach different code paths, not across equivalent values. A review finding earns one regression test, not a matrix. Tests that re-exercise framework behaviour already covered elsewhere — a second CSRF variant on a route that already has one, another invalid value taking a validator path already asserted — are duplication: reviewers flag them with the same evidence standard as duplicated logic, and an agent adding one removes the redundant case instead. More coverage is not automatically better coverage; added test volume is not evidence of thoroughness.
+
 ## Shared rules
 
 - Locked baseline: Django templates/HTMX, PostgreSQL, Docker and scoped AWS services. Do not add a SPA, DRF, JWT, Celery, NoSQL or payment gateway without a scope decision.
