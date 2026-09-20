@@ -12,7 +12,6 @@ from . import services
 from .models import Order
 
 SESSION_KEY = "checkout_idempotency_key"
-SESSION_ITEM_IDS = "checkout_item_ids"
 
 
 class CheckoutView(LoginRequiredMixin, View):
@@ -20,10 +19,9 @@ class CheckoutView(LoginRequiredMixin, View):
 
     def _clear_session(self, request):
         request.session.pop(SESSION_KEY, None)
-        request.session.pop(SESSION_ITEM_IDS, None)
 
     def _prepare(self, request):
-        """Shared render path: redirect if the cart is empty, else ensure key/pin match it.
+        """Shared render path: redirect if the cart is empty, else make sure a key exists.
 
         Returns an HttpResponse to return immediately, or a list of cart items.
         """
@@ -36,7 +34,6 @@ class CheckoutView(LoginRequiredMixin, View):
 
         if not request.session.get(SESSION_KEY):
             request.session[SESSION_KEY] = str(uuid.uuid4())
-        request.session[SESSION_ITEM_IDS] = [item.pk for item in items]
 
         return items
 
@@ -53,7 +50,8 @@ class CheckoutView(LoginRequiredMixin, View):
             line_total = product.price * item.quantity
             subtotal += line_total
             lines.append({"item": item, "product": product, "line_total": line_total, "warning": warning})
-        return {"lines": lines, "subtotal": subtotal, "error": error}
+        review = services.fingerprint_for([(item.product, item.quantity) for item in items])
+        return {"lines": lines, "subtotal": subtotal, "error": error, "review": review}
 
     def _render_error(self, request, message, status):
         result = self._prepare(request)
@@ -69,12 +67,12 @@ class CheckoutView(LoginRequiredMixin, View):
 
     def post(self, request):
         key = request.session.get(SESSION_KEY)
-        item_ids = request.session.get(SESSION_ITEM_IDS)
-        if not key or not item_ids:
+        review = request.POST.get("review", "")
+        if not key or not services.FINGERPRINT_RE.fullmatch(review):
             return redirect("orders:checkout")
 
         try:
-            order = services.checkout(request.user, key, item_ids)
+            order = services.checkout(request.user, key, review)
         except services.EmptyCartError:
             self._clear_session(request)
             messages.info(request, "Your cart is empty.")

@@ -37,7 +37,7 @@ Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimpo
 ## Checkout transaction
 
 1. Authenticate, validate positive bounded quantities and derive owner/prices on server.
-2. Resolve user-scoped idempotency key and stable request fingerprint. Equivalent retry returns the original order; changed contents conflict. Clearing the cart must not break equivalent retries.
+2. Resolve user-scoped idempotency key and stable request fingerprint. Equivalent retry returns the original order; changed contents conflict. Clearing the cart must not break equivalent retries. The review page submits the fingerprint of the lines it displayed; it must equal the fingerprint of the locked cart lines to place an order, and the stored fingerprint of an existing order on replay.
 3. Lock cart/product state in a consistent order, or use correctly bounded conditional updates; recheck stock and atomically create order/items and deduct stock.
 4. Enforce unique non-null user/idempotency key at DB level; handle concurrent uniqueness conflicts so only one order persists.
 5. Clear purchased cart state transactionally; confirm only after commit. Never use cached stock/prices to authorise checkout.

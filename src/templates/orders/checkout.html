@@ -41,6 +41,7 @@
 <a class="button button--compact button--outline-neutral" href="{% url 'cart:detail' %}">Back to cart</a>
 <form method="post" action="{% url 'orders:checkout' %}">
     {% csrf_token %}
+    <input type="hidden" name="review" value="{{ review }}">
     <button type="submit" class="button button--dark">Place order</button>
 </form>
 {% endif %}

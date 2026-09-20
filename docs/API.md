@@ -14,7 +14,7 @@ Status: GET/HEAD /health/ (URL name health), the presentation-only GET/HEAD / fo
 | POST `/cart/items/` | Authenticated | Add product/positive quantity |
 | POST `/cart/items/<id>/update/` | Owner | Replace quantity with bounds validation |
 | POST `/cart/items/<id>/delete/` | Owner | Remove item |
-| GET, POST `/checkout/` | Authenticated | Read-only review page; session-derived idempotency key/fingerprint and atomic simulated checkout |
+| GET, POST `/checkout/` | Authenticated | Review page that renders a fingerprint of the displayed cart lines; POST with CSRF and that `review` value, verified against the locked cart; session-derived idempotency key; atomic simulated checkout |
 | GET `/orders/` | Authenticated | Owner's paginated order history, most recent first |
 | GET `/orders/<id>/` | Owner | Persisted order confirmation/detail |
 | GET `/analytics/` | Operator | Period-labelled sales/inventory analytics from the latest completed run; optional `range` and `compare` query parameters; HTMX requests receive only the `#analytics-panel` fragment. See [analytics](ANALYTICS.md#dashboard-get-analytics-operator-only) |
@@ -51,7 +51,7 @@ Reserved integration contracts (to implement and verify in the named backend fol
 | Cart add | cart:add | product_id, quantity integer 1..999 |
 | Cart update | cart:update | URL item ID, quantity integer 1..999 |
 | Cart delete | cart:delete | URL item ID; POST with CSRF |
-| Checkout | orders:checkout / orders/checkout.html | GET renders the review page (no fields); POST with CSRF only — idempotency key and pinned cart item IDs are session-derived, not submitted by the client |
+| Checkout | orders:checkout / orders/checkout.html | GET renders the review page with a hidden `review` field (64-character lowercase hex fingerprint of the displayed lines, price excluded); POST with CSRF and `review`. The idempotency key is session-derived, not submitted. A missing or malformed `review` redirects to the review page; a well-formed value that no longer matches the locked cart is rejected as changed (200, nothing written); the same key with a different `review` conflicts (409) |
 | Order detail | orders:detail / orders/detail.html | URL order ID; GET, owner-only |
 | Order history | orders:list / orders/list.html | GET owner's orders; page: positive integer; backend-bounded pagination (10 per page) |
 | Analytics | reporting:dashboard / reporting/dashboard.html, fragment reporting/_panel.html | GET, operator only; `range`: one of `7d`, `30d` (default), `90d`, `mtd`, `ytd`; `compare`: `1` to enable, absent otherwise; no user, run or date fields from the client |

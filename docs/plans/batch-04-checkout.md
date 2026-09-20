@@ -2,6 +2,8 @@
 
 Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step.
 
+> **Revised after review (20 September 2026).** The session-pinned cart item IDs described below were replaced by a review fingerprint posted with the form, after independent review findings CHK-001 and CHK-002. The pin, `SESSION_ITEM_IDS` and the "item added after the review page stays in the cart" behaviour no longer apply; see [checkout-review-fixes.md](checkout-review-fixes.md). The rest of this plan (locking order, savepoint handling, exception mapping, live-price rule) still holds.
+
 ## Context
 
 Next roadmap batch after cart (Batch 3, shipped on `erfan/backend-auth`). Checkout turns a cart into a real `Order` — the highest-risk batch so far, because `Order`/`OrderItem` are already schema-locked with PostgreSQL constraints/triggers (`src/orders/models.py`, `src/reporting/migrations/0002_inventory_guards.py`) and `docs/SCHEMA.md`'s "Checkout transaction" section (lines 37-45) already dictates the sequence non-negotiably. `docs/API.md` only reserves `POST /checkout/` — everything else (route names, page structure, the idempotency mechanism) is ours to design, and was discussed with the user before writing this.
