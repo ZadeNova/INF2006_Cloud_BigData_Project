@@ -12,6 +12,10 @@ class CartValidationError(Exception):
         self.message = message
 
 
+class CartItemNotFound(Exception):
+    """The item is gone (removed in another tab, or consumed by checkout) by the time it was locked."""
+
+
 def get_cart(user):
     cart, _ = Cart.objects.get_or_create(owner=user)
     return cart
@@ -54,7 +58,10 @@ def add_item(cart, product, quantity):
 
 def set_item_quantity(cart, item, quantity):
     with transaction.atomic():
-        item = CartItem.objects.select_for_update().get(pk=item.pk, cart=cart)
+        try:
+            item = CartItem.objects.select_for_update().get(pk=item.pk, cart=cart)
+        except CartItem.DoesNotExist:
+            raise CartItemNotFound from None
         if not item.product.active:
             raise CartValidationError(
                 f'"{item.product.name}" is no longer available; remove it from your cart instead.'

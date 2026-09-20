@@ -19,6 +19,7 @@ from cart.services import add_item, get_cart, remove_item, set_item_quantity
 from catalogue.models import Product
 from orders import services
 from orders.models import Order, OrderItem
+from db_helpers import wait_until_blocked
 from orders.views import SESSION_KEY
 
 pytestmark = pytest.mark.django_db
@@ -519,16 +520,7 @@ def test_checkout_waits_for_a_concurrent_cart_change_and_then_rejects_the_stale_
     with transaction.atomic():
         CartItem.objects.select_for_update().get(pk=item.pk)      # another tab is in the middle of an update
         thread.start()
-        for _ in range(100):                                       # wait until checkout is blocked on a lock
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT pg_stat_clear_snapshot()")  # pg_stat_activity is cached for the transaction
-                cursor.execute("SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() "
-                               "AND pid <> pg_backend_pid() AND wait_event_type = 'Lock'")
-                if cursor.fetchone()[0]:
-                    break
-            threading.Event().wait(0.1)
-        else:
-            pytest.fail(f"checkout never blocked on the cart row lock; outcome so far: {outcome!r}")
+        wait_until_blocked()                                       # checkout is now waiting on the row lock
         CartItem.objects.filter(pk=item.pk).update(quantity=5)
     thread.join(10)
 

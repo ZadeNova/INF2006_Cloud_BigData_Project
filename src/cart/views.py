@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render, resolve_url
 from django.views.generic import View
 
@@ -70,6 +70,8 @@ class CartUpdateView(CartMutationView):
 
         try:
             services.set_item_quantity(cart, item, form.cleaned_data["quantity"])
+        except services.CartItemNotFound:
+            raise Http404 from None
         except CartValidationError as exc:
             return self._respond(request, error=exc.message)
         return self._respond(request)

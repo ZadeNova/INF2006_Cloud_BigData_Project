@@ -99,6 +99,21 @@
         showDesignNotesError();
     });
 
+    // HTMX does not swap error responses, so a 503 (database temporarily unavailable) would otherwise be silent.
+    document.body.addEventListener("htmx:responseError", function (event) {
+        var xhr = event.detail && event.detail.xhr;
+        var main = document.getElementById("main-content");
+        if (!xhr || xhr.status !== 503 || !main || document.getElementById("service-unavailable")) {
+            return;
+        }
+        var notice = document.createElement("div");
+        notice.id = "service-unavailable";
+        notice.className = "message message--error";
+        notice.setAttribute("role", "alert");
+        notice.textContent = "The service is temporarily unavailable. Please try again in a moment.";
+        main.insertBefore(notice, main.firstChild);
+    });
+
     document.body.addEventListener("htmx:afterSwap", function (event) {
         var target = event.detail && event.detail.target;
         if (!target || target.id !== "design-note") {

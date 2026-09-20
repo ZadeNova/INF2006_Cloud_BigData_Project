@@ -1,12 +1,17 @@
 """Persistent cart: add/update/remove, ownership isolation, HTMX contract."""
+import threading
+
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.db import connection, transaction
 from django.test import Client
 from django.urls import reverse
 
+from cart import services, views as cart_views
 from cart.models import Cart, CartItem
 from catalogue.models import Product
+from db_helpers import wait_until_blocked
 
 pytestmark = pytest.mark.django_db
 
@@ -201,6 +206,26 @@ def test_update_on_missing_item_returns_404():
     assert response.status_code == 404
 
 
+def test_update_returns_404_if_the_item_disappears_after_the_view_looked_it_up(monkeypatch):
+    # CART-001: another tab removes the item between the view's lookup and the service's locked lookup
+    product = make_product("p1")
+    client = logged_in_client()
+    client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1})
+    item = CartItem.objects.get(product=product)
+    real_lookup = cart_views.get_object_or_404
+
+    def look_up_then_remove(*args, **kwargs):
+        found = real_lookup(*args, **kwargs)
+        CartItem.objects.filter(pk=found.pk).delete()
+        return found
+
+    monkeypatch.setattr(cart_views, "get_object_or_404", look_up_then_remove)
+
+    response = client.post(reverse("cart:update", args=[item.pk]), {"quantity": 3})
+
+    assert response.status_code == 404
+
+
 # --- delete ---
 
 
@@ -307,3 +332,80 @@ def test_users_only_see_their_own_cart():
 
     assert list(response.context["items"]) == []
     assert Cart.objects.get(owner__username="owner").items.count() == 1
+
+
+# --- concurrency (real PostgreSQL connections; deterministic: a second connection holds a lock, the request
+# under test starts and is seen blocked, then the lock is released) ---
+
+
+def run_blocked_request(action):
+    """Run `action` in a thread; returns (thread, outcome dict). The thread closes its own connection."""
+    outcome = {}
+
+    def target():
+        try:
+            outcome["result"] = action()
+        except Exception as exc:  # noqa: BLE001 - asserted on by the tests
+            outcome["error"] = exc
+        finally:
+            connection.close()
+
+    return threading.Thread(target=target), outcome
+
+
+@pytest.mark.django_db(transaction=True)
+def test_add_waits_for_a_concurrent_update_and_increments_on_top_of_it():
+    """Without the row lock the request reads 1, writes 2 and overwrites the concurrent change (CART-002)."""
+    user = make_user()
+    product = make_product("p1", stock=50)
+    item = services.add_item(services.get_cart(user), product, 1)
+    thread, outcome = run_blocked_request(lambda: services.add_item(services.get_cart(user), product, 1))
+
+    with transaction.atomic():
+        CartItem.objects.select_for_update().get(pk=item.pk)      # another request holds the row
+        thread.start()
+        wait_until_blocked()
+        CartItem.objects.filter(pk=item.pk).update(quantity=5)    # its change, committed on leaving the block
+    thread.join(10)
+
+    assert "error" not in outcome, outcome
+    assert CartItem.objects.get(pk=item.pk).quantity == 6         # 5 + 1, not 1 + 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_a_first_add_racing_a_concurrent_insert_becomes_an_increment():
+    """The unique constraint makes the loser fail; add_item must retry it as an increment (CART-002)."""
+    user = make_user()
+    product = make_product("p1", stock=50)
+    cart = services.get_cart(user)
+    thread, outcome = run_blocked_request(lambda: services.add_item(services.get_cart(user), product, 2))
+
+    with transaction.atomic():
+        CartItem.objects.create(cart=cart, product=product, quantity=3)   # another request's uncommitted insert
+        thread.start()
+        wait_until_blocked()                                              # our insert waits on the unique index
+    thread.join(10)
+
+    assert "error" not in outcome, outcome
+    rows = CartItem.objects.filter(cart=cart, product=product)
+    assert rows.count() == 1 and rows.get().quantity == 5
+
+
+@pytest.mark.django_db(transaction=True)
+def test_update_waits_for_a_concurrent_removal_and_then_reports_the_item_gone():
+    """The real interleaving behind CART-001: without the lock the update fails with a database error."""
+    user = make_user()
+    product = make_product("p1", stock=50)
+    cart = services.get_cart(user)
+    item = services.add_item(cart, product, 1)
+    thread, outcome = run_blocked_request(lambda: services.set_item_quantity(cart, item, 3))
+
+    with transaction.atomic():
+        CartItem.objects.select_for_update().get(pk=item.pk)
+        thread.start()
+        wait_until_blocked()
+        CartItem.objects.filter(pk=item.pk).delete()
+    thread.join(10)
+
+    assert isinstance(outcome.get("error"), services.CartItemNotFound), outcome
+    assert not CartItem.objects.filter(pk=item.pk).exists()
