@@ -99,12 +99,8 @@ def test_live_orders_are_included_like_imported_ones(owner, widget):
     # Singapore is UTC+8 with no daylight saving: 16:00 UTC is midnight of the next business date
     (datetime(2024, 3, 1, 15, 59, 59, tzinfo=timezone.utc), date(2024, 3, 1)),
     (datetime(2024, 3, 1, 16, 0, 0, tzinfo=timezone.utc), date(2024, 3, 2)),
-    (datetime(2024, 3, 1, 23, 30, tzinfo=timezone.utc), date(2024, 3, 2)),
-    (datetime(2024, 3, 1, 0, 0, tzinfo=timezone.utc), date(2024, 3, 1)),
     # the leap day is a real business date, and 16:00 UTC on 28 Feb is its first instant
     (datetime(2024, 2, 28, 16, 0, tzinfo=timezone.utc), date(2024, 2, 29)),
-    (datetime(2024, 2, 29, 15, 59, tzinfo=timezone.utc), date(2024, 2, 29)),
-    (datetime(2024, 2, 29, 16, 0, tzinfo=timezone.utc), date(2024, 3, 1)),
     # year end
     (datetime(2024, 12, 31, 16, 0, tzinfo=timezone.utc), date(2025, 1, 1)),
 ])

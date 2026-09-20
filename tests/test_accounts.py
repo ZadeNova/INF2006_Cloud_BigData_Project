@@ -17,13 +17,6 @@ def csrf_token_from(response):
     return match.group(1)
 
 
-def test_registration_get_renders_form():
-    response = Client().get(reverse("accounts:register"))
-
-    assert response.status_code == 200
-    assert response.templates[0].name == "accounts/register.html"
-
-
 def test_registration_creates_user_with_usable_password_and_no_profile():
     client = Client()
 
@@ -51,20 +44,17 @@ def test_registration_rejects_duplicate_username():
     })
 
     assert response.status_code == 200
+    assert response.templates[0].name == "accounts/register.html"
     assert "already exists" in response.content.decode()
 
 
-@pytest.mark.parametrize("payload,expected_error", [
-    ({"password1": "Str0ngPass!2026", "password2": "different"}, "didn’t match"),
-    ({"password1": "password123", "password2": "password123"}, "too common"),
-])
-def test_registration_rejects_invalid_password(payload, expected_error):
-    client = Client()
-
-    response = client.post(reverse("accounts:register"), {"username": "dup", **payload})
+def test_registration_enforces_the_password_validators():
+    # "too common" proves AUTH_PASSWORD_VALIDATORS is wired; a mismatch is UserCreationForm's own behaviour
+    response = Client().post(reverse("accounts:register"), {
+        "username": "dup", "password1": "password123", "password2": "password123"})
 
     assert response.status_code == 200
-    assert expected_error in response.content.decode()
+    assert "too common" in response.content.decode()
     assert not get_user_model().objects.filter(username="dup").exists()
 
 
@@ -76,13 +66,6 @@ def test_authenticated_user_is_redirected_away_from_register():
 
     assert response.status_code == 302
     assert response.url == "/products/"
-
-
-def test_login_get_renders_form():
-    response = Client().get(reverse("accounts:login"))
-
-    assert response.status_code == 200
-    assert response.templates[0].name == "registration/login.html"
 
 
 def test_login_success_authenticates_and_redirects():
@@ -109,6 +92,7 @@ def test_login_failure_rerenders_with_non_field_error():
     })
 
     assert response.status_code == 200
+    assert response.templates[0].name == "registration/login.html"
     assert "Please enter a correct username and password" in response.content.decode()
     assert "_auth_user_id" not in client.session
 

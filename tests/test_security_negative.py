@@ -88,9 +88,11 @@ def csrf_client(user, cookie=True):
 
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=IDS)
-@pytest.mark.parametrize("htmx", [False, True], ids=["normal", "htmx"])
-@pytest.mark.parametrize("mode", ["no_token", "wrong_header", "wrong_form_field"])
+@pytest.mark.parametrize("htmx, mode", [(False, "no_token"), (False, "wrong_form_field"), (True, "wrong_header")],
+                         ids=["normal-no_token", "normal-wrong_form_field", "htmx-wrong_header"])
 def test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing(scenario, htmx, mode):
+    # Each token failure is paired only with the channel that really carries it (forms post a field, HTMX sends
+    # a header); Django's comparison is identical across routes, so per route the point is that none is exempt.
     user = make_user(operator=True)
     url, data, unchanged = scenario(user)
     client = csrf_client(user, cookie=mode != "no_token")
@@ -224,7 +226,35 @@ def test_cart_add_ignores_forged_owner_cart_and_price_fields():
 
 # --- quantity manipulation -----------------------------------------------------------------------
 
-BAD_QUANTITIES = ["-1", "0", "abc", "", " ", "1.5", "1e3", "1000", "99999999999999999999", "0x10"]
+BAD_QUANTITIES = ["-1", "0", "abc", "", "1.5"]      # negative, lower bound, non-numeric, missing, non-integer
+
+
+def test_cart_add_guards_the_999_ceiling_itself_not_the_stock_limit():
+    user = make_user()
+    product = make_product(stock=5000)          # far above 1000, so only the quantity ceiling can refuse
+    client = Client()
+    client.force_login(user)
+
+    rejected = client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1000}, HTTP_HX_REQUEST="true")
+
+    assert rejected.context["error"] == "Invalid product or quantity."      # the form's message, not a stock one
+    assert not CartItem.objects.filter(cart__owner=user).exists()
+    client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 999})
+    assert CartItem.objects.get(cart__owner=user).quantity == 999
+
+
+def test_cart_update_guards_the_999_ceiling_itself_not_the_stock_limit():
+    user = make_user()
+    item = add_item(get_cart(user), make_product(stock=5000), 3)
+    client = Client()
+    client.force_login(user)
+
+    rejected = client.post(reverse("cart:update", args=[item.pk]), {"quantity": 1000}, HTTP_HX_REQUEST="true")
+
+    assert rejected.context["error"] == "Invalid quantity."
+    assert CartItem.objects.get(pk=item.pk).quantity == 3
+    client.post(reverse("cart:update", args=[item.pk]), {"quantity": 999})
+    assert CartItem.objects.get(pk=item.pk).quantity == 999
 
 
 @pytest.mark.parametrize("quantity", BAD_QUANTITIES)

@@ -117,7 +117,9 @@ def test_comparison_span_in_a_non_leap_year():
     assert comparison == Span(date(2025, 2, 22), date(2025, 2, 28))
 
 
-@pytest.mark.parametrize("latest", [date(2024, 2, 29), date(2024, 3, 1), date(2024, 12, 31), date(2025, 12, 31)])
+# Two anchors reach every branch: 1 Mar 2024 puts the leap day inside the rolling ranges, and 31 Dec 2024 hits the
+# 366-date cap. The leap day itself and a non-leap year end have dedicated tests above.
+@pytest.mark.parametrize("latest", [date(2024, 3, 1), date(2024, 12, 31)])
 @pytest.mark.parametrize("key", ranges.RANGE_KEYS)
 def test_comparison_is_adjacent_and_equal_length(latest, key):
     span = ranges.resolve_span(key, latest)
@@ -175,7 +177,9 @@ def test_unknown_granularity_is_rejected():
         ranges.buckets(Span(date(2024, 3, 4), date(2024, 3, 17)), "monthly")
 
 
-@pytest.mark.parametrize("latest", [date(2024, 2, 29), date(2024, 3, 1), date(2024, 12, 31), date(2025, 12, 31)])
+# Two anchors reach every branch: 1 Mar 2024 puts the leap day inside the rolling ranges, and 31 Dec 2024 hits the
+# 366-date cap. The leap day itself and a non-leap year end have dedicated tests above.
+@pytest.mark.parametrize("latest", [date(2024, 3, 1), date(2024, 12, 31)])
 @pytest.mark.parametrize("key", ranges.RANGE_KEYS)
 def test_buckets_tile_the_span_exactly(latest, key):
     span = ranges.resolve_span(key, latest)

@@ -168,30 +168,18 @@ def test_toggle_rejects_invalid_active_value():
     assert product.active is True
 
 
-def test_deactivate_is_idempotent_under_double_submit():
-    product = make_product("p1", active=True)
+@pytest.mark.parametrize("start_active, target", [(True, "false"), (False, "true")], ids=["deactivate", "activate"])
+def test_toggle_is_idempotent_under_double_submit(start_active, target):
+    product = make_product("p1", active=start_active)
     client = Client()
     client.force_login(make_operator())
     url = reverse("catalogue:product_toggle_active", args=[product.pk])
 
-    client.post(url, {"active": "false"})
-    client.post(url, {"active": "false"})
+    client.post(url, {"active": target})
+    client.post(url, {"active": target})
 
     product.refresh_from_db()
-    assert product.active is False
-
-
-def test_activate_is_idempotent_under_double_submit():
-    product = make_product("p1", active=False)
-    client = Client()
-    client.force_login(make_operator())
-    url = reverse("catalogue:product_toggle_active", args=[product.pk])
-
-    client.post(url, {"active": "true"})
-    client.post(url, {"active": "true"})
-
-    product.refresh_from_db()
-    assert product.active is True
+    assert product.active is (target == "true")
 
 
 def test_seed_demo_refuses_to_promote_an_existing_customer(monkeypatch):
