@@ -4,6 +4,8 @@ Status checked: 22 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- PR #2 final integration review (22 September 2026): independent Astra Medium review cleared after Astra Low fixed FINAL-001 (Windows raw-CSV newline conversion) with scoped Git attributes and unchanged dataset bytes. All six source checksums verified; hosted CI on `c8d2656` passed 381 tests, fresh migrations and Django/migration checks. Local rerun was unavailable due to Docker Engine HTTP 500. Review and limitations: [final PR review](reviews/pr-2-final.md). Cleared for the user-authorized merge once final-head CI passes; consult PR #2 for publication/merge state. Dataset profiling/import, dashboard, AWS and frontend integration remain open.
+
 - Documentation cleanup: removed nine separate foundation verification/output files at the user's request. Existing reviews in `docs/reviews/` are retained; supporting historical records remain in Git history. Required submission evidence templates remain in `evidence/`.
 
 - Complete locally: added [GitHub Actions CI](../.github/workflows/ci.yml) for pull requests and main pushes, reusing pinned Docker/PostgreSQL. Image build, fresh isolated migrations, Django checks, missing-migration check and all 53 tests passed on 12 September; validation resources cleaned up. Hosted Ubuntu execution remains to be confirmed in Actions after push; Linux initializer ownership is configured but not reproduced locally. User explicitly waived independent review for this CI-only task; the general backend review rule remains unchanged.
