@@ -5,7 +5,7 @@
 **Deadline:** Sunday, 11 October 2026, 11:59 PM, Singapore time  
 **Budget:** User-reported AWS student accounts accessed through Canvas, USD 40 credits per member  
 **Decision:** Analytics is required. Customer-segmentation ML is optional.  
-**Data:** LaelaZ synthetic-ecommerce is the selected source, subject to downloaded-file validation; generate missing application fields separately.  
+**Data:** Ecommerce Sales Dataset (Analytics Engineering) is the selected source, chosen 22 September 2026 after Hugging Face access to LaelaZ/synthetic-ecommerce was never granted; generate missing application fields separately.  
 **Progression:** The submitted INF2006 application becomes the foundation for INF2003, which expands its database functionality locally.
 
 ## 1. Purpose and intended outcome
@@ -127,26 +127,29 @@ Example: 35 units sold over 7 complete days gives 5 units/day. Stock of 30 gives
 
 ### Selected dataset and provenance
 
-Use [LaelaZ / synthetic-ecommerce on Hugging Face](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) as the selected historical source. The publisher states that every row is synthetic, generated through a seeded NumPy process, with no real people or scraped data. The published licence is MIT. These are publisher statements, not the team's independent audit: inspect and validate the downloaded release before accepting it.
+**Switched 22 September 2026.** [LaelaZ/synthetic-ecommerce on Hugging Face](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) was the original selection; its files are gated, access was requested 20 September 2026 and was not granted by the team's own decision deadline. Per this scope's own rule below ("record the change rather than silently swapping datasets"), the team switched to a different, already-accessible synthetic source rather than wait further.
+
+Use the [Ecommerce Sales Dataset from Analytics Engineering](https://www.analyticsengineering.com/datasets/ecommerce-sales) as the selected historical source. The publisher states it is "synthetic educational data generated to model a fictional business," explicitly to practice analytical methods rather than to estimate real-world revenue, with no PII. The published licence is CC BY 4.0 (attribution required in `data/README.md`; otherwise unrestricted). These are publisher statements, not the team's independent audit: inspect and validate the downloaded release before accepting it, same as any dataset.
 
 | Source table | Published rows | Relevant fields |
 |---|---:|---|
-| customers | 2,000 | customer_id, signup_date, channel, country |
-| products | 120 | product_id, product_name, category, unit_price, unit_cost |
-| orders | 12,000 | order_id, customer_id, order_ts, status |
-| order_items | 30,120 | order_item_id, order_id, product_id, quantity, unit_price |
-| events | 59,599 | event_id, session_id, customer_id, event_type, event_ts |
+| customers | 20,000 | customer_id, created_at, country_code, acquisition_channel, customer_segment |
+| products | 1,200 | product_id, sku, product_name, category, unit_cost, list_price |
+| orders | 100,000 | order_id, customer_id, ordered_at, order_status, currency, subtotal, tax_amount, shipping_amount, order_total |
+| order_items | 237,537 | order_item_id, order_id, product_id, quantity, unit_price, discount_amount, line_total |
+| payments | 105,388 | not imported; out of scope for this application's schema |
+| refunds | 7,910 | not imported; out of scope for this application's schema |
 
-Published order coverage is January-December 2024. Files are Parquet. Actual counts, ranges and fields must be recorded after download. Browsing events are optional input and do not commit the team to a funnel feature. The catalogue uses SKU-style names; fictional display names can be added without changing product identity.
+Published order coverage is January 2023-December 2025. Files are downloadable as CSV, Parquet, Excel or SQLite with no account required. Actual counts, ranges and fields must be recorded after download. The catalogue uses SKU-style names; fictional display names can be added without changing product identity.
 
-Record the source URL, downloaded revision/date, file checksums, licence notice, schema, row counts and every transformation in `data/README.md` and `data/DATA_DICTIONARY.md`. Preserve original files separately from transformed data. Review generation provenance where accessible; do not state that the generator has been independently audited unless that work is completed. Do not substitute anonymised real data: the team's selected policy is synthetic-only.
+Record the source URL, downloaded date, file checksums, licence notice and attribution, schema, row counts and every transformation in `data/README.md` and `data/DATA_DICTIONARY.md`. Preserve original files separately from transformed data. Review generation provenance where accessible; do not state that the generator has been independently audited unless that work is completed. Do not substitute anonymised real data: the team's selected policy is synthetic-only, and this source's own documentation confirms it is synthetic.
 
 ### Where to download the dataset
 
-- Dataset card and provenance: https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce
-- Download browser (Files tab): https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce/tree/main
-- Download the original Parquet files for customers, products, orders and order_items. Events are optional for this scope. Retain the dataset card and applicable licence notice alongside the source records.
-- Preserve these inputs under `data/raw/` locally, record the selected repository revision and SHA-256 checksums, then upload the same validated inputs to the private S3 data bucket for the cloud import demonstration.
+- Dataset and data dictionary: https://www.analyticsengineering.com/datasets/ecommerce-sales
+- Download the customers, products, orders and order_items tables (Parquet or CSV). Payments and refunds are published but not imported; retain them raw alongside the rest, per INF2003 baseline rule 5 (preserve source tables not currently imported).
+- Save the dataset's data dictionary page locally and record the CC BY 4.0 licence notice and attribution alongside the source records.
+- Preserve these inputs under `data/raw/` locally, record the downloaded date and SHA-256 checksums, then upload the same validated inputs to the private S3 data bucket for the cloud import demonstration.
 - Generate missing stock, lead times, fictional display names and demo account/cart records separately. Do not assume historical customer records contain working application credentials.
 
 Dataset selection is a planning decision; downloading, inspecting and validating the files remains Phase 1 work. The publisher states the data is fully synthetic; this scope does not claim an independent generator audit.
@@ -157,11 +160,12 @@ Design the application schema around its workflow and map the dataset into it; d
 
 | Dataset information | Application mapping / treatment |
 |---|---|
-| customer_id and customer attributes | CustomerProfile/source reference; link to a synthetic Django account where required |
-| product_id, category, price and cost | Product with a unique source reference; convert monetary values to the documented decimal precision |
-| order_id, customer_id, order_ts, status | Order linked to the mapped customer; preserve external reference and source timestamps |
-| order-item product, quantity and price | OrderItem linked to the mapped order/product; retain historical unit price |
-| completed, cancelled, refunded | Explicit application status mapping; only completed orders enter completed-sales totals |
+| customer_id and customer attributes (country_code, acquisition_channel, customer_segment) | CustomerProfile/source reference; link to a synthetic Django account where required; the extra attributes are optional metadata, not required |
+| product_id, sku, category, list_price and unit_cost | Product with a unique source reference (`sku` as the human-readable identifier, `product_id` as the stable key); convert monetary values to the documented decimal precision |
+| order_id, customer_id, ordered_at, order_status | Order linked to the mapped customer; preserve external reference and source timestamp |
+| order-item product, quantity and unit_price | OrderItem linked to the mapped order/product; retain historical unit price |
+| completed, cancelled, refunded, partially_refunded | Explicit application status mapping; `partially_refunded` collapses to `refunded` (the application's `Order.Status` has no partial-refund state); only completed orders enter completed-sales totals |
+| subtotal, tax_amount, shipping_amount, discount_amount, order_total | Not persisted: the application does not model tax, shipping or per-line discounts. `Order.total` is computed from `OrderItem` lines only, as already designed; these source columns are read for validation (reconciling against published totals) and then discarded |
 | Missing stock and lead times | Generate a dated inventory snapshot and documented lead-time assumptions |
 | Missing credentials and carts | Generate separate demo accounts/carts; imported accounts have unusable passwords by default |
 
@@ -171,7 +175,7 @@ Inventory is a generated snapshot, not a quantity inferred merely by subtracting
 
 ### Dates and reporting modes
 
-Default to preserving original timestamps and a reproducible historical reporting cutoff (for example 1 January 2025, using the seven preceding complete days). Pair historical stock-coverage calculations with the generated inventory snapshot at that cutoff. Do not combine current stock with 2024 sales while labelling the result current coverage.
+Default to preserving original timestamps and a reproducible historical reporting cutoff (for example 1 January 2025, using the seven preceding complete days). Pair historical stock-coverage calculations with the generated inventory snapshot at that cutoff. Do not combine current stock with historical sales while labelling the result current coverage.
 
 A live-demo fixture may shift all related customer/order/event dates by one recorded constant offset. Choose it so no imported event falls after the demo cutoff, preserve relative intervals, and record the source/target date anchors. Specify an assumed timezone for naive source timestamps; do not silently claim the source used Singapore time. Apply the same convention to signup dates, analytics windows and inventory snapshots.
 
@@ -179,11 +183,11 @@ Keep original historical data, date-shifted demo fixtures and performance fixtur
 
 ### Dataset size and supplemental generation
 
-The brief states no minimum row count. The selected 12,000 orders and 30,120 line items are a reasonable starting scale for INF2006 analytics. Increase volume only when an experiment needs it; millions of stored rows are not necessary to demonstrate request-driven autoscaling.
+The brief states no minimum row count. The selected 100,000 orders and 237,537 line items are larger than the original 12,000/30,120 estimate from the since-superseded LaelaZ selection, and are imported in full: the row count adds no meaningful import-code complexity and has negligible storage/budget impact, and it gives `INF2003_BASELINE.md`'s later SQL-vs-NoSQL comparison a more credible base without a separate seeded scale-up. Increase volume further only when an experiment needs it; millions of stored rows are not necessary to demonstrate request-driven autoscaling.
 
 Maintain three fixtures: a tiny independently hand-checkable correctness fixture, the validated imported historical dataset, and an isolated/resettable load-test fixture with sufficient stock and repeatable shoppers. Record seed, counts, date range and distribution assumptions for all generated additions. Larger fixtures must preserve valid relationships and plausible skew, not duplicate IDs or arbitrarily copy records.
 
-If the selected download fails provenance, licence or integrity checks, use a documented fully synthetic generator with equivalent tables. Record the change rather than silently swapping datasets. Selection is complete; validation and import remain implementation tasks.
+If this download also fails provenance, licence or integrity checks once profiled, use the documented fully synthetic generator ([batch-06a-dataset-generator.md](plans/batch-06a-dataset-generator.md)) with equivalent tables, and record that further change the same way this one was recorded. The generator remains needed regardless, for the tiny hand-checkable correctness fixture and the isolated load-test fixture required below. Selection is complete; validation and import remain implementation tasks.
 
 ### Analytics validation and limitations
 
@@ -466,8 +470,8 @@ Primary assessment source: `INF2006_Team_Project_Brief_2026.pdf`, sections 4-10 
 
 Dataset and design references:
 
-- [Selected synthetic dataset and published provenance/licence](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce)
-- [Published dataset files](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce/tree/main)
+- [Selected synthetic dataset and published provenance/licence](https://www.analyticsengineering.com/datasets/ecommerce-sales)
+- [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) — original selection, superseded 22 September 2026 after gated access was never granted
 - Selected `DESIGN.md` supplied by the user, adapted for this project; record its original source and relevant asset licences.
 
 Technical references:

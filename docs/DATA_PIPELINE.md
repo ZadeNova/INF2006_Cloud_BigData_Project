@@ -1,8 +1,8 @@
 # Dataset and import contract
 
-Status: source selected, download/validation pending. The publisher describes [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) as fully synthetic with MIT licensing. This is not an independent generator audit.
+Status: source selected, download/validation pending. **Switched 22 September 2026**: the original selection, [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce), is gated and access was never granted by the decision deadline. The publisher of the current selection, the [Analytics Engineering Ecommerce Sales Dataset](https://www.analyticsengineering.com/datasets/ecommerce-sales), describes it as synthetic educational data under CC BY 4.0 (attribution required). This is not an independent generator audit.
 
-Download original Parquet files from the [Files tab](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce/tree/main): customers, products, orders and order_items. Events optional. Verify published counts/date ranges in the scope against downloaded files.
+Download the customers, products, orders and order_items tables (Parquet or CSV, no account required) from https://www.analyticsengineering.com/datasets/ecommerce-sales. Payments and refunds are published but not imported. Verify published counts/date ranges in the scope against downloaded files.
 
 ## Reproducible processing
 
