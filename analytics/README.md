@@ -104,3 +104,39 @@ Astra Medium round-2 review is now CLEAR; dataset roadmap Phases 1–2 are compl
 The later review independently passed 406 tests and repeated full-source import/replay
 and SQL reconciliation; see the review log for the exact snapshot and limitations. Real-data analytics refresh, dashboard, ML, S3/AWS, load testing
 and visual browser QA were not run.
+
+## Phase 3: independent refresh verification
+
+Implemented locally on 22 September 2026; independent review status is in
+[analytics-phase3.md](../docs/reviews/analytics-phase3.md). Exact commands, run IDs,
+counts, timings and limitations are in [executed evidence](../evidence/test-data-ai.md).
+Both full-data refreshes matched exactly. pandas found zero daily/monetary/coverage
+mismatches; all 410 combined tests passed. No production reporting change was needed.
+
+With application database environment variables configured, export the production
+comparison target separately, then run the independent verifier:
+
+```sh
+python analytics/export_coverage.py --run-id <UUID> --output coverage.json
+python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json
+```
+
+The exporter needs the application dependencies/settings; the verifier needs only
+`analytics/requirements.txt`. It connects directly using `POSTGRES_DB`, `POSTGRES_USER`,
+`POSTGRES_PASSWORD`, `POSTGRES_HOST`, optional `POSTGRES_PORT` (5432), and optional
+`POSTGRES_SSLMODE`/`POSTGRES_SSLROOTCERT`, or an explicit `--database-url`. Keep secrets
+in the environment. The verifier imports no Django or application business code.
+It reads raw tables and checks exactly one completed run and sealed inventory;
+production daily rows and the JSON export are comparison targets only. Missing or
+mismatched targets, invalid runs/inventory/configuration and discrepancies exit non-zero.
+A successful comparison exits 0 and prints a JSON summary without customer fields.
+
+For historical imports always pass the importer-reported namespace, cutoff and
+inventory version to refresh. Do not run snapshot_inventory to backdate live stock.
+Run IDs in the evidence identify a removed disposable database; reproduce import
+and refresh to obtain new IDs. Four independent tests live in `analytics/tests/`,
+outside ordinary web tests because pandas is intentionally absent from the web image.
+The evidence gives the combined 410-test invocation using the built `/app` settings.
+
+Independent Astra Medium round-1 review is **CLEAR**. Phase 3 is complete locally;
+all task scratch resources were removed after review. Nothing was committed or pushed.

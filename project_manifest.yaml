@@ -26,9 +26,9 @@ evidence:
 
 data_ai:
   dataset: "data/README.md"
-  method: "Independent pandas integrity profile and manual dataset acceptance; transactional CSV import with create-only replay and deterministic sealed inventory. User accepted descriptive use despite flat-noise risk; independent round-2 review cleared DATA-001–003 with no new actionable findings."
-  evaluation: "data/PROFILE.md; analytics/README.md: zero integrity rejects, full scratch import/replay and exact decimal reconciliation; generated inventory and sparse recent sales are disclosed limitations."
-  reproducible_command: "python analytics/profile_dataset.py --source data/raw"
+  method: "Accepted synthetic CSV import with sealed historical inventory; SQL refresh independently checked by raw-table pandas recomputation and a separately exported production coverage target."
+  evaluation: "evidence/test-data-ai.md: two identical refreshes; 65,589 daily rows, zero unit/amount/coverage mismatches, exact 0.00 maximum monetary difference; 410 combined tests passed. Synthetic descriptive use only; independent Phase 3 review status in docs/reviews/analytics-phase3.md."
+  reproducible_command: "python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json; first export with analytics/export_coverage.py (full setup in evidence/test-data-ai.md)"
   source_version: "Analytics Engineering Ecommerce Sales & Returns v1.0.0; downloaded 2026-09-22; data/raw/checksums.txt"
   verified_scratch_namespace: "synthetic/revision-a/demo/v1"
   verified_seed: 42

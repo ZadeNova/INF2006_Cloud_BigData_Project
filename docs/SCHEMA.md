@@ -26,6 +26,16 @@ Demo display currency: SGD as an explicit simulation convention, not a claim abo
 
 Historical Order rows have an external ID and no idempotency key/fingerprint. Live simulated orders have no external ID, require a user-scoped UUID key plus a 64-character lowercase SHA-256 fingerprint, and are completed only. Database uniqueness permits the same key for different users but never two orders for the same user/key. The later checkout service owns canonical fingerprint generation and replay handling.
 
+## Reporting SQL view
+
+`reporting_completed_sale_lines` is created by `reporting/0003_completed_sale_lines_view.py`
+(`RunSQL`, reversed by dropping the view). It joins `orders_order` to `orders_orderitem`
+and exposes completed lines only: namespace, order_id, placed_at, product_id, quantity,
+historical unit_price, quantity-times-unit_price line_total, and the Asia/Singapore
+business_date. Refresh uses placed_at for an indexable window bound and business_date
+for complete-date membership. Formulas and sparse publication are owned by
+[the analytics contract](ANALYTICS.md#processing-and-validation).
+
 ## Foundation decisions: DOC-001 and DOC-002
 
 Imported accounts have unusable passwords and are never matched by email/name. CustomerProfile explicitly maps source identity to User. The dataset importer uses a full SHA-256 namespaced username and preserves authentication state on replay. Its accepted-input fingerprint is held in the immutable `InventoryVersion.version` identity (`import-v1-` plus SHA-256), allowing original product inputs to be verified independently of mutable Product fields. One accepted manifest per namespace; changed source revisions require new namespaces. No schema migration was required. Mapping details are in [data dictionary](../data/DATA_DICTIONARY.md); implementation passed independent round-2 review ([record](reviews/analytics-data-import.md)).
