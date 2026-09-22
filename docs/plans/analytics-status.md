@@ -1,6 +1,6 @@
 # Analytics: status and remaining work
 
-Handover note for teammates, the independent reviewer and coding agents picking up the analytics feature. Snapshot date: 20 September 2026, branch `erfan/backend-auth`. This file is a status summary, not a contract: formulas and rules live in [ANALYTICS.md](../ANALYTICS.md), routes in [API.md](../API.md), and the detailed plans are linked below. Where this file and a contract disagree, the contract wins; tell the user. The tracker ([IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md)) has **not** been updated for these batches yet.
+Handover note for teammates, the independent reviewer and coding agents picking up the analytics feature. Snapshot date: 22 September 2026, branch `erfan/backend`. This file is a status summary, not a contract: formulas and rules live in [ANALYTICS.md](../ANALYTICS.md), routes in [API.md](../API.md), and the detailed plans are linked below. Where this file and a contract disagree, the contract wins; tell the user. The tracker ([IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md)) was reconciled with these batches on 22 September 2026.
 
 ## In one paragraph
 

@@ -35,5 +35,5 @@ Targeted only, via Docker Compose web/db, per CLAUDE.md:
 - confirm the new bad-Referer test fails against the old formatter (temporarily revert change 1) so it proves the fix.
 The full suite is not rerun unless asked; Astra's 429-test run covered `b282a60`.
 
-## Not done
-No commit or push (only on request). No Astra review is claimed; the fix needs a Round 3 independent review.
+## Outcome
+Committed as `ce1c788`. Astra's round 3 (`b282a60..282a1ec`) resolved SEC-001: the fixed message held across Django's `SuspiciousOperation` family and CSRF, and the reviewer reproduced the original leak against the previous formatter to confirm the regression tests were not passing for the wrong reason. See [security-gap-check.md](../reviews/security-gap-check.md).

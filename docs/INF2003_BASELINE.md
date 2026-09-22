@@ -25,7 +25,7 @@ INF2003 (Database Systems) is a separate module whose project will be built on t
 | Wishlist | New many-to-many between user and product; low impact |
 | MongoDB product/catalogue documents | A second store; AGENTS.md forbids NoSQL until a scope decision is made |
 | Advanced SQL, MongoDB aggregation, indexes | Reuses the analytics workload; existing indexes include `order_owner_date` and `order_reporting_window` |
-| Controlled SQL vs MongoDB comparison | The selected dataset (about 12,000 orders and 30,000 line items) is likely too small for meaningful differences; a seeded scale-up is an INF2003 task |
+| Controlled SQL vs MongoDB comparison | The selected dataset is about 100,000 orders and 237,537 line items (the source was switched on 22 September 2026; see `PROJECT_SCOPE_INF2006.md` §5) — roughly 8x the earlier estimate and a more credible base for measurable differences, so a seeded scale-up may no longer be needed. Confirm against the actual benchmark design rather than assuming either way; this size shows index and query-plan differences, not large-scale effects |
 
 ## Rules for INF2006 work
 
