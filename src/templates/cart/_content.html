@@ -1,0 +1,39 @@
+<div id="cart-content" class="surface-card operator-table">
+    {% if error %}
+    <div class="message message--error" role="alert">
+        <span class="message__icon" aria-hidden="true">!</span>
+        <div><p>{{ error }}</p></div>
+    </div>
+    {% endif %}
+
+    {% if items %}
+    <div class="operator-row operator-row--header">
+        <span>Product</span>
+        <span style="text-align: right;">Price</span>
+        <span>Quantity</span>
+        <span style="text-align: right;">Line total</span>
+        <span></span>
+    </div>
+    {% for item in items %}
+    <div class="operator-row">
+        <span class="operator-row__name">
+            {{ item.product.name }}{% if not item.product.active %} <span class="form-note">(unavailable)</span>{% endif %}
+        </span>
+        <span class="operator-row__price">{{ item.product.display_price }}</span>
+        <form method="post" action="{% url 'cart:update' item.pk %}" hx-post="{% url 'cart:update' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
+            {% csrf_token %}
+            <input type="number" name="quantity" min="1" max="999" value="{{ item.quantity }}" style="width: 6rem;">
+            <button type="submit" class="button button--compact button--outline-neutral">Update</button>
+        </form>
+        <span class="operator-row__price">S${{ item.line_total }}</span>
+        <form method="post" action="{% url 'cart:delete' item.pk %}" hx-post="{% url 'cart:delete' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
+            {% csrf_token %}
+            <button type="submit" class="button button--compact button--outline-neutral">Remove</button>
+        </form>
+    </div>
+    {% endfor %}
+    <p class="form-note">Subtotal (available items only): S${{ subtotal }}</p>
+    {% else %}
+    <p>Your cart is empty. <a href="{% url 'catalogue:product_list' %}">Continue shopping</a>.</p>
+    {% endif %}
+</div>

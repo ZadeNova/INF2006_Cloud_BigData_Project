@@ -56,7 +56,7 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Framework auth/session migrations exist, but no authentication, catalogue/cart, checkout or analytics routes are implemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. The local migration service applies pending migrations before web starts; no business routes are added.
+Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Registration/login/logout (`/register/`, `/login/`, `/logout/`) and a public paginated product catalogue (`/products/`, seeded via `manage.py seed_demo --seed 42`) are implemented; cart, checkout and analytics routes remain unimplemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. The local migration service applies pending migrations before web starts.
 
 ```powershell
 docker compose down

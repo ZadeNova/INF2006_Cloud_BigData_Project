@@ -1,85 +1,130 @@
 # Claude Code Session
 
-AGENTS.md is the authoritative source of truth for this repository.
-Read it before making changes.
-
-Follow all repository conventions, architecture decisions, and constraints
-defined there.
-
-## Context and Implementation
-
-Before implementing or modifying anything:
-
-1. Read the current relevant status/next step in
-   `docs/IMPLEMENTATION_PLAN.md`.
-2. Identify and read the relevant sections of the project's contracts and
-   documentation based on the task.
-3. Inspect the relevant existing code, tests, configuration and dependencies.
-4. Check Git status and preserve unrelated changes.
-
-Do not implement based only on the user's description when relevant
-repository code, documentation or contracts can provide additional context.
-
-Use targeted reading rather than recursively loading the entire repository.
-Read only the material necessary for the current task, while ensuring
-sufficient context for correctness.
+`AGENTS.md` is the authoritative source of truth for this repository.
+Read it before making changes and follow its conventions, architecture,
+and constraints.
 
 ## Operating Modes
 
-The user can explicitly switch between two modes.
+The user can explicitly choose between two modes.
 
-### Learning Mode
+### Learning Mode — Default
 
-Goal: implement features while helping the user understand the framework
-and implementation.
+Goal: help the user understand the implementation while building it.
 
-- Explain relevant Django/framework concepts and important design decisions.
-- Briefly explain request/data flow when useful.
-- Prefer simple, idiomatic framework patterns.
+- Explain relevant framework concepts and important design decisions.
+- Briefly explain request/data flow and unfamiliar patterns when useful.
+- Prefer simple, idiomatic solutions over clever abstractions.
 - Claude may implement the requested code; the user does not need to write
   every line manually.
 - Keep explanations proportional to the complexity of the task.
 
-### Heavy Implementation Mode
+### Implementation Mode
 
-Goal: maximize implementation speed and correctness.
+Goal: maximize implementation speed and efficiency.
 
-- Prioritize completing the requested work.
-- Inspect the relevant code, documentation and contracts before editing.
-- Implement directly and minimize unnecessary explanation.
-- Run appropriate checks and fix issues encountered.
-- Do not introduce unnecessary abstractions or unrelated refactors.
+- Prioritize completing the agreed implementation.
+- Minimize explanations unless clarification is important.
+- Inspect the relevant code and documentation before editing.
+- Implement directly within the agreed scope.
+- Avoid unnecessary abstractions, refactors, and exploration.
+- Follow the same testing, review, commit, and push gates as Learning Mode.
 
-Default to Learning Mode unless the user explicitly requests
-Heavy Implementation Mode.
+The user may switch modes at any time.
 
-## Review Workflow
+## Workflow
 
-Astra is the independent reviewer for this project.
+Follow this workflow unless the user explicitly changes it:
 
-Claude Code is the implementer and must not act as, simulate, or substitute
-for the Astra review.
+`Discuss/Plan → Implement → Test → Self-Review → Fix → Test → Commit → Push`
 
-After implementation, the work is considered:
+### Discuss / Plan
 
-`implemented-pending-review`
+Before implementation:
 
-The review does not happen automatically or immediately after implementation.
+- Read the relevant status in `docs/IMPLEMENTATION_PLAN.md`.
+- Read relevant contracts and documentation.
+- Inspect relevant code, tests, configuration, and dependencies.
+- Check Git status and preserve unrelated changes.
+- Discuss important design decisions with the user.
+- Write the finalized implementation plan to `docs/plans/` before
+  implementation.
 
-The user may push the changes or open a PR, after which the separate Astra
-review workflow reviews the work according to `AGENTS.md` and
-`docs/DEVELOPMENT.md`.
+Do not begin implementation until the plan is sufficiently clear.
 
-Do not claim that work has passed review unless an actual Astra review has
-occurred and its result is available.
+### Implement
 
-Do not repeatedly review your own implementation in an attempt to simulate
-Astra. Claude may run normal implementation checks and tests, but these are
-not equivalent to the independent Astra review gate.
+Implement only the agreed scope.
 
-If the user asks for a self-review, clearly label it as a Claude self-review
-and do not represent it as the Astra review.
+- Do not modify unrelated files.
+- Avoid unnecessary abstractions or refactors.
 
-## Git
+### Test
 
-Whenever creating a commit, ensure that it is authored to the User.
+After implementation:
+
+- Run the smallest relevant tests by default.
+- Do not automatically run the full test suite.
+- Do not start the application, Docker, databases, or other services
+  unless required for verification.
+- Avoid redundant or expensive verification.
+
+Tests should cover behavior introduced or changed by the implementation.
+
+### Self-Review
+
+Claude may perform a self-review as an early guard before the independent
+Astra review.
+
+- Clearly label findings as a `Claude self-review`.
+- Do not represent self-review as independent review.
+- Report all findings before fixing anything.
+- Wait for the user to decide which findings should be fixed unless the
+  user explicitly authorized autonomous fixes.
+
+### Fix
+
+Fix the findings approved by the user.
+
+Do not expand the scope with unrelated improvements.
+
+### Final Test
+
+After fixes:
+
+- Run targeted tests covering the affected behavior.
+- Run broader tests only when justified by the change or explicitly requested.
+- Do not repeatedly run unchanged expensive checks.
+
+### Commit
+
+Never commit automatically.
+
+Only create a commit when the user explicitly asks for one.
+
+Before committing:
+
+- Verify the intended files are included.
+- Ensure unrelated changes are excluded.
+- Ensure the implementation and tests are in the intended final state.
+- Author the commit to the User.
+
+### Push
+
+Never push automatically.
+
+Only push when the user explicitly asks.
+
+Do not create PRs, merge, reset, revert, or discard changes unless explicitly
+instructed.
+
+## Cost
+
+The user has limited credits.
+
+- Prefer direct tools over subagents.
+- Do not launch multiple agents by default.
+- Use targeted investigation and testing.
+- Avoid unnecessary repeated commands.
+- Use low/medium effort for self-review unless a deeper review is explicitly
+  requested.

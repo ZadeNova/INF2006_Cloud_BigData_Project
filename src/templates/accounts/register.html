@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Register — Northstar Market{% endblock %}
+{% block content %}
+<section class="auth-page" aria-labelledby="register-title">
+    <div class="auth-page__card">
+        <h1 id="register-title">Create an account</h1>
+        <form class="auth-form" method="post" novalidate>
+            {% csrf_token %}
+            {% include "accounts/_form_fields.html" %}
+            <button type="submit" class="button button--dark">Register</button>
+        </form>
+        <p class="form-note">Already have an account? <a href="{% url 'accounts:login' %}">Log in</a>.</p>
+    </div>
+</section>
+{% endblock %}

@@ -36,6 +36,10 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
 
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price
+
     class Meta:
         constraints = [
             models.CheckConstraint(condition=Q(quantity__gte=1), name="order_item_quantity_positive"),

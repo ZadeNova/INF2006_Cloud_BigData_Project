@@ -25,6 +25,7 @@
             </button>
 
             <nav class="site-nav" id="primary-navigation" aria-label="Primary navigation">
+                <a href="{% url 'catalogue:product_list' %}">Shop</a>
                 <a href="{% url 'home' %}#overview">Overview</a>
                 <a href="{% url 'home' %}#patterns">Patterns</a>
                 <a href="{% url 'home' %}#states">States</a>
@@ -33,11 +34,34 @@
             <div class="site-header__meta">
                 <span class="status-chip"><span class="status-chip__dot" aria-hidden="true"></span>Foundation preview</span>
                 <a class="button button--dark button--compact" href="{% url 'health' %}">System status</a>
+                {% if perms.catalogue.toggle_product_active %}
+                <a class="button button--compact" href="{% url 'catalogue:manage_list' %}">Manage products</a>
+                {% endif %}
+                {% if user.is_authenticated %}
+                <a class="button button--compact" href="{% url 'orders:list' %}">Orders</a>
+                <a class="button button--compact" href="{% url 'cart:detail' %}">Cart</a>
+                <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="button button--compact">Log out</button>
+                </form>
+                {% else %}
+                <a class="button button--compact" href="{% url 'accounts:login' %}">Log in</a>
+                {% endif %}
             </div>
         </div>
     </header>
 
     <main id="main-content">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message--{{ message.level_tag }}" role="{% if message.level_tag == 'error' %}alert{% else %}status{% endif %}">
+                <span class="message__icon" aria-hidden="true">{% if message.level_tag == 'error' %}!{% else %}✓{% endif %}</span>
+                <div><p>{{ message }}</p></div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
 

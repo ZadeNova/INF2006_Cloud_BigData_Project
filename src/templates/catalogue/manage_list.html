@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Manage products — Northstar Market{% endblock %}
+{% block content %}
+<section class="section-heading">
+    <h1>Manage products</h1>
+</section>
+
+<div class="surface-card operator-table">
+    <div class="operator-row operator-row--header">
+        <span>Product</span>
+        <span>Category</span>
+        <span style="text-align: right;">Price</span>
+        <span style="text-align: right;">Stock</span>
+        <span>Status</span>
+        <span></span>
+    </div>
+    {% for product in products %}
+    <div class="operator-row">
+        <span class="operator-row__name">{{ product.name }}</span>
+        <span class="operator-row__category">{{ product.category }}</span>
+        <span class="operator-row__price">{{ product.display_price }}</span>
+        <span class="operator-row__stock{% if product.stock_status != "in-stock" %} operator-row__stock--{{ product.stock_status }}{% endif %}">{{ product.stock }}</span>
+        <span class="operator-row__status">
+            {% if product.active %}
+            <span class="operator-row__status-dot operator-row__status-dot--active"></span>
+            <span>Active</span>
+            {% else %}
+            <span class="operator-row__status-dot operator-row__status-dot--inactive"></span>
+            <span>Inactive</span>
+            {% endif %}
+        </span>
+        <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
+            {% csrf_token %}
+            <button type="submit" name="active" value="{% if product.active %}false{% else %}true{% endif %}" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
+                {% if product.active %}Deactivate{% else %}Activate{% endif %}
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+
+<nav aria-label="Product pages">
+    {% if page_obj.has_previous %}
+    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
+    {% endif %}
+</nav>
+{% endblock %}

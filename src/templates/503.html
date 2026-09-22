@@ -1,0 +1,29 @@
+{% load static %}<!doctype html>
+{# Standalone on purpose: rendering the shared base template touches the user and session, which need the database. #}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Temporarily unavailable · Northstar Market</title>
+    <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+    <main id="main-content">
+        <section class="error-page" aria-labelledby="error-title">
+            <div class="error-page__card">
+                <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> 503 · temporarily unavailable</p>
+                <h1 id="error-title">We can't reach our data right now.</h1>
+                <p>This is temporary. Please wait a few seconds and try again.</p>
+                <div class="message message--error" role="alert">
+                    <span class="message__icon" aria-hidden="true">!</span>
+                    <div>
+                        <strong>If you were placing an order,</strong>
+                        <p>check your order history before trying again, so you do not order twice.</p>
+                    </div>
+                </div>
+                <a class="button button--dark" href="/">Try again</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

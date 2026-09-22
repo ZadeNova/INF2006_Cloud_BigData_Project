@@ -38,6 +38,10 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "config.middleware.DatabaseUnavailableMiddleware",
+    # After DatabaseUnavailableMiddleware so its process_exception sees an exception first (they run in
+    # reverse order) and can record the class before the 503 is produced.
+    "config.middleware.RequestLoggingMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -96,4 +100,21 @@ if boolean("DJANGO_TRUST_PROXY"):
 SECURE_REDIRECT_EXEMPT = [r"^health/$"]
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/products/"
+LOGOUT_REDIRECT_URL = "/"
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+DEMO_NAMESPACE = "synthetic/revision-a/demo/v1"
+
+# One JSON line per event on standard output (collected by Docker and CloudWatch). Only our own request and
+# error loggers, Django's 5xx error records and Django's security warnings are routed here; the formatter
+# never emits exception messages. Gunicorn's access log stays disabled.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"json": {"()": "config.jsonlog.JsonFormatter"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "stream": "ext://sys.stdout", "formatter": "json"}},
+    "loggers": {
+        "northstar": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+    },
+}

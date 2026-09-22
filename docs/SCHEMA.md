@@ -10,7 +10,7 @@ All domain primary keys are BigAutoField unless stated. Foreign keys are NOT NUL
 |---|---|
 | Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions. No auth routes yet. Source profiles are optional for locally registered users. |
 | CustomerProfile | One-to-one User (PROTECT); namespace/external ID; aware source_signup_at distinct from User.date_joined; channel/country up to 100 characters. |
-| Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. |
+| Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. Custom permission `catalogue.toggle_product_active` gates operator activate/deactivate; no other field is operator-writable. |
 | Cart | One-to-one owner User (CASCADE); one persistent cart per user, emptied after later checkout rather than keeping multiple active carts. |
 | CartItem | Cart (CASCADE), Product (PROTECT), quantity 1..999; unique cart/product. No stock reservation. |
 | Order | Owner User (PROTECT); namespace, nullable external_id; status completed/cancelled/refunded; finite nonnegative decimal(14,2) total; aware placed_at; nullable UUID idempotency_key; request_fingerprint up to 64 characters. Indexed owner/date and namespace/status/date. |
@@ -37,7 +37,7 @@ Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimpo
 ## Checkout transaction
 
 1. Authenticate, validate positive bounded quantities and derive owner/prices on server.
-2. Resolve user-scoped idempotency key and stable request fingerprint. Equivalent retry returns the original order; changed contents conflict. Clearing the cart must not break equivalent retries.
+2. Resolve user-scoped idempotency key and stable request fingerprint. Equivalent retry returns the original order; changed contents conflict. Clearing the cart must not break equivalent retries. The review page submits the fingerprint of the lines it displayed; it must equal the fingerprint of the locked cart lines to place an order, and the stored fingerprint of an existing order on replay.
 3. Lock cart/product state in a consistent order, or use correctly bounded conditional updates; recheck stock and atomically create order/items and deduct stock.
 4. Enforce unique non-null user/idempotency key at DB level; handle concurrent uniqueness conflicts so only one order persists.
 5. Clear purchased cart state transactionally; confirm only after commit. Never use cached stock/prices to authorise checkout.

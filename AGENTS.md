@@ -17,6 +17,7 @@ Follow system/developer instructions and the user's current instructions. These 
 | Data import/generation | [Data pipeline](docs/DATA_PIPELINE.md), [schema](docs/SCHEMA.md), [analytics](docs/ANALYTICS.md) |
 | Analytics | [Analytics](docs/ANALYTICS.md), [data pipeline](docs/DATA_PIPELINE.md), [schema](docs/SCHEMA.md) |
 | AWS, caching, deployment | [Infrastructure](docs/AWS_INFRASTRUCTURE.md), [architecture](docs/ARCHITECTURE.md), [security](docs/SECURITY.md) |
+| Changes near INF2003 seams (AWS/ML isolation, analytics SQL, dataset retention, ER diagram, local run path) | [INF2003 baseline](docs/INF2003_BASELINE.md) |
 | Tests/evidence | [Testing](docs/TESTING.md), relevant feature contracts and existing evidence records |
 | Commits/PRs | [Development](docs/DEVELOPMENT.md) |
 
@@ -65,6 +66,8 @@ Reuse suitable existing code instead of duplicating business rules or maintainin
 
 Reviewers must flag unnecessary complexity, duplicated logic and dead code with concrete evidence and a simpler corrective direction. Simplicity is about fewer moving parts and clearer behaviour, not the shortest possible code; retain necessary validation, error handling, transactions and tests.
 
+The same standard applies to tests. Cover each rule once, at the layer the rule lives in: business rules at the service level, HTTP contracts at the view level, invariants at the database level. Parametrise only across inputs that reach different code paths, not across equivalent values. A review finding earns one focused regression per independently breakable behaviour, not a matrix; a unit check and an integration check that catch different defects are both justified. Judge duplication by the defect a case would detect, not by the finding or the test count. Tests that re-exercise framework behaviour already covered elsewhere — a second CSRF variant on a route that already has one, another invalid value taking a validator path already asserted — are duplication: reviewers flag them with the same evidence standard as duplicated logic, and an agent adding one removes the redundant case instead. More coverage is not automatically better coverage; added test volume is not evidence of thoroughness.
+
 ## Shared rules
 
 - Locked baseline: Django templates/HTMX, PostgreSQL, Docker and scoped AWS services. Do not add a SPA, DRF, JWT, Celery, NoSQL or payment gateway without a scope decision.
@@ -75,7 +78,7 @@ Reviewers must flag unnecessary complexity, duplicated logic and dead code with 
 - Preserve downloaded raw data unchanged; apply transformations through reproducible scripts.
 - Review Terraform plans and verify deployed behaviour, not merely a successful apply; see infrastructure guidance for shared-state coordination.
 - Include migrations with model changes. Update affected schema, API and analytics contracts in the same change.
-- Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline.
+- Keep INF2003 implementation out of this delivery. Preserve local execution and the submitted baseline; see [INF2003 baseline](docs/INF2003_BASELINE.md) for the guardrails that keep it extensible.
 - Every agent-created commit must have a concise subject and a non-empty descriptive body explaining what was fixed or changed, why, and the verification performed. Apply this to checkpoint and documentation commits too; see DEVELOPMENT.md for the format.
 - Never commit credentials, sensitive logs, real personal data or secret-containing Terraform state. Maintain attribution and AI-use records.
 - Run appropriate checks and disclose unrun checks. Placeholder evidence, planned commands and code existence are not successful results.
@@ -83,4 +86,4 @@ Reviewers must flag unnecessary complexity, duplicated logic and dead code with 
 
 ## Documentation ownership
 
-Schema owns application fields; API owns routes; analytics owns formulas; DESIGN owns visual reference; infrastructure owns AWS configuration; implementation plan owns status. Link rather than duplicate. Data dictionaries describe actual source fields and transformations. README and evidence describe the delivered system, not aspirations.
+Schema owns application fields; API owns routes; analytics owns formulas; DESIGN owns visual reference; infrastructure owns AWS configuration; INF2003 baseline owns INF2003-readiness guardrails; implementation plan owns status. Link rather than duplicate. Data dictionaries describe actual source fields and transformations. README and evidence describe the delivered system, not aspirations.
