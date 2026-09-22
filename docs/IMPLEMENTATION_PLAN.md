@@ -4,6 +4,8 @@ Status checked: 22 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
+- **Dataset roadmap Phases 1–2 complete locally; independent Astra Medium round-2 gate CLEAR (22 September 2026).** DATA-001–003 resolved, no new actionable findings. Reviewer independently passed all **406 tests**, including 25 import tests; full-source import/replay, sealed inventory completeness, zero per-order SQL mismatches, profile reproduction, checksums, Django/database checks and migration drift. The user accepted this externally sourced synthetic dataset for descriptive sales/inventory demonstrations despite weak patterns; no forecasting or seasonality validation is claimed. [Review and limitations](reviews/analytics-data-import.md). Next: roadmap Phase 3, independent pandas cross-check of analytics refresh on the imported data. Overall project Phases 1–2 remain in progress for infrastructure, dashboard and integration work.
+
 - PR #2 merged at `0887e81` after independent final review and 381 passing hosted tests; [review](reviews/pr-2-final.md). Local Docker follow-up (22 September 2026) passed build, fresh PostgreSQL initialization/migrations, Django/database checks, migration drift check and all 381 tests after Astra Low fixed DOCKER-001 (Windows CRLF checkout of the Linux initializer). Independent Astra Medium review cleared the fix; [commands, finding and results](reviews/docker-windows-checks.md). The scoped attribute fix and follow-up record are included in the post-merge follow-up. Docker Engine HTTP 500 is no longer blocking verification. Dataset profiling/import, dashboard, AWS and frontend integration remain open.
 
 - Documentation cleanup: removed nine separate foundation verification/output files at the user's request. Existing reviews in `docs/reviews/` are retained; supporting historical records remain in Git history. Required submission evidence templates remain in `evidence/`.
@@ -28,7 +30,7 @@ Status checked: 22 September 2026. This file owns implementation status; [scope]
 | Phase | Dates in 2026 | Status | Exit condition |
 |---|---|---|---|
 | 1. Foundation and feasibility | 11-17 Sep | In progress; local backend foundation reviewed in batches | Verify account, HTTPS and dataset; scaffold local app and first AWS smoke deployment |
-| 2. Ecommerce and analytics | 18-24 Sep | In progress; application backend (auth, catalogue, cart, checkout, order history) and analytics refresh (6b) implemented, independent review gate cleared at `7eea9b7`; dataset import, dashboard, AWS/S3 and frontend integration still open | AWS workflow/S3 import work; correctness/security/analytics tests pass |
+| 2. Ecommerce and analytics | 18-24 Sep | In progress; application backend (auth, catalogue, cart, checkout, order history) and analytics refresh (6b) implemented, independent review gate cleared at `7eea9b7`; dataset acceptance/import now reviewed and complete locally; real-data analytics cross-check, dashboard, AWS/S3 and frontend integration still open | AWS workflow/S3 import work; correctness/security/analytics tests pass |
 | 3. Scaling and recovery | 25 Sep-1 Oct | Not started | Dated scaling, recovery and monitoring evidence; freeze features |
 | 4. Reproduction and packaging | 2-8 Oct | Not started | Clean-machine rehearsal, report, manifest and declarations complete |
 | 5. Submission and preservation | 9-11 Oct | Not started | Submit by 11 Oct 23:59 SGT; archive ZIP and tag exact commit |
@@ -49,15 +51,16 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 
 **Data and evidence**
 - [x] Resolve relevant planning-review prerequisites before dependent implementation: DOC-001/002 contract/persistence corrections accepted in [batch 3 review](reviews/foundation-batch-3.md); DOC-003 already corrected. Workflow regressions remain follow-ups.
-- [ ] Download/pin the dataset, validate fields/relationships and record provenance/checksums; accept it or document the synthetic fallback.
-- [ ] Define source mapping, dated inventory and safe reimport rules; capture evidence and review links as work completes.
+- [x] Download/pin the dataset, validate fields/relationships and record provenance/checksums; manual acceptance for descriptive use recorded. [Profile](../data/PROFILE.md), [provenance](../data/README.md), [round-2 review](reviews/analytics-data-import.md).
+- [x] Define and implement source mapping, dated inventory and safe reimport rules. Full-source import/replay, inventory completeness and live-state preservation verified; [round-2 review](reviews/analytics-data-import.md).
 
 ### Phase 2: ecommerce and analytics
 
 - [ ] Application: registration/login/logout, catalogue, persistent cart, atomic/idempotent checkout and owner-only history work end to end. All implemented on branch `erfan/backend-auth`; independent Astra Medium review gate cleared at `7eea9b7` on 22 Sep 2026 (logs linked in the entries below). Left unchecked because the end-to-end walkthrough on real data and the frontend integration are still open, not because review is pending.
 - [ ] Frontend: integrate routes, forms, validation/retry states and the protected analytics dashboard using DESIGN.
 - [ ] Infrastructure: real app image, private S3 import, secure config, logs and cross-instance sessions work with no stickiness; HTTPS precedes credential-bearing traffic.
-- [ ] Data: idempotent import preserves live state; analytics matches hand-checkable fixtures and shows reporting dates/freshness.
+- [x] Data import: create-only replay preserves live state; generated inventory is complete and sealed. Dataset roadmap Phases 1–2 cleared; [review](reviews/analytics-data-import.md).
+- [ ] Data analytics: independently cross-check refresh against the imported data with pandas, then integrate reporting dates/freshness in the dashboard (roadmap Phases 3–4).
 - [ ] Verification: independent backend review gates and relevant functional/security/data tests pass; supporting members record results and report notes.
 
 ### Phase 3: scaling and recovery
@@ -84,7 +87,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 2. Frontend foundation is complete at implementation checkpoint `c59b162` plus review/evidence checkpoint `6e94aec`; continue with the separate backend authentication task. Evidence: [frontend foundation](reviews/frontend-foundation.md); review: [frontend review](reviews/frontend-foundation.md).
 3. Backend authentication task: registration/login/logout and session security implemented and pushed on branch `erfan/backend-auth` (see 13 Sep 2026 entry below for scope/verification). Status: implemented; independent review round 1 found no actionable findings ([log](reviews/auth-registration.md)); backend gate cleared at `7eea9b7` on 22 Sep 2026.
 4. Backend catalogue, `store_operator`, cart, checkout and order history tasks: all implemented locally on branch `erfan/backend-auth` (see 14/15/19 Sep 2026 entries below). Status: implemented and independently reviewed; findings and re-reviews are in [catalogue-operator](reviews/catalogue-operator.md), [cart](reviews/cart.md), [checkout](reviews/checkout.md) and [order-history](reviews/order-history.md); backend gate cleared at `7eea9b7` on 22 Sep 2026.
-5. Data track: dataset switched and downloaded (see Dataset in Open items above); remaining sequence — profile, import, refresh against real data, then the dashboard — is written in [backend-completion-roadmap.md](plans/backend-completion-roadmap.md).
+5. Data track: dataset roadmap Phases 1–2 complete locally with round-2 gate CLEAR. Continue roadmap Phase 3: run analytics refresh on imported data and independently cross-check with pandas, then implement the dashboard. [Review](reviews/analytics-data-import.md), [roadmap](plans/backend-completion-roadmap.md).
 6. Infrastructure track (outside this task): actual lab permissions/balance/region, shared-state ownership and HTTPS/ALB health Host arrangement before a smoke deployment with RDS. No AWS resources were provisioned here.
 
 Planning DOC-001/002 are resolved at the contract/persistence boundary; future importer/checkout/aggregation regressions remain required. DOC-003 remains corrected. See [planning review](reviews/planning-suite-review.md).
@@ -94,7 +97,7 @@ Planning DOC-001/002 are resolved at the contract/persistence boundary; future i
 |---|---|
 | Integration account, region, permissions, balance | Actual capability record and cost estimate; credits do not pool |
 | HTTPS | Supported hostname/certificate and validation arrangement |
-| Dataset | **Switched 22 Sep 2026** to the Analytics Engineering Ecommerce Sales Dataset (CC BY 4.0) after LaelaZ/synthetic-ecommerce's gated access was never granted; downloaded, checksummed and committed (`b95905a`), row counts confirmed exact against the publisher's data dictionary. `analytics/profile_dataset.py` integrity validation (uniqueness, orphan keys, monetary reconciliation) still pending. See `PROJECT_SCOPE_INF2006.md` §5 and [backend-completion-roadmap.md](plans/backend-completion-roadmap.md) |
+| Dataset | Integrity passes: Analytics Engineering v1.0.0 (CC BY 4.0), raw download `b95905a` unchanged, exact counts and zero integrity rejects. **User accepted descriptive use on 22 Sep 2026 (DATA-003)**; weak weekly variation and 31.67–39.75% without recent sales do not rule out flat noise. [Review log](reviews/analytics-data-import.md), [profile](../data/PROFILE.md). Round-2 independent review cleared all findings and repeated full-source import/replay in reviewer-only scratch. Deployed demo namespace/date anchor remains to be selected. |
 | ElastiCache | Conditional; requires explicit selection, lab support, budget and measured value |
 | Optional ML | Deferred; omit if it delays required work |
 | Submission group ID | Fill in for submission packaging; member-name assignment is not a development task |
@@ -102,6 +105,14 @@ Planning DOC-001/002 are resolved at the contract/persistence boundary; future i
 | Dataset generation/alteration permission | **Resolved 22 Sep 2026:** confirmed permitted by the user. Generating/altering dataset fields (synthetic stock/lead-time supplementation per `docs/DATA_PIPELINE.md`) may proceed for the real-dataset import task |
 
 ## Update protocol and decisions
+
+### Dataset Phases 1–2 review handoff, 22 September 2026
+
+Status: **complete locally; round-2 gate CLEAR**. Base `3deed85024e841bd9dccc99c1860ca379d5012bc`, branch `CL/Analytics`; the review included tracked and untracked task files with no unrelated changes. Exact snapshot, stable findings, remediation, independent verification and limitations are recorded in [analytics-data-import review](reviews/analytics-data-import.md). The user's subsequent commit instruction authorizes this batch and documentation status updates.
+
+Dataset acceptance is manual and limited to descriptive demonstrations. Raw source is unchanged; mappings and deterministic supplements are documented in [data dictionary](../data/DATA_DICTIONARY.md). One accepted manifest per namespace, unusable passwords at creation, create-only replay and immutable dated inventory are implemented. Deployment date/namespace selection remains open.
+
+Reviewer verification: 406 tests passed (including 25 import tests), full-source import/replay and SQL reconciliation passed, six raw checksums matched, profile reproduced exactly, system/database/migration checks passed. Only isolated disposable resources were used and removed. Actual HTTP checks remain implementer evidence; real-data analytics refresh, dashboard, ML, S3/AWS, load/recovery and browser visual QA remain outside this batch. Next is roadmap Phase 3, not overall project Phase 3.
 
 Update this file with substantive changes: status, evidence/commit references, blockers and next steps. Never mark a phase complete from code existence alone. For backend tasks, link the review log and record review status/round, unresolved finding IDs and next action. A repeated unresolved finding after Low remediation sets the task to Awaiting user manual Astra Medium escalation; do not mark it complete. Reserve proposal time for INF2003 before 4 October 23:30 without implementing its expansion here.
 

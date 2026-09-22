@@ -28,7 +28,7 @@ Historical Order rows have an external ID and no idempotency key/fingerprint. Li
 
 ## Foundation decisions: DOC-001 and DOC-002
 
-Imported accounts must be created with unusable passwords and never matched to existing accounts by email/name. CustomerProfile explicitly maps source identity to User; the future importer must preserve that mapping and authentication state. Initial models do not implement an importer or create demo accounts.
+Imported accounts have unusable passwords and are never matched by email/name. CustomerProfile explicitly maps source identity to User. The dataset importer uses a full SHA-256 namespaced username and preserves authentication state on replay. Its accepted-input fingerprint is held in the immutable `InventoryVersion.version` identity (`import-v1-` plus SHA-256), allowing original product inputs to be verified independently of mutable Product fields. One accepted manifest per namespace; changed source revisions require new namespaces. No schema migration was required. Mapping details are in [data dictionary](../data/DATA_DICTIONARY.md); implementation passed independent round-2 review ([record](reviews/analytics-data-import.md)).
 
 Persist immutable dated inventory separately from Product's mutable live stock AND lead time. Build an InventoryVersion and its rows in a transaction, verify all expected products, then seal. Row inserts lock the version to serialize with sealing; update/delete of snapshot rows and changes/unsealing of sealed versions fail at the database level. Corrections use a new version. Historical runs select an explicit namespace/version/cutoff and reject incomplete/mismatched snapshots; there is no fallback to Product values. A run cannot refer to an unsealed or differently dated version.
 

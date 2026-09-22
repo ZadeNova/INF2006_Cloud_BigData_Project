@@ -57,6 +57,14 @@ Validate `range` against this whitelist (a Django form choice); an invalid value
 
 ## Calendar correctness
 
+Dataset acceptance (22 September 2026): source orders carry explicit UTC `Z` offsets,
+which the importer preserves. Published UTC coverage ends 31 December 2025, but the
+last Singapore order is 1 January 2026 at 07:59:03. The unshifted generated inventory
+cutoff is therefore 2 January 2026 at 00:00 Singapore. Naive signup dates assume
+Singapore. `--shift-anchor` is an exclusive midnight cutoff; a constant whole-day
+offset puts the latest order on the preceding date. This clarifies source handling
+without changing reporting formulas; see [data provenance](../data/README.md).
+
 Never hardcode 365, 366 or 30 in logic. Derive spans, day counts and comparison spans from date arithmetic, and derive any per-date denominator from the actual span (the seven-date average stays fixed at seven by definition). Convert stored UTC timestamps to `Asia/Singapore` in SQL with an explicit time zone; Singapore has no daylight saving. The source dataset covers January 2023 to December 2025 and so contains 29 February 2024. The unshifted historical fixture keeps that real leap day; the shifted demo fixture moves every date by a recorded whole-number-of-days offset, which may move it off 29 February, so leap-day behaviour is verified with explicit-date test fixtures rather than the imported data either way. A shift must be a fixed number of days, never adding a year, which is invalid for 29 February.
 
 ## Processing and validation
