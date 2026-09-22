@@ -1,10 +1,10 @@
 # Analytics: status and remaining work
 
-Handover note for teammates, the independent reviewer and coding agents picking up the analytics feature. Snapshot date: 22 September 2026, branch `erfan/backend`. This file is a status summary, not a contract: formulas and rules live in [ANALYTICS.md](../ANALYTICS.md), routes in [API.md](../API.md), and the detailed plans are linked below. Where this file and a contract disagree, the contract wins; tell the user. The tracker ([IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md)) was reconciled with these batches on 22 September 2026.
+Handover note for teammates, the independent reviewer and coding agents picking up the analytics feature. Status reconciled 22 September 2026 after PR #2 merged to `main` at `0887e81`. This reconciliation uses only repository records: Git history for merged commits and tracked files, [analytics refresh](../reviews/analytics-refresh.md), [analytics queries](../reviews/analytics-queries.md) and [final integration](../reviews/pr-2-final.md) for review outcomes, [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) for current status, and [backend-completion-roadmap.md](backend-completion-roadmap.md) for the remaining-work order. No task is marked complete from code existence alone. Formulas and rules remain owned by [ANALYTICS.md](../ANALYTICS.md), and routes by [API.md](../API.md). Where this handover conflicts with an owning source, follow the owning source and correct this handover.
 
 ## In one paragraph
 
-The backend core is built and tested on fixture data: a SQL view of completed sale lines, date-range logic, a full-refresh `refresh_analytics` command, a `snapshot_inventory` command and the dashboard's read queries. Nothing has run on real data yet. **Dataset switched 22 September 2026**: the original selection (LaelaZ/synthetic-ecommerce on Hugging Face) was gated and access never arrived by the decision deadline; the team switched to the [Analytics Engineering Ecommerce Sales Dataset](https://www.analyticsengineering.com/datasets/ecommerce-sales) (CC BY 4.0, no account needed, verified schema: 20,000 customers, 1,200 products, 100,000 orders, 237,537 order items), see `PROJECT_SCOPE_INF2006.md` §5 for the full mapping. The dashboard page, the pandas cross-check and the importer are still to do; the deterministic generator remains needed for the correctness and load-test fixtures, not as the historical-import fallback. The optional ML is still to do. None of it has passed the independent review gate.
+The analytics backend core is merged to `main`, tested on fixture data and independently review-gate cleared: a SQL view of completed sale lines, date-range logic, a full-refresh `refresh_analytics` command, a `snapshot_inventory` command and the dashboard's read queries. Nothing has run on the selected real dataset yet. **Dataset switched and committed 22 September 2026**: the original selection (LaelaZ/synthetic-ecommerce on Hugging Face) was gated and access never arrived by the decision deadline; the team switched to the [Analytics Engineering Ecommerce Sales Dataset](https://www.analyticsengineering.com/datasets/ecommerce-sales) (CC BY 4.0, no account needed). The unchanged raw release is tracked under `data/raw/` at `b95905a`; all six checksums and published row counts were verified during final integration review. Full integrity and analytics-signal profiling is still pending. The importer, independent pandas cross-check and dashboard remain open. The deterministic generator remains planned for correctness and isolated load-test fixtures, not as the primary historical source. Optional ML is deferred and may be omitted without weakening the required analytics submission.
 
 ## Done
 
@@ -19,6 +19,8 @@ The backend core is built and tested on fixture data: a SQL view of completed sa
 
 Tests: `tests/test_analytics_ranges.py`, `test_analytics_view.py`, `test_analytics_refresh.py`, `test_analytics_snapshot.py`, `test_analytics_queries.py`, shared builders in `tests/analytics_helpers.py`. Full suite at `788f545`: 301 passed, `manage.py check` clean, `makemigrations --check` reports no changes (the view is a `RunSQL` migration, no model change).
 
+Review status: [analytics refresh](../reviews/analytics-refresh.md) passed with no actionable findings. [Analytics queries](../reviews/analytics-queries.md) cleared at `7eea9b7` after AQRY-001 and AQRY-002 were resolved; KO-1 remains an owner-accepted, disclosed approximation rather than an unresolved review finding. PR #2 then passed final integration review and merged to `main` at `0887e81`; hosted CI at the reviewed head passed 381 tests. Real-dataset execution, the pandas comparison, dashboard and scheduler-host-loss exercise were outside those reviews and remain unverified.
+
 Commands (all run inside the web container, for example `docker compose run --rm web python manage.py ...`):
 
 - `snapshot_inventory --as-of YYYY-MM-DD [--namespace NS] [--name NAME]`: seals current stock and lead times as an immutable inventory version; the cutoff is 00:00 Singapore time on that date. The option is `--name` because Django reserves `--version`.
@@ -26,20 +28,19 @@ Commands (all run inside the web container, for example `docker compose run --rm
 
 ## Left to do
 
-Ordered by dependency. Sizes: S under an hour, M a session, L several.
+Ordered by dependency from [backend-completion-roadmap.md](backend-completion-roadmap.md). Sizes retain the existing estimates: S under an hour, M a session, L several.
 
-1. **Done, awaiting re-review: `snapshot_inventory` today-only guard (KO-1).** The owner chose today's Singapore date only, with the live-stock approximation disclosed in ANALYTICS.md and the dashboard footer (6c). AQRY-001 (integer overflow in the flag arithmetic) and AQRY-002 (unsealed existing versions) were fixed in the same change. See [docs/reviews/analytics-queries.md](../reviews/analytics-queries.md).
-2. **A9, S:** `seed_demo --no-products` (create the demo operator without the 14 hand-written products). See [6a decision 5](batch-06a-data-import.md).
-3. **A7, L: dashboard (batch 6c).** Fully planned in [batch-06c-dashboard.md](batch-06c-dashboard.md); its prerequisites (A5) exist. Includes: move `HtmxLoginRequiredMixin` to `accounts/mixins.py`, the `reporting.view_analytics` permission (options-only migration `0004`) granted in `seed_demo`, the view and `#analytics-panel` fragment, vendored Chart.js (verify `collectstatic` accepts it), templates, tests. Buildable and testable without the dataset.
-4. **A8, M to L: deterministic generator.** Planned in [batch-06a-dataset-generator.md](batch-06a-dataset-generator.md). No longer the historical-import fallback (a real dataset was selected 22 September, see above) — still needed for the tiny hand-checkable correctness fixture and the isolated load-test fixture required by `PROJECT_SCOPE_INF2006.md`'s "maintain three fixtures" rule. Needs the `../data:/app/data:ro` Compose mount and `pyarrow` in `requirements.in`.
-5. **6a import (M to L).** [batch-06a-data-import.md](batch-06a-data-import.md): `src/config/dataset.py`, `import_dataset`, generated stock and the sealed import-time inventory, tests on tiny CSV fixtures. **The download is done** (22 September 2026, CSV source tables, checksummed in `data/raw/checksums.txt`, row counts confirmed exact): the profile run, mapping and real import can now proceed without waiting on anyone. `src/requirements.in` needs no new dependency — CSV is read with the standard-library `csv` module, so the originally-planned `pyarrow` addition is dropped.
-6. **A6, M: `analytics/verify_refresh.py`.** Independent pandas recomputation compared with the database (plan in 6b). Write and smoke-test on generated or fixture data; run on real data later.
-7. **Batch 6d (optional, gated): K-means RFM segmentation.** Only after the required work passes and the data profile shows enough order history per customer. Planned only in outline in [ANALYTICS.md](../ANALYTICS.md).
-8. **Documentation and evidence owed:**
+1. **Dataset acceptance (Phase 1):** write and run `analytics/profile_dataset.py` with its separate pandas requirements; produce `data/PROFILE.md`; verify identity, relationship, status, money, quantity, chronology and per-order reconciliation rules; measure the actual sales signal and seven-day no-sales proportion. Replace the placeholder content in `data/README.md` and `data/DATA_DICTIONARY.md` with provenance, attribution, checksums, mapping and transformations. This is the acceptance gate before import.
+2. **6a import (Phase 2, M to L):** implement `src/config/dataset.py`, `import_dataset`, generated stock/lead times and the sealed import-time inventory, plus tests on tiny CSV fixtures. Add the read-only `../data:/app/data:ro` Compose mount. CSV parsing uses the standard library, so the web image needs no new import dependency. Fold in **A9, S:** `seed_demo --no-products`, which creates the demo operator without the 14 hand-written products.
+3. **Analytics on real data (Phase 3):** run `snapshot_inventory` and `refresh_analytics` against the accepted import, reconcile results, and write `analytics/verify_refresh.py` (**A6, M**) for an independent pandas recomputation against the database. The existing 6b review did not perform this validation.
+4. **A7 dashboard (Phase 4, L):** implement [batch 6c](batch-06c-dashboard.md): move `HtmxLoginRequiredMixin` to `accounts/mixins.py`, add and grant `reporting.view_analytics`, build the protected view and `#analytics-panel` HTMX fragment, vendor Chart.js, add templates and tests, verify `collectstatic`, then walk through the page against the imported data.
+5. **A8 deterministic generator (M to L):** retain the planned generator for the tiny hand-checkable correctness fixture and isolated load-test fixture. It is not the primary historical-import fallback. Keep its dependency choice aligned with [batch-06a-dataset-generator.md](batch-06a-dataset-generator.md); do not add `pyarrow` to the web image merely to import the downloaded CSV release.
+6. **Documentation and evidence (Phase 5):**
    - `docs/SCHEMA.md`: document the view. `docs/plans/batch-06b-analytics-refresh.md`: `--version` is now `--name`.
    - `docs/API.md`: flip the analytics route to implemented when 6c lands.
    - Tracker entries for 6a, 6b and 6c; `analytics/README.md`; `evidence/test-data-ai.md` and `evidence/data-validation.md` from real command output; `data/README.md`, `data/DATA_DICTIONARY.md`, manifest fields after 6a. Update the [review brief](astra-review.md) queue with the analytics commits.
-9. **Independent review gate:** [astra-review.md](astra-review.md) lists five earlier backend tasks awaiting review; the analytics work above should join that queue in this order: 6a import, 6b (already committed as `41ea463`, `470becd`, `788f545`), then the 6c backend part.
+7. **Independent review gate:** 6b is already cleared. Queue the new 6a importer work and then the 6c backend/dashboard integration for their own review gates before marking them complete.
+8. **Optional batch 6d:** K-means RFM segmentation remains deferred. Start it only after required analytics, AWS smoke deployment and evidence pass, and only if profiling shows sufficient repeat-purchase signal. It may be omitted.
 
 The scheduler that triggers `refresh_analytics` periodically is deliberately **not** designed yet; that is an infrastructure-phase decision after the command exists (see [cloud-independent-prep.md](cloud-independent-prep.md) B6).
 
@@ -58,15 +59,15 @@ The scheduler that triggers `refresh_analytics` periodically is deliberately **n
 - **Rebuild after changing `src/`.** The image copies `src/` at build time and only `tests/` is mounted. Run `docker compose build web` before `docker compose run ...`, or you will test stale code.
 - **Sealed inventory versions cannot be deleted** (database triggers make them append-only). Do not run `snapshot_inventory` against the shared dev database casually; it leaves a permanent version that can later conflict with an import. Tests use throwaway databases and are safe.
 - Use `docker compose run --rm web pytest -q -p no:cacheprovider /app/tests/test_analytics_*.py` for the analytics tests, then the whole suite when a migration or shared code changes.
-- `data/raw/` is gitignored. It currently holds only the old dataset card (`DATASET_CARD.md`) from the superseded LaelaZ selection. The current source, the Analytics Engineering Ecommerce Sales Dataset, is not gated — download it directly, no account or access request needed.
-- Commits by agents: descriptive body, the user as sole author, no `Co-Authored-By` trailer unless the user says otherwise. Never push.
+- `data/raw/` is tracked and contains the unchanged Analytics Engineering release, its licence/dictionary and checksums. Do not hand-edit raw inputs; implement transformations reproducibly elsewhere and re-check hashes after checkout on another platform.
+- Commits by agents require a concise subject and non-empty descriptive body. Commit or push only within the user's explicit Git scope; do not add `Co-Authored-By` unless requested.
 
-## Open decisions (user)
+## Decisions and current status
 
 | Decision | Recommendation | Where |
 |---|---|---|
-| `snapshot_inventory` past-date guard | decided: today's Singapore date only, disclosed approximation | resolved, item 1 |
-| Dataset: wait for access or switch to the generator | **decided 22 September: switched to the Analytics Engineering dataset** (not the generator — a real, already-accessible synthetic dataset was found instead) | [6a plan](batch-06a-data-import.md), `PROJECT_SCOPE_INF2006.md` §5 |
-| Commit raw dataset files or only checksums | decide after download | 6a decision 7 |
+| `snapshot_inventory` past-date guard | Decided: today's Singapore date only, disclosed approximation; review gate cleared with KO-1 recorded as owner-accepted mitigation | [analytics queries review](../reviews/analytics-queries.md) |
+| Dataset: wait for access or switch | Decided 22 September: switched to the Analytics Engineering dataset, not the generator | [6a plan](batch-06a-data-import.md), `PROJECT_SCOPE_INF2006.md` §5 |
+| Commit raw dataset files or only checksums | Decided and completed: unchanged raw release, licence, dictionary and checksums committed at `b95905a` | [6a decision 7](batch-06a-data-import.md) |
 | Move `HtmxLoginRequiredMixin` (touches cart code awaiting review) | move it | [6c plan](batch-06c-dashboard.md) decision 1 |
 | Generator location and defaults | `src/config/dataset_generator.py`, 80/10/10 status mix | [generator plan](batch-06a-dataset-generator.md) |
