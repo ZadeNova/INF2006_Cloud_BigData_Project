@@ -7,15 +7,11 @@
     <div class="error-page__card">
         <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> 404 · page not found</p>
         <h1 id="error-title">This path is not ready yet.</h1>
-        <p>Northstar Market is still laying its foundation. The page you requested is not part of the live application yet.</p>
-        <div class="message message--error" role="alert">
-            <span class="message__icon" aria-hidden="true">!</span>
-            <div>
-                <strong>No business route was changed.</strong>
-                <p>Authentication, catalogue, cart, checkout and analytics remain follow-up work.</p>
-            </div>
+        <p>The page you requested is not part of the live application. The storefront itself is up: browse the catalogue, or head back to the overview.</p>
+        <div class="hero__actions">
+            <a class="button button--dark" href="{% url 'catalogue:product_list' %}">Browse products</a>
+            <a class="button button--outline-neutral" href="{% url 'home' %}">Go to the overview</a>
         </div>
-        <a class="button button--dark" href="{% url 'home' %}">Return to the foundation</a>
     </div>
 </section>
 {% endblock %}

@@ -1,30 +1,72 @@
 {% extends "base.html" %}
 {% block title %}Order #{{ order.pk }} — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Order confirmed</h1>
-    <p>Order #{{ order.pk }} &middot; placed {{ order.placed_at }} &middot; status: {{ order.get_status_display }}</p>
-</section>
+<div class="page">
+    <a class="page__back" href="{% url 'orders:list' %}">{% include "_icon.html" with name="caret-left" size="sm" only %} All orders</a>
 
-<div class="surface-card operator-table">
-    <div class="operator-row operator-row--header">
-        <span>Product</span>
-        <span style="text-align: right;">Price</span>
-        <span>Quantity</span>
-        <span style="text-align: right;">Line total</span>
+    <div class="shop-layout">
+        <div>
+            <div class="order-head">
+                <span class="order-head__mark" aria-hidden="true">{% include "_icon.html" with name="check" size="lg" only %}</span>
+                <div>
+                    <h1 class="page__title">Order #{{ order.pk }} is confirmed</h1>
+                    <p class="page__lead">Placed {{ order.placed_at|date:"j F Y" }} at {{ order.placed_at|date:"H:i" }}. A copy stays in your order history. There is no email in this build.</p>
+                </div>
+            </div>
+
+            <div class="line-head" aria-hidden="true">
+                <span></span>
+                <span>Product</span>
+                <span>Unit price</span>
+                <span>Qty</span>
+                <span>Line total</span>
+            </div>
+            <ul class="line-list">
+                {% for item in items %}
+                <li class="surface-card line-item">
+                    <div class="line line--review">
+                        <span class="line__thumb line__thumb--{{ item.product.category|slugify }}" aria-hidden="true">
+                            {% include "catalogue/_category_glyph.html" with category=item.product.category extra="" only %}
+                        </span>
+                        <div class="line__main">
+                            <p class="line__name">{{ item.product.name }}</p>
+                            <p class="line__meta">{{ item.product.category }}</p>
+                        </div>
+                        <div class="line__figures">
+                            <span class="line__unit"><span class="visually-hidden">Unit price </span>S${{ item.unit_price }}</span>
+                            <span class="line__count"><span class="visually-hidden">Quantity </span>&times; {{ item.quantity }}</span>
+                            <span class="line__total"><span class="visually-hidden">Line total </span>S${{ item.line_total }}</span>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="page__footnote">Unit prices are the values captured when the order was placed, so later catalogue changes never rewrite this page.</p>
+        </div>
+
+        <aside class="summary" aria-labelledby="summary-title">
+            <h2 class="summary__title" id="summary-title">Summary</h2>
+            <dl class="summary__rows">
+                <div class="summary__row">
+                    <dt>Status</dt>
+                    <dd><span class="badge badge--{{ order.status }}">{{ order.get_status_display }}</span></dd>
+                </div>
+                <div class="summary__row summary__row--rule">
+                    <dt>Payment</dt>
+                    <dd>Simulated</dd>
+                </div>
+            </dl>
+            <dl class="summary__total">
+                <dt>Paid</dt>
+                <dd>S${{ order.total }}</dd>
+            </dl>
+            <a class="button button--lg button--block button--dark" href="{% url 'catalogue:product_list' %}">Continue shopping</a>
+            <a class="button button--block button--outline-neutral summary__action" href="{% url 'orders:list' %}">View all orders</a>
+            <p class="summary__note">
+                {% include "_icon.html" with name="credit-card" size="sm" only %}
+                <span>Payment was simulated for this coursework build. No card details were collected and no money moved.</span>
+            </p>
+        </aside>
     </div>
-    {% for item in items %}
-    <div class="operator-row">
-        <span class="operator-row__name">{{ item.product.name }}</span>
-        <span class="operator-row__price">S${{ item.unit_price }}</span>
-        <span>{{ item.quantity }}</span>
-        <span class="operator-row__price">S${{ item.line_total }}</span>
-    </div>
-    {% endfor %}
-    <p class="form-note">Total: S${{ order.total }}</p>
 </div>
-
-<p class="form-note">Payment is simulated — no real charge was made.</p>
-<a class="button button--compact button--outline-neutral" href="{% url 'orders:list' %}">View all orders</a>
-<a class="button button--compact button--outline-neutral" href="{% url 'catalogue:product_list' %}">Continue shopping</a>
 {% endblock %}

@@ -1,51 +1,62 @@
 {% extends "base.html" %}
 {% block title %}Manage products — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Manage products</h1>
-</section>
+<div class="page">
+    <div class="page__header">
+        <div>
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Operator</p>
+            <h1 class="page__title">Manage products</h1>
+            <p class="page__lead">Activate or deactivate a product. Prices, stock and catalogue entries are seeded or imported, not edited here.</p>
+        </div>
+        <p class="page__meta">{{ paginator.count }} product{{ paginator.count|pluralize }}</p>
+    </div>
 
-<div class="surface-card operator-table">
-    <div class="operator-row operator-row--header">
-        <span>Product</span>
-        <span>Category</span>
-        <span style="text-align: right;">Price</span>
-        <span style="text-align: right;">Stock</span>
-        <span>Status</span>
-        <span></span>
+    <div class="surface-card optable">
+        <div class="optable__row optable__row--head">
+            <span>Product</span>
+            <span>Category</span>
+            <span class="optable__num">Price</span>
+            <span class="optable__num">Stock</span>
+            <span>Status</span>
+            <span><span class="visually-hidden">Action</span></span>
+        </div>
+        {% for product in products %}
+        <div class="optable__row">
+            <span class="optable__name">{{ product.name }}</span>
+            <span class="optable__muted">{{ product.category }}</span>
+            <span class="optable__num">{{ product.display_price }}</span>
+            <span class="optable__num optable__num--{{ product.stock_status }}">{{ product.stock }}</span>
+            <span>
+                {% if product.active %}
+                <span class="badge badge--completed">Active</span>
+                {% else %}
+                <span class="badge badge--neutral">Inactive</span>
+                {% endif %}
+            </span>
+            <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
+                {% csrf_token %}
+                <button type="submit" name="active" value="{% if product.active %}false{% else %}true{% endif %}" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
+                    {% if product.active %}Deactivate{% else %}Activate{% endif %}<span class="visually-hidden"> {{ product.name }}</span>
+                </button>
+            </form>
+        </div>
+        {% endfor %}
     </div>
-    {% for product in products %}
-    <div class="operator-row">
-        <span class="operator-row__name">{{ product.name }}</span>
-        <span class="operator-row__category">{{ product.category }}</span>
-        <span class="operator-row__price">{{ product.display_price }}</span>
-        <span class="operator-row__stock{% if product.stock_status != "in-stock" %} operator-row__stock--{{ product.stock_status }}{% endif %}">{{ product.stock }}</span>
-        <span class="operator-row__status">
-            {% if product.active %}
-            <span class="operator-row__status-dot operator-row__status-dot--active"></span>
-            <span>Active</span>
-            {% else %}
-            <span class="operator-row__status-dot operator-row__status-dot--inactive"></span>
-            <span>Inactive</span>
-            {% endif %}
-        </span>
-        <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
-            {% csrf_token %}
-            <button type="submit" name="active" value="{% if product.active %}false{% else %}true{% endif %}" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
-                {% if product.active %}Deactivate{% else %}Activate{% endif %}
-            </button>
-        </form>
-    </div>
-    {% endfor %}
+
+    {% if is_paginated %}
+    <nav class="pager" aria-label="Product pages">
+        {% if page_obj.has_previous %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.previous_page_number }}">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</span>
+        {% endif %}
+        <p class="pager__status">Page <strong>{{ page_obj.number }}</strong> of {{ paginator.num_pages }}</p>
+        {% if page_obj.has_next %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.next_page_number }}">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</span>
+        {% endif %}
+    </nav>
+    {% endif %}
 </div>
-
-<nav aria-label="Product pages">
-    {% if page_obj.has_previous %}
-    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-    {% endif %}
-    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
-    {% endif %}
-</nav>
 {% endblock %}

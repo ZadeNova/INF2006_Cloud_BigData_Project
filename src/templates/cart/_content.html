@@ -1,4 +1,4 @@
-<div id="cart-content" class="surface-card operator-table">
+<div id="cart-content">
     {% if error %}
     <div class="message message--error" role="alert">
         <span class="message__icon" aria-hidden="true">!</span>
@@ -7,33 +7,87 @@
     {% endif %}
 
     {% if items %}
-    <div class="operator-row operator-row--header">
-        <span>Product</span>
-        <span style="text-align: right;">Price</span>
-        <span>Quantity</span>
-        <span style="text-align: right;">Line total</span>
-        <span></span>
+    <div class="shop-layout">
+        <ul class="line-list">
+            {% for item in items %}
+            <li class="surface-card line-item">
+                <div class="line{% if not item.product.active %} line--muted{% endif %}">
+                    <span class="line__thumb line__thumb--{{ item.product.category|slugify }}" aria-hidden="true">
+                        {% include "catalogue/_category_glyph.html" with category=item.product.category extra="" only %}
+                    </span>
+                    <div class="line__main">
+                        <p class="line__name">{{ item.product.name }}</p>
+                        <p class="line__meta">{{ item.product.display_price }} each · {{ item.product.category }}</p>
+                    </div>
+                    <div class="line__figures">
+                        <div class="line__qty">
+                            {% if item.product.active %}
+                            <label class="field-label" for="qty-{{ item.pk }}">Quantity</label>
+                            <form method="post" action="{% url 'cart:update' item.pk %}"
+                                  hx-post="{% url 'cart:update' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML"
+                                  hx-trigger="change, submit">
+                                {% csrf_token %}
+                                <div class="stepper">
+                                    <button class="stepper__button" type="button" data-step="-1" data-step-target="qty-{{ item.pk }}" aria-label="Decrease quantity of {{ item.product.name }}">{% include "_icon.html" with name="minus" size="sm" only %}</button>
+                                    <input class="stepper__input" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="999" value="{{ item.quantity }}">
+                                    <button class="stepper__button" type="button" data-step="1" data-step-target="qty-{{ item.pk }}" aria-label="Increase quantity of {{ item.product.name }}">{% include "_icon.html" with name="plus" size="sm" only %}</button>
+                                </div>
+                                <button type="submit" class="button button--compact button--outline-neutral stepper-submit">Update</button>
+                            </form>
+                            {% else %}
+                            <span class="field-label">Quantity</span>
+                            <p class="line__count">{{ item.quantity }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="line__total">S${{ item.line_total }}</span>
+                    </div>
+                    <form method="post" action="{% url 'cart:delete' item.pk %}"
+                          hx-post="{% url 'cart:delete' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
+                        {% csrf_token %}
+                        <button type="submit" class="line__remove" aria-label="Remove {{ item.product.name }} from your cart">{% include "_icon.html" with name="trash" only %}</button>
+                    </form>
+                </div>
+                {% if not item.product.active %}
+                <p class="line__notice">{% include "_icon.html" with name="prohibit" size="sm" only %} This product is no longer available. It is excluded from your total and will not be ordered.</p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <aside class="summary summary--sticky" aria-labelledby="summary-title">
+            <h2 class="summary__title" id="summary-title">Order summary</h2>
+            <dl class="summary__rows">
+                {% comment %}
+                Deliberately not paired with the subtotal: an unavailable line is
+                counted here but excluded from the money, and showing both on one
+                row would read as arithmetic that does not add up.
+                {% endcomment %}
+                <div class="summary__row summary__row--rule">
+                    <dt>Items in your cart</dt>
+                    <dd>{{ items|length }}</dd>
+                </div>
+            </dl>
+            <dl class="summary__total">
+                <dt>Subtotal</dt>
+                <dd>S${{ subtotal }}</dd>
+            </dl>
+            <a class="button button--lg button--block button--dark" href="{% url 'orders:checkout' %}">
+                Proceed to checkout
+                {% include "_icon.html" with name="arrow-right" size="sm" only %}
+            </a>
+            <p class="summary__note">
+                {% include "_icon.html" with name="info" size="sm" only %}
+                <span>Totals cover available items only. Stock is indicative until the order is placed, and payment is simulated.</span>
+            </p>
+        </aside>
     </div>
-    {% for item in items %}
-    <div class="operator-row">
-        <span class="operator-row__name">
-            {{ item.product.name }}{% if not item.product.active %} <span class="form-note">(unavailable)</span>{% endif %}
-        </span>
-        <span class="operator-row__price">{{ item.product.display_price }}</span>
-        <form method="post" action="{% url 'cart:update' item.pk %}" hx-post="{% url 'cart:update' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
-            {% csrf_token %}
-            <input type="number" name="quantity" min="1" max="999" value="{{ item.quantity }}" style="width: 6rem;">
-            <button type="submit" class="button button--compact button--outline-neutral">Update</button>
-        </form>
-        <span class="operator-row__price">S${{ item.line_total }}</span>
-        <form method="post" action="{% url 'cart:delete' item.pk %}" hx-post="{% url 'cart:delete' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
-            {% csrf_token %}
-            <button type="submit" class="button button--compact button--outline-neutral">Remove</button>
-        </form>
-    </div>
-    {% endfor %}
-    <p class="form-note">Subtotal (available items only): S${{ subtotal }}</p>
+
     {% else %}
-    <p>Your cart is empty. <a href="{% url 'catalogue:product_list' %}">Continue shopping</a>.</p>
+    <div class="empty">
+        <span class="empty__icon" aria-hidden="true">{% include "_icon.html" with name="cart" only %}</span>
+        <h2>Your cart is empty</h2>
+        <p>Items you add stay in your cart across devices and sessions, so you can pick this up later.</p>
+        <a class="button button--dark" href="{% url 'catalogue:product_list' %}">Continue shopping</a>
+    </div>
     {% endif %}
 </div>

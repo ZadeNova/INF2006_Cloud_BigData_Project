@@ -2,7 +2,8 @@
 {% block title %}Log in — Northstar Market{% endblock %}
 {% block content %}
 <section class="auth-page" aria-labelledby="login-title">
-    <div class="auth-page__card">
+    <div class="surface-card auth-page__card">
+        <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Account</p>
         <h1 id="login-title">Log in</h1>
         <form class="auth-form" method="post" novalidate>
             {% csrf_token %}

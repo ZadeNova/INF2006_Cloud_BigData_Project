@@ -4,8 +4,26 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Northstar Market frontend foundation preview">
+    <meta name="description" content="Northstar Market storefront">
+    <meta name="color-scheme" content="light dark">
     <title>{% block title %}Northstar Market{% endblock %}</title>
+    {# Applied before first paint so a stored choice does not flash the other theme. #}
+    <script>
+        (function () {
+            document.documentElement.classList.add("js");
+            try {
+                var stored = localStorage.getItem("northstar-theme");
+                if (stored === "dark" || stored === "light") {
+                    document.documentElement.setAttribute("data-theme", stored);
+                }
+            } catch (error) {
+                /* Private mode or blocked storage: fall back to the system preference. */
+            }
+        }());
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block head %}{% endblock %}
 </head>
@@ -15,7 +33,7 @@
     <header class="site-header">
         <div class="site-header__inner">
             <a class="brand" href="{% url 'home' %}" aria-label="Northstar Market home">
-                <span class="brand__mark" aria-hidden="true">✦</span>
+                <span class="brand__mark" aria-hidden="true">{% include "_icon.html" with name="star" only %}</span>
                 <span class="brand__name">Northstar <span>Market</span></span>
             </a>
 
@@ -25,27 +43,36 @@
             </button>
 
             <nav class="site-nav" id="primary-navigation" aria-label="Primary navigation">
-                <a href="{% url 'catalogue:product_list' %}">Shop</a>
-                <a href="{% url 'home' %}#overview">Overview</a>
-                <a href="{% url 'home' %}#patterns">Patterns</a>
-                <a href="{% url 'home' %}#states">States</a>
+                <a href="{% url 'catalogue:product_list' %}"{% if request.resolver_match.view_name == 'catalogue:product_list' %} aria-current="page"{% endif %}>Shop</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'orders:list' %}"{% if request.resolver_match.namespace == 'orders' %} aria-current="page"{% endif %}>Orders</a>
+                {% endif %}
             </nav>
 
             <div class="site-header__meta">
-                <span class="status-chip"><span class="status-chip__dot" aria-hidden="true"></span>Foundation preview</span>
-                <a class="button button--dark button--compact" href="{% url 'health' %}">System status</a>
                 {% if perms.catalogue.toggle_product_active %}
-                <a class="button button--compact" href="{% url 'catalogue:manage_list' %}">Manage products</a>
+                <a class="nav-pill nav-pill--quiet" href="{% url 'catalogue:manage_list' %}"{% if request.resolver_match.view_name == 'catalogue:manage_list' %} aria-current="page"{% endif %}>Manage products</a>
                 {% endif %}
                 {% if user.is_authenticated %}
-                <a class="button button--compact" href="{% url 'orders:list' %}">Orders</a>
-                <a class="button button--compact" href="{% url 'cart:detail' %}">Cart</a>
+                {% with cart_count=user.cart.items.count %}
+                <a class="nav-pill" href="{% url 'cart:detail' %}"{% if request.resolver_match.namespace == 'cart' %} aria-current="page"{% endif %}>
+                    {% include "_icon.html" with name="cart" only %}
+                    Cart
+                    {% if cart_count %}<span class="count-badge">{{ cart_count }}</span><span class="visually-hidden">items in cart</span>{% endif %}
+                </a>
+                {% endwith %}
+                {% endif %}
+                <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
+                    {% include "_icon.html" with name="moon" extra="theme-toggle__to-dark" only %}
+                    {% include "_icon.html" with name="sun" extra="theme-toggle__to-light" only %}
+                </button>
+                {% if user.is_authenticated %}
                 <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                     {% csrf_token %}
-                    <button type="submit" class="button button--compact">Log out</button>
+                    <button type="submit" class="nav-pill nav-pill--quiet">{% include "_icon.html" with name="sign-out" size="sm" only %} Log out</button>
                 </form>
                 {% else %}
-                <a class="button button--compact" href="{% url 'accounts:login' %}">Log in</a>
+                <a class="nav-pill" href="{% url 'accounts:login' %}">Log in</a>
                 {% endif %}
             </div>
         </div>
@@ -66,12 +93,34 @@
     </main>
 
     <footer class="site-footer">
-        <div class="site-footer__inner">
+        <div class="site-footer__inner site-footer__inner--columns">
             <div>
                 <p class="site-footer__brand">Northstar Market</p>
                 <p class="site-footer__copy">A calm foundation for a useful storefront.</p>
+                <p class="site-footer__meta">Payments are simulated. No card is ever charged.</p>
             </div>
-            <p class="site-footer__meta">Phase 1 · Django templates + HTMX</p>
+            <div>
+                <p class="site-footer__heading">Shop</p>
+                <ul class="site-footer__links">
+                    <li><a href="{% url 'catalogue:product_list' %}">All products</a></li>
+                    {% if user.is_authenticated %}
+                    <li><a href="{% url 'cart:detail' %}">Your cart</a></li>
+                    <li><a href="{% url 'orders:list' %}">Order history</a></li>
+                    {% else %}
+                    <li><a href="{% url 'accounts:login' %}">Log in</a></li>
+                    <li><a href="{% url 'accounts:register' %}">Create an account</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <p class="site-footer__heading">Project evidence</p>
+                <ul class="site-footer__links">
+                    <li><a href="{% url 'home' %}#overview">Foundation preview</a></li>
+                    <li><a href="{% url 'home' %}#patterns">Patterns</a></li>
+                    <li><a href="{% url 'home' %}#states">States</a></li>
+                    <li><a href="{% url 'health' %}">System status</a></li>
+                </ul>
+            </div>
         </div>
     </footer>
 

@@ -45,6 +45,77 @@
         });
     }
 
+    var THEME_KEY = "northstar-theme";
+    var darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    var activeTheme = function () {
+        var explicit = document.documentElement.getAttribute("data-theme");
+        if (explicit === "dark" || explicit === "light") {
+            return explicit;
+        }
+        return darkQuery.matches ? "dark" : "light";
+    };
+
+    // Delegated so the controls survive every HTMX swap.
+    document.addEventListener("click", function (event) {
+        var toggle = event.target.closest("[data-theme-toggle]");
+        if (!toggle) {
+            return;
+        }
+        var next = activeTheme() === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        try {
+            localStorage.setItem(THEME_KEY, next);
+        } catch (error) {
+            /* The choice still applies to this page; it just will not persist. */
+        }
+    });
+
+    document.addEventListener("click", function (event) {
+        var button = event.target.closest("[data-step]");
+        if (!button) {
+            return;
+        }
+        var input = document.getElementById(button.getAttribute("data-step-target"));
+        if (!input || input.disabled) {
+            return;
+        }
+        var min = Number(input.getAttribute("min")) || 1;
+        var max = Number(input.getAttribute("max")) || 999;
+        var current = Number(input.value) || min;
+        var next = Math.min(max, Math.max(min, current + Number(button.getAttribute("data-step"))));
+        if (next === current) {
+            return;
+        }
+        input.value = String(next);
+        // The form listens for change, so this is what posts the new quantity.
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    if (!window.htmx) {
+        document.documentElement.classList.add("no-htmx");
+    }
+
+    // The swapped fragment cannot host its own live region, because HTMX
+    // replaces the element itself. This one lives outside #cart-content.
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        var target = event.detail && event.detail.target;
+        if (!target || target.id !== "cart-content") {
+            return;
+        }
+        var status = document.getElementById("cart-status");
+        if (!status) {
+            return;
+        }
+        // outerHTML swaps leave event.detail.target detached, so read the
+        // fresh node out of the document rather than the swapped-out one.
+        var fresh = document.getElementById("cart-content");
+        var total = fresh && fresh.querySelector(".summary__total dd");
+        status.textContent = total
+            ? "Cart updated. Subtotal " + total.textContent.trim() + "."
+            : "Cart updated.";
+    });
+
     var getDesignNotesRetry = function () {
         return document.querySelector("[data-design-notes-success='true']");
     };

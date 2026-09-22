@@ -1,27 +1,47 @@
 {% extends "base.html" %}
 {% block title %}Products — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Products</h1>
-</section>
+<div class="page">
+    <div class="page__header">
+        <div>
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Catalogue</p>
+            <h1 class="page__title">Products</h1>
+            <p class="page__lead">Stock counts are indicative and are checked again when you place an order.</p>
+        </div>
+        {% if products %}
+        <p class="page__meta">Showing <strong>{{ page_obj.start_index }}-{{ page_obj.end_index }}</strong> of {{ paginator.count }}</p>
+        {% endif %}
+    </div>
 
-{% if products %}
-<div class="product-grid">
-    {% for product in products %}
-    {% include "catalogue/_product_card.html" %}
-    {% endfor %}
+    {% if products %}
+    <div class="product-grid">
+        {% for product in products %}
+        {% include "catalogue/_product_card.html" %}
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav class="pager" aria-label="Product pages">
+        {% if page_obj.has_previous %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.previous_page_number }}">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</span>
+        {% endif %}
+        <p class="pager__status">Page <strong>{{ page_obj.number }}</strong> of {{ paginator.num_pages }}</p>
+        {% if page_obj.has_next %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.next_page_number }}">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="empty">
+        <span class="empty__icon" aria-hidden="true">{% include "_icon.html" with name="storefront" only %}</span>
+        <h2>No products available yet</h2>
+        <p>The catalogue is empty for this namespace. Once products are seeded or imported they appear here.</p>
+    </div>
+    {% endif %}
 </div>
-
-<nav aria-label="Product pages">
-    {% if page_obj.has_previous %}
-    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-    {% endif %}
-    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
-    {% endif %}
-</nav>
-{% else %}
-<p>No products available yet.</p>
-{% endif %}
 {% endblock %}

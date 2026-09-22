@@ -1,48 +1,112 @@
 {% extends "base.html" %}
 {% block title %}Checkout — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Checkout</h1>
-    <p>Review your order before placing it. Payment is simulated — no real charge occurs.</p>
-</section>
+<div class="page">
+    <a class="page__back" href="{% url 'cart:detail' %}">{% include "_icon.html" with name="caret-left" size="sm" only %} Back to cart</a>
+    <div class="page__header">
+        <div>
+            <h1 class="page__title">Checkout</h1>
+            <p class="page__lead">Review your order before placing it. Nothing below can be edited here. Go back to the cart to change quantities.</p>
+        </div>
+        <ol class="steps">
+            <li class="step step--done"><span class="step__mark" aria-hidden="true">{% include "_icon.html" with name="check" size="sm" only %}</span> Cart</li>
+            <span class="steps__rule" aria-hidden="true"></span>
+            <li class="step step--current" aria-current="step"><span class="step__mark" aria-hidden="true">2</span> Review</li>
+            <span class="steps__rule" aria-hidden="true"></span>
+            <li class="step"><span class="step__mark" aria-hidden="true">3</span> Confirmation</li>
+        </ol>
+    </div>
 
-{% if error %}
-<div class="message message--error" role="alert">
-    <span class="message__icon" aria-hidden="true">!</span>
-    <div><p>{{ error }}</p></div>
-</div>
-{% endif %}
+    {% if error %}
+    <div class="message message--error" role="alert">
+        <span class="message__icon" aria-hidden="true">!</span>
+        <div><p>{{ error }}</p></div>
+    </div>
+    {% endif %}
 
-<div class="surface-card operator-table">
     {% if lines %}
-    <div class="operator-row operator-row--header">
-        <span>Product</span>
-        <span style="text-align: right;">Price</span>
-        <span>Quantity</span>
-        <span style="text-align: right;">Line total</span>
+    <div class="shop-layout">
+        <div>
+            <div class="line-head" aria-hidden="true">
+                <span></span>
+                <span>Product</span>
+                <span>Unit price</span>
+                <span>Qty</span>
+                <span>Line total</span>
+            </div>
+            <ul class="line-list">
+                {% for line in lines %}
+                <li class="surface-card line-item">
+                    <div class="line line--review">
+                        <span class="line__thumb line__thumb--{{ line.product.category|slugify }}" aria-hidden="true">
+                            {% include "catalogue/_category_glyph.html" with category=line.product.category extra="" only %}
+                        </span>
+                        <div class="line__main">
+                            <p class="line__name">{{ line.product.name }}</p>
+                            <p class="line__meta">{{ line.product.category }}</p>
+                            {% if line.warning %}
+                            <p class="line__warn">{% include "_icon.html" with name="warning" size="sm" only %} {{ line.warning }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="line__figures">
+                            <span class="line__unit"><span class="visually-hidden">Unit price </span>{{ line.product.display_price }}</span>
+                            <span class="line__count"><span class="visually-hidden">Quantity </span>&times; {{ line.item.quantity }}</span>
+                            <span class="line__total"><span class="visually-hidden">Line total </span>S${{ line.line_total }}</span>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <aside class="summary" aria-labelledby="summary-title">
+            <h2 class="summary__title" id="summary-title">Order summary</h2>
+            <dl class="summary__rows">
+                <div class="summary__row">
+                    <dt>{{ lines|length }} product{{ lines|length|pluralize }}</dt>
+                    <dd>S${{ subtotal }}</dd>
+                </div>
+                <div class="summary__row summary__row--rule">
+                    <dt>Delivery</dt>
+                    <dd>Not simulated</dd>
+                </div>
+            </dl>
+            <dl class="summary__total">
+                <dt>Total</dt>
+                <dd>S${{ subtotal }}</dd>
+            </dl>
+
+            <div class="callout">
+                {% include "_icon.html" with name="credit-card" size="sm" only %}
+                <div>
+                    <strong>Payment is simulated</strong>
+                    <p>No card details are collected and no charge is made. The order is recorded as completed.</p>
+                </div>
+            </div>
+
+            <form class="summary__action" method="post" action="{% url 'orders:checkout' %}">
+                {% csrf_token %}
+                <input type="hidden" name="review" value="{{ review }}">
+                <button type="submit" class="button button--lg button--block button--dark">
+                    Place order
+                    {% include "_icon.html" with name="arrow-right" size="sm" only %}
+                </button>
+            </form>
+
+            <p class="summary__note">
+                {% include "_icon.html" with name="info" size="sm" only %}
+                <span>Safe to retry. If the connection drops, reloading and pressing the button again will not create a second order.</span>
+            </p>
+        </aside>
     </div>
-    {% for line in lines %}
-    <div class="operator-row">
-        <span class="operator-row__name">
-            {{ line.product.name }}{% if line.warning %} <span class="form-note">({{ line.warning }})</span>{% endif %}
-        </span>
-        <span class="operator-row__price">{{ line.product.display_price }}</span>
-        <span>{{ line.item.quantity }}</span>
-        <span class="operator-row__price">S${{ line.line_total }}</span>
-    </div>
-    {% endfor %}
-    <p class="form-note">Total: S${{ subtotal }}</p>
+
     {% else %}
-    <p>Your cart is empty. <a href="{% url 'catalogue:product_list' %}">Continue shopping</a>.</p>
+    <div class="empty">
+        <span class="empty__icon" aria-hidden="true">{% include "_icon.html" with name="cart" only %}</span>
+        <h2>Your cart is empty</h2>
+        <p>There is nothing to check out. Add something to your cart first.</p>
+        <a class="button button--dark" href="{% url 'catalogue:product_list' %}">Continue shopping</a>
+    </div>
     {% endif %}
 </div>
-
-{% if lines %}
-<a class="button button--compact button--outline-neutral" href="{% url 'cart:detail' %}">Back to cart</a>
-<form method="post" action="{% url 'orders:checkout' %}">
-    {% csrf_token %}
-    <input type="hidden" name="review" value="{{ review }}">
-    <button type="submit" class="button button--dark">Place order</button>
-</form>
-{% endif %}
 {% endblock %}

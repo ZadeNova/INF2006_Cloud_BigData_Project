@@ -1,42 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Your orders — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Your orders</h1>
-</section>
+<div class="page">
+    <div class="page__header">
+        <div>
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Account</p>
+            <h1 class="page__title">Your orders</h1>
+            <p class="page__lead">Only your own orders appear here. Each total is the prices captured at the moment that order was placed.</p>
+        </div>
+        {% if orders %}
+        <p class="page__meta">{{ paginator.count }} order{{ paginator.count|pluralize }}</p>
+        {% endif %}
+    </div>
 
-<div class="surface-card operator-table">
     {% if orders %}
-    <div class="operator-row operator-row--header">
-        <span>Order</span>
-        <span>Date</span>
-        <span>Status</span>
-        <span>Items</span>
-        <span style="text-align: right;">Total</span>
-    </div>
-    {% for order in orders %}
-    <div class="operator-row">
-        <span class="operator-row__name"><a href="{% url 'orders:detail' order.pk %}">Order #{{ order.pk }}</a></span>
-        <span>{{ order.placed_at }}</span>
-        <span>{{ order.get_status_display }}</span>
-        <span>{{ order.item_count }}</span>
-        <span class="operator-row__price">S${{ order.total }}</span>
-    </div>
-    {% endfor %}
+    <ul class="order-list">
+        {% for order in orders %}
+        <li>
+            <a class="surface-card order-row" href="{% url 'orders:detail' order.pk %}">
+                <span class="order-row__id">#{{ order.pk }}<span class="visually-hidden">, order</span></span>
+                <span class="order-row__date">{{ order.placed_at|date:"j M Y, H:i" }}</span>
+                <span class="badge badge--{{ order.status }}">{{ order.get_status_display }}</span>
+                <span class="order-row__items">{{ order.item_count }} item{{ order.item_count|pluralize }}</span>
+                <span class="order-row__total">S${{ order.total }}</span>
+                <span class="order-row__go" aria-hidden="true">{% include "_icon.html" with name="caret-right" only %}</span>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if is_paginated %}
+    <nav class="pager" aria-label="Order pages">
+        {% if page_obj.has_previous %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.previous_page_number }}">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</span>
+        {% endif %}
+        <p class="pager__status">Page <strong>{{ page_obj.number }}</strong> of {{ paginator.num_pages }}</p>
+        {% if page_obj.has_next %}
+        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.next_page_number }}">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
+        {% else %}
+        <span class="button button--compact button--disabled" aria-disabled="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
     {% else %}
-    <p>You haven't placed any orders yet. <a href="{% url 'catalogue:product_list' %}">Continue shopping</a>.</p>
+    <div class="empty">
+        <span class="empty__icon" aria-hidden="true">{% include "_icon.html" with name="package" only %}</span>
+        <h2>You haven't placed any orders yet</h2>
+        <p>Once you place one, it appears here with its items, status and the total you paid.</p>
+        <a class="button button--dark" href="{% url 'catalogue:product_list' %}">Continue shopping</a>
+    </div>
     {% endif %}
 </div>
-
-{% if is_paginated %}
-<nav aria-label="Order pages">
-    {% if page_obj.has_previous %}
-    <a class="button button--compact" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-    {% endif %}
-    <span class="form-note">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-    <a class="button button--compact" href="?page={{ page_obj.next_page_number }}">Next</a>
-    {% endif %}
-</nav>
-{% endif %}
 {% endblock %}

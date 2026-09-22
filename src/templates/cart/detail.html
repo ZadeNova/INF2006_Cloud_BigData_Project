@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Your cart — Northstar Market{% endblock %}
 {% block content %}
-<section class="section-heading">
-    <h1>Your cart</h1>
-</section>
+<div class="page">
+    <a class="page__back" href="{% url 'catalogue:product_list' %}">{% include "_icon.html" with name="caret-left" size="sm" only %} Continue shopping</a>
+    <div class="page__header">
+        <div>
+            <h1 class="page__title">Your cart</h1>
+            <p class="page__lead">Change a quantity and the totals update without leaving the page.</p>
+        </div>
+    </div>
 
-{% include "cart/_content.html" %}
+    <p class="visually-hidden" role="status" id="cart-status"></p>
+
+    {% include "cart/_content.html" %}
+</div>
 {% endblock %}
