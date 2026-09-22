@@ -37,6 +37,9 @@
                 {% if perms.catalogue.toggle_product_active %}
                 <a class="button button--compact" href="{% url 'catalogue:manage_list' %}">Manage products</a>
                 {% endif %}
+                {% if perms.reporting.view_analytics %}
+                <a class="button button--compact" href="{% url 'reporting:dashboard' %}">Analytics</a>
+                {% endif %}
                 {% if user.is_authenticated %}
                 <a class="button button--compact" href="{% url 'orders:list' %}">Orders</a>
                 <a class="button button--compact" href="{% url 'cart:detail' %}">Cart</a>

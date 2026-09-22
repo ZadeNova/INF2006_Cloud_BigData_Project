@@ -7,6 +7,7 @@ urlpatterns = [
     path("", include("orders.urls")),
     path("products/", include("catalogue.urls")),
     path("cart/", include("cart.urls")),
+    path("analytics/", include("reporting.urls")),
     path("foundation/design-notes/", design_notes, name="design-notes"),
     path("foundation/design-notes-unavailable/", design_notes_unavailable, name="design-notes-unavailable"),
     path("health/", health, name="health"),

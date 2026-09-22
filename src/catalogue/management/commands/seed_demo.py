@@ -68,13 +68,13 @@ class Command(BaseCommand):
         self.stdout.write(f"Created {created} demo product(s); {len(products) - created} already existed.")
 
         group, _ = Group.objects.get_or_create(name="store_operator")
-        try:
-            permission = Permission.objects.get(codename="toggle_product_active", content_type__app_label="catalogue")
-        except Permission.DoesNotExist:
-            raise CommandError(
-                "catalogue.toggle_product_active permission not found — run 'manage.py migrate' before seed_demo."
-            ) from None
-        if not group.permissions.filter(pk=permission.pk).exists():
+        for app_label, codename in [("catalogue", "toggle_product_active"), ("reporting", "view_analytics")]:
+            try:
+                permission = Permission.objects.get(codename=codename, content_type__app_label=app_label)
+            except Permission.DoesNotExist:
+                raise CommandError(
+                    f"{app_label}.{codename} permission not found — run 'manage.py migrate' before seed_demo."
+                ) from None
             group.permissions.add(permission)
 
         User = get_user_model()
