@@ -4,7 +4,7 @@ Status checked: 22 September 2026. This file owns implementation status; [scope]
 
 ## Current state
 
-- PR #2 final integration review (22 September 2026): independent Astra Medium review cleared after Astra Low fixed FINAL-001 (Windows raw-CSV newline conversion) with scoped Git attributes and unchanged dataset bytes. All six source checksums verified; hosted CI on `c8d2656` passed 381 tests, fresh migrations and Django/migration checks. Local rerun was unavailable due to Docker Engine HTTP 500. Review and limitations: [final PR review](reviews/pr-2-final.md). Cleared for the user-authorized merge once final-head CI passes; consult PR #2 for publication/merge state. Dataset profiling/import, dashboard, AWS and frontend integration remain open.
+- PR #2 merged at `0887e81` after independent final review and 381 passing hosted tests; [review](reviews/pr-2-final.md). Local Docker follow-up (22 September 2026) passed build, fresh PostgreSQL initialization/migrations, Django/database checks, migration drift check and all 381 tests after Astra Low fixed DOCKER-001 (Windows CRLF checkout of the Linux initializer). Independent Astra Medium review cleared the fix; [commands, finding and results](reviews/docker-windows-checks.md). The scoped attribute fix and follow-up record are included in the post-merge follow-up. Docker Engine HTTP 500 is no longer blocking verification. Dataset profiling/import, dashboard, AWS and frontend integration remain open.
 
 - Documentation cleanup: removed nine separate foundation verification/output files at the user's request. Existing reviews in `docs/reviews/` are retained; supporting historical records remain in Git history. Required submission evidence templates remain in `evidence/`.
 
