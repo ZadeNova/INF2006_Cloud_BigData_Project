@@ -1,2 +1,4 @@
 # Preserve downloaded raw CSV bytes and their recorded SHA-256 checksums.
 data/raw/*.csv -text
+# Linux container startup scripts require LF shebangs on Windows checkouts.
+src/docker/*.sh text eol=lf
