@@ -10,7 +10,7 @@ Use a shared base template, reusable forms/product components and named HTMX fra
 
 ## Design and states
 
-Adapt the cream/green design reference with the project's own branding and licensed assets/fonts. Keep visual values in DESIGN and use shared CSS tokens with consistent units. Do not add rewards, careers or drink features from reference examples.
+Adapt the VoiceBox design reference — black, white and one red accent, square corners, no shadows, 2px borders — with the project's own branding and licensed assets and fonts. Keep visual values in DESIGN and use shared CSS tokens with consistent units; token names follow DESIGN.md's palette tables. Red is a fill, a rule or a mark, never small text: it reaches only 3.61:1 on the page ground, so red that has to be read uses the darker `--color-secondary-ink`. Do not add article, byline, commenting or blog features from reference examples.
 
 Define loading, empty, validation and dependency-error states. Label payments as simulated. Catalogue stock is indicative; explain sold-out checkout outcomes. Preserve the checkout request key across uncertain retries; button disabling is not server-side idempotency.
 

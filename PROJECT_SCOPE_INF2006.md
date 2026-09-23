@@ -60,7 +60,7 @@ Pin supported dependency and image versions during week one. Do not change frame
 
 ### Frontend design reference
 
-Use the selected Starbucks-inspired `DESIGN.md` as a visual reference for cream surfaces, green accents, rounded cards and pill buttons. Its intended project location is the repository root; the supplied reference was read from Downloads. Implement styling through reusable Django templates and shared CSS. Use the project's own branding and appropriately licensed imagery/fonts, with a system font or Inter instead of proprietary fonts. Standardise inconsistent rem/pixel values and verify focus states, contrast, labels and mobile layouts. Design examples do not add rewards, careers or drink-customisation features to this scope. Record source attribution.
+Use `DESIGN.md` at the repository root as the visual reference. **Changed 23 September 2026**: the original Starbucks-inspired reference (cream surfaces, green accents, rounded cards, pill buttons) was replaced by VoiceBox, a high-contrast editorial system — black, white and a single red accent, square corners, no shadows, 2px borders carrying the structure. The storefront was reimplemented against it on branch `UIUX`. Implement styling through reusable Django templates and shared CSS; `site.css` token names follow DESIGN.md's own palette tables so a value named there can be found in the stylesheet. Use the project's own branding and appropriately licensed assets and fonts: Archivo Black, Work Sans and Space Mono (SIL Open Font License) replace the reference's proprietary faces, and icons are Phosphor (MIT). Standardise inconsistent rem/pixel values and verify focus states, contrast, labels and mobile layouts — the status colours in the reference sit at roughly 3:1 on their own tints and are darkened one shade in the build to pass AA. Design examples do not add article, byline, commenting or blog features to this scope. Source attribution for the VoiceBox reference is still outstanding; see DESIGN.md section 7.
 
 ## 4. Application features and correctness
 
@@ -472,7 +472,10 @@ Dataset and design references:
 
 - [Selected synthetic dataset and published provenance/licence](https://www.analyticsengineering.com/datasets/ecommerce-sales)
 - [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) — original selection, superseded 22 September 2026 after gated access was never granted
-- Selected `DESIGN.md` supplied by the user, adapted for this project; record its original source and relevant asset licences.
+- Selected `DESIGN.md` (VoiceBox) supplied by the user, adapted for this project; **original source and licence not yet recorded** — outstanding attribution task
+- Starbucks-inspired design reference — original selection, superseded 23 September 2026 when the storefront was reimplemented against VoiceBox
+- [Archivo Black](https://fonts.google.com/specimen/Archivo+Black), [Work Sans](https://fonts.google.com/specimen/Work+Sans) and [Space Mono](https://fonts.google.com/specimen/Space+Mono) — SIL Open Font License
+- [Phosphor Icons](https://github.com/phosphor-icons/core) — MIT License, vendored as one SVG sprite
 
 Technical references:
 

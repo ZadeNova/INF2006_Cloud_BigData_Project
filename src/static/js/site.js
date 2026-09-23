@@ -96,6 +96,22 @@
         document.documentElement.classList.add("no-htmx");
     }
 
+    var readSubtotal = function () {
+        var node = document.querySelector("#cart-content .summary__total dd");
+        return node ? node.textContent.trim() : null;
+    };
+
+    // HTMX replaces the node, so the old figure has to be read before the
+    // swap for the mark below to know whether the money actually moved.
+    var previousSubtotal = null;
+
+    document.body.addEventListener("htmx:beforeSwap", function (event) {
+        var target = event.detail && event.detail.target;
+        if (target && target.id === "cart-content") {
+            previousSubtotal = readSubtotal();
+        }
+    });
+
     // The swapped fragment cannot host its own live region, because HTMX
     // replaces the element itself. This one lives outside #cart-content.
     document.body.addEventListener("htmx:afterSwap", function (event) {
@@ -103,17 +119,30 @@
         if (!target || target.id !== "cart-content") {
             return;
         }
-        var status = document.getElementById("cart-status");
-        if (!status) {
-            return;
-        }
         // outerHTML swaps leave event.detail.target detached, so read the
         // fresh node out of the document rather than the swapped-out one.
         var fresh = document.getElementById("cart-content");
         var total = fresh && fresh.querySelector(".summary__total dd");
-        status.textContent = total
-            ? "Cart updated. Subtotal " + total.textContent.trim() + "."
-            : "Cart updated.";
+
+        var status = document.getElementById("cart-status");
+        if (status) {
+            status.textContent = total
+                ? "Cart updated. Subtotal " + total.textContent.trim() + "."
+                : "Cart updated.";
+        }
+
+        // State indication, and only when there is a state change to indicate:
+        // the figure inverts instantly, then releases over 420ms via CSS.
+        if (total && previousSubtotal !== null && total.textContent.trim() !== previousSubtotal) {
+            total.classList.add("is-updated");
+            // Two frames, so the inverted state is painted before it releases.
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    total.classList.remove("is-updated");
+                });
+            });
+        }
+        previousSubtotal = null;
     });
 
     var getDesignNotesRetry = function () {

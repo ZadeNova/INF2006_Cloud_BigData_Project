@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Statistics preview — Northstar Market{% endblock %}
+{% block content %}
+<div class="page">
+    <div class="preview-banner" role="note">
+        {% include "_icon.html" with name="warning" only %}
+        <div>
+            <strong>Design comp. Every number on this page is invented.</strong>
+            <p>Nothing here is queried. The real dashboard is a later batch that reads the analytics
+               run, and it will live on its own protected operator route. Do not cite this page as a
+               result or as evidence that analytics works.</p>
+        </div>
+    </div>
+
+    <div class="page__header">
+        <div>
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Operator preview</p>
+            <h1 class="page__title">Statistics</h1>
+            <p class="page__lead">What the shop would report, laid out as the finished dashboard will
+               be. Sample figures stand in for a completed analytics run.</p>
+        </div>
+        <div class="meta-stack">
+            <span class="badge badge--completed">{% include "_icon.html" with name="check" size="sm" only %} Sample run</span>
+            <p class="page__meta">Cutoff 2026-09-21 23:59 SGT · run v14</p>
+        </div>
+    </div>
+
+    <div class="analytics-toolbar">
+        <span class="field-label">Range</span>
+        <div class="chip-row">
+            <span class="chip">7D</span>
+            <span class="chip chip--on" aria-current="true">30D</span>
+            <span class="chip">90D</span>
+            <span class="chip">MTD</span>
+            <span class="chip">YTD</span>
+        </div>
+        <p class="analytics-toolbar__note">
+            {% include "_icon.html" with name="info" size="sm" only %}
+            <span>Comparison with the previous 30 days is shown on the trend.</span>
+        </p>
+    </div>
+
+    <div class="stat-grid">
+        <div class="surface-card stat-tile">
+            <p class="stat-tile__label">Completed sales</p>
+            <p class="stat-tile__value">S$100,168.03</p>
+            <p class="stat-tile__delta">&#9650; 9.6% <span>vs S$91,402.55</span></p>
+        </div>
+        <div class="surface-card stat-tile">
+            <p class="stat-tile__label">Units sold</p>
+            <p class="stat-tile__value">2,292</p>
+            <p class="stat-tile__delta">&#9650; 8.2% <span>vs 2,118</span></p>
+        </div>
+        <div class="surface-card stat-tile">
+            <p class="stat-tile__label">Orders</p>
+            <p class="stat-tile__value">486</p>
+            <p class="stat-tile__delta">&#9650; 6.1% <span>vs 458</span></p>
+        </div>
+        <div class="surface-card stat-tile">
+            <p class="stat-tile__label">Average order</p>
+            <p class="stat-tile__value">S$206.11</p>
+            <p class="stat-tile__delta stat-tile__delta--down">&#9660; 2.4% <span>vs S$211.18</span></p>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <section class="surface-card panel" aria-labelledby="trend-title">
+            <div class="panel__head">
+                <div>
+                    <h2 class="panel__title" id="trend-title">Daily completed sales</h2>
+                    <p class="panel__note">30 days to 21 September 2026, against the 30 before it.</p>
+                </div>
+                <p class="page__meta">Peak 08 Sep · S$3,590.94</p>
+            </div>
+            <div class="chart">
+                <svg viewBox="0 0 880 300" role="img" aria-label="Daily completed sales for the selected 30 days against the previous 30 days. Sample data.">
+        <line class="chart__grid" x1="64" y1="223.0" x2="856" y2="223.0"/>
+        <text class="chart__tick" x="52" y="227.0" text-anchor="end">2.4K</text>
+        <line class="chart__grid" x1="64" y1="177.0" x2="856" y2="177.0"/>
+        <text class="chart__tick" x="52" y="181.0" text-anchor="end">2.8K</text>
+        <line class="chart__grid" x1="64" y1="131.0" x2="856" y2="131.0"/>
+        <text class="chart__tick" x="52" y="135.0" text-anchor="end">3.2K</text>
+        <line class="chart__grid" x1="64" y1="85.0" x2="856" y2="85.0"/>
+        <text class="chart__tick" x="52" y="89.0" text-anchor="end">3.6K</text>
+        <line class="chart__grid" x1="64" y1="39.0" x2="856" y2="39.0"/>
+        <text class="chart__tick" x="52" y="43.0" text-anchor="end">4.0K</text>
+        <line class="chart__axis" x1="64" y1="246" x2="856" y2="246"/>
+        <text class="chart__tick" x="64.0" y="272" text-anchor="start">23 AUG</text>
+        <text class="chart__tick" x="255.2" y="272" text-anchor="middle">30 AUG</text>
+        <text class="chart__tick" x="446.3" y="272" text-anchor="middle">06 SEP</text>
+        <text class="chart__tick" x="637.5" y="272" text-anchor="middle">13 SEP</text>
+        <text class="chart__tick" x="856.0" y="272" text-anchor="end">21 SEP</text>
+        <polyline class="chart__series chart__series--prev" points="64.0,194.2 91.3,169.0 118.6,165.6 145.9,177.1 173.2,179.3 200.6,164.8 227.9,154.6 255.2,169.6 282.5,200.5 309.8,218.2 337.1,209.8 364.4,192.2 391.7,186.5 419.0,188.3 446.3,175.8 473.7,143.8 501.0,116.4 528.3,118.5 555.6,145.1 582.9,167.5 610.2,170.3 637.5,167.2 664.8,176.9 692.1,193.6 719.4,192.5 746.8,164.9 774.1,132.4 801.4,121.8 828.7,131.4 856.0,136.7"/>
+        <polyline class="chart__series chart__series--current" points="64.0,156.3 91.3,126.1 118.6,119.8 145.9,131.9 173.2,137.7 200.6,128.4 227.9,122.8 255.2,139.6 282.5,169.1 309.8,182.5 337.1,168.8 364.4,147.3 391.7,140.6 419.0,144.8 446.3,137.1 473.7,110.2 501.0,86.0 528.3,88.2 555.6,111.4 582.9,128.8 610.2,126.8 637.5,121.2 664.8,132.1 692.1,152.7 719.4,156.9 746.8,133.5 774.1,102.5 801.4,89.8 828.7,94.9 856.0,95.0"/>
+        <line class="chart__crosshair" x1="719.4" y1="16" x2="719.4" y2="246.0"/>
+        <rect class="chart__dot chart__dot--prev" x="714.9" y="188.0" width="9" height="9"/>
+        <rect class="chart__dot chart__dot--current" x="713.9" y="151.4" width="11" height="11"/>
+        <text class="chart__label chart__label--current" x="852.0" y="81.0" text-anchor="end">THIS PERIOD</text>
+        <text class="chart__label chart__label--prev" x="852.0" y="160.7" text-anchor="end">PREVIOUS</text>
+
+# peak: 3590.9447609460885 at index 16
+                </svg>
+            </div>
+            <details class="panel__table">
+                <summary>View as a table</summary>
+                <p class="panel__note">The finished dashboard lists every bucket here, so the chart is
+                   never the only way to read the numbers.</p>
+            </details>
+        </section>
+
+        <section class="surface-card panel" aria-labelledby="category-title">
+            <div class="panel__head">
+                <div>
+                    <h2 class="panel__title" id="category-title">Sales by category</h2>
+                    <p class="panel__note">Completed orders in the selected range.</p>
+                </div>
+            </div>
+            <ul class="catbars">
+                <li class="catbar">
+                    <span class="catbar__label">Home</span>
+                    <span class="catbar__track"><span class="catbar__fill" style="width: 100%"></span></span>
+                    <span class="catbar__value">S$40,416.32</span>
+                    <span class="catbar__units">812 u</span>
+                </li>
+                <li class="catbar">
+                    <span class="catbar__label">Outdoor</span>
+                    <span class="catbar__track"><span class="catbar__fill" style="width: 67.9%"></span></span>
+                    <span class="catbar__value">S$27,438.42</span>
+                    <span class="catbar__units">584 u</span>
+                </li>
+                <li class="catbar">
+                    <span class="catbar__label">Kitchen</span>
+                    <span class="catbar__track"><span class="catbar__fill" style="width: 44.2%"></span></span>
+                    <span class="catbar__value">S$17,860.16</span>
+                    <span class="catbar__units">549 u</span>
+                </li>
+                <li class="catbar">
+                    <span class="catbar__label">Electronics</span>
+                    <span class="catbar__track"><span class="catbar__fill" style="width: 35.8%"></span></span>
+                    <span class="catbar__value">S$14,453.13</span>
+                    <span class="catbar__units">347 u</span>
+                </li>
+            </ul>
+            <p class="catbars__total">
+                <span class="field-label">Total</span>
+                <span class="page__meta">S$100,168.03 · 2,292 u</span>
+            </p>
+        </section>
+    </div>
+
+    <div class="analytics-grid analytics-grid--tables">
+        <section class="surface-card panel" aria-labelledby="top-title">
+            <div class="panel__head">
+                <div>
+                    <h2 class="panel__title" id="top-title">Top sellers</h2>
+                    <p class="panel__note">Ranked by revenue. The finished page lists ten.</p>
+                </div>
+            </div>
+            <div class="optable">
+                <div class="optable__row optable__row--head optable__row--top">
+                    <span>Product</span>
+                    <span>Category</span>
+                    <span>Units</span>
+                    <span>Unit price</span>
+                    <span>Revenue</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Ridgeline 3-Season Tent</span>
+                    <span class="optable__muted">Outdoor</span>
+                    <span class="optable__num">148</span>
+                    <span class="optable__num">S$80.00</span>
+                    <span class="optable__num optable__num--strong">S$11,840.00</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Copper Core Saucepan</span>
+                    <span class="optable__muted">Kitchen</span>
+                    <span class="optable__num">213</span>
+                    <span class="optable__num">S$39.00</span>
+                    <span class="optable__num optable__num--strong">S$8,307.00</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Alder Wool Throw</span>
+                    <span class="optable__muted">Home</span>
+                    <span class="optable__num">176</span>
+                    <span class="optable__num">S$44.00</span>
+                    <span class="optable__num optable__num--strong">S$7,744.00</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Harbour Bluetooth Headphones</span>
+                    <span class="optable__muted">Electronics</span>
+                    <span class="optable__num">94</span>
+                    <span class="optable__num">S$75.00</span>
+                    <span class="optable__num optable__num--strong">S$7,050.00</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Cast Iron Skillet 28cm</span>
+                    <span class="optable__muted">Kitchen</span>
+                    <span class="optable__num">162</span>
+                    <span class="optable__num">S$39.00</span>
+                    <span class="optable__num optable__num--strong">S$6,318.00</span>
+                </div>
+                <div class="optable__row optable__row--top">
+                    <span class="optable__name">Linen Duvet Set</span>
+                    <span class="optable__muted">Home</span>
+                    <span class="optable__num">88</span>
+                    <span class="optable__num">S$68.00</span>
+                    <span class="optable__num optable__num--strong">S$5,984.00</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="surface-card panel" aria-labelledby="repl-title">
+            <div class="panel__head">
+                <div>
+                    <h2 class="panel__title" id="repl-title">Replenishment</h2>
+                    <p class="panel__note">Worst cover first. The finished page lists twenty-five.</p>
+                </div>
+            </div>
+            <div class="chip-row chip-row--counts">
+                <span class="badge badge--refunded">4 flagged</span>
+                <span class="badge badge--warning">1 unavailable</span>
+                <span class="badge badge--completed">20 ok</span>
+            </div>
+            <div class="optable">
+                <div class="optable__row optable__row--head optable__row--repl">
+                    <span>Product</span>
+                    <span>Stock</span>
+                    <span>Cover</span>
+                    <span>Status</span>
+                </div>
+                <div class="optable__row optable__row--repl">
+                    <span class="optable__name">Ridgeline 3-Season Tent</span>
+                    <span class="optable__num optable__num--low-stock">4</span>
+                    <span class="optable__num">14 d</span>
+                    <span class="badge badge--refunded">Flagged</span>
+                </div>
+                <div class="optable__row optable__row--repl">
+                    <span class="optable__name">Harbour Bluetooth Headphones</span>
+                    <span class="optable__num optable__num--out-of-stock">0</span>
+                    <span class="optable__num">&mdash;</span>
+                    <span class="badge badge--warning">Unavailable</span>
+                </div>
+                <div class="optable__row optable__row--repl">
+                    <span class="optable__name">Trailhead Water Filter</span>
+                    <span class="optable__num optable__num--low-stock">7</span>
+                    <span class="optable__num">19 d</span>
+                    <span class="badge badge--refunded">Flagged</span>
+                </div>
+                <div class="optable__row optable__row--repl">
+                    <span class="optable__name">Alder Wool Throw</span>
+                    <span class="optable__num">9</span>
+                    <span class="optable__num">No history</span>
+                    <span class="badge badge--neutral">Insufficient</span>
+                </div>
+                <div class="optable__row optable__row--repl">
+                    <span class="optable__name">Copper Core Saucepan</span>
+                    <span class="optable__num">61</span>
+                    <span class="optable__num">62 d</span>
+                    <span class="badge badge--completed">Ok</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="callout callout--wide">
+        {% include "_icon.html" with name="info" size="sm" only %}
+        <div>
+            <strong>How these numbers would be made</strong>
+            <p>Completed orders only; cancelled orders are excluded from every figure. Money is the
+               price captured at checkout, never the current catalogue price. Cover is units sold per
+               day over the last 28 days, and a product with fewer than 14 days of history is reported
+               as insufficient rather than guessed.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

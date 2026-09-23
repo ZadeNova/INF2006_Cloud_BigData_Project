@@ -23,12 +23,17 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block head %}{% endblock %}
 </head>
 <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="utility-bar">
+        <span>Payments are simulated. No card is ever charged.</span>
+        <span class="utility-bar__aside">Singapore / SGD</span>
+    </div>
 
     <header class="site-header">
         <div class="site-header__inner">
@@ -118,6 +123,7 @@
                     <li><a href="{% url 'home' %}#overview">Foundation preview</a></li>
                     <li><a href="{% url 'home' %}#patterns">Patterns</a></li>
                     <li><a href="{% url 'home' %}#states">States</a></li>
+                    <li><a href="{% url 'statistics-preview' %}">Statistics preview</a></li>
                     <li><a href="{% url 'health' %}">System status</a></li>
                 </ul>
             </div>
