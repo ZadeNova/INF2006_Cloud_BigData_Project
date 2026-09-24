@@ -70,5 +70,5 @@ vanish with a disposable container, so capture stdout or use a mounted output pa
 
 Full scratch import/replay and decimal reconciliation passed. The profile found weak
 weekly variation and 31.67–39.75% of products without recent completed sales; these
-are documented limitations, not commercial demand evidence. See the tracker for final
-test counts and pending review status.
+are documented limitations, not commercial demand evidence. The import review gate is
+CLEAR ([log](reviews/analytics-data-import.md)); see the tracker for test counts.

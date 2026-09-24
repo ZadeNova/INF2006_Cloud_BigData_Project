@@ -117,5 +117,7 @@ Generated inventory demonstrates the mechanism, not real supply conditions; stoc
 is deliberately correlated with recent sales. The UTC source end gives a partial
 final Singapore sales date: complete calendar dates cannot supply missing source
 hours. Synthetic sales do not establish demand, elasticity or forecast accuracy.
-Analytics refresh against this data, dashboard, ML, S3/cloud remain outside this batch.
-Imported users cannot log in until a password is deliberately set.
+The analytics refresh and the dashboard were built and verified against this data
+afterwards (see [analytics/README.md](../analytics/README.md) and
+[evidence/test-data-ai.md](../evidence/test-data-ai.md)); ML, S3 and cloud use remain
+not done. Imported users cannot log in until a password is deliberately set.

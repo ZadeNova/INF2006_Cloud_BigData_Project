@@ -8,4 +8,4 @@
 - **Date:** TODO
 - **Artefact path:** TODO
 
-Local foundation evidence only (12 September 2026): [DB outage/readiness recovery and preserved migration metadata after container recreation](foundation-batch-4.md). No AWS scaling, cross-instance authenticated session/cart or interrupted-checkout recovery test has run.
+Local foundation evidence only (12 September 2026): [DB outage/readiness recovery and preserved migration metadata after container recreation](../docs/reviews/foundation-batch-4.md). No AWS scaling, cross-instance authenticated session/cart or interrupted-checkout recovery test has run.

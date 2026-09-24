@@ -56,7 +56,19 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Registration/login/logout (`/register/`, `/login/`, `/logout/`) and a public paginated product catalogue (`/products/`, seeded via `manage.py seed_demo --seed 42`) are implemented; cart, checkout and analytics routes remain unimplemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. The local migration service applies pending migrations before web starts.
+Gunicorn serves the application at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Implemented routes: `/register/`, `/login/`, `/logout/`; `/products/` (public catalogue) and `/products/manage/` (operator); `/cart/`; `/checkout/`, `/orders/`, `/orders/<id>/`; and `/analytics/` (operator dashboard). `/foundation/statistics/` is a design-only page with invented numbers. [API.md](../docs/API.md) owns the route contract. The local migration service applies pending migrations before web starts.
+
+Management commands (run as `docker compose run --rm web python manage.py <command>`):
+
+| Command | Purpose |
+|---|---|
+| `seed_demo --seed 42 [--no-products]` | Create the demo operator (`store_operator` group) and, unless `--no-products`, 14 demo products. Create-only. |
+| `import_dataset --source /app/data/raw --namespace NS` | Import the checksummed dataset with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
+| `snapshot_inventory --as-of YYYY-MM-DD` | Seal live stock as an immutable inventory version (today's Singapore date only). Leaves a permanent version, so avoid it on the shared dev database. |
+| `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
+| `check_database` | Connectivity and applied-migration gate. |
+
+The `/analytics/` page is empty until a refresh has completed. On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manual `chcon` is needed.
 
 ```powershell
 docker compose down

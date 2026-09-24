@@ -1,6 +1,6 @@
 # Testing and evidence contract
 
-Status: planned suite; evidence templates are not results. Use pytest/pytest-django and Locust after establishing dependencies/commands. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
+Status: the pytest suite exists and runs in CI (layout in [tests/README.md](../tests/README.md); 438 tests per the tracker on 24 September 2026, to be re-run and recorded); Locust load tests do not exist yet; evidence templates are not results. Use pytest/pytest-django and Locust. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
 
 | Area | Required behaviour/evidence |
 |---|---|
@@ -32,7 +32,7 @@ Every record includes objective, setup/versions, exact commands/steps, inputs/se
 
 Preserve required project_manifest.yaml keys/relative paths. Required categories map to evidence/test-functional.md, test-security.md, test-data-ai.md and test-resilience.md; monitoring has a separate entry. Link additional results from these records.
 
-A different teammate reproduces local application and analytics without paid AWS access. Validate manifest paths, required ZIP contents, report headings/page limits, contributions and attribution. Preserve dated cloud proof before teardown. Do not claim a CI gate exists until implemented.
+A different teammate reproduces local application and analytics without paid AWS access. Validate manifest paths, required ZIP contents, report headings/page limits, contributions and attribution. Preserve dated cloud proof before teardown. CI runs the suite but is not a required merge gate unless branch protection is configured.
 
 ## Team ownership
 

@@ -8,7 +8,7 @@ All domain primary keys are BigAutoField unless stated. Foreign keys are NOT NUL
 
 | Entity | Fields and constraints / deletion behaviour |
 |---|---|
-| Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions. No auth routes yet. Source profiles are optional for locally registered users. |
+| Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions; auth routes are implemented in `accounts`. Source profiles are optional for locally registered users. |
 | CustomerProfile | One-to-one User (PROTECT); namespace/external ID; aware source_signup_at distinct from User.date_joined; channel/country up to 100 characters. |
 | Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. Custom permission `catalogue.toggle_product_active` gates operator activate/deactivate; no other field is operator-writable. |
 | Cart | One-to-one owner User (CASCADE); one persistent cart per user, emptied after later checkout rather than keeping multiple active carts. |
@@ -42,7 +42,7 @@ Imported accounts have unusable passwords and are never matched by email/name. C
 
 Persist immutable dated inventory separately from Product's mutable live stock AND lead time. Build an InventoryVersion and its rows in a transaction, verify all expected products, then seal. Row inserts lock the version to serialize with sealing; update/delete of snapshot rows and changes/unsealing of sealed versions fail at the database level. Corrections use a new version. Historical runs select an explicit namespace/version/cutoff and reject incomplete/mismatched snapshots; there is no fallback to Product values. A run cannot refer to an unsealed or differently dated version.
 
-Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimport-and-fixture-ownership). Mode/source revision/fixture version are part of namespace identity. Default imports and supplemental seeds are create-only, verifying existing rows and preserving live state. Import, controlled reset, checkout and aggregation commands are follow-up tasks; their end-to-end regression tests remain required. Foundation tests demonstrate immutable snapshot persistence and separation from live Product updates, not checkout or analytics execution.
+Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimport-and-fixture-ownership). Mode/source revision/fixture version are part of namespace identity. Default imports and supplemental seeds are create-only, verifying existing rows and preserving live state. Import (`import_dataset`), checkout, snapshot and aggregation (`refresh_analytics`) are implemented and covered by `tests/test_import.py`, `test_orders.py` and the analytics tests; a controlled reset command is not implemented. Foundation tests separately demonstrate immutable snapshot persistence and separation from live Product updates.
 
 ## Checkout transaction
 
@@ -52,4 +52,4 @@ Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimpo
 4. Enforce unique non-null user/idempotency key at DB level; handle concurrent uniqueness conflicts so only one order persists.
 5. Clear purchased cart state transactionally; confirm only after commit. Never use cached stock/prices to authorise checkout.
 
-Historical import bypasses live checkout and stock deductions. Include migrations with model changes and validate concurrency against PostgreSQL, not SQLite. No checkout service is implemented in foundation work.
+Historical import bypasses live checkout and stock deductions. Include migrations with model changes and validate concurrency against PostgreSQL, not SQLite. The checkout service is `orders/services.py`; its concurrency tests use real PostgreSQL connections.

@@ -1,25 +1,26 @@
-# Foundation tests
+# Automated tests
 
-Run from repository root after the Docker quickstart in ../src/README.md:
-
-```powershell
-docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests/test_settings.py
-```
-
-Batch 2 verifies configuration failure cases, production cookie/TLS defaults and a real PostgreSQL non-superuser connection. pytest creates and drops its own test database. Tests are mounted read-only at /app/tests; no SQLite substitute. Other correctness/security/load suites remain pending. Review summary: ../docs/reviews/foundation-batch-2.md.
-
-Schema suite (real PostgreSQL, isolated test DB):
+pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. The tracker recorded 438 passing tests on 24 September 2026; re-run before quoting a number. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
 
 ```powershell
-docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests/test_schema.py /app/tests/test_settings.py
+docker compose run --rm web pytest -q -p no:cacheprovider /app/tests
+docker compose run --rm web pytest -q -p no:cacheprovider /app/tests/test_cart.py   # one module
 ```
 
-See ../docs/reviews/foundation-batch-3.md. These are persistence/constraint tests, not checkout/import/analytics workflow evidence.
+The image copies `src/` at build time and only `tests/` is mounted, so run `docker compose build web` after changing application code, or the tests run against stale code.
 
-Full current foundation suite:
+| Module | Covers |
+|---|---|
+| `test_settings.py`, `test_schema.py` | Configuration failure cases, production cookie/TLS defaults, non-superuser database role; schema constraints and triggers |
+| `test_health.py`, `test_db_unavailable.py`, `test_request_logging.py` | Liveness, the database-unavailable 503, JSON request logs and secret redaction |
+| `test_accounts.py`, `test_catalogue.py` | Registration, login, logout, safe redirects; catalogue, operator toggle, `seed_demo` |
+| `test_cart.py`, `test_orders.py` | Cart rules and HTMX contract; checkout, idempotency, history, and real-thread concurrency tests |
+| `test_security_negative.py` | CSRF, anonymous access, forged fields and quantity manipulation across every mutation |
+| `test_analytics_ranges.py`, `test_analytics_view.py`, `test_analytics_refresh.py`, `test_analytics_snapshot.py`, `test_analytics_queries.py` | Date ranges, the SQL view, refresh and locking, inventory snapshots, dashboard queries |
+| `test_analytics_dashboard.py` | The `/analytics/` view: permissions, HTMX fragment, context |
+| `test_import.py` | Dataset import, replay, conflicts, date shifts, sealed inventory |
+| `test_frontend.py` | Presentation pages, including the statistics preview |
 
-```powershell
-docker compose -f src/compose.yaml run --rm web pytest -q -p no:cacheprovider /app/tests
-```
+`analytics/tests/` holds four tests for the independent pandas verifier; they need pandas and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
 
-Health/readiness and live Docker outage/recreation results: ../docs/reviews/foundation-batch-4.md. No business workflow, frontend or AWS verification is implied.
+Locking and concurrency tests use real independent connections. A passing suite is not by itself a functional or security claim; record the command, date and outcome in the files under [../evidence/](../evidence/README.md). No load, scaling or AWS test exists yet.

@@ -1,6 +1,6 @@
 # Cloud-independent prep
 
-Status: **not started, deliberately deferred.** Sequencing decided with the user: finish the backend and analytics batches (6a, 6b, 6c) first, then the cloud work. This file lists the preparation that does not depend on the dataset or on a deployed AWS environment, so it can be picked up in any gap. Nothing here is implemented, and nothing here is evidence. Requirements stay in the [scope](../../PROJECT_SCOPE_INF2006.md); AWS configuration rules stay in [AWS infrastructure](../AWS_INFRASTRUCTURE.md); status stays in the [implementation plan](../IMPLEMENTATION_PLAN.md).
+Status (24 September 2026): **not started; now unblocked.** The backend and analytics batches (6a, 6b, 6c) that this track was waiting for are complete locally, so B1, B3 and B4 onward can proceed. B2 (logging) is implemented. This file lists the preparation that does not depend on the dataset or on a deployed AWS environment, so it can be picked up in any gap. Nothing here is implemented, and nothing here is evidence. Requirements stay in the [scope](../../PROJECT_SCOPE_INF2006.md); AWS configuration rules stay in [AWS infrastructure](../AWS_INFRASTRUCTURE.md); status stays in the [implementation plan](../IMPLEMENTATION_PLAN.md).
 
 Constraints that apply to every item (from [INF2003 baseline](../INF2003_BASELINE.md) rules 1, 2 and 7): the app must run without AWS, anything that touches an AWS service sits behind configuration with a local fallback, Terraform lives in one subdirectory under `src/`, and load scripts take a configurable base URL.
 
