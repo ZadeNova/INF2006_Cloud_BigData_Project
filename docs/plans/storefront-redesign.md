@@ -87,7 +87,7 @@ Each batch is independently shippable. Batches 1 to 4 are pass 1; batch 5 is pas
 
 ## Known issues and open items
 
-- **`--band-ink-soft` is undefined in light mode.** It is declared only in the two dark blocks but used by six rules, so in light mode those declarations fall back to inherited colour. Not yet fixed; anything new should avoid the token until it is defined in `:root`.
+- **`--band-ink-soft` was undefined in light mode. Fixed 24 September 2026** ([two-small-defects.md](two-small-defects.md)): it is now `#a3a3a3` in the light `:root`, as in the dark blocks, because the band is dark in both themes. Six rules use it (hero label, feature-band copy and stat, footer meta and links). A scan of `site.css` found no other custom property that is used but undefined. Not yet checked in a browser.
 - **`DESIGN.md`'s original source and licence are not recorded.** `PROJECT_SCOPE_INF2006.md` lists this as an outstanding attribution task; `DESIGN.md` section 7 says only that the project owner supplied it.
 - **The real dashboard and the statistics comp are separate work.** `/analytics/` was written and reviewed against the pre-VoiceBox palette and aligned to the tokens afterwards ([dashboard-theme-alignment.md](dashboard-theme-alignment.md)). Whether the comp's layout (static SVG chart, four stat tiles including "Orders" and "Average order") should replace the dashboard's markup is undecided, as is whether the backend supplies those two figures.
 

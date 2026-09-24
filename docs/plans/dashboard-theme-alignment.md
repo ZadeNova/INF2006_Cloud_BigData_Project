@@ -24,7 +24,7 @@ Option B (rebuild the panel around the designer's comp `foundation/statistics.ht
 | `--color-spruce` as text | `--color-text-primary` |
 | `--color-spruce` as fill (hero mark, flagged card) | `--band-fill` with `--band-ink` text |
 | active range link | `--action-fill` / `--on-action` (as `.chip--on`) |
-| `--color-white`, `--color-white-soft` | `--band-ink` (`--band-ink-soft` is not used: it is undefined in light mode) |
+| `--color-white`, `--color-white-soft` | `--band-ink` (`--band-ink-soft` is not used here; it was undefined in light mode when this was written and was defined on 24 September) |
 | `--color-mint` chips, badges | `--color-surface-raised` |
 | `--color-pine` | `--color-success` (fill `--color-success-tint`) |
 | `--color-accent` | `--color-secondary-ink` for emphasis, `--color-text-primary` for comparison deltas, `--color-border-strong` for focus outlines |
