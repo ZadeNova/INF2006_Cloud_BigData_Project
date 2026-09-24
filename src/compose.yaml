@@ -47,7 +47,7 @@ services:
       start_period: 10s
     volumes:
       - ../tests:/app/tests:ro,z
-      - ../data:/app/data:ro
+      - ../data:/app/data:ro,z
   migrate:
     build: .
     image: inf2006-foundation-app

@@ -68,7 +68,25 @@ Management commands (run as `docker compose run --rm web python manage.py <comma
 | `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
 | `check_database` | Connectivity and applied-migration gate. |
 
-The `/analytics/` page is empty until a refresh has completed. On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manual `chcon` is needed.
+On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manual `chcon` is needed.
+
+## Demo data
+
+A fresh start has an empty store and an empty dashboard. This loads the full dataset (1,200 products, 100,000 historical orders) and a completed analytics run. Run it on a **new database**: if `seed_demo` has ever run without `--no-products`, its 14 demo products sit in the same namespace and the import refuses with a conflict. To start over, `docker compose down --volumes` deletes the local database (this is the only case where that is intended).
+
+```powershell
+docker compose up --build -d
+docker compose run --rm web python manage.py import_dataset --source /app/data/raw --namespace synthetic/revision-a/demo/v1
+docker compose run --rm web python manage.py seed_demo --no-products
+docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-02
+```
+
+- The import takes about 20 seconds and prints row counts, the cutoff `2026-01-02T00:00:00+08:00` and the sealed inventory name. Re-running it changes nothing (every row reports `unchanged`).
+- `seed_demo --no-products` creates the operator `demo-operator`. Locally its password is the fallback in `src/catalogue/management/commands/seed_demo.py` unless `DEMO_OPERATOR_PASSWORD` is set; outside local the variable is required.
+- `--as-of 2026-01-02` matches the import's cutoff, so the refresh uses the importer's sealed inventory without naming it. The dashboard then covers 1 January 2025 to 1 January 2026.
+- Imported customers have unusable passwords by design. To shop, register a new account at `/register/`. Live orders placed today fall after the historical cutoff, so they do not appear on this dashboard run.
+
+Verified on 24 September 2026 in a disposable Compose project on a fresh volume: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
 
 ```powershell
 docker compose down
