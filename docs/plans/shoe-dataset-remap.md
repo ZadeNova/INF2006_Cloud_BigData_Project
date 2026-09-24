@@ -1,6 +1,6 @@
 # Shoe dataset remap
 
-Written 24 September 2026, branch `erfan/analytics`. Status: **plan only, nothing built.** Goal: turn the imported catalogue of 1,200 mixed products into a shoe shop of about 42 products without touching the downloaded raw files, keeping the sales history, the analytics numbers and every integrity check meaningful. Agreed with the user: raw data stays unchanged and a reproducible script makes a separate derived dataset ([AGENTS.md](../../AGENTS.md), [data pipeline](../DATA_PIPELINE.md)); the remap approach was chosen over a subset.
+Written 24 September 2026, branch `erfan/analytics`. Status: **approved, plan only, nothing built.** How to start and what not to break: [shoe-dataset-handoff.md](shoe-dataset-handoff.md). Goal: turn the imported catalogue of 1,200 mixed products into a shoe shop of a few dozen products (the teammate decides the count; the user's estimate is 20 to 40) without touching the downloaded raw files, keeping the sales history, the analytics numbers and every integrity check meaningful. Agreed with the user: raw data stays unchanged and a reproducible script makes a separate derived dataset ([AGENTS.md](../../AGENTS.md), [data pipeline](../DATA_PIPELINE.md)); the remap approach was chosen over a subset.
 
 ## Why a remap and not a subset
 
@@ -9,7 +9,7 @@ Measured on the raw data (24 September 2026):
 - Product demand is nearly uniform: **148 to 247 order lines per product, median 197**, spread 7% of the mean. A subset of 40 products would keep that per-product rate (about 0.18 lines a day), so roughly a third of products would still show "no recent sales", and total sales would fall to about 7 lines a day.
 - Historical prices track list prices tightly: `unit_price / list_price` is **0.96 to 1.04**, and 38% of lines carry a discount.
 
-Mapping every source product onto one of about 42 shoes keeps all 100,000 orders and 237,537 lines, so each shoe sells about 5 lines a day, the coverage and replenishment flags become meaningful, and the charts have a signal.
+Mapping every source product onto one of the shoes keeps all 100,000 orders and 237,537 lines. That is about 217 lines a day across the catalogue, so each shoe sells about 5 lines a day at 40 shoes and about 11 at 20; the coverage and replenishment flags become meaningful and the charts have a signal.
 
 ## Approval gate
 
@@ -19,10 +19,11 @@ Mapping every source product onto one of about 42 shoes keeps all 100,000 orders
 
 ## Decisions (24 September 2026)
 
-1. Approval: pending the professors (above).
+1. Approval: **granted by the professor, 24 September 2026** (above).
 2. Derived CSVs are **generated on demand**, not committed. The script, the shoe catalogue, the product map and `checksums.txt` are committed.
 3. Shoe categories and names: **another group member decides**. They supply `analytics/shoe_catalogue.csv` (spec below).
 4. Price range: **the same member decides**.
+5. Number of shoes: **the teammate decides**, expected 20 to 40 (25 September 2026).
 
 ## Design
 
@@ -39,9 +40,11 @@ Mapping every source product onto one of about 42 shoes keeps all 100,000 orders
 | `list_price` | Decimal with at most 2 places, greater than 0 |
 | `unit_cost` | Decimal with at most 2 places, greater than 0 and below `list_price` |
 
-Between **30 and 50 rows in total, with at least 3 shoes in every category** (the user's target; the proposal was 6 categories x 7 = 42). Each shoe should have a distinct price so the price column in the dashboard is not flat. Until the member delivers the file the script is tested against a clearly labelled placeholder catalogue that is not committed as the real one.
+The teammate decides the total (the user's estimate is **20 to 40**; the original proposal was 6 categories x 7 = 42). The hard rule is **at least 3 shoes in every category**, so at least 18 in total. Each shoe should have a distinct price so the price column in the dashboard is not flat. Until the member delivers the file the script is tested against a clearly labelled placeholder catalogue that is not committed as the real one.
 
-**Category-preserving mapping:** the six source categories map one-to-one onto the six shoe categories, so per-category sales totals and shares are unchanged and the category chart keeps its shape. The pairing of a source category to a shoe category is arbitrary and is decided together with the catalogue. Within a category the 200 source products are assigned to its 7 shoes by a **seeded weighted choice** (seed 42, weights declared in the script), so some shoes become bestsellers. A uniform assignment would make all shoes nearly identical (each would average about 30 source products of similar demand) and leave the top-sellers table flat.
+**Category-preserving mapping:** the six source categories map one-to-one onto the six shoe categories, so per-category sales totals and shares are unchanged and the category chart keeps its shape. The pairing of a source category to a shoe category is arbitrary and is decided together with the catalogue. Within a category the 200 source products are assigned to that category's shoes by a **seeded weighted choice** (seed 42, weights declared in the script), so some shoes become bestsellers. A uniform assignment would make all shoes nearly identical (with k shoes in a category each would average about 200/k source products of similar demand) and leave the top-sellers table flat.
+
+**Same shoe on two lines of one order.** Several source products map to each shoe, so some multi-line orders will contain the same shoe twice. A rough uniform estimate on the 72,221 multi-line orders is 7% to 16% (3 to 7 shoes per category), and weighted assignment raises it. The schema allows this (`OrderItem` is unique on order and line ID, not on product) and analytics sums are unaffected. Recommended: accept and document it, which keeps 237,537 lines; merging duplicates would change the line count and need a weighted price. Recorded as a decision for the teammate in the handoff.
 
 **Rewriting rows:** only the columns that carry product identity or money change.
 
@@ -61,7 +64,7 @@ Everything is Decimal, rounded ROUND_HALF_UP to cents. The importer rejects any 
 |---|---|
 | Script | `analytics/build_shoe_dataset.py`, standard library only, run with host Python 3 like `init_env.py` |
 | Derived files | Generated on demand, not committed (about the size of `data/raw`); the map, catalogue and `checksums.txt` are committed. The Demo data recipe gains one step (run the script), and `data/derived/` is gitignored. |
-| Namespace | A new one, for example `synthetic/shoes/revision-a/demo/v1`, because changed source data needs a new namespace. `DEMO_NAMESPACE` in `settings.py` changes to it, along with the two literals in `tests/test_schema.py`, `project_manifest.yaml` and the docs and recipes that quote the old value. |
+| Namespace | A new one, for example `synthetic/shoes/revision-a/demo/v1`, because changed source data needs a new namespace. `DEMO_NAMESPACE` in `settings.py` changes to it, along with `project_manifest.yaml` and the docs and recipes that quote the old value. The tests need no edit: they read `settings.DEMO_NAMESPACE`, and the two literals in `tests/test_schema.py` are fixture strings that must stay different from that file's own `NAMESPACE`. |
 | Importer, refresh, dashboard | No code change expected: same tables, same rules, same cutoff (`2026-01-02`). |
 | `analytics/profile_dataset.py` | Needs an `--output` option, because it always overwrites `data/PROFILE.md`. Profile the derived set to `data/derived/shoes/PROFILE.md`. |
 | `analytics/verify_refresh.py` | Recomputes from the imported tables, so it should run unchanged; confirm when running it. |
@@ -69,10 +72,11 @@ Everything is Decimal, rounded ROUND_HALF_UP to cents. The importer rejects any 
 ## Verification (in a disposable Compose project, removed afterwards)
 
 1. Script tests: mapping covers every source product exactly once; each shoe gets at least one source product; per-category totals are preserved; the three arithmetic rules hold on a sample and on the full output; regeneration is byte-identical.
-2. `validate` gives zero rejects; `import_dataset` creates 20,000 users, about 42 products, 100,000 orders and 237,537 lines, and replay reports everything unchanged.
+2. `validate` gives zero rejects; `import_dataset` creates 20,000 users, the chosen number of products, 100,000 orders and 237,537 lines, and replay reports everything unchanged.
 3. Profile the derived set and read the numbers: share of shoes with no recent sales (expected about zero), top-seller spread, flagged share.
 4. `refresh_analytics --as-of 2026-01-02`, then `export_coverage.py` and `verify_refresh.py`: zero mismatches, as for the raw import.
-5. Storefront and dashboard over HTTP: the catalogue has 4 pages or fewer, the dashboard shows categories and top sellers with distinct values.
+5. Storefront and dashboard over HTTP: the catalogue has 2 to 4 pages at 12 per page, the dashboard shows categories and top sellers with distinct values.
+6. Customer segments: segments are stored per analytics run and the panel appears only when the selected run has assignments, so after the refresh run `analytics/segment_customers.py` and `load_customer_segments` for the new run and check the panel. Prices change in the remap, so the clusters will differ from the current ones.
 
 ## Documents and evidence to update after approval
 
@@ -97,7 +101,7 @@ About one working day of our work in total. The cross-check tooling already exis
 
 ## Still open
 
-Only the professors' answer and the catalogue file from the group member. Nothing else blocks steps 2 and 3.
+The catalogue file and the product count, both from the teammate or the group member they agree it with. Nothing else blocks steps 2 and 3.
 
 ## Not in scope
 
