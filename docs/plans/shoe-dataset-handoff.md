@@ -14,7 +14,8 @@ The professor approved modifying the dataset on 24 September 2026. The result is
 
 ## Before you start
 
-- **Branch from the updated `main`** once `erfan/analytics` has been merged: `git fetch`, then `git switch -c <yourname>/shoe-dataset origin/main`. If the merge has not happened yet, ask the user; do not branch from an older commit.
+- **Branch from `origin/erfan/analytics`** while its pull request into `main` is still under review: `git fetch`, then `git switch -c <yourname>/shoe-dataset origin/erfan/analytics`. That branch already contains everything you need (the importer, dashboard, segments and these docs); do not branch from an older commit or from `main`, which lacks them until the pull request merges. Never push to `erfan/analytics` itself; only the user does.
+- **Keeping up.** Review fixes may land on `erfan/analytics` while you work: `git fetch`, then **merge** `origin/erfan/analytics` into your branch (do not rebase; other people's commits are shared). After the pull request merges, merge `origin/main` the same way; it will be clean because it contains the same commits, and from then on `main` is your base and your pull request's target.
 - **Your session has no memory of this project.** It reads `CLAUDE.md` and `AGENTS.md` on its own. Also have it read, in this order: the [design](shoe-dataset-remap.md), this file, [DATA_PIPELINE.md](../DATA_PIPELINE.md), [batch-06a-data-import.md](batch-06a-data-import.md) (the importer's rules), [data/README.md](../../data/README.md).
 - **Plan first.** `CLAUDE.md` requires your own plan in `docs/plans/` before implementation. Do not just paste this file back.
 - **Verify by running.** Numbers in these docs were true on 25 September 2026; re-check anything you depend on.
