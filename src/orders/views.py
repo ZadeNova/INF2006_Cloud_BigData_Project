@@ -1,5 +1,4 @@
 import uuid
-from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -7,6 +6,8 @@ from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import ListView, View
+
+from cart.services import cart_subtotal
 
 from . import services
 from .models import Order
@@ -39,7 +40,6 @@ class CheckoutView(LoginRequiredMixin, View):
 
     def _context(self, items, error=None):
         lines = []
-        subtotal = Decimal("0.00")
         for item in items:
             product = item.product
             warning = None
@@ -47,11 +47,10 @@ class CheckoutView(LoginRequiredMixin, View):
                 warning = "No longer available."
             elif item.quantity > product.stock:
                 warning = f"Only {product.stock} left in stock."
-            line_total = product.price * item.quantity
-            subtotal += line_total
-            lines.append({"item": item, "product": product, "line_total": line_total, "warning": warning})
+            lines.append({"item": item, "product": product, "line_total": item.line_total, "warning": warning})
         review = services.fingerprint_for([(item.product, item.quantity) for item in items])
-        return {"lines": lines, "subtotal": subtotal, "error": error, "review": review}
+        # Same rule as the cart page: an unavailable line stays visible but is not added to the total.
+        return {"lines": lines, "subtotal": cart_subtotal(items), "error": error, "review": review}
 
     def _render_error(self, request, message, status):
         result = self._prepare(request)

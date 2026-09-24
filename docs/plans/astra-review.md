@@ -131,7 +131,7 @@ A cross-cutting review of the implemented code against [SECURITY.md](../SECURITY
 
 ## Upcoming review queue
 
-`analytics-data-import`, `analytics-phase3` and `analytics-dashboard` are cleared (see Current status). Still to come, needing the same gate: the deterministic generator, scoped to the correctness and load-test fixtures ([plan](batch-06a-dataset-generator.md); not implemented), any fix to the checkout subtotal display if it changes `orders/views.py`, and all infrastructure work, which is backend-owned. Current status is in [analytics-status.md](analytics-status.md).
+`analytics-data-import`, `analytics-phase3` and `analytics-dashboard` are cleared (see Current status). Still to come, needing the same gate: the deterministic generator, scoped to the correctness and load-test fixtures ([plan](batch-06a-dataset-generator.md); not implemented), the 24 September checkout subtotal fix in `orders/views.py` (display arithmetic only, [plan](two-small-defects.md)), and all infrastructure work, which is backend-owned. Current status is in [analytics-status.md](analytics-status.md).
 
 ## Reviewer output checklist
 

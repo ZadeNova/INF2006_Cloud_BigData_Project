@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from cart.models import CartItem
-from cart.services import add_item, get_cart, remove_item, set_item_quantity
+from cart.services import add_item, cart_subtotal, get_cart, remove_item, set_item_quantity
 from catalogue.models import Product
 from orders import services
 from orders.models import Order, OrderItem
@@ -154,6 +154,21 @@ def test_inactive_product_blocks_whole_order_no_mutation():
     assert CartItem.objects.filter(cart__owner=user).count() == 2
     product_ok.refresh_from_db()
     assert product_ok.stock == 5
+
+
+def test_review_page_total_leaves_out_a_deactivated_product_like_the_cart_does():
+    user = make_user()
+    add_item(get_cart(user), make_product("p1", price="10.00"), 2)
+    add_item(get_cart(user), make_product("p2", price="7.50", active=False), 1)
+    client = logged_in_client(user)
+
+    response = client.get(reverse("orders:checkout"))
+
+    assert response.status_code == 200
+    assert "No longer available" in response.content.decode()      # the line is still shown, with its warning
+    assert len(response.context["lines"]) == 2
+    assert response.context["subtotal"] == Decimal("20.00")
+    assert response.context["subtotal"] == cart_subtotal(get_cart(user).items.select_related("product"))
 
 
 def test_insufficient_stock_blocks_order_with_409_no_mutation():
