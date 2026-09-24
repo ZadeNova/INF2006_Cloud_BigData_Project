@@ -4,8 +4,8 @@ from django.views.decorators.http import require_safe
 
 
 @require_safe
-def home(request):
-    """Presentation-only frontend foundation preview until business routes land."""
+def foundation_preview(request):
+    """Presentation-only frontend foundation preview, kept as reviewed design evidence; the shop is at /."""
     return render(request, "foundation/home.html")
 
 

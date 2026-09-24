@@ -73,7 +73,7 @@ Each batch is independently shippable. Batches 1 to 4 are pass 1; batch 5 is pas
 
 ## What must not change
 
-- The home page (`foundation/home.html`) and its component classes. It is reviewed evidence; it inherits the tokens and must render correctly in both themes, but its markup stays.
+- The home page (`foundation/home.html`) and its component classes. Since 24 September 2026 it is served at `/foundation/`, with `/` redirecting to the catalogue (CR-008); the template itself is unchanged. It is reviewed evidence; it inherits the tokens and must render correctly in both themes, but its markup stays.
 - Views, models, forms, URLs, migrations, checkout idempotency and the review fingerprint (the statistics preview is the single recorded exception, above).
 - HTMX endpoints, targets and swap semantics.
 - Six strings asserted by the test suite: `"indicative"`, `"no longer available"`, `"changed"`, `"haven't placed any orders"`, `id="cart-content"`, `"This path is not ready yet."`

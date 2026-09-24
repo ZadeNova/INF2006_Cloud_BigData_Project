@@ -294,10 +294,10 @@ def test_rendered_insufficient_history_hides_coverage_metrics(client, operator):
 
 def test_operator_nav_is_permission_guarded(client, operator):
     client.force_login(operator)
-    assert 'href="/analytics/"' in client.get(reverse("home")).content.decode()
+    assert 'href="/analytics/"' in client.get(reverse("foundation-preview")).content.decode()
     customer = get_user_model().objects.create_user(username="ordinary")
     client.force_login(customer)
-    assert 'href="/analytics/"' not in client.get(reverse("home")).content.decode()
+    assert 'href="/analytics/"' not in client.get(reverse("foundation-preview")).content.decode()
 
 
 def test_pruned_selected_run_rebuilds_complete_context(world, dashboard):

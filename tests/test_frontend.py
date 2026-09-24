@@ -5,7 +5,7 @@ from django.urls import reverse
 
 
 def test_foundation_home_renders_live_shell_and_representative_page():
-    response = Client().get(reverse("home"))
+    response = Client().get(reverse("foundation-preview"))
 
     assert response.status_code == 200
     assert "Northstar Market" in response.content.decode()
@@ -21,8 +21,15 @@ def test_foundation_home_renders_live_shell_and_representative_page():
 def test_foundation_home_is_safe_read_only_page():
     client = Client()
 
-    assert client.head(reverse("home")).status_code == 200
-    assert client.post(reverse("home")).status_code == 405
+    assert client.head(reverse("foundation-preview")).status_code == 200
+    assert client.post(reverse("foundation-preview")).status_code == 405
+
+
+def test_the_site_root_lands_on_the_catalogue():
+    response = Client().get("/")
+
+    assert response.status_code == 302
+    assert response.url == reverse("catalogue:product_list")
 
 
 def test_design_notes_renders_a_presentation_fragment():

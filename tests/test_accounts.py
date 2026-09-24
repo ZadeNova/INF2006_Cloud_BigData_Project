@@ -192,7 +192,7 @@ def test_logout_without_csrf_token_is_rejected():
 def test_logout_with_csrf_token_succeeds():
     client = Client(enforce_csrf_checks=True)
     client.force_login(get_user_model().objects.create_user(username="logoutuser"))
-    token = csrf_token_from(client.get(reverse("home")))
+    token = csrf_token_from(client.get(reverse("foundation-preview")))
 
     response = client.post(reverse("accounts:logout"), {"csrfmiddlewaretoken": token})
 

@@ -25,7 +25,7 @@
                             <label class="field-label" for="qty-{{ item.pk }}">Quantity</label>
                             <form method="post" action="{% url 'cart:update' item.pk %}"
                                   hx-post="{% url 'cart:update' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML"
-                                  hx-trigger="change, submit">
+                                  hx-trigger="change, submit" hx-sync="this:replace">
                                 {% csrf_token %}
                                 <div class="stepper">
                                     <button class="stepper__button" type="button" data-step="-1" data-step-target="qty-{{ item.pk }}" aria-label="Decrease quantity of {{ item.product.name }}">{% include "_icon.html" with name="minus" size="sm" only %}</button>

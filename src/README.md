@@ -56,7 +56,7 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves the application at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Implemented routes: `/register/`, `/login/`, `/logout/`; `/products/` (public catalogue) and `/products/manage/` (operator); `/cart/`; `/checkout/`, `/orders/`, `/orders/<id>/`; and `/analytics/` (operator dashboard). `/foundation/statistics/` is a design-only page with invented numbers. [API.md](../docs/API.md) owns the route contract. The local migration service applies pending migrations before web starts.
+Gunicorn serves the application at http://127.0.0.1:8000/ (which redirects to the catalogue) and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Implemented routes: `/register/`, `/login/`, `/logout/`; `/products/` (public catalogue) and `/products/manage/` (operator); `/cart/`; `/checkout/`, `/orders/`, `/orders/<id>/`; and `/analytics/` (operator dashboard). `/foundation/` is the Phase 1 design preview and `/foundation/statistics/` a design-only page with invented numbers. [API.md](../docs/API.md) owns the route contract. The local migration service applies pending migrations before web starts.
 
 Management commands (run as `docker compose run --rm web python manage.py <command>`):
 
@@ -86,7 +86,7 @@ docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-0
 - `--as-of 2026-01-02` matches the import's cutoff, so the refresh uses the importer's sealed inventory without naming it. The dashboard then covers 1 January 2025 to 1 January 2026.
 - Imported customers have unusable passwords by design. To shop, register a new account at `/register/`. Live orders placed today fall after the historical cutoff, so they do not appear on this dashboard run.
 
-Verified on 24 September 2026 in a disposable Compose project on a fresh volume: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
+Verified on 24 September 2026 in a disposable Compose project on a fresh volume: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP `/` redirected to the catalogue, the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
 
 ```powershell
 docker compose down

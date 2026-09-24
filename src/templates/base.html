@@ -123,9 +123,9 @@
             <div>
                 <p class="site-footer__heading">Project evidence</p>
                 <ul class="site-footer__links">
-                    <li><a href="{% url 'home' %}#overview">Foundation preview</a></li>
-                    <li><a href="{% url 'home' %}#patterns">Patterns</a></li>
-                    <li><a href="{% url 'home' %}#states">States</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#overview">Foundation preview</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#patterns">Patterns</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#states">States</a></li>
                     <li><a href="{% url 'statistics-preview' %}">Statistics preview</a></li>
                     <li><a href="{% url 'health' %}">System status</a></li>
                 </ul>
@@ -133,7 +133,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+    <script src="{% static 'vendor/htmx/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/site.js' %}" defer></script>
     {% block scripts %}{% endblock %}
 </body>

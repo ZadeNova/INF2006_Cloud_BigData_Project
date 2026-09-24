@@ -1,0 +1,16 @@
+# Code review fixes: CR-001, CR-002, CR-008, CR-009, CR-010, CR-011
+
+Written 24 September 2026, branch `erfan/analytics` at `78300a0`, from the Opus 5.5 code review (a Claude review, not the independent Astra gate). The user chose these six; CR-012 (no CSP) is recorded as an accepted limitation, and CR-003 to CR-007 are parked for the AWS phase.
+
+| ID | Change | Files |
+|---|---|---|
+| CR-001 | Add the `z` SELinux label to the `../data` bind mount, as already done for `tests` and the init script. Verified broken: `ls /app/data/raw` gives `Permission denied` on Fedora. | `src/compose.yaml` |
+| CR-002 | A "Demo data" section in `src/README.md`: the exact, tested sequence from a fresh volume to a store with the imported catalogue and a populated dashboard (`import_dataset` into `DEMO_NAMESPACE`, then `seed_demo --no-products` for the operator, then `refresh_analytics --as-of 2026-01-02`), with the warnings that matter (plain `seed_demo` first makes the import conflict; imported customers cannot log in). Run end to end in a disposable Compose project before documenting it. | `src/README.md` |
+| CR-008 | `/` redirects (302) to the catalogue. The foundation preview moves to `/foundation/` under the new URL name `foundation-preview`; its template is unchanged (it is reviewed evidence). The URL name `home` stays on `/`, so the brand link lands on the shop. Footer "Project evidence" links and the 404 button follow the new names. A redirect rather than a second copy of the listing keeps one canonical catalogue URL and leaves `LOGIN_REDIRECT_URL`, pagination and the nav highlight unchanged. | `src/config/urls.py`, `src/config/views.py`, `base.html`, `404.html`, `docs/API.md`, tests |
+| CR-009 | Vendor HTMX 2.0.4 under `src/static/vendor/htmx/` with its licence and a README recording source and SHA-256 (the Chart.js pattern), taken from the npm tarball after checking the registry's integrity hash; load it from static instead of jsDelivr. | `base.html`, `src/static/vendor/htmx/` |
+| CR-010 | `hx-sync="this:replace"` on the cart quantity form so only the latest stepper request's response is swapped. In `site.js`, a 404 on a `#cart-content` request (item removed in another tab) reloads the page so the current cart is shown instead of nothing. No backend contract change: update still returns 404 for a missing item. | `cart/_content.html`, `site.js` |
+| CR-011 | Drop `|safe` from `help_text` in the shared form partial. Django's password help text is already a `SafeString` (`format_html`), so it still renders as a list, while any plain help text is escaped. | `accounts/_form_fields.html` |
+
+Tests: update `reverse("home")` uses that expect the preview page to `foundation-preview`; add one test that `/` redirects to the catalogue. No test for CR-009/010/011 (vendoring and client behaviour are checked over HTTP; CR-011 by rendering the register page).
+
+Verification: targeted modules (`test_frontend`, `test_accounts`, `test_analytics_dashboard`, `test_cart`, `test_catalogue`), `manage.py check`, image build (`collectstatic` must accept the vendored file), live HTTP checks of `/`, `/foundation/`, the register page and the static HTMX file, and the CR-002 recipe in a disposable Compose project that is removed afterwards. Docs: `API.md`, `FRONTEND.md`, tracker. No commit until the user asks.

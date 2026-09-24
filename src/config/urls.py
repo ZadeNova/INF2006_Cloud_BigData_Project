@@ -1,8 +1,12 @@
 from django.urls import include, path
-from .views import design_notes, design_notes_unavailable, health, home, statistics_preview
+from django.views.generic import RedirectView
+
+from .views import design_notes, design_notes_unavailable, foundation_preview, health, statistics_preview
 
 urlpatterns = [
-    path("", home, name="home"),
+    # The storefront is the landing page; one canonical catalogue URL, so this redirects rather than re-serving it.
+    path("", RedirectView.as_view(pattern_name="catalogue:product_list"), name="home"),
+    path("foundation/", foundation_preview, name="foundation-preview"),
     path("", include("accounts.urls")),
     path("", include("orders.urls")),
     path("products/", include("catalogue.urls")),
