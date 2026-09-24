@@ -1,13 +1,23 @@
 (function () {
     "use strict";
 
-    var chartColors = {
-        green: "#0b6047",
-        accent: "#137956",
-        spruce: "#173d34",
-        mint: "#d8ebe4",
-        muted: "#78958c"
-    };
+    // Colours come from the theme's custom properties (site.css), read at draw
+    // time so light and dark mode both work. Fallbacks only cover a missing
+    // stylesheet; they are not a second palette.
+    function themeColor(name, fallback) {
+        var value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return value || fallback;
+    }
+
+    function palette() {
+        return {
+            primary: themeColor("--color-text-primary", "#0a0a0a"),
+            muted: themeColor("--color-text-secondary", "#525252"),
+            tick: themeColor("--color-text-secondary", "#525252"),
+            grid: themeColor("--color-border-subtle", "#e5e5e5"),
+            surface: themeColor("--color-surface", "#fafafa")
+        };
+    }
 
     function readPayload(id) {
         var element = document.getElementById(id);
@@ -31,30 +41,31 @@
     }
 
     function trendChart(canvas, payload) {
+        var c = palette();
         var datasets = [{
             label: "Selected sales value",
             data: payload.values,
-            borderColor: chartColors.green,
-            backgroundColor: "rgba(11, 96, 71, 0.14)",
-            pointBackgroundColor: chartColors.green,
-            pointBorderColor: "#ffffff",
+            borderColor: c.primary,
+            backgroundColor: "transparent",
+            pointBackgroundColor: c.primary,
+            pointBorderColor: c.surface,
             pointBorderWidth: 2,
             pointRadius: 4,
-            tension: 0.28,
-            fill: true
+            tension: 0,
+            fill: false
         }];
         if (payload.comparison) {
             datasets.push({
                 label: "Previous period",
                 data: payload.comparison.values,
-                borderColor: chartColors.muted,
+                borderColor: c.muted,
                 backgroundColor: "transparent",
-                pointBackgroundColor: chartColors.muted,
-                pointBorderColor: "#ffffff",
+                pointBackgroundColor: c.muted,
+                pointBorderColor: c.surface,
                 pointBorderWidth: 2,
                 pointRadius: 3,
                 borderDash: [7, 5],
-                tension: 0.28,
+                tension: 0,
                 fill: false
             });
         }
@@ -66,25 +77,26 @@
                 maintainAspectRatio: false,
                 interaction: { mode: "index", intersect: false },
                 plugins: {
-                    legend: { labels: { usePointStyle: true, color: chartColors.spruce } },
+                    legend: { labels: { usePointStyle: true, color: c.tick } },
                     tooltip: { callbacks: { label: function (context) { return " S$" + Number(context.parsed.y).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } } }
                 },
                 scales: {
-                    x: { ticks: { color: chartColors.spruce, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } },
-                    y: { beginAtZero: true, ticks: { color: chartColors.spruce, callback: function (value) { return "S$" + Number(value).toLocaleString(); } }, grid: { color: "rgba(23, 61, 52, 0.12)" } }
+                    x: { ticks: { color: c.tick, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: c.tick, callback: function (value) { return "S$" + Number(value).toLocaleString(); } }, grid: { color: c.grid } }
                 }
             }
         });
     }
 
     function categoryChart(canvas, payload) {
+        var c = palette();
         var datasets = [{
             label: "Selected period sales value",
             data: payload.values,
-            backgroundColor: chartColors.accent,
-            borderColor: chartColors.green,
+            backgroundColor: c.primary,
+            borderColor: c.primary,
             borderWidth: 1,
-            borderRadius: 7,
+            borderRadius: 0,
             maxBarThickness: 30
         }];
         if (payload.comparison) {
@@ -92,9 +104,9 @@
                 label: "Previous period sales value (outline)",
                 data: payload.comparison.values,
                 backgroundColor: "transparent",
-                borderColor: chartColors.muted,
+                borderColor: c.muted,
                 borderWidth: 2,
-                borderRadius: 7,
+                borderRadius: 0,
                 maxBarThickness: 30
             });
         }
@@ -109,12 +121,12 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { labels: { usePointStyle: true, color: chartColors.spruce } },
+                    legend: { labels: { usePointStyle: true, color: c.tick } },
                     tooltip: { callbacks: { label: function (context) { return " S$" + Number(context.parsed.x).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); } } }
                 },
                 scales: {
-                    x: { beginAtZero: true, ticks: { color: chartColors.spruce, callback: function (value) { return "S$" + Number(value).toLocaleString(); } }, grid: { color: "rgba(23, 61, 52, 0.12)" } },
-                    y: { ticks: { color: chartColors.spruce }, grid: { display: false } }
+                    x: { beginAtZero: true, ticks: { color: c.tick, callback: function (value) { return "S$" + Number(value).toLocaleString(); } }, grid: { color: c.grid } },
+                    y: { ticks: { color: c.tick }, grid: { display: false } }
                 }
             }
         });
@@ -124,6 +136,7 @@
         if (!window.Chart || !root) {
             return;
         }
+        window.Chart.defaults.font.family = themeColor("--font-sans", "sans-serif");
         var trend = root.querySelector("[data-chart='trend']");
         var categories = root.querySelector("[data-chart='categories']");
         if (trend) {
@@ -204,6 +217,16 @@
         drawCharts(target);
         notice.focus();
     }
+
+    function redrawForTheme() {
+        drawCharts(document.getElementById("analytics-panel"));
+    }
+
+    new MutationObserver(redrawForTheme).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"]
+    });
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redrawForTheme);
 
     document.addEventListener("DOMContentLoaded", function () {
         drawCharts(document.getElementById("analytics-panel"));
