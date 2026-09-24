@@ -13,7 +13,9 @@ Mapping every source product onto one of about 42 shoes keeps all 100,000 orders
 
 ## Approval gate
 
-The user is asking the professors whether the dataset may be modified; work proceeds only after they approve. Until then the script can be built and tested in a scratch database, but **the app is not switched to the derived data, nothing is recorded as evidence, and the report does not describe it**. The tracker's Open items row still says permission was confirmed by the user on 22 September; correct it to "awaiting professor approval" now and to the outcome afterwards.
+**Approved by the professor, 24 September 2026.** The tracker's Open items row is updated accordingly. Adoption is still gated on the script itself: the app is not switched to the derived data, nothing is recorded as evidence, and the report does not describe it, until the derived dataset passes `config.dataset.validate` with zero rejects (see step 4 in the build order below) and a teammate has built and checked it in.
+
+**Ownership: a teammate builds this**, per the user's 24 September decision. They own the shoe catalogue file (`analytics/shoe_catalogue.csv`), `analytics/build_shoe_dataset.py`, and the namespace switch and its tests/docs/evidence (step 4 below). This plan remains the agreed design; check with them before changing it.
 
 ## Decisions (24 September 2026)
 

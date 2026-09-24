@@ -35,8 +35,8 @@ Follow system/developer instructions and the user's current instructions. These 
 
 - Backend, database, analytics and infrastructure: **Astra / Low** (`gpt-6-astra`, reasoning `low`). The user's term Light means Low.
 - Frontend implementation and visual verification: **Luna / Max** (`gpt-5.6-luna`, reasoning `max`).
-- Independent backend reviewer: **Astra / Medium** (`gpt-6-astra`, reasoning `medium`), read-only and separate from the implementer.
-- Backend implementation escalation: the user manually selects **Astra / Medium**. Reviewer assignment does not authorise upgrading the implementation agent.
+- Independent backend reviewer: **Astra / Medium** (`gpt-6-astra`, reasoning `medium`) or **Claude Opus 5.5**, read-only and separate from the implementer. Opus 5.5 counts as the independent reviewer only in a fresh session with no access to the implementing conversation; a same-session Opus 5.5 review is a logged, user-accepted exception, labelled as such, not the default (see DEVELOPMENT.md).
+- Backend implementation escalation: the user manually selects **Astra / Medium** or a fresh-session **Opus 5.5**. Reviewer assignment does not authorise upgrading the implementation agent.
 
 This file cannot switch the active agent's model. Report a known mismatch before dependent implementation; do not invent unavailable model information. Documentation and coordination do not require a model switch.
 
@@ -47,12 +47,12 @@ The user explicitly authorises the backend review/fix delegation loop below. Oth
 For each completed backend task/feature or fix, run the independent review gate in [DEVELOPMENT.md](docs/DEVELOPMENT.md#backend-review-gate) before marking it complete or publishing it. This covers backend-owned database, import/analytics, infrastructure and supporting test changes; documentation-only and frontend-only changes are outside this mandatory gate.
 
 1. Astra Low implements and runs relevant checks.
-2. Assign a separate Astra Medium reviewer to inspect the exact task diff against relevant specifications and tests. Reviewer is read-only and reports mistakes, gaps, regressions and dead code with stable finding IDs.
-3. Log findings and review metadata under `docs/reviews/<task-id>.md`; the coordinator writes the log. Hand findings to Astra Low to fix and rerun checks.
-4. Astra Medium reviews the revised diff. If the same unresolved issue appears again after its Low fix attempt, stop the task immediately and report it to the user for manual switch to Astra Medium. Do not keep retrying, auto-upgrade the implementer, publish or mark complete.
+2. Assign a separate independent reviewer — Astra Medium, or Opus 5.5 in a fresh session — to inspect the exact task diff against relevant specifications and tests. Reviewer is read-only and reports mistakes, gaps, regressions and dead code with stable finding IDs.
+3. Log findings and review metadata under `docs/reviews/<task-id>.md`; the coordinator writes the log, including which reviewer and which tier (fresh-session or same-session exception). Hand findings to Astra Low to fix and rerun checks.
+4. The same reviewer tier reviews the revised diff. If the same unresolved issue appears again after its Low fix attempt, stop the task immediately and report it to the user for manual switch to Astra Medium or a fresh-session Opus 5.5. Do not keep retrying, auto-upgrade the implementer, publish or mark complete.
 5. New findings follow the same Low-fix/Medium-review cycle; preserve finding identity across rounds so rewording cannot reset the repeated-issue rule. Complete only with no unresolved actionable findings and appropriate verification.
 
-Use supported explicit model settings when assigning agents; do not imply the active agent can switch itself. If the required independent reviewer or Low fixer cannot be assigned, report the gate as blocked rather than substitute self-review or silently use a different model. Apply targeted-reading rules to reviewers and pass only task context, diff boundaries, relevant spec paths and check results. See DEVELOPMENT for exact logging and stop/resume rules.
+Use supported explicit model settings when assigning agents; do not imply the active agent can switch itself. If the required independent reviewer or Low fixer cannot be assigned, report the gate as blocked rather than substitute self-review or silently use a different model. A same-session Opus 5.5 review is not a silent substitution when logged as such per DEVELOPMENT.md; it is a substitution when unlabelled. Apply targeted-reading rules to reviewers and pass only task context, diff boundaries, relevant spec paths and check results. See DEVELOPMENT for exact logging and stop/resume rules.
 
 ## Human team ownership
 
