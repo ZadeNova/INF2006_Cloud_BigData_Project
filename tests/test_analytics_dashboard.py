@@ -18,7 +18,8 @@ from django.core.management.base import CommandError
 from django.db.migrations import AlterModelOptions
 from django.urls import resolve, reverse
 
-from analytics_helpers import NS, OTHER_NS, SGT, add_order, at, make_inventory, make_products, make_run
+from analytics_helpers import NS, OTHER_NS, SGT, add_order, at, load_segments, make_inventory, make_products, make_run
+from accounts.models import CustomerProfile
 from catalogue.models import Product
 from reporting import queries, services
 from reporting.models import AnalyticsRun
@@ -216,7 +217,7 @@ def test_coverage_is_fixed_and_ignores_live_stock(world, dashboard):
 
 def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, operator, django_assert_num_queries):
     assert operator.has_perm("reporting.view_analytics")
-    with django_assert_num_queries(13):
+    with django_assert_num_queries(14):
         small = dashboard({"range": "7d", "compare": "1"})
     assert small.context_data["comparison_available"]
     extra = make_products(names=tuple(f"extra-{i}" for i in range(30)))
@@ -225,7 +226,7 @@ def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, opera
     for i, product in enumerate(extra.values()):
         add_order(operator, f"extra-{i}", [(product, 1, "10.00")], at(2024, 5, 7))
     services.refresh_analytics(namespace=NS, as_of=inventory.cutoff.astimezone(SGT).date(), inventory_version=inventory.version)
-    with django_assert_num_queries(13):
+    with django_assert_num_queries(14):
         large = dashboard({"range": "7d", "compare": "1"})
     context = large.context_data
     assert len(context["coverage"]) == 25
@@ -340,6 +341,30 @@ def test_category_comparison_aligns_prior_only_categories(dashboard):
     }
     assert [(row["selected"].units, row["comparison"].units) for row in context["category_rows"]] == [(7, 0), (0, 2)]
     assert context["comparison_top_sellers"][0].product_id == products["beta"].pk
+
+
+def test_dashboard_shows_ml_segment_panel_when_assignments_exist(client, operator):
+    products = make_products()
+    inventory = make_inventory(products, cutoff=at(2024, 5, 8, 0))
+    run = make_run(inventory, [(date(2024, 5, 7), products["alpha"], 7, "70.00")])
+    second = get_user_model().objects.create_user(username="import-" + ("a" * 60))
+    CustomerProfile.objects.create(
+        user=second, namespace=NS, external_id="C000002", source_signup_at=at(2024, 1, 1), channel="web", country="SG")
+    load_segments(run, [
+        (operator, 0, "high_value", 2, 6, "450.00"),
+        (second, 1, "at_risk", 48, 1, "40.00"),
+    ])
+
+    client.force_login(operator)
+    body = client.get(reverse("reporting:dashboard"), {"range": "7d"}).content.decode()
+    assert "Customer segments" in body
+    assert "Segmented customers" in body
+    assert "Top customers by segment (up to 25 each, max 50)" in body
+    assert "Customer ref" in body and "Login username" in body
+    assert "high_value" in body and "at_risk" in body
+    assert "demo-operator" not in body
+    assert "C000002" in body and "import-" in body and "…" in body
+    assert "Silhouette 0.5123" in body
 
 
 def test_rendered_comparison_includes_category_series_and_previous_sellers(client, operator):

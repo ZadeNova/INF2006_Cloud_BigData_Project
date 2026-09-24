@@ -1,4 +1,5 @@
 import uuid
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
@@ -58,4 +59,40 @@ class DailyProductSales(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["run", "business_date", "product"], name="daily_run_product_unique"),
             models.CheckConstraint(condition=Q(sales_amount__gte=0) & Q(sales_amount__lte="9999999999999999.99"), name="daily_sales_nonnegative"),
+        ]
+
+
+class CustomerSegment(models.Model):
+    run = models.ForeignKey(AnalyticsRun, on_delete=models.CASCADE, related_name="customer_segments")
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    model_version = models.CharField(max_length=100)
+    cluster_id = models.PositiveSmallIntegerField()
+    segment_label = models.CharField(max_length=40)
+    recency_days = models.PositiveIntegerField()
+    frequency_orders = models.PositiveIntegerField()
+    monetary_total = models.DecimalField(max_digits=18, decimal_places=2)
+    k_clusters = models.PositiveSmallIntegerField()
+    silhouette_score = models.DecimalField(max_digits=5, decimal_places=4, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["run", "customer", "model_version"], name="segment_run_customer_version_unique"),
+            models.CheckConstraint(condition=~Q(model_version=""), name="segment_model_version_nonempty"),
+            models.CheckConstraint(condition=~Q(segment_label=""), name="segment_label_nonempty"),
+            models.CheckConstraint(condition=Q(cluster_id__gte=0), name="segment_cluster_id_nonnegative"),
+            models.CheckConstraint(condition=Q(k_clusters__gte=2), name="segment_k_clusters_min"),
+            models.CheckConstraint(condition=Q(monetary_total__gte=0) & Q(monetary_total__lte="9999999999999999.99"),
+                                   name="segment_monetary_nonnegative"),
+            models.CheckConstraint(
+                condition=Q(
+                    Q(silhouette_score__isnull=True),
+                    Q(("silhouette_score__gte", -1), ("silhouette_score__lte", 1), _connector="AND"),
+                    _connector="OR",
+                ),
+                name="segment_silhouette_range"),
+        ]
+        indexes = [
+            models.Index(fields=["run", "model_version"], name="segment_run_model_idx"),
+            models.Index(fields=["run", "segment_label"], name="segment_run_label_idx"),
         ]

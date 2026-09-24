@@ -176,6 +176,31 @@
         </div>
     </section>
 
+    {% if segment_overview %}
+    <section class="analytics-section" aria-labelledby="segments-title">
+        <div class="section-heading section-heading--compact"><p class="eyebrow">Optional ML</p><h2 id="segments-title">Customer segments</h2><p>Cluster assignments are loaded for this run and model version {{ segment_overview.model_version }}. They support operator targeting and do not change sales or replenishment metrics.</p></div>
+        <div class="analytics-cards">
+            <article class="analytics-card surface-card"><p class="analytics-card__label">Segmented customers</p><p class="analytics-card__value">{{ segment_overview.customers|units }}</p><div class="analytics-card__comparison"><span>K={{ segment_overview.k_clusters }} clusters</span></div></article>
+            <article class="analytics-card surface-card"><p class="analytics-card__label">Segment sales value</p><p class="analytics-card__value">S${{ segment_overview.sales_amount|money }}</p><div class="analytics-card__comparison">{% if segment_overview.silhouette_score is not None %}<span>Silhouette {{ segment_overview.silhouette_score }}</span>{% else %}<span>Silhouette unavailable</span>{% endif %}</div></article>
+        </div>
+        <div class="surface-card analytics-table-card analytics-table-card--segment-summary">
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Customer segment summary">
+                <table class="analytics-data-table"><caption class="visually-hidden">Customer segment summary</caption><thead><tr><th scope="col">Segment</th><th scope="col">Customers</th><th scope="col">Share of segment sales</th><th scope="col">Mean recency (days)</th><th scope="col">Mean frequency</th><th scope="col">Mean monetary</th></tr></thead><tbody>
+                    {% for item in segment_overview.segments %}<tr><th scope="row">{{ item.segment_label }}</th><td>{{ item.customers|units }}</td><td>{{ item.sales_share_percent }}%</td><td>{{ item.mean_recency_days|rate }}</td><td>{{ item.mean_frequency_orders|rate }}</td><td>S${{ item.mean_monetary_total|money }}</td></tr>{% endfor %}
+                </tbody></table>
+            </div>
+        </div>
+        <div class="surface-card analytics-table-card analytics-table-card--segment-customers">
+            <h3 class="analytics-subsection-title">Top customers by segment (up to 25 each, max 50)</h3>
+            <div class="table-scroll" tabindex="0" role="region" aria-label="Segment customer list">
+                <table class="analytics-data-table analytics-data-table--segments-customers"><caption class="visually-hidden">Segment customer list</caption><thead><tr><th scope="col">Segment</th><th scope="col">Customer ref</th><th scope="col">Login username</th><th scope="col">Recency (days)</th><th scope="col">Frequency</th><th scope="col">Monetary</th></tr></thead><tbody>
+                    {% for row in segment_customers %}<tr><td>{{ row.segment_label }}</td><td>{{ row.customer_reference }}</td><td title="{{ row.username_full }}"><span class="segment-username">{{ row.username_short }}</span></td><td>{{ row.recency_days|units }}</td><td>{{ row.frequency_orders|units }}</td><td>S${{ row.monetary_total|money }}</td></tr>{% empty %}<tr><td class="table-empty" colspan="6">No segment customer rows are available for this run.</td></tr>{% endfor %}
+                </tbody></table>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
     <footer class="analytics-assumptions">
         <p class="eyebrow">Assumptions and limits</p>
         <p>Sales are completed simulated transactions in synthetic data; sales value is not accounting revenue. Inventory is a sealed snapshot paired with this reporting cutoff. Generated historical inventory is aligned to its historical cutoff; a live snapshot captured after midnight is an approximation of the midnight cutoff, and this page does not infer provenance the run does not expose. The seven-day rate and fixed lead times simplify reality, and stockouts can hide unmet demand. A product with no recent sales receives no confident coverage estimate.</p>

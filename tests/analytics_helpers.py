@@ -7,7 +7,7 @@ from django.utils import timezone
 from catalogue.models import Product
 from orders.models import Order, OrderItem
 from reporting import ranges
-from reporting.models import AnalyticsRun, DailyProductSales, InventorySnapshot, InventoryVersion
+from reporting.models import AnalyticsRun, CustomerSegment, DailyProductSales, InventorySnapshot, InventoryVersion
 
 SGT = ranges.BUSINESS_TZ
 NS = "synthetic/revision-a/historical/v1"
@@ -60,3 +60,14 @@ def make_run(inventory, rows, finished_at=None, status=AnalyticsRun.Status.COMPL
         AnalyticsRun.objects.filter(pk=run.pk).update(status=status, finished_at=finished_at or timezone.now())
     run.refresh_from_db()
     return run
+
+
+def load_segments(run, rows, *, model_version="rfm-kmeans-v1", k_clusters=3, silhouette="0.5123"):
+    """rows: [(user, cluster_id, segment_label, recency_days, frequency_orders, monetary_total), ...]."""
+    created = []
+    for user, cluster_id, segment_label, recency, frequency, monetary in rows:
+        created.append(CustomerSegment.objects.create(
+            run=run, customer=user, model_version=model_version, cluster_id=cluster_id, segment_label=segment_label,
+            recency_days=recency, frequency_orders=frequency, monetary_total=monetary, k_clusters=k_clusters,
+            silhouette_score=silhouette))
+    return created

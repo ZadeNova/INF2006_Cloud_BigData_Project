@@ -92,7 +92,8 @@ Begins only after the required work passes and the dataset profile shows custome
 - Train and evaluate offline in `analytics/` with its own requirements; the web image has no ML dependency.
 - Features per customer, as of the run cutoff and using only completed orders before it: recency (days since last order), frequency (order count) and monetary value (sum of order totals). Scale the features, transform skewed monetary values, fit K-means with a fixed random seed and choose k by silhouette over a small range.
 - Evaluate cluster sizes and profiles (mean RFM and share of sales per cluster), silhouette and stability across seeds or resamples. Do not report classification accuracy without true labels. State that synthetic customers may reflect the generator's structure rather than real behaviour.
-- A management command loads cluster assignments into one dedicated table, keyed by model version and analytics run. Removal means deleting that module and table.
+- Offline training writes JSON via `analytics/segment_customers.py`; Django command `load_customer_segments` loads
+  assignments into one dedicated table keyed by model version and analytics run. Removal means deleting that module and table.
 - The dashboard shows a segment panel (sizes, share of sales, mean RFM) only when assignments exist for the run. It tells the operator which customer groups drive sales; it does not change any deterministic metric or replenishment flag, and it is secondary to the sales-driven inventory planning.
 
 Use the simplest algorithm that can be justified for the store; more complex models are not planned.

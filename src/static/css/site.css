@@ -3624,12 +3624,19 @@ h2 {
 .analytics-comparison-status { margin:0; padding:var(--space-4); color:var(--color-text-secondary); font-size:1.3rem; }
 .analytics-data-table { width:100%; min-width:68rem; border-collapse:collapse; font-size:1.3rem; }
 .analytics-data-table--coverage { min-width:86rem; }
+.analytics-data-table--segments-customers { min-width:78rem; }
 .analytics-data-table th,.analytics-data-table td { padding:var(--space-3) var(--space-4); border-bottom:1px solid var(--color-border-subtle); text-align:left; vertical-align:middle; white-space:nowrap; }
 .analytics-data-table thead th { padding-top:var(--space-2); padding-bottom:var(--space-2); color:var(--color-text-secondary); font-size:1.1rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
 .analytics-data-table tbody tr:last-child th,.analytics-data-table tbody tr:last-child td { border-bottom:none; }
 .analytics-data-table__rank { width:5.4rem; }
 .analytics-data-table .operator-row__price { text-align:right; }
 .analytics-data-table .rank-badge { margin-inline:auto; }
+.segment-username { display:inline-block; max-width:34rem; overflow:hidden; text-overflow:ellipsis; vertical-align:bottom; }
+.analytics-table-card--segment-summary { margin-top:var(--space-3); }
+.analytics-table-card--segment-customers { margin-top:var(--space-4); padding-top:var(--space-4); }
+.analytics-table-card--segment-customers .analytics-subsection-title { margin-bottom:var(--space-3); }
+.analytics-data-table--segments-customers th,
+.analytics-data-table--segments-customers td { padding-top:var(--space-4); padding-bottom:var(--space-4); }
 .rank-badge { display:grid; width:2.8rem; height:2.8rem; place-items:center; border-radius:0; background:var(--color-surface-raised); color:var(--color-text-primary); font-size:1.2rem; font-weight:700; }
 .status-label { display:inline-flex; align-items:center; min-height:2.8rem; border-radius:var(--pill-radius); padding:.4rem .9rem; font-size:1.1rem; font-weight:700; line-height:1.25; }
 .status-label--flagged { background:var(--color-warning-tint); color:var(--color-warning); }
