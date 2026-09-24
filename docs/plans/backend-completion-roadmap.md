@@ -6,7 +6,17 @@ work. Target: finish the dataset and remaining backend features as working, self
 — see the strategic note at the end). This file sequences the work; it does not replace the
 detailed batch plans it links to. Where this file and a linked plan disagree, the linked plan wins.
 
-## Where things stand
+## Current checklist (23 September 2026)
+
+- [x] Phase 1: dataset integrity profile, provenance and manual acceptance for descriptive use.
+- [x] Phase 2: transactional import, safe replay and deterministic sealed inventory; independent round-2 gate CLEAR.
+- [x] Phase 3: analytics refresh against imported data and independent pandas cross-check; independent review CLEAR (see current tracker).
+- [x] Phase 4: dashboard complete locally; independent Astra Medium round-3 gate CLEAR, DASH-001–005 resolved. [Review, verification and limitations](../reviews/analytics-dashboard.md).
+- [ ] Phase 5: remaining submission evidence and packaging.
+
+[Current status and next work](../IMPLEMENTATION_PLAN.md), [review and verification](../reviews/analytics-data-import.md). The planning baseline below predates implementation; its flat-noise fallback criterion is superseded for this checksummed release by the user's explicit descriptive-use acceptance in [data/README.md](../../data/README.md). Existing demo products are now rejected by import; use an empty product namespace and `seed_demo --no-products`, per the data pipeline contract.
+
+## Planning baseline before implementation
 
 Done and independently review-gate cleared (see [analytics-status.md](analytics-status.md) and
 [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md)): auth, catalogue, cart, checkout, order

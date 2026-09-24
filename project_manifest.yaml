@@ -26,9 +26,15 @@ evidence:
 
 data_ai:
   dataset: "data/README.md"
-  method: ""
-  evaluation: ""
-  reproducible_command: ""
+  method: "Accepted synthetic CSV import with sealed historical inventory; SQL refresh independently checked by raw-table pandas recomputation and a separately exported production coverage target."
+  evaluation: "evidence/test-data-ai.md: two identical refreshes; 65,589 daily rows, zero unit/amount/coverage mismatches, exact 0.00 maximum monetary difference; 410 combined tests passed. Synthetic descriptive use only; independent Phase 3 review status in docs/reviews/analytics-phase3.md."
+  reproducible_command: "python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json; first export with analytics/export_coverage.py (full setup in evidence/test-data-ai.md)"
+  source_version: "Analytics Engineering Ecommerce Sales & Returns v1.0.0; downloaded 2026-09-22; data/raw/checksums.txt"
+  verified_scratch_namespace: "synthetic/revision-a/demo/v1"
+  verified_seed: 42
+  verified_shift_offset_days: 0
+  verified_inventory_cutoff: "2026-01-02T00:00:00+08:00"
+  verified_inventory_version: "import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f"
 
 security:
   threat_control_map: "evidence/threat-control-map.md"

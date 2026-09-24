@@ -37,6 +37,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--seed", type=int, default=42)
+        parser.add_argument("--no-products", action="store_true", help="Create the operator without demo products")
 
     def handle(self, *args, **options):
         operator_password = os.environ.get("DEMO_OPERATOR_PASSWORD")
@@ -47,7 +48,8 @@ class Command(BaseCommand):
 
         rng = random.Random(options["seed"])
         created = 0
-        for index, (name, category) in enumerate(DEMO_PRODUCTS, start=1):
+        products = [] if options["no_products"] else DEMO_PRODUCTS
+        for index, (name, category) in enumerate(products, start=1):
             price = money(rng.uniform(5, 150))
             cost = money(price * Decimal(str(round(rng.uniform(0.4, 0.7), 2))))
             _, was_created = Product.objects.get_or_create(
@@ -63,16 +65,16 @@ class Command(BaseCommand):
                 },
             )
             created += was_created
-        self.stdout.write(f"Created {created} demo product(s); {len(DEMO_PRODUCTS) - created} already existed.")
+        self.stdout.write(f"Created {created} demo product(s); {len(products) - created} already existed.")
 
         group, _ = Group.objects.get_or_create(name="store_operator")
-        try:
-            permission = Permission.objects.get(codename="toggle_product_active", content_type__app_label="catalogue")
-        except Permission.DoesNotExist:
-            raise CommandError(
-                "catalogue.toggle_product_active permission not found — run 'manage.py migrate' before seed_demo."
-            ) from None
-        if not group.permissions.filter(pk=permission.pk).exists():
+        for app_label, codename in [("catalogue", "toggle_product_active"), ("reporting", "view_analytics")]:
+            try:
+                permission = Permission.objects.get(codename=codename, content_type__app_label=app_label)
+            except Permission.DoesNotExist:
+                raise CommandError(
+                    f"{app_label}.{codename} permission not found — run 'manage.py migrate' before seed_demo."
+                ) from None
             group.permissions.add(permission)
 
         User = get_user_model()

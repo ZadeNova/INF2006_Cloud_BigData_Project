@@ -58,6 +58,9 @@
                 {% if perms.catalogue.toggle_product_active %}
                 <a class="nav-pill nav-pill--quiet" href="{% url 'catalogue:manage_list' %}"{% if request.resolver_match.view_name == 'catalogue:manage_list' %} aria-current="page"{% endif %}>Manage products</a>
                 {% endif %}
+                {% if perms.reporting.view_analytics %}
+                <a class="button button--compact" href="{% url 'reporting:dashboard' %}">Analytics</a>
+                {% endif %}
                 {% if user.is_authenticated %}
                 {% with cart_count=user.cart.items.count %}
                 <a class="nav-pill" href="{% url 'cart:detail' %}"{% if request.resolver_match.namespace == 'cart' %} aria-current="page"{% endif %}>

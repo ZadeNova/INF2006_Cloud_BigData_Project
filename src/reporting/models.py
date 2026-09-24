@@ -40,6 +40,7 @@ class AnalyticsRun(models.Model):
     summary_version = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     class Meta:
+        permissions = [("view_analytics", "Can view sales and inventory analytics")]
         constraints = [
             models.CheckConstraint(condition=Q(cutoff__gt=models.F("window_start")), name="analytics_window_valid"),
             models.CheckConstraint(condition=Q(status__in=["running", "completed", "failed"]), name="analytics_status_valid"),
