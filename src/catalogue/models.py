@@ -3,6 +3,22 @@ from django.db.models import Q
 
 LOW_STOCK_THRESHOLD = 10
 
+# Trial: static 3D models for selected products, keyed by product name.
+PRODUCT_MODELS = {
+    "Air Jordan 1 High": "models/air-jordan-1-high.glb",
+    "Air Jordan 1 Low Dior": "models/air-jordan-1-low-dior.glb",
+    "Classic Brown Sneaker": "models/brown-sneaker.glb",
+    "Converse Chuck High": "models/converse-high.glb",
+    "FILA Chunky Sneaker": "models/fila-sneaker.glb",
+    "New Balance 997": "models/new-balance-997.glb",
+    "Air Jordan 1 Classic": "models/air-jordan-1-classic.glb",
+    "Nike Air Max 90": "models/nike-air-max-90.glb",
+    "RTFKT Creator One": "models/rtfkt-creator-one.glb",
+    "Salomon XT-6": "models/salomon-xt6.glb",
+    "Adidas Yellow & Black Runner": "models/adidas-yellow-black.glb",
+    "New Balance 574 Classic": "models/new-balance-574.glb",
+}
+
 class Product(models.Model):
     namespace = models.CharField(max_length=160)
     external_id = models.CharField(max_length=100)
@@ -21,6 +37,10 @@ class Product(models.Model):
         if self.stock <= LOW_STOCK_THRESHOLD:
             return "low-stock"
         return "in-stock"
+
+    @property
+    def model_asset(self):
+        return PRODUCT_MODELS.get(self.name)
 
     @property
     def display_price(self):

@@ -1,6 +1,11 @@
+{% load static %}
 <article class="surface-card product-card">
     <div class="tile tile--{{ product.category|slugify }}{% if product.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
+        {% if product.model_asset %}
+        <model-viewer class="tile__model" src="{% static product.model_asset %}" alt="3D model of {{ product.name }}" loading="lazy" auto-rotate auto-rotate-delay="0" rotation-per-second="20deg" field-of-view="13deg" min-field-of-view="10deg" camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" environment-image="neutral"></model-viewer>
+        {% else %}
         {% include "catalogue/_category_glyph.html" with category=product.category extra="tile__glyph" only %}
+        {% endif %}
     </div>
     <div class="product-card__body">
         <span class="product-card__category">{{ product.category }}</span>

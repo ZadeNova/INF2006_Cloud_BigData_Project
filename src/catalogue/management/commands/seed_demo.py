@@ -1,4 +1,5 @@
-"""Deterministic demo catalogue products and store_operator role; create-only, safe to re-run."""
+"""Deterministic demo sneaker catalogue and store_operator role; create-only apart from
+deactivating retired demo products, safe to re-run."""
 import os
 import random
 from decimal import ROUND_HALF_UP, Decimal
@@ -11,21 +12,23 @@ from django.core.management.base import BaseCommand, CommandError
 from catalogue.models import Product
 
 DEMO_PRODUCTS = [
-    ("Trail Backpack 30L", "Outdoor"),
-    ("Insulated Water Bottle", "Outdoor"),
-    ("Camping Lantern", "Outdoor"),
-    ("Ceramic Coffee Mug", "Kitchen"),
-    ("Nonstick Frying Pan", "Kitchen"),
-    ("Electric Kettle", "Kitchen"),
-    ("Wireless Earbuds", "Electronics"),
-    ("USB-C Charging Cable", "Electronics"),
-    ("Portable Bluetooth Speaker", "Electronics"),
-    ("Cotton Bath Towel Set", "Home"),
-    ("Scented Candle Trio", "Home"),
-    ("Throw Blanket", "Home"),
-    ("Desk Organizer", "Home"),
-    ("Reusable Grocery Bags", "Home"),
+    ("Air Jordan 1 High", "Sneakers"),
+    ("Air Jordan 1 Low Dior", "Sneakers"),
+    ("Classic Brown Sneaker", "Sneakers"),
+    ("Converse Chuck High", "Sneakers"),
+    ("FILA Chunky Sneaker", "Sneakers"),
+    ("New Balance 997", "Sneakers"),
+    ("Air Jordan 1 Classic", "Sneakers"),
+    ("Nike Air Max 90", "Sneakers"),
+    ("RTFKT Creator One", "Sneakers"),
+    ("Salomon XT-6", "Sneakers"),
+    ("Adidas Yellow & Black Runner", "Sneakers"),
+    ("New Balance 574 Classic", "Sneakers"),
 ]
+
+# Earlier general-goods demo rows used this prefix. They are deactivated, not
+# deleted, because carts, orders and reporting rows may still reference them.
+RETIRED_EXTERNAL_ID_PREFIX = "demo-"
 
 
 def money(value):
@@ -52,7 +55,7 @@ class Command(BaseCommand):
             cost = money(price * Decimal(str(round(rng.uniform(0.4, 0.7), 2))))
             _, was_created = Product.objects.get_or_create(
                 namespace=settings.DEMO_NAMESPACE,
-                external_id=f"demo-{index:03d}",
+                external_id=f"sneaker-{index:03d}",
                 defaults={
                     "name": name,
                     "category": category,
@@ -64,6 +67,13 @@ class Command(BaseCommand):
             )
             created += was_created
         self.stdout.write(f"Created {created} demo product(s); {len(DEMO_PRODUCTS) - created} already existed.")
+        retired = Product.objects.filter(
+            namespace=settings.DEMO_NAMESPACE,
+            external_id__startswith=RETIRED_EXTERNAL_ID_PREFIX,
+            active=True,
+        ).update(active=False)
+        if retired:
+            self.stdout.write(f"Deactivated {retired} retired demo product(s).")
 
         group, _ = Group.objects.get_or_create(name="store_operator")
         try:

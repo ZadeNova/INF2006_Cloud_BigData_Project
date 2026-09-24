@@ -228,4 +228,55 @@
             heading.focus();
         }
     });
+
+    // 3D product tiles: reveal once loaded, and ease the spin speed up while
+    // the pointer is over the card rather than snapping between speeds.
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var IDLE_SPIN = 20;
+    var HOVER_SPIN = 120;
+
+    document.querySelectorAll(".tile__model").forEach(function (viewer) {
+        var markLoaded = function () {
+            viewer.classList.add("is-loaded");
+        };
+        if (viewer.loaded) {
+            markLoaded();
+        } else {
+            viewer.addEventListener("load", markLoaded, { once: true });
+        }
+
+        if (reduceMotion.matches) {
+            viewer.removeAttribute("auto-rotate");
+            return;
+        }
+
+        var card = viewer.closest(".product-card");
+        var speed = IDLE_SPIN;
+        var target = IDLE_SPIN;
+        var frame = null;
+
+        var step = function () {
+            speed += (target - speed) * 0.1;
+            if (Math.abs(target - speed) < 0.5) {
+                speed = target;
+            }
+            viewer.setAttribute("rotation-per-second", speed.toFixed(1) + "deg");
+            frame = speed === target ? null : requestAnimationFrame(step);
+        };
+        var spinTo = function (value) {
+            target = value;
+            if (!frame) {
+                frame = requestAnimationFrame(step);
+            }
+        };
+
+        card.addEventListener("pointerenter", function (event) {
+            if (event.pointerType === "mouse") {
+                spinTo(HOVER_SPIN);
+            }
+        });
+        card.addEventListener("pointerleave", function () {
+            spinTo(IDLE_SPIN);
+        });
+    });
 }());

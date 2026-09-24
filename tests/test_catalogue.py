@@ -212,3 +212,21 @@ def test_seed_demo_allows_fallback_password_in_local(monkeypatch):
 
     operator = get_user_model().objects.get(username="demo-operator")
     assert operator.check_password("Str0ngDemoOperator!2026")
+
+
+def test_seed_demo_creates_sneakers_and_deactivates_retired_demo_products(monkeypatch):
+    monkeypatch.delenv("DEMO_OPERATOR_PASSWORD", raising=False)
+    retired = make_product("demo-001")
+    other_namespace = make_product("demo-001", namespace=HISTORICAL_NAMESPACE)
+
+    with override_settings(LOCAL=True):
+        call_command("seed_demo")
+        call_command("seed_demo")
+
+    retired.refresh_from_db()
+    other_namespace.refresh_from_db()
+    sneakers = Product.objects.filter(namespace=settings.DEMO_NAMESPACE, external_id__startswith="sneaker-")
+    assert sneakers.count() == 12
+    assert all(product.active and product.category == "Sneakers" for product in sneakers)
+    assert retired.active is False
+    assert other_namespace.active is True
