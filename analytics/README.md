@@ -19,11 +19,31 @@ exit code nor positive variance means the dataset is accepted. Before import, re
 an explicit manual decision for the checksummed release in data/README.md, resolving
 the planned flat-noise criterion against descriptive sales/inventory use. Variability
 alone does not establish trend, seasonality or forecast quality.
-No ML or K-means analysis is performed.
-Customer-order distribution and recency diagnostics are deferred with optional ML.
 No peak-memory measurement/cloud-instance suitability claim is made; bulk-create
 batching does not bound total importer memory. Measure on the selected cloud instance
 before using it for the deployment import.
+
+## Optional ML: offline RFM K-means
+
+ML stays outside the web image. Train/evaluate offline here, then load assignments
+into the app table keyed by analytics run and model version:
+
+```powershell
+docker compose run --rm --no-deps --user 0 --volume "${PWD}:/work" --workdir /work web sh -lc "python -m venv /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r analytics/requirements.txt && /tmp/analytics-env/bin/python analytics/segment_customers.py --run-id <RUN_UUID> --output /work/analytics/segments.json --model-version rfm-kmeans-v1"
+docker compose run --rm --volume "${PWD}\analytics:/work/analytics" web python manage.py load_customer_segments --run-id <RUN_UUID> --input /work/analytics/segments.json --model-version rfm-kmeans-v1
+```
+
+`segment_customers.py` reads completed orders before the run cutoff, computes RFM,
+scales features, log-transforms monetary, chooses k by silhouette on a bounded range,
+checks stability by comparing each seed's labels against the published-label seed
+(ARI mean/std), and writes JSON rows plus cluster profiles. Segment naming uses
+recency, frequency and monetary together (`high_value`, `core`, `at_risk`) rather
+than spend alone. The dashboard shows a segment panel only when assignments exist
+for the selected run.
+
+Results are descriptive on synthetic data and may reflect generator structure instead
+of real customer behavior. Treat this panel as optional operational guidance, not a
+predictive model.
 
 ## Executed verification, 22 September 2026
 

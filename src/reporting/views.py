@@ -80,7 +80,12 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     comparison_series=[],
                     comparison_categories=[],
                     comparison_top_sellers=[],
+                    segment_overview=queries.customer_segment_overview(run),
+                    segment_customers=[],
                 )
+                if context["segment_overview"] is not None:
+                    context["segment_customers"] = queries.customer_segment_customers(
+                        run, model_version=context["segment_overview"].model_version, limit=50)
                 if compare:
                     previous = ranges.comparison_span(span)
                     available = ranges.comparison_available(

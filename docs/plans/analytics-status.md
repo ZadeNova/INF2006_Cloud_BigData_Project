@@ -40,7 +40,7 @@ Ordered by dependency from [backend-completion-roadmap.md](backend-completion-ro
    - `docs/API.md`: analytics route and HTMX contract are implemented and independently review-cleared locally; publication remains pending.
    - Tracker entries for 6a, 6b and 6c; `analytics/README.md`; `evidence/test-data-ai.md` and `evidence/data-validation.md` from real command output; `data/README.md`, `data/DATA_DICTIONARY.md`, manifest fields after 6a. Update the [review brief](astra-review.md) queue with the analytics commits.
 7. **Independent review gate:** 6b is already cleared. 6a is independently cleared. Phase 3 pandas verification is independently cleared. The 6c backend/dashboard integration is independently cleared in round 3; [review](../reviews/analytics-dashboard.md).
-8. **Optional batch 6d:** K-means RFM segmentation remains deferred. Start it only after required analytics, AWS smoke deployment and evidence pass, and only if profiling shows sufficient repeat-purchase signal. It may be omitted.
+8. **Optional batch 6d:** K-means RFM segmentation is implemented locally as an additive panel (offline training script + `load_customer_segments` command + dashboard rendering) for branch evaluation. The original sequencing gate still applies for publication: proceed after required analytics + AWS smoke deployment/evidence, unless the team records an explicit exception. Keep it removable and treat output as descriptive on synthetic data, not predictive.
 
 The scheduler that triggers `refresh_analytics` periodically is deliberately **not** designed yet; that is an infrastructure-phase decision after the command exists (see [cloud-independent-prep.md](cloud-independent-prep.md) B6).
 

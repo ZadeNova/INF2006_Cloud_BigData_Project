@@ -73,7 +73,7 @@ These are parallel work tracks, not extra staffing assumptions: the user leads b
 - [ ] With two healthy instances, demonstrate failure/session continuity and safe retry of uncertain checkout.
 - [ ] Exercise analytics scheduler-host loss in a controlled test and verify restart/re-run without duplicate or partial summaries; record interruption and recovery.
 - [ ] Complete security/storage/analytics tests and an actual monitoring query/alert; diagnose failures honestly.
-- [ ] Evaluate optional cache/ML only after core work is solid; preserve the existing conditional scope and freeze features by 1 October.
+- [ ] Evaluate optional cache/ML only after core work is solid; optional ML segmentation is implemented locally for branch evaluation and remains descriptive-only on synthetic data, while cache remains conditional. Freeze features by 1 October.
 
 ### Phase 4: reproduction and packaging
 
@@ -103,7 +103,7 @@ Planning DOC-001/002 are resolved at the contract/persistence boundary; future i
 | HTTPS | Supported hostname/certificate and validation arrangement |
 | Dataset | Integrity passes: Analytics Engineering v1.0.0 (CC BY 4.0), raw download `b95905a` unchanged, exact counts and zero integrity rejects. **User accepted descriptive use on 22 Sep 2026 (DATA-003)**; weak weekly variation and 31.67–39.75% without recent sales do not rule out flat noise. [Review log](reviews/analytics-data-import.md), [profile](../data/PROFILE.md). Round-2 independent review cleared all findings and repeated full-source import/replay in reviewer-only scratch. Deployed demo namespace/date anchor remains to be selected. |
 | ElastiCache | Conditional; requires explicit selection, lab support, budget and measured value |
-| Optional ML | Deferred; omit if it delays required work |
+| Optional ML | Implemented locally as optional additive RFM K-means panel (offline train + load command + dashboard) for branch evaluation; final publication still follows the existing "after required work/AWS evidence" gate unless the team records an explicit exception. Keep it removable and descriptive-only on synthetic data. |
 | Submission group ID | Fill in for submission packaging; member-name assignment is not a development task |
 | INF2003 reuse | Confirm lecturer policy and contribution attribution |
 | Dataset generation/alteration permission | **Resolved 22 Sep 2026:** confirmed permitted by the user. Generating/altering dataset fields (synthetic stock/lead-time supplementation per `docs/DATA_PIPELINE.md`) may proceed for the real-dataset import task |
