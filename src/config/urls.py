@@ -5,7 +5,7 @@ from .views import design_notes, design_notes_unavailable, foundation_preview, h
 
 urlpatterns = [
     # The storefront is the landing page; one canonical catalogue URL, so this redirects rather than re-serving it.
-    path("", RedirectView.as_view(pattern_name="catalogue:product_list"), name="home"),
+    path("", RedirectView.as_view(pattern_name="catalogue:product_list", http_method_names=["get", "head"]), name="home"),
     path("foundation/", foundation_preview, name="foundation-preview"),
     path("", include("accounts.urls")),
     path("", include("orders.urls")),

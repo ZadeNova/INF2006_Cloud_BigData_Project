@@ -50,7 +50,9 @@ class CheckoutView(LoginRequiredMixin, View):
             lines.append({"item": item, "product": product, "line_total": item.line_total, "warning": warning})
         review = services.fingerprint_for([(item.product, item.quantity) for item in items])
         # Same rule as the cart page: an unavailable line stays visible but is not added to the total.
-        return {"lines": lines, "subtotal": cart_subtotal(items), "error": error, "review": review}
+        available_count = sum(1 for item in items if item.product.active)
+        return {"lines": lines, "subtotal": cart_subtotal(items), "available_count": available_count,
+                "error": error, "review": review}
 
     def _render_error(self, request, message, status):
         result = self._prepare(request)

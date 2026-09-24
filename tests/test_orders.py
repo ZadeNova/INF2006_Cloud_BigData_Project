@@ -167,6 +167,8 @@ def test_review_page_total_leaves_out_a_deactivated_product_like_the_cart_does()
     assert response.status_code == 200
     assert "No longer available" in response.content.decode()      # the line is still shown, with its warning
     assert len(response.context["lines"]) == 2
+    assert response.context["available_count"] == 1
+    assert "<dt>1 available product</dt>" in response.content.decode()     # the row agrees with the total beside it
     assert response.context["subtotal"] == Decimal("20.00")
     assert response.context["subtotal"] == cart_subtotal(get_cart(user).items.select_related("product"))
 

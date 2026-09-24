@@ -30,6 +30,8 @@ def test_the_site_root_lands_on_the_catalogue():
 
     assert response.status_code == 302
     assert response.url == reverse("catalogue:product_list")
+    assert Client().head("/").status_code == 302
+    assert Client().post("/").status_code == 405          # a safe-methods route, as it was before the redirect
 
 
 def test_design_notes_renders_a_presentation_fragment():

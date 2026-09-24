@@ -63,7 +63,7 @@
             <h2 class="summary__title" id="summary-title">Order summary</h2>
             <dl class="summary__rows">
                 <div class="summary__row">
-                    <dt>{{ lines|length }} product{{ lines|length|pluralize }}</dt>
+                    <dt>{{ available_count }} available product{{ available_count|pluralize }}</dt>
                     <dd>S${{ subtotal }}</dd>
                 </div>
                 <div class="summary__row summary__row--rule">

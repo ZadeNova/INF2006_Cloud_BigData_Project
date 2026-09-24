@@ -19,7 +19,7 @@ Frontend and visual work (templates, CSS) is outside this backend gate. The chec
 
 Cleared after the backend gate, each with its own log: [analytics-data-import](../reviews/analytics-data-import.md) (dataset import, round 2), [analytics-phase3](../reviews/analytics-phase3.md) (refresh cross-check against pandas, round 1) and [analytics-dashboard](../reviews/analytics-dashboard.md) (dashboard, round 3). The dataset-switch commits (`4403337`, `63f6787`, `b95905a`) were covered by the PR #2 final review.
 
-**Not yet independently reviewed:** the dashboard re-theme to the VoiceBox tokens (`766d837`), which touched CSS and `analytics.js` only, and the UIUX storefront redesign (frontend-only, outside the mandatory backend gate). Anything new under `src/` that changes routes, models, forms or migrations needs the gate again.
+**Not Astra-reviewed:** the dashboard re-theme to the VoiceBox tokens (`766d837`, CSS and `analytics.js` only) and the UIUX storefront redesign (frontend-only, outside the mandatory backend gate). The backend-owned delta after the cleared dashboard state (`config/urls.py`, `config/views.py`, `orders/views.py`, the compose data mount) was reviewed on 24 September 2026 by Claude Opus 5.5, **accepted by the project owner as a substitute reviewer** and recorded as a deviation from this gate; it is not independent of the author. See [opus-delta-review.md](../reviews/opus-delta-review.md). The three advisory findings from that review were fixed the same day. Anything new under `src/` that changes routes, models, forms or migrations needs the gate again.
 
 ## Cleared review queue (rounds 1 to 4)
 
