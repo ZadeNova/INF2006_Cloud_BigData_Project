@@ -111,7 +111,9 @@ def _stability_against_published(scaled, k_clusters, published_labels, seeds):
 
 
 def feature_matrix(frame, preprocessing="baseline"):
-    features = frame[["recency_days", "frequency_orders", "monetary_total"]].to_numpy(dtype=float)
+    # copy=True: to_numpy can return a read-only view under pandas copy-on-write,
+    # and the transforms below are applied in place.
+    features = frame[["recency_days", "frequency_orders", "monetary_total"]].to_numpy(dtype=float, copy=True)
     if not np.isfinite(features).all() or (features < 0).any():
         raise ValueError("RFM features must be finite and nonnegative")
     features[:, 2] = np.log1p(features[:, 2])
