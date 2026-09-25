@@ -58,7 +58,7 @@ Mostly the user's and teammate's actions; this is the tracker's open Phase 1 inf
 
 Decision needed: where does the container image come from (a registry the lab allows, or built on the instance)? Record it here because it changes B6.
 
-**Tool:** `python3 src/tools/aws_capability_check.py --region <lab region> --output evidence/aws-capability-record.md` writes most of this record in about a minute. It is read-only (list/describe calls and EC2 dry runs), so it creates nothing and costs nothing; it redacts account numbers and does not know the remaining balance, which is read from the lab page. Listing a service does not prove that creating it is permitted; that is proved by the Terraform plan and apply in stages 2 and 3.
+**Tool** (step-by-step guide: [AWS_CAPABILITY_CHECK.md](../AWS_CAPABILITY_CHECK.md)): `python3 src/tools/aws_capability_check.py --region <lab region> --output evidence/aws-capability-record.md` writes most of this record in about a minute. It is read-only (list/describe calls and EC2 dry runs), so it creates nothing and costs nothing; it redacts account numbers and does not know the remaining balance, which is read from the lab page. Listing a service does not prove that creating it is permitted; that is proved by the Terraform plan and apply in stages 2 and 3.
 
 **HTTPS options**, in order of preference. Terraform is written once with a `certificate_arn` input, so A and B differ only in where the ARN comes from:
 

@@ -1,5 +1,7 @@
-"""The AWS capability probe classifies results and never leaks an account number; it calls no AWS API here."""
+"""The AWS capability probe classifies results, keeps personal identifiers out of its record and survives a slow call; it calls no AWS API here."""
 import json
+import subprocess
+from types import SimpleNamespace
 
 import pytest
 
@@ -77,3 +79,49 @@ def test_no_probe_can_change_anything():
     for _, _, build, _ in probe.PROBES:
         args = build({"ami": "ami-0abc", "account": "123456789012"})
         assert args[1].startswith(verbs) or "--dry-run" in args, args
+
+
+@pytest.mark.parametrize("text, secret", [
+    ("arn:aws:iam::123456789012:root", "123456789012"),
+    ("User: arn:aws:sts::1:assumed-role/voclabs/user2345678=Jane_Doe is not authorized", "Jane_Doe"),
+    ("User: arn:aws:iam::1:user/JaneDoe is not authorized", "JaneDoe"),
+    ("requested by someone@example.com", "someone@example.com"),
+])
+def test_redact_removes_each_kind_of_identifier(text, secret):
+    assert secret not in probe.redact(text)
+
+
+def test_an_error_is_redacted_before_it_is_cut_to_length():
+    # The account number starts at column 149, so a 160-character cut leaves 11 digits: too few for the
+    # account pattern, so cutting first would leak almost the whole number.
+    line = "x" * 135 + " arn:aws:sts::123456789012:assumed-role/voclabs/user2345678=Jane_Doe is not authorized"
+
+    def runner(args):
+        return 254, "", f"An error occurred (AccessDenied)\n{line}"
+
+    results, _ = probe.run_probes(runner)
+    record = probe.render(results, "us-east-1", probe.datetime.datetime(2026, 9, 25, 9, 0))
+    assert "1234567" not in record and "Jane_Doe" not in record and "user2345678" not in record
+
+
+def test_a_pipe_or_newline_in_a_detail_cannot_break_the_table():
+    record = probe.render([("Area2", "check", "error", "a | b\nc")], "us-east-1", probe.datetime.datetime(2026, 9, 25, 9, 0))
+    row = next(line for line in record.splitlines() if line.startswith("| Area2"))
+    assert row.replace("\\|", "").count("|") == 5      # four columns, five separators
+    assert "a \\| b c" in row
+
+
+def test_a_call_that_times_out_is_recorded_and_the_run_continues(monkeypatch):
+    def slow_iam(command, **kwargs):
+        if "iam" in command:
+            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+        return SimpleNamespace(returncode=254, stdout="", stderr=DENIED)
+
+    monkeypatch.setattr(probe.subprocess, "run", slow_iam)
+
+    results, fatal = probe.run_probes(probe.make_runner(["aws"], timeout=45))
+
+    assert fatal is None and len(results) == len(probe.PROBES)      # nothing after the timeouts was lost
+    timed_out = [(outcome, detail) for area, _, outcome, detail in results if area == "IAM"]
+    assert len(timed_out) == 2
+    assert all(outcome == "error" and "Timed out after 45 seconds" in detail for outcome, detail in timed_out)

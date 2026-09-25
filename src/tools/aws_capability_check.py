@@ -17,6 +17,7 @@ import shutil
 import subprocess
 import sys
 
+CALL_TIMEOUT = 45  # seconds per AWS CLI call
 DENIED = ("AccessDenied", "UnauthorizedOperation", "not authorized", "AuthorizationError")
 FATAL = {
     "credentials": ("Unable to locate credentials", "NoCredentialProviders"),
@@ -38,8 +39,18 @@ def classify(returncode, stderr):
     return "error"
 
 
+# Error messages name the caller. In lab accounts the session name of an assumed role, the name of an IAM user
+# and the email-like strings that often sit in them can identify a student, and this record is meant for evidence/.
+SESSION_NAME = re.compile(r"(assumed-role/[^/\s]+/)[^\s:\"',]+")
+IAM_USER_NAME = re.compile(r"(:user/)[^\s:\"',]+")
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+
+
 def redact(text):
-    return re.sub(r"\b\d{12}\b", "<account>", text)
+    text = re.sub(r"\b\d{12}\b", "<account>", text)
+    text = SESSION_NAME.sub(r"\1<session>", text)
+    text = IAM_USER_NAME.sub(r"\1<user>", text)
+    return EMAIL.sub("<email>", text)
 
 
 def names(items, key, limit=8):
@@ -135,9 +146,14 @@ def run_probes(runner):
             except (KeyError, IndexError, ValueError, TypeError):
                 detail = "call succeeded; response not summarised"
         else:
-            detail = stderr.strip().splitlines()[-1][:160] if stderr.strip() else ""
+            detail = redact(stderr.strip().splitlines()[-1])[:160] if stderr.strip() else ""
         results.append((area, check, outcome, redact(detail)))
     return results, None
+
+
+def cell(text):
+    """One table cell: no newline and no unescaped pipe, either of which would break the Markdown table."""
+    return " ".join(str(text).split()).replace("|", "\\|")
 
 
 def render(results, region, when):
@@ -149,7 +165,7 @@ def render(results, region, when):
         "| Area | Check | Result | Detail |",
         "|---|---|---|---|",
     ]
-    lines += [f"| {area} | {check} | {outcome} | {detail} |" for area, check, outcome, detail in results]
+    lines += [f"| {area} | {check} | {outcome} | {cell(detail)} |" for area, check, outcome, detail in results]
     lines += [
         "",
         "## How to read this",
@@ -170,6 +186,17 @@ def render(results, region, when):
     return "\n".join(lines)
 
 
+def make_runner(base, timeout=CALL_TIMEOUT):
+    """Return runner(args) -> (returncode, stdout, stderr). A call that times out is an error result, not a crash."""
+    def runner(call):
+        try:
+            done = subprocess.run(base + call, capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return 124, "", f"Timed out after {timeout} seconds"
+        return done.returncode, done.stdout, done.stderr
+    return runner
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--region", required=True, help="the lab's region, for example us-east-1")
@@ -183,11 +210,7 @@ def main(argv=None):
     if args.profile:
         base += ["--profile", args.profile]
 
-    def runner(call):
-        done = subprocess.run(base + call, capture_output=True, text=True, timeout=45)
-        return done.returncode, done.stdout, done.stderr
-
-    results, fatal = run_probes(runner)
+    results, fatal = run_probes(make_runner(base))
     if fatal == "credentials":
         sys.exit("No AWS credentials found. Configure them (aws configure, or export the lab's AWS_* variables) and retry.")
     if fatal == "expired":
