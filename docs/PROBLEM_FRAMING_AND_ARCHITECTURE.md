@@ -209,7 +209,7 @@ repo, not generic terms:
 |---|---|
 | Users | Customer and Store Operator, as two distinct actors |
 | Application components | "Django/Gunicorn (EC2 ASG)" — matches `ARCHITECTURE.md`'s own wording |
-| Cloud services | EC2, ALB, Auto Scaling Group, RDS PostgreSQL 17, S3, ACM, ECR, Secrets Manager, IAM (`LabInstanceProfile`), CloudWatch, SNS, WAF and CloudTrail — distinguish deployed evidence from planned controls; AWS Budgets dashed until the lab confirms it. No Systems Manager, EventBridge Scheduler or Lambda |
+| Cloud services | EC2, ALB, Auto Scaling Group, RDS PostgreSQL 17, S3, ACM, ECR, Secrets Manager, IAM (`LabInstanceProfile`), Systems Manager, CloudWatch, SNS, WAF and CloudTrail — distinguish deployed evidence from planned controls; AWS Budgets dashed until the lab confirms it. No Lambda; EventBridge Scheduler only if the optional side quest is built |
 | Trust boundaries | At minimum: the VPC boundary, and the public app subnet vs. the private RDS subnet, as drawn boxes, not implied; label the security-group chain sg-alb → sg-app → sg-db |
 | Data stores | RDS and the one S3 bucket (dataset, exports, images, `.glb` models) as distinct labeled stores |
 | Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected; SNS alert to the team; CloudTrail event history for API audit |

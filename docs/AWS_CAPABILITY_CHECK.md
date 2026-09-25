@@ -122,7 +122,7 @@ What each area tells you, and the decision it feeds:
 | Scheduling, Inference | Scheduler schedules and Lambda functions | Legacy discovery only; these services are no longer selected. Probe availability is not a deployment requirement; ML uses an explicitly triggered batch workflow. |
 | Monitoring, Cost | CloudWatch, SNS, Budgets allowed | Discovery only; verify alarm delivery, SNS notification and cost controls separately. |
 
-Systems Manager is not selected; the AMI lookup uses EC2 image discovery. Agree a secure administration method with the infrastructure owner. The generated record includes role checks to complete manually; it does not inspect trust policies or simulate role permissions. No secret values are retrieved.
+The AMI lookup uses EC2 image discovery. Systems Manager Session Manager was reinstated on 26 September 2026 as the administration method; confirm instance access in Terraform stage 1. The generated record includes role checks to complete manually; it does not inspect trust policies or simulate role permissions. No secret values are retrieved.
 
 ## Step 6: Add the balance and review the file before committing
 

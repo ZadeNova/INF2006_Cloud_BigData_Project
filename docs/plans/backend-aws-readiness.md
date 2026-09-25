@@ -6,6 +6,8 @@ Companion: [finding dispositions and evidence](../reviews/backend-aws-readiness.
 
 ## Goal and boundaries
 
+> **Superseded in part (26 September 2026):** the user reinstated Systems Manager Session Manager for administration and one-off jobs, made EventBridge Scheduler an optional side quest, and narrowed WAF to one login rate rule. The user is the Terraform owner. Decision record: [aws-terraform.md](aws-terraform.md). Statements below that SSM is not selected are historical.
+
 Resolve confirmed backend/ML issues, coordinate related frontend fixes, and prepare a reproducible application release and ML interface for the existing infrastructure plus ECR, SNS, CloudTrail, WAF and Secrets Manager.
 
 The user owns application/ML remediation; their groupmate owns Terraform. This plan does not authorise a Terraform rewrite, AWS creation, dataset replacement, commit or push. The original planning task wrote planning documents only; Phase 0 now reconciles contracts and the read-only probe without AWS calls.

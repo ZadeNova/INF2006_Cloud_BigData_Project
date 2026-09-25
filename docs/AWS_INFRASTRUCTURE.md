@@ -4,15 +4,16 @@ Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for bud
 
 ## Baseline
 
-- Reserve `src/infrastructure/` for Terraform-owner implementation; no Terraform files exist at this preparation baseline. Provider versions remain the infrastructure owner's scoped decision.
+- Terraform lives in `src/infrastructure/` (confirmed 26 September 2026), owned by the user; no Terraform files exist at this preparation baseline. Provider versions remain the infrastructure owner's scoped decision.
 - HTTPS ALB across two permitted Availability Zones, health-checked EC2 targets in an ASG.
 - Same container image, signing configuration and database sessions on every instance; stickiness disabled.
 - Private Single-AZ RDS PostgreSQL, inbound only from application security group. State its availability limitation.
 - Private S3 for checked inputs/optional exports; block public access and restrict object permissions. Retain local input mode.
 - CloudWatch sanitised logs/metrics with short retention.
 - IAM runtime roles and Secrets Manager for database credentials/shared Django signing key; unavailable storage or retrieval blocks deployment. No baked-in access keys or plaintext user-data/launch-template secrets.
-- ECR is the selected image route. SNS, CloudTrail and regional WAF are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. Systems Manager is not selected.
-- Offline ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected. Preserve local training/loading and keep ML libraries outside the web image.
+- ECR is the selected image route. SNS, CloudTrail and regional WAF (one rate-based login rule) are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. **Systems Manager Session Manager is selected (reinstated 26 September 2026)** for administration and one-off jobs, with no SSH and no inbound admin ports. Decision record: [aws-terraform.md](plans/aws-terraform.md).
+- Region: `us-east-1`, two Availability Zones; the lab has no Singapore region. This is a documented lab constraint against the Singapore story (latency and data-residency notes in the decision record).
+- Offline ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. Lambda is not selected; EventBridge Scheduler (with SSM Run Command) is an optional side quest after the evidence runs. Preserve local training/loading and keep ML libraries outside the web image.
 
 Initial/minimum ASG capacity one, default test maximum two. Have two healthy targets before failure demonstration. Additional capacity requires quota/cost checks. Budget baseline: EC2 public subnets with application ingress restricted to ALB to avoid mandatory NAT cost; RDS private. Restrict management access separately through permitted facilities.
 

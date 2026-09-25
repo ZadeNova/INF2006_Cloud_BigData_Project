@@ -56,7 +56,7 @@ Mostly the user's and teammate's actions; this is the tracker's open Phase 1 inf
 - HTTPS arrangement: a hostname and certificate path. The generated ALB hostname is not a team-owned certificate. This blocks exposing login traffic.
 - Terraform: version and provider pins, and a single state owner per environment (two developers share infrastructure). Local versus remote state, custody, backup; state and secret-bearing plans are never committed.
 
-Selected image route: ECR. Verify creation/push/pull permissions; resolve denied access before deployment. Secrets Manager is selected for credentials and the shared signing key; unavailable storage/retrieval blocks deployment. No plaintext user-data/launch-template fallback. Systems Manager is not selected; agree a secure administration method with the infrastructure owner.
+Selected image route: ECR. Verify creation/push/pull permissions; resolve denied access before deployment. Secrets Manager is selected for credentials and the shared signing key; unavailable storage/retrieval blocks deployment. No plaintext user-data/launch-template fallback. Systems Manager Session Manager is selected (reinstated 26 September 2026) for administration and one-off jobs; no SSH.
 
 **Teammate-reported lab probe (25 September 2026):** us-east-1 Learner Lab list/describe checks and EC2/VPC dry runs succeeded for the probed services; the vCPU quota lookup was denied. LabInstanceProfile/LabRole were available; role creation was not established. PostgreSQL default reported 18.3, while this build targets 17.x. ECR and a domain/ACM route are planned. No raw probe evidence was independently rerun during integration; redact lab-generated names before retention. Creation permissions, balance, HTTPS, WAF and role-separated secret access remain actual deployment gates.
 
@@ -77,7 +77,7 @@ Confirm A with the instructor. B requires permission, hostname matching and expl
 
 **Revised 25 September 2026: Terraform first.** Terraform creates and owns every team resource; the console is for learning and inspection. The user is learning Terraform from zero, so each phase comes with a guide that explains the concepts it uses and lists explicit steps, and nothing starts until the user says so. Full plan, decisions, file layout and stages: [aws-terraform.md](aws-terraform.md). The notes below still apply.
 
-Location: `src/terraform/`. Build in small reviewable steps that follow the setup order:
+Location: `src/infrastructure/`. Build in small reviewable steps that follow the setup order:
 
 1. Provider, version pins, variables, `.gitignore` for state and plan files.
 2. Network: VPC, subnets in two permitted Availability Zones, security groups (public ALB to app only; app to private RDS on 5432).
@@ -115,7 +115,7 @@ The console-first build was replaced by Terraform first (B5). What carries over:
 | VPC | Two AZs; public subnets for the ALB and app (no NAT cost); private subnets for RDS |
 | Security groups | ALB accepts 443 from the internet; app accepts 8000 from the ALB group only; RDS accepts 5432 from the app group only |
 | ALB | HTTPS listener; the HTTP listener only redirects; health check `/health/`; stickiness off |
-| EC2 and Auto Scaling | Launch template with IMDSv2 required, encrypted EBS and an agreed secure administration method (SSM not selected); min 1, max 2; target tracking on `ALBRequestCountPerTarget` |
+| EC2 and Auto Scaling | Launch template with IMDSv2 required, encrypted EBS and Systems Manager Session Manager instead of SSH; min 1, max 2; target tracking on `ALBRequestCountPerTarget` |
 | RDS | PostgreSQL, single-AZ (state the limitation), private, encrypted, TLS forced, short backup retention |
 | S3 | Public access blocked, versioning, encryption, a deny-non-TLS bucket policy |
 | IAM | An instance profile; no access keys on instances |

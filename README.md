@@ -34,7 +34,7 @@ Implemented locally (not yet deployed):
 - A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
 - Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
 
-Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, optional saved-model inference, and load tests. ML uses an explicitly triggered batch workflow; EventBridge Scheduler and Lambda are not selected.
+Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, optional saved-model inference, and load tests. ML uses an explicitly triggered batch workflow; Lambda is not selected; EventBridge Scheduler is an optional side quest after the evidence runs.
 
 Payments are simulated; no real payment-card data is collected. Analytics is required; descriptive customer-segmentation ML is included. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
 

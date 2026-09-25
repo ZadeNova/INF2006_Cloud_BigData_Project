@@ -198,7 +198,7 @@ The selected dataset has deliberately simplified synthetic relationships; it doe
 
 ## 6. Included ML: descriptive customer segmentation
 
-Included by the 25 September scope decision. Preserve required analytics, checkout and evidence work. Offline training and assignment loading exist; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected.
+Included by the 25 September scope decision. Preserve required analytics, checkout and evidence work. Offline training and assignment loading exist; saved-model inference is optional and unimplemented. Lambda is not selected; EventBridge Scheduler is an optional side quest.
 
 - Calculate recency, completed-order frequency and spending at a fixed cutoff.
 - Scale features and fit a small K-means model offline.
@@ -222,7 +222,7 @@ S3 remains required for dataset/export object storage. Block public access, rest
 
 CloudFront is excluded from the current implementation. Discuss it as an alternative for edge caching and reducing static-origin traffic; its omission reflects this workload, budget and deadline, not a claim that CDNs require geographically distributed users. An ElastiCache product-data cache remains a candidate, subject to explicit scope selection, lab support and measured value; it is not required for session continuity.
 
-Retain the existing infrastructure and add ECR for the image route, SNS notifications, CloudTrail auditing, regional WAF protection. ML uses an explicitly triggered batch workflow; EventBridge Scheduler and Lambda are not selected. Systems Manager is not selected. Verify each service, role and cost in the actual lab; these are selected requirements, not deployed controls.
+Retain the existing infrastructure and add ECR for the image route, SNS notifications, CloudTrail auditing, regional WAF protection. ML uses an explicitly triggered batch workflow; Lambda is not selected, and EventBridge Scheduler is an optional side quest after the evidence runs. Systems Manager Session Manager is selected (26 September 2026) for administration and one-off jobs, with no SSH. The lab offers only `us-east-1`: a documented constraint against the Singapore framing. Verify each service, role and cost in the actual lab; these are selected requirements, not deployed controls.
 
 CloudWatch receives sanitised application and infrastructure metrics/logs. The application obtains configuration through permitted secure mechanisms. Sessions and carts use PostgreSQL rather than instance-local state. New instances must run the same image, dependencies and shared Django signing configuration.
 

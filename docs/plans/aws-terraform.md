@@ -6,13 +6,16 @@ Status (25 September 2026): planned, not started. Terraform is not installed on 
 
 Integration note (26 September 2026): Terraform-first sequencing and the teammate's lab observations are retained. The current scope and reviewed [runtime handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff) govern service selection and application startup: WAF remains selected; SSM, EventBridge Scheduler and Lambda are not selected. S3 media delivery is proposed work, not implemented by the ML remediation. Lab observations below are teammate-reported, not independently rerun during Git integration.
 
+**Decisions revised by the user (26 September 2026), superseding the integration note where they differ:** Systems Manager Session Manager is reinstated for administration and one-off jobs; a scheduler is an optional side quest after stage 5; WAF stays, narrowed to one login rate rule; the user is the Terraform owner and the only person who runs `apply`. Details in the table below.
+
 ## Decisions recorded here
 
 | Decision | Detail |
 |---|---|
 | **Build method (changed 25 September 2026)** | Terraform creates and owns every team resource. The console is for watching and learning (reading settings, logs, metrics, CloudTrail) and for the few steps Terraform cannot do: the ACM validation record at an external registrar, confirming the SNS email subscription, and reading the lab balance. Anything created by hand is imported into Terraform or deleted, so there is no drift. Replaces "console first, then reproduce in Terraform". |
-| Region and account | `us-east-1`, AWS Academy Learner Lab (`voclabs` role). One member's account is the integration account; one person applies. |
-| IAM | Role creation is assumed denied. Reference `LabInstanceProfile` and `LabRole` through data sources; never create IAM roles. Recorded as external dependencies. |
+| Region and account | `us-east-1`, AWS Academy Learner Lab (`voclabs` role); the lab offers no Singapore region. Two Availability Zones (the ALB requires at least two). One member's account is the integration account. **Documented lab constraint:** the story is a Singapore shop, so the report states the added latency for Singapore customers (measure it rather than assume), that production would use `ap-southeast-1` (a one-variable change in Terraform), and that the data is synthetic (PDPA's Transfer Limitation Obligation would otherwise apply to overseas storage). Analytics keeps Singapore business dates regardless. |
+| Ownership | **The user writes the Terraform and is the single state owner and the only person who runs `apply`.** The application owner supplies the image and the runtime contract ([handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff)). |
+| IAM | **Role, user and policy creation is denied (verified 26 September 2026).** Terraform references `LabInstanceProfile` and `LabRole` through data sources and contains no `aws_iam_*` resources. Every instance and every job therefore runs as `LabRole`, so per-job IAM separation (web, migration, trainer, bootstrap) cannot be enforced at the IAM layer: any instance can read any team secret and the bucket. Least privilege is enforced where the lab allows it: separate database roles (runtime, migration, bootstrap), a separate secret per job so each container is only handed its own, security groups, S3 Block Public Access and TLS-only policy, no access keys anywhere. The intended per-job policies are written as reference JSON under `src/infrastructure/iam-reference/` (not applied) so the report can show the production design. Service roles needed by AWS itself (Auto Scaling's service-linked role, the scheduler's execution role) are checked in stage 1 and stage 'Optional'; RDS Enhanced Monitoring (needs its own role) is not used. |
 | Database | RDS PostgreSQL pinned to **17.x** (the lab default is 18.3; the app, CI and all verification run on 17). Pick the newest 17 minor the lab offers. Single-AZ, private, encrypted, TLS forced. Master password managed by RDS in Secrets Manager (`manage_master_user_password`), so it never enters Terraform state. |
 | Secrets | Terraform creates secret resources without values. Provision exact per-entrypoint schemas outside Terraform; the application startup loader retrieves its own secret using role credentials. Separate runtime, migration, trainer and bootstrap access as specified in the runtime handoff. Web instances must not read the master/bootstrap secret. |
 | Object storage | **One S3 bucket**, prefixes `data/` (dataset), `exports/` (analytics exports), `media/images/`, `media/models/` (`.glb` shoe models). Block Public Access, versioning, SSE-S3, a deny-non-TLS policy. Browsers read media through short-lived pre-signed GET URLs. |
@@ -20,12 +23,15 @@ Integration note (26 September 2026): Terraform-first sequencing and the teammat
 | Image registry | ECR, immutable tags (git SHA), scan on push, keep the last 10 images. |
 | HTTPS | ACM certificate on a team-owned domain with DNS validation at the registrar. Certificate ARN is a variable, so everything else can be applied before the domain exists. A test certificate fallback requires confirmed import permission, hostname matching and explicit client trust; it is not guaranteed. |
 | Audit | CloudTrail **event history** (on by default, 90 days, free). Nothing created; shown on the diagram and cited in the threat-control map. |
-| Batch operations | Explicitly triggered refresh/train/export/import and maintenance commands on one designated authorised runner. No EventBridge Scheduler, Lambda or SSM. Agree secure runner access with the infrastructure owner before deployment; no automatic scheduling is implemented. |
-| Not built | EventBridge Scheduler, Lambda, Systems Manager, CloudFront, NAT gateway, ElastiCache, EKS or a separate analytics service. WAF remains selected and requires deployed verification. |
+| Administration access | **Systems Manager Session Manager (reinstated 26 September 2026).** Admins and developers open a shell on an instance with no inbound ports, no SSH keys and no bastion; every session is recorded in CloudTrail. Used for debugging (container logs, connectivity) and for one-off jobs. Needs the SSM agent (preinstalled on Amazon Linux 2023) and SSM permissions on `LabInstanceProfile`, to be confirmed in stage 1. No port 22. |
+| Batch operations | Explicitly triggered refresh, train, export, import and maintenance commands (`db_bootstrap`, `migrate`, S3 sync and `import_dataset`, `refresh_analytics`, `clearsessions`), run by hand through Session Manager on one designated instance, following the runbook and the role-separated secrets in the runtime handoff. |
+| Scheduler | **Optional side quest, after stage 5.** EventBridge Scheduler invoking SSM Run Command on a tagged instance, if the lab accepts `LabRole` as the scheduler's role. Until then jobs are triggered by hand, which the scope allows. |
+| WAF | **Selected, narrow.** One regional web ACL on the ALB with one rate-based rule on `POST /login/` (credential stuffing, threat T7), Count mode first, then Block. No managed rule sets. The Locust source is exempted or the limit raised during scaling runs, and that is recorded. Lab permission to be confirmed in stage 1. |
+| Not built | Lambda, CloudFront, NAT gateway, ElastiCache, EKS, a customer-managed KMS key (AWS-managed keys encrypt at rest), or a separate analytics service. EventBridge Scheduler only as the optional side quest above. |
 
 ## Layout
 
-`src/terraform/`, one root module, one file per concern, no child modules (easier to read and learn):
+`src/infrastructure/` (decided 26 September 2026: the name already reserved by the runtime contract, excluded from the image by `src/.dockerignore` and checked by the ignore test in `tests/README.md`; it also holds the boot-script template and reference IAM policies, not only Terraform), one root module, one file per concern, no child modules (easier to read and learn):
 
 ```
 versions.tf        provider and Terraform version pins
@@ -58,9 +64,9 @@ Names follow `inf2006-<component>` (`inf2006-alb`, `inf2006-db`, `inf2006-app-as
 3. Read the private IP through IMDSv2 and set the exact DJANGO_HEALTH_PROBE_HOST=<private-ip>:8000 exception. Keep ordinary DJANGO_ALLOWED_HOSTS restricted to approved application hostnames; follow the runtime handoff.
 4. Run the approved ECR image digest with DJANGO_TRUST_PROXY=true only behind the documented ALB/network boundary, and send sanitised logs to CloudWatch.
 
-Require IMDSv2 and verify the hop limit/role delivery needed by the container. Systems Manager is not selected. A permitted secure administration path must be agreed before deployment; do not open public SSH by default.
+Require IMDSv2 and verify the hop limit/role delivery needed by the container. Administration is through Systems Manager Session Manager; no SSH key and no port 22.
 
-One-off operations run on the designated authorised maintenance runner, not on every ASG boot: db_bootstrap, coordinated migrate, S3 dataset sync and import_dataset. Use the separate role/secret schemas and commands in the runtime handoff. Secure runner access remains an infrastructure prerequisite.
+One-off operations run by hand through Session Manager on one designated instance, not on every ASG boot: db_bootstrap, coordinated migrate, S3 dataset sync and import_dataset. Use the separate secret schemas and commands in the runtime handoff.
 
 ## Stages
 
@@ -70,10 +76,11 @@ Each stage: `fmt`, `validate`, `plan` saved to a file, the plan read aloud (crea
 |---|---|---|---|
 | 0 | Nothing: install Terraform, `init`, provider pins | `terraform version`, `validate` | none |
 | 1 | Network, security groups, S3, ECR, secret, log group, SNS | Subnets in 2 AZs; S3 public access blocked; push the image to ECR | near zero |
-| 2 | RDS | Instance private, encrypted, 17.x; connect through the agreed authorised maintenance runner and run `db_bootstrap` | about USD 0.02/hour |
+| 2 | RDS | Instance private, encrypted, 17.x; run `db_bootstrap` through Session Manager on a temporary instance or the first app instance | about USD 0.02/hour |
 | 3 | ACM certificate, ALB, launch template, ASG (min 1, max 1 first) | `https://<domain>/health/` returns 200; HTTP redirects; run coordinated migrations and import; the shop loads | about USD 0.05/hour total |
 | 4 | Target tracking, max 2, alarms, WAF | Alarm email received; scoped WAF rules verified; explicit batch run verified | verify selected services against current pricing |
 | 5 | Evidence runs: baseline, autoscaling, session continuity, batch failure/retry recovery | Evidence files per the scope | same |
+| Optional | EventBridge Scheduler plus SSM Run Command for `refresh_analytics` and `clearsessions` | A scheduled run appears in the analytics run list | small |
 | 6 | `terraform destroy` | Nothing tagged `Project=inf2006` remains; final balance recorded | none |
 
 Costs are rough on-demand estimates; check them against the AWS pricing pages and the lab balance after each stage. Destroy between working sessions if the stack will sit idle for a day.
@@ -82,7 +89,7 @@ Costs are rough on-demand estimates; check them against the AWS pricing pages an
 
 - **A domain** for stage 3. The user is buying one from an external registrar (cheaper than Route 53, and DNS stays outside the lab account, so it survives teardown). The purchase and DNS steps (buy, add ACM's validation CNAME, point `shop.<domain>` at the ALB) are explained in the stage 3 guide. Buying it before stage 3 is fine; nothing else needs it.
 - **Application changes** before stage 3, backend-owned and through the review gate: configurable Gunicorn workers (`GUNICORN_WORKERS`, currently hardcoded 2 in the Dockerfile), and S3 media storage (`django-storages` with pre-signed URLs, only when the teammate's image fields land).
-- **Stage-1 lab checks:** secret creation and role-separated retrieval with available lab profiles; budget and WAF permissions. Record actual results; listing APIs does not establish creation permission.
+- **Stage-1 lab checks:** secret creation and retrieval with `LabInstanceProfile`; Session Manager access to an instance; budget and WAF permissions. Record actual results; listing APIs does not establish creation permission.
 
 ## Review
 
