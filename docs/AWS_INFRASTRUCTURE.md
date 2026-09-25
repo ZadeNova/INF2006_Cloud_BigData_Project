@@ -20,7 +20,7 @@ Initial/minimum ASG capacity one, default test maximum two. Have two healthy tar
 
 Verify region, service/role permissions, instance types, quotas and actual balance. Credits are separate, not a pooled USD 200. Establish hostname/certificate validation for HTTPS; the generated ALB hostname is not a team-owned certificate arrangement.
 
-Foundation supplies GET/HEAD /health/ as database-independent process liveness (200, no-store), with allowed-host validation and internal HTTPS-redirect exemption. The separate check_database management command verifies PostgreSQL and applied migrations for operator/deployment readiness. Never use database readiness to replace all app instances during shared RDS failure. Local Compose uses a 10s probe interval, 2s request timeout, 3s process timeout, three retries and 10s start period; local startup was verified, but these are not calibrated AWS settings. The later deployment must resolve ALB probe Host/allowed-host handling (default probes may use target IPs), and measure its own thresholds/timeouts/warmup. No AWS deployment is claimed.
+Foundation supplies GET/HEAD /health/ as database-independent process liveness (200, no-store), with allowed-host validation and internal HTTPS-redirect exemption. The separate check_database management command verifies PostgreSQL and applied migrations for operator/deployment readiness. Never use database readiness to replace all app instances during shared RDS failure. Local Compose uses a 10s probe interval, 2s request timeout, 3s process timeout, three retries and 10s start period; local startup was verified, but these are not calibrated AWS settings. The opt-in exact probe Host exception below handles target IP probes while normal hosts remain strict; deployment must verify the selected target address and measure thresholds/timeouts/warmup. No AWS deployment is claimed.
 
 Deploy repeatable images and run migrations once through a coordinated step, not racing on every instance boot. Test compatibility/recovery before rollout. Terraform state can contain secrets and stays outside source/submission.
 
@@ -100,3 +100,63 @@ DML grants. Run `manage.py migrate --noinput` once using the migration credentia
 `manage.py check_database` and the web process with the runtime profile. Never deliver migration
 or bootstrap credentials to web containers. Local Compose intentionally retains its existing
 single local owner/developer role and requires no AWS configuration.
+
+## Secrets Manager startup and ALB boundary
+
+No Terraform or launch implementation is present at the reviewed baseline. The following is the
+application handoff contract, not a claim of compatible infrastructure or deployed verification.
+`AWS_SECRET_ID` and `AWS_REGION` are required nonsecret configuration outside `DJANGO_ENV=local`.
+One `config/secrets.py` loader retrieves `SecretString` once per process/startup through the SDK's
+role credential providers, uses bounded timeouts/retries and normal HTTPS certificate verification,
+and ignores configured custom service endpoints. Static environment/shared-file AWS credentials
+are refused. SDK/config/payload failures are sanitised and stop startup, with no plaintext fallback.
+Local mode reads its existing environment and neither imports nor calls the AWS SDK.
+
+Use distinct secrets and IAM access for these caller-required JSON schemas (all values strings,
+nonempty and non-placeholder; extra fields are refused). Identifiers below are configuration keys,
+not provisioned secret names or ARNs:
+
+| Caller | Required JSON keys | Optional JSON key |
+|---|---|---|
+| Django web and management commands | `POSTGRES_DB`, `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `DJANGO_SECRET_KEY` | `POSTGRES_PORT` |
+| Standalone batch trainer and refresh verifier | `POSTGRES_DB`, `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD` | `POSTGRES_PORT` |
+| One-off bootstrap only | DB keys above plus `MIGRATION_USER`, `MIGRATION_PASSWORD`, `BOOTSTRAP_USER`, `BOOTSTRAP_PASSWORD` | `POSTGRES_PORT` |
+
+The web secret names the unprivileged runtime login; the one-off migration secret has the same
+app schema but names the migration owner. The web instance role must have GetSecretValue only
+on its runtime secret, never migration/bootstrap secrets. The migration and bootstrap runners
+receive separate permitted roles/secret selection; the bootstrap aggregate secret is confined
+to the one-off privileged runner. Standalone training/verification use a separate DB-only secret
+and read-only DB identity; no Django signing key is delivered to that process. All app instances
+receive the same signing key. Owner credentials must never reach a web container. The schema
+cannot prove a database identity's privileges: bootstrap/integration checks and IAM boundaries
+are required. Rotation takes effect after coordinated process replacement, not on each request.
+
+A caller's retrieved secret replaces ambient values for its schema. Production `verify_refresh.py
+--database-url` is refused so URL credentials cannot bypass secret selection; explicit local DSNs
+remain supported. CA path, allowed hosts, trusted CSRF origins, proxy switch, release identity and
+probe Host remain nonsecret deployment configuration. `APP_RELEASE_ID` is a required bounded
+nonsecret identifier in production (for example the deployed commit or image identity). The WSGI
+worker emits one startup JSON event with release/environment through existing stdout logging.
+It does not log secret IDs, values or customer data.
+
+Allow inbound TCP 8000 to app instances only from the ALB security group, not the internet or
+other workload groups. Set `DJANGO_TRUST_PROXY=true` only at that boundary where ALB supplies
+`X-Forwarded-Proto`; the app does not trust `X-Forwarded-Host`. Configure explicit application
+hostnames in `DJANGO_ALLOWED_HOSTS` and matching HTTPS `DJANGO_CSRF_TRUSTED_ORIGINS`.
+Set `DJANGO_HEALTH_PROBE_HOST` per instance to its exact private IPv4 address followed by `:8000`.
+The optional early middleware accepts that Host only for GET/HEAD `/health/`, returning the same
+no-store, database-independent liveness response before HTTPS redirection. Existing request logging
+wraps Host validation so rejected normal requests retain their request ID in the response and security event. Wrong IP/port, other
+methods and every normal route retain allowed-host validation. The configured IP is not added
+to general allowed hosts; arbitrary IP ranges/wildcards and forwarded Host are not accepted.
+The probe exception is not authentication; its safety also depends on the ALB-only network rule.
+Keep `check_database` as an operator readiness step so an RDS outage does not recycle all app
+instances. Actual ALB headers, TLS trust, role access and denied access still require AWS evidence.
+
+Primary references: [ALB probe Host](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-troubleshooting.html),
+[ALB forwarded protocol](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/x-forwarded-headers.html),
+[GetSecretValue permissions](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html),
+[SDK role credentials](https://docs.aws.amazon.com/boto3/latest/guide/credentials.html).
+Grant `kms:Decrypt` only when needed for the selected customer-managed key; provision/access
+failures block deployment rather than permitting plaintext launch configuration.

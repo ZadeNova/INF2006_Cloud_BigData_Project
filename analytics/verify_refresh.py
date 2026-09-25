@@ -12,6 +12,7 @@ import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from config.database import connection_parameters
+from config.secrets import DB_FIELDS, load_environment
 
 CENT = Decimal("0.01")
 
@@ -109,7 +110,10 @@ def compare(run, lines, snapshots, persisted, target):
 
 
 def connect(database_url=None):
-    return psycopg.connect(**connection_parameters(database_url))
+    env = load_environment(DB_FIELDS)
+    if database_url and env.get("DJANGO_ENV", "production") != "local":
+        raise ValueError("Production database URLs are forbidden; use Secrets Manager")
+    return psycopg.connect(**connection_parameters(database_url, environ=env))
 
 
 def main(argv=None):

@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import OperationalError
 from django.db.backends.postgresql.base import DatabaseWrapper
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 
 from config.jsonlog import JsonFormatter
@@ -218,3 +218,14 @@ def test_logging_is_configured_for_json_on_standard_output():
     assert handlers and isinstance(handlers[0].formatter, JsonFormatter)
     assert logging.getLogger("northstar.request").getEffectiveLevel() == logging.INFO
     assert settings.LOGGING["loggers"]["django.request"]["propagate"] is False
+
+
+@override_settings(ALLOWED_HOSTS=["shop.example"], SECURE_SSL_REDIRECT=True)
+def test_rejected_host_keeps_request_id_in_response_and_security_event(logs):
+    response = Client().get("/login/", HTTP_HOST="rejected.example", HTTP_X_REQUEST_ID="review-request-123")
+    assert response.status_code == 400
+    assert response["X-Request-ID"] == "review-request-123"
+    (security,) = logs.records("django.security.DisallowedHost")
+    (request,) = logs.request_lines()
+    assert security["request_id"] == request["request_id"] == "review-request-123"
+    assert request["status"] == 400 and "rejected.example" not in logs.raw

@@ -1,6 +1,6 @@
 # Runtime and AWS security preparation
 
-Date: 25 September 2026. Status: in progress; no completed review gate or AWS readiness claim.
+Date: 25 September 2026. Status: checkpoints A and B independently cleared locally; C pending. No deployed AWS readiness claim.
 
 ## Baseline and ownership
 
@@ -22,7 +22,7 @@ Terraform edits, provisioning, real secret retrieval, shared/AWS database bootst
 
 ## Review rounds and verification
 
-Pending. Exact frozen paths, hashes, commands, actual results, findings and unrun checks will be recorded per checkpoint. No tests or image build have yet been executed in this Phase 5 pass.
+The following chronological entries record frozen paths, hashes, commands, actual results, findings and unrun checks per checkpoint. At initialization no tests or image build had been executed; later entries supersede that initial state.
 
 ## Checkpoint A — frozen round 1
 
@@ -164,3 +164,91 @@ docker run --rm --network container:inf2006-runtime-a-db --mount type=bind,sourc
 No implementation changed after round 3. Coordinator completion metadata updates only this record, tracker and original readiness dispositions. A local checkpoint commit is authorised after scoped staged-content inspection. B/C remain pending and nothing is pushed or deployed.
 
 Coordinator staged verification: exactly 18 task paths; all 14 reviewed implementation/contract/test hashes matched. Staged bytes match working bytes after newline normalization; all decode as UTF-8. Added-text AWS-key/private-key pattern scan found no matches; no generated artifacts or credential files staged. This scoped scan is not an exhaustive secret-detection claim. `git diff --cached --check` passed and no unstaged changes remained. Final inspection changes no implementation.
+
+## Checkpoint B — startup configuration and ALB boundary
+
+A local commit: `e4cc1d6b35ea3243bab84d98d61738f16ba8b31a`, verified descriptive body and clean post-commit tree (seven commits ahead of fetched origin). B baseline is this commit. No push/deployment.
+
+Astra Low continues with one role-based Secrets Manager startup loader, a documented strict secret schema without real identifiers, local environment compatibility, sanitised failures, narrow configured probe Host/path/method handling and minimal release identity in existing logging. Runtime and migration use separately permissioned secret values with the same ordinary application schema; only the one-off bootstrap path may receive bootstrap credentials. IAM must keep migration/bootstrap secrets unavailable to the web role. No competing profile framework or application-side rotation machinery is required.
+
+B implementation/review pending. C image/context verification and concrete final infrastructure handoff remain pending.
+
+### B frozen round 1
+
+Baseline `e4cc1d6b35ea3243bab84d98d61738f16ba8b31a`; 20 implementation/test/contract paths below, including three new files. A behavior remains in scope for regression review. Coordinator record changes are metadata. No C packaging changes yet.
+
+Implemented one cached startup secret loader with strict caller schemas, bounded role-based retrieval, sanitised errors, no production plaintext fallback and no AWS imports/calls in local mode. Production standalone DSNs are explicitly refused to avoid a second credential source; local DSNs remain supported. Added exact configured private-IP:8000 GET/HEAD health exception, strict normal Host validation and release startup JSON event. Only required SDK pins added; existing dependency pins unchanged.
+
+Implementer verification: host **69 passed / 1 failed** (pre-existing logging assertion expects Unix separators; Windows formatter emits backslash). Initial host run 59 passed / 10 failed because local staticfiles were absent; existing collect_static.py generated task-only ignored staticfiles before rerun. Supported Linux Python 3.13.15: **70 passed in 17.25s**, `pip check` clean. Initial dependency-image run 68 passed / 2 failed because that older image lacked the CA-path environment default; explicitly setting the documented CA path produced the passing rerun. Final C image build remains pending.
+
+Container `inf2006-runtime-b-check`, dependency image `sha256:8f2604a3255a264d915f08d73b23d968a23b470161543c4d077003a52686246c`, user 0 for temporary dependency installation, network `container:inf2006-runtime-a-db`. Read-only mounts `<workspace>/src:/app`, `<workspace>/tests:/app/tests`, `<workspace>/analytics:/work/analytics`; workdir `/app`. Environment: `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=/app`, `DJANGO_ENV=local`, synthetic signing key, allowed hosts `localhost,127.0.0.1,testserver`, DB `runtime_test_owner`, user `runtime_test_runner`, task-only password, host `127.0.0.1`, port `5432`, CA `/app/certs/rds-global-bundle.pem`, task-only admin DSN for bootstrap fixtures. No real AWS credentials/secret values used.
+
+Inside that disposable container:
+
+```sh
+python -m venv --system-site-packages /tmp/checks
+/tmp/checks/bin/python -m pip install -q -r /app/requirements.txt -r /work/analytics/requirements.txt
+/tmp/checks/bin/python -m pip check
+/tmp/checks/bin/python -m pytest -q -c /app/pytest.ini -p no:cacheprovider /app/tests/test_secrets.py /app/tests/test_settings.py /app/tests/test_health.py /app/tests/test_request_logging.py /app/tests/test_database_policy.py /app/tests/test_db_bootstrap.py /work/analytics/tests/test_startup_credentials.py
+```
+
+Pinned Django `check`: no issues; `makemigrations --check --dry-run`: no changes (4.70s combined), same A command shape using current source and local fixture environment. `git diff --check` passed. Dependency test container is stopped and retained temporarily; only task-created staticfiles/resource cleanup pending. No final image, hosted CI, real TLS handshake, AWS or full-suite results claimed.
+
+| Path | B working-file SHA-256 |
+|---|---|
+| analytics/README.md | fcb6f8833585bdc9a5f746764aa233b6fbc0ff910c061dfa6334fb5c52d7ad3d |
+| analytics/requirements.txt | 0e1d4279256bd6e6b264f9301f90a24773ba81938f177f06c9d9b8f4b7bb4f38 |
+| analytics/segment_customers.py | 39b2ceed50258ecdea9510807db274c34d5a141a86e73744e3e6cf95438007b5 |
+| analytics/verify_refresh.py | 1d4d52f0a143414021780700b025808faaf58a05dff1883087c664458b422be1 |
+| analytics/tests/test_startup_credentials.py | 77459aa1916e34bb7f4aee6bc6293c90f7a440ffbaf2ac34d555d29466d4d103 |
+| docs/API.md | 447a1d6d11574afe6f538b00363e13d42d82245833e95548d8d5c6b7f5d3f8a2 |
+| docs/AWS_INFRASTRUCTURE.md | cbee147f69a4d56b3c2f6b61f3a34e4229e48d94e9bff153a56f77c258a8429f |
+| docs/SECURITY.md | 7eb578e152dd885ea833365cd29ba0ef2f3c8384511afe8346d6d8bf303bb7ab |
+| src/README.md | 431f2af27cf276dce0de333ef47019b6c143b7b7e2ac5a4f4fec76b3ab236f57 |
+| src/config/middleware.py | e13e7b72c5914f648fe1c8b9c5a8f5a2809d61115e8277081e8295350d3ff7eb |
+| src/config/settings.py | 19e1c02207b8b38c7204ae18f88d1a8f0fc1cac0bc8c410355a7d2fe48f81d73 |
+| src/config/views.py | a4323dc492d0ea2d4d07f1bab73b138610d04fa951c7d58fdfe4d532d2c4ddf9 |
+| src/config/wsgi.py | e91aaddfee2f8663f5253e8b8341b3fcd4b81bdc10b89fd43f3ab2f7599d906e |
+| src/config/secrets.py | 91cf81162a5ad1f99de21e37e70724f517fcf365c9b279eadd3432b1598c1491 |
+| src/requirements.in | 0ce6edc1799e6eaa6d58a3c6b58e25bdbb7f246a833f3132f1d2717abe1e2946 |
+| src/requirements.txt | c96b6826225abc5329195f9558e7769ab304f0ac3f45c67aba20bc6c1d867753 |
+| src/tools/db_bootstrap.py | f3f244efcfa8af7295f74051204adbd97d84766b64311796e71b09c8c0bedde9 |
+| tests/test_health.py | 7fe3621f172ecfd20b0495a8a140627a9860af3cddd378b6ac4c08a6d3ce2862 |
+| tests/test_settings.py | b657d0bae6f42eb35d62de500c1f8cb5cfeba048b12731c6940b766b1cf1388a |
+| tests/test_secrets.py | 6f0838b5271ad28b4fc91dd47af3f9d8ede9558f3a926e9137bf9433a0e46dab |
+
+B host-only failure identifier: `tests/test_request_logging.py::test_a_controlled_failure_can_be_correlated_without_leaking_its_message` expects `cart/views.py`; the unchanged formatter produces Windows path separators. It passed in the supported Linux run. Analytics caller tests load both standalone modules by importlib path under `/work/analytics`; `PYTHONPATH=/app` only. Bootstrap subprocesses use the same combined pinned environment. No unrelated portability fix was introduced.
+
+### B round 1 — RAS-007; gate open
+
+Independent (fresh session) Astra Medium reviewer inspected all 20 frozen paths/direct consumers, verified every hash and retained RAS-001–006 as resolved. Fake-secret/policy/standalone checks independently **19 passed in 2.36s**; `git diff --check` passed. No database mutation, AWS call, real TLS or final-image execution.
+
+| ID | Severity | File/line | Required spec / evidence | Issue and expected correction | Low fix / verification | Re-review outcome |
+|---|---|---|---|---|---|---|
+| RAS-007 | P2 | src/config/middleware.py:32; settings middleware order | SECURITY request-ID correlation for sanitised security failures | First middleware rejects Host before existing request logger assigns ID. Reviewer reproduced 400 with no response X-Request-ID and null security-event ID; prior order retains both. Let existing logging wrap normal Host validation, retain narrow DB-independent health exception, add one correlation regression. | Pending | Pending |
+
+Low receives RAS-007 for one remediation attempt. Same finding unresolved after re-review triggers the mandatory manual-escalation stop.
+
+### B RAS-007 Low remediation — frozen round 2
+
+Middleware order now keeps DatabaseUnavailable outermost, then existing RequestLogging, then HealthProbe and Security. Existing exception recording/503 handling remains intact; request IDs exist before normal Host rejection. The probe remains before redirect and inside DB-independent logging. One focused regression asserts rejected-Host response, request event and sanitised DisallowedHost event share the supplied valid request ID with HTTPS redirect enabled. AWS contract wording changed from first to early middleware.
+
+`docker start -a inf2006-runtime-b-check` reran the documented pinned dependency setup and current-source suite: `pip check` clean; **71 passed in 17.39s**. Includes existing database-outage/exception logging tests, health/proxy tests and A/startup regressions. `git diff --check` passed. No new resources or C changes.
+
+B boundary now has 21 implementation/test/contract files. Only these hashes changed or were added; other B round-1 hashes remain applicable:
+
+| Path | B round-2 SHA-256 |
+|---|---|
+| src/config/settings.py | 23ce81ec448aafebf8dc333ecded9207f1b49c8c55e82c90e8123d5cd106d4c0 |
+| tests/test_request_logging.py | 71edec6b7fc97f222e33cae46337f3b8b57f288b3fae249bef811853ede58af9 |
+| docs/AWS_INFRASTRUCTURE.md | ab0c03012798c86a9e274aa44cd71f7c60c25c1e169b074980cf4c138394687e |
+
+### B round 2 — independent gate clear
+
+Same Independent (fresh session) Astra Medium reviewer: **RAS-007 resolved; no unresolved actionable findings or new findings**. All 21 frozen hashes matched and complete B boundary reassessed. Request logging wraps Host/security validation; database exception ordering and DB-independent probe remain intact. RAS-001–006 remain closed.
+
+Independent rejected-Host HTTP/security-event correlation reproduced successfully with HTTPS redirect enabled; two focused health/proxy tests passed. The logging pytest case could not initialize its database fixture without configured DB access, so the reviewer used a direct nonmutating reproduction instead. `git diff --check` passed. Implementer's 71-test Linux result was not independently rerun; no AWS, database mutation, actual TLS or final-image claim.
+
+B gate clear only; C packaging/final-image and deployed verification remain open. Coordinator updates only completion metadata before scoped staging and local commit.
+
+B coordinator staged verification: exactly 24 task paths; all 21 frozen implementation/test/contract hashes match. Staged content matches working text after newline normalization, decodes as UTF-8, and contains no AWS-key/private-key pattern matches in additions. No generated/static/credential files staged; no unstaged tracked changes. `git diff --cached --check` passed. Scoped scan is not exhaustive secret detection. Only coordinator metadata changed after independent clearance.

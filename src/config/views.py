@@ -37,6 +37,10 @@ def statistics_preview(request):
 def health(request):
     """Process liveness, deliberately independent of shared database availability."""
     request.get_host()  # Apply the explicit host policy even for this minimal response.
+    return health_response()
+
+
+def health_response():
     response = JsonResponse({"status": "ok"})
     response["Cache-Control"] = "no-store"
     return response

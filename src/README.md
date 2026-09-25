@@ -101,6 +101,29 @@ Dependencies: exact direct/transitive pip pins in requirements.txt; requirements
 
 Package paths: config holds settings/URLs/WSGI; accounts, catalogue, cart, orders and reporting are domain packages. Built-in Django User is retained. Frontend-owned templates/ contains the shared shell, foundation preview and presentation fragment; static/ contains the shared stylesheet and minimal navigation/HTMX focus script. Future business route/form contracts are owned by API.md. Batch review summaries live under ../docs/reviews/.
 
-Health is liveness only and stays 200 during shared database failure. check_database is the separate connectivity/applied-migration gate and returns nonzero sanitized errors on failure. See ../docs/reviews/foundation-batch-4.md for local failure/recovery and container-recreation results. Neither check demonstrates an ecommerce workflow or AWS availability. A later deployment must configure and test the ALB probe Host/allowed-host policy.
+Health is liveness only and stays 200 during shared database failure. check_database is the separate connectivity/applied-migration gate and returns nonzero sanitized errors on failure. See ../docs/reviews/foundation-batch-4.md for local failure/recovery and container-recreation results. Neither check demonstrates an ecommerce workflow or AWS availability. The optional exact ALB probe Host policy is defined in the production startup interface below; actual deployment verification remains required.
 
 Keep 127.0.0.1 in the local allowed-host list because the Docker health probe uses it. Production ALB settings are a separate integration task.
+
+
+## Production startup interface
+
+Follow the [canonical runtime handoff](../docs/AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary)
+for secret JSON/IAM schemas and the one-off bootstrap/migration sequence. Nonsecret environment:
+`DJANGO_ENV=production`, `AWS_REGION`, `AWS_SECRET_ID`, `APP_RELEASE_ID`, explicit
+`DJANGO_ALLOWED_HOSTS`, HTTPS `DJANGO_CSRF_TRUSTED_ORIGINS`, and (behind ALB-only ingress)
+`DJANGO_TRUST_PROXY=true`, `DJANGO_HEALTH_PROBE_HOST=<instance-private-ip>:8000`.
+The image supplies the RDS CA path; no database/signing secrets are passed in commands or images.
+The instance/runner role supplies SDK credentials. These are handoff commands, not executed AWS evidence:
+
+```sh
+# Privileged runner only, selecting its separately permissioned bootstrap secret:
+python tools/db_bootstrap.py
+# Migration runner only, selecting its separately permissioned migration-owner app secret:
+python manage.py migrate --noinput
+# Runtime runner/secret, after migrations:
+python manage.py check_database
+# Web image's existing CMD starts Gunicorn; do not run migrations on each web boot.
+```
+
+Local Compose remains unchanged and requires no AWS settings or SDK access.

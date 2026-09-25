@@ -1,5 +1,4 @@
 """Provision separate schema-owner and runtime roles; never run on an ASG boot."""
-import os
 from pathlib import Path
 import sys
 
@@ -7,6 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import psycopg
 from psycopg import sql
 from config.database import connection_parameters
+from config.secrets import BOOTSTRAP_FIELDS, load_environment
 
 
 def required(env, name):
@@ -72,7 +72,7 @@ def check_database(conn, runtime, migration):
 
 
 def bootstrap(env=None):
-    env = os.environ if env is None else env
+    env = load_environment(BOOTSTRAP_FIELDS, environ=env)
     app = connection_parameters(environ=env)
     if env.get("BOOTSTRAP_SSLMODE") not in (None, app["sslmode"]):
         raise ValueError("BOOTSTRAP_SSLMODE must match the shared PostgreSQL TLS policy")

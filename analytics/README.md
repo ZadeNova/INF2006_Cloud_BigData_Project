@@ -57,7 +57,7 @@ needs normal Django settings (`DJANGO_ENV`, `DJANGO_SECRET_KEY`, allowed hosts).
 For local PostgreSQL explicitly set `DJANGO_ENV=local` (TLS defaults to disabled).
 Production defaults to `verify-full` and requires the approved `POSTGRES_SSLROOTCERT`
 CA path through the [shared connection policy](../docs/AWS_INFRASTRUCTURE.md#database-runtime-preparation).
-Real RDS connectivity and Secrets Manager delivery remain separate readiness gates.
+Production selects a DB-only Secrets Manager secret with `AWS_SECRET_ID`/`AWS_REGION` and role credentials; see the same handoff for its strict schema. Real RDS connectivity and IAM delivery verification remain separate readiness gates.
 
 Provision a nonsecret UUID `ML_SOURCE_ID` once for the intended deployment/database
 association and keep it in that environment's protected operational configuration.
@@ -305,7 +305,7 @@ python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.js
 
 The exporter needs the application dependencies/settings; the verifier needs only
 `analytics/requirements.txt`. It connects directly using `POSTGRES_DB`, `POSTGRES_USER`,
-`POSTGRES_PASSWORD`, `POSTGRES_HOST`, optional `POSTGRES_PORT` (5432), and `POSTGRES_SSLROOTCERT`, or an explicit `--database-url`. Production is the default and requires `verify-full` TLS and a readable CA bundle even for DSNs. Set `DJANGO_ENV=local` explicitly for local PostgreSQL without TLS. Keep secrets
+`POSTGRES_PASSWORD`, `POSTGRES_HOST`, optional `POSTGRES_PORT` (5432), and `POSTGRES_SSLROOTCERT`, or an explicit local `--database-url`. Production refuses URLs and reads its DB-only Secrets Manager secret. Production is the default and requires `verify-full` TLS and a readable CA bundle even for DSNs. Set `DJANGO_ENV=local` explicitly for local PostgreSQL without TLS. Keep secrets
 in the environment. The verifier imports no Django or application business code.
 It reads raw tables and checks exactly one completed run and sealed inventory;
 production daily rows and the JSON export are comparison targets only. Missing or

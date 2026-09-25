@@ -131,3 +131,7 @@ Immutable feature snapshots remain unimplemented and require a separately bounde
 ## Phase 5 checkpoint A disposition (25 September 2026)
 
 [Runtime security review](runtime-aws-security.md) records production database policy shared by Django/standalone/bootstrap tools and refusal-based bootstrap with distinct migration/runtime roles. READY-002 and the upstream bootstrap follow-up are resolved for this bounded application preparation after Astra Low checks and independent fresh-session Astra Medium round 3 (RAS-001–006 resolved). READY-007 remains partial pending startup/secrets/health integration and actual AWS verification; READY-004 packaging remains pending. READY-005/009 Phase 0 architecture corrections remain valid. No RDS, ALB, Secrets Manager IAM or other deployed control is claimed verified.
+
+## Phase 5 checkpoint B disposition (25 September 2026)
+
+[Runtime security review](runtime-aws-security.md) records the single role-based Secrets Manager startup loader, strict caller schemas, local environment path, shared signing-key contract, narrow configured ALB probe Host exception and preserved request correlation. Independent Astra Medium round 2 cleared RAS-007 after 71 pinned Linux implementer checks. READY-007 application startup/Host contract is prepared locally; image packaging (READY-004) and all actual ALB/RDS/secret-IAM checks remain open. READY-005/009 retain the accepted service architecture without plaintext launch configuration. No deployed readiness claim.

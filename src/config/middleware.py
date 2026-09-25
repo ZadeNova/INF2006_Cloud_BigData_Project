@@ -18,6 +18,21 @@ RETRY_AFTER_SECONDS = "5"
 SAFE_REQUEST_ID = re.compile(r"[A-Za-z0-9._-]{8,64}")
 
 
+class HealthProbeMiddleware:
+    """Exact internal ALB probe exception; ordinary requests keep explicit Host validation."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if (settings.HEALTH_PROBE_HOST and request.META.get("HTTP_HOST") == settings.HEALTH_PROBE_HOST
+                and request.path_info == "/health/" and request.method in {"GET", "HEAD"}):
+            from config.views import health_response
+            return health_response()
+        request.get_host()
+        return self.get_response(request)
+
+
 class RequestLoggingMiddleware:
     """Give every request an ID and log one JSON line with method, path, status, duration and user ID.
 

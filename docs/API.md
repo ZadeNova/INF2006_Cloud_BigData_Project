@@ -18,7 +18,7 @@ Status: GET/HEAD /health/ (URL name health), GET / (URL name home, a 302 redirec
 | GET `/orders/` | Authenticated | Owner's paginated order history, most recent first |
 | GET `/orders/<id>/` | Owner | Persisted order confirmation/detail |
 | GET `/analytics/` | Operator | Period-labelled sales/inventory analytics from the latest completed run; optional `range` and `compare` query parameters; HTMX requests receive only the `#analytics-panel` fragment. See [analytics](ANALYTICS.md#dashboard-get-analytics-operator-only) |
-| GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation |
+| GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation except the configured exact ALB probe Host for this safe-method path only (see [runtime boundary](AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary)) |
 | GET `/` | Public | 302 redirect to `/products/`; the storefront is the landing page (review finding CR-008) |
 | GET, HEAD `/foundation/` | Public preview | Presentation-only frontend foundation page, moved from `/` unchanged; no account, catalogue or checkout data |
 | GET, HEAD `/foundation/design-notes/` | Public preview | Presentation-only HTMX fragment; no business state or user data |

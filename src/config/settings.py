@@ -1,47 +1,70 @@
 """Environment-driven configuration. Compose is local-only; production is fail-closed."""
 import os
+import ipaddress
+import re
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 
+from config.secrets import APP_FIELDS, load_environment
+
+ENVIRON = os.environ
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 def required(name):
-    value = os.environ.get(name, "")
+    value = ENVIRON.get(name, "")
     if not value or value.startswith("replace-"):
         raise ImproperlyConfigured(f"{name} must be set to a non-placeholder value")
     return value
 
 def boolean(name, default=False):
-    value = os.environ.get(name, str(default)).lower()
+    value = ENVIRON.get(name, str(default)).lower()
     if value not in {"true", "false"}:
         raise ImproperlyConfigured(f"{name} must be true or false")
     return value == "true"
 
-ENVIRONMENT = os.environ.get("DJANGO_ENV", "production")
+ENVIRONMENT = ENVIRON.get("DJANGO_ENV", "production")
 if ENVIRONMENT not in {"local", "production"}:
     raise ImproperlyConfigured("DJANGO_ENV must be local or production")
 LOCAL = ENVIRONMENT == "local"
-SECRET_KEY = required("DJANGO_SECRET_KEY")
-if len(SECRET_KEY) < 50:
-    raise ImproperlyConfigured("DJANGO_SECRET_KEY must contain at least 50 characters")
 DEBUG = boolean("DJANGO_DEBUG")
 if DEBUG and not LOCAL:
     raise ImproperlyConfigured("DEBUG is forbidden outside local development")
+try:
+    ENVIRON = load_environment(APP_FIELDS)
+except ValueError as error:
+    raise ImproperlyConfigured(str(error)) from None
+SECRET_KEY = required("DJANGO_SECRET_KEY")
+if len(SECRET_KEY) < 50:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must contain at least 50 characters")
+RELEASE_ID = ENVIRON.get("APP_RELEASE_ID", "local" if LOCAL else "")
+if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", RELEASE_ID):
+    raise ImproperlyConfigured("APP_RELEASE_ID must be a nonsecret release identifier")
+HEALTH_PROBE_HOST = ENVIRON.get("DJANGO_HEALTH_PROBE_HOST", "")
+if HEALTH_PROBE_HOST:
+    try:
+        address, port = HEALTH_PROBE_HOST.split(":")
+        ip = ipaddress.IPv4Address(address)
+        if str(ip) != address or not ip.is_private or ip.is_unspecified or ip.is_multicast or port != "8000":
+            raise ValueError()
+    except ValueError:
+        raise ImproperlyConfigured("DJANGO_HEALTH_PROBE_HOST must be one private IPv4 address:8000") from None
 ALLOWED_HOSTS = [v.strip() for v in required("DJANGO_ALLOWED_HOSTS").split(",") if v.strip()]
 if not ALLOWED_HOSTS or "*" in ALLOWED_HOSTS:
     raise ImproperlyConfigured("Explicit allowed hosts are required")
-CSRF_TRUSTED_ORIGINS = [v.strip() for v in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if v.strip()]
+CSRF_TRUSTED_ORIGINS = [v.strip() for v in ENVIRON.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if v.strip()]
 INSTALLED_APPS = [
     "django.contrib.auth", "django.contrib.contenttypes", "django.contrib.sessions",
     "django.contrib.messages", "django.contrib.staticfiles",
     "config", "accounts", "catalogue", "cart", "orders", "reporting",
 ]
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
     "config.middleware.DatabaseUnavailableMiddleware",
     # After DatabaseUnavailableMiddleware so its process_exception sees an exception first (they run in
     # reverse order) and can record the class before the 503 is produced.
     "config.middleware.RequestLoggingMiddleware",
+    # Correlate Host/security rejections as well as normal requests; the exact probe stays DB-independent.
+    "config.middleware.HealthProbeMiddleware",
+    "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -61,7 +84,7 @@ TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates",
     ]}}]
 from config.database import connection_parameters
 try:
-    database = connection_parameters()
+    database = connection_parameters(environ=ENVIRON)
 except ValueError as error:
     raise ImproperlyConfigured(str(error)) from None
 DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql",
@@ -94,7 +117,7 @@ SESSION_COOKIE_SECURE = not LOCAL
 CSRF_COOKIE_SECURE = not LOCAL
 SECURE_SSL_REDIRECT = not LOCAL
 # Short by default: a browser that has seen HSTS refuses HTTP and certificate-warning bypasses for this long.
-HSTS_SECONDS = os.environ.get("DJANGO_HSTS_SECONDS", "3600")
+HSTS_SECONDS = ENVIRON.get("DJANGO_HSTS_SECONDS", "3600")
 if not (HSTS_SECONDS.isascii() and HSTS_SECONDS.isdigit()):
     raise ImproperlyConfigured("DJANGO_HSTS_SECONDS must be a non-negative whole number")
 SECURE_HSTS_SECONDS = 0 if LOCAL else int(HSTS_SECONDS)
