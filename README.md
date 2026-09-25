@@ -121,7 +121,7 @@ Backend implementation uses Astra Low and independent Astra Medium diff review. 
 
 ## Testing and submission evidence
 
-The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (459 passed in a local Docker run on 25 September 2026 at `9e07dcf`; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
+The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (392 passed in a local Docker run on 25 September 2026 after the test trim on `f72a872`; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
 
 Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
 

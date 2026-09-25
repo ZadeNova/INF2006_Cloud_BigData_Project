@@ -37,12 +37,14 @@ def shopper():
     return user, product, client
 
 
-@pytest.mark.parametrize("method, route", [
-    ("get", "cart:detail"), ("post", "cart:add"), ("get", "orders:checkout"), ("post", "orders:checkout"),
-    ("get", "orders:list"), ("get", "catalogue:product_list"),
+@pytest.mark.parametrize("anonymous, method, route", [
+    (True, "get", "catalogue:product_list"),    # no session to load: the outage hits the view's own query
+    (False, "post", "orders:checkout"),         # logged in: the outage hits the session load before the view
 ])
-def test_a_database_outage_answers_503_with_retry_after_and_no_details(shopper, method, route):
+def test_a_database_outage_answers_503_with_retry_after_and_no_details(shopper, anonymous, method, route):
     _, _, client = shopper
+    if anonymous:
+        client = Client()
     with database_down(OperationalError(SECRET)):
         response = getattr(client, method)(reverse(route))
 

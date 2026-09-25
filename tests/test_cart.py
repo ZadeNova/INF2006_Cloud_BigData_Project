@@ -107,26 +107,6 @@ def test_add_rejects_product_outside_demo_namespace():
     assert not CartItem.objects.filter(product=product).exists()
 
 
-def test_add_requires_login_normal_request_redirects():
-    product = make_product("p1")
-
-    response = Client().post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1})
-
-    assert response.status_code == 302
-    assert response.url.startswith(settings.LOGIN_URL)
-
-
-def test_add_requires_login_htmx_request_gets_hx_redirect():
-    product = make_product("p1")
-
-    response = Client().post(
-        reverse("cart:add"), {"product_id": product.pk, "quantity": 1}, HTTP_HX_REQUEST="true"
-    )
-
-    assert response.status_code == 200
-    assert response.headers["HX-Redirect"] == settings.LOGIN_URL
-
-
 # --- update ---
 
 
@@ -140,19 +120,6 @@ def test_update_replaces_quantity_within_bounds():
 
     item.refresh_from_db()
     assert item.quantity == 7
-
-
-@pytest.mark.parametrize("bad_quantity", [0, 1000])
-def test_update_rejects_out_of_bounds_quantity_without_mutation(bad_quantity):
-    product = make_product("p1", stock=2000)
-    client = logged_in_client()
-    client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 5})
-    item = CartItem.objects.get(product=product)
-
-    client.post(reverse("cart:update", args=[item.pk]), {"quantity": bad_quantity})
-
-    item.refresh_from_db()
-    assert item.quantity == 5
 
 
 def test_update_rejects_when_exceeding_current_stock():

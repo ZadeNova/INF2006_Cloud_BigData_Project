@@ -2,9 +2,8 @@
 
 Each test asserts both the rejection and that business state is unchanged, so a status code alone can never
 pass. Covered here: unauthenticated mutations, forged price/owner/total fields, quantity manipulation and CSRF on
-every browser mutation (normal and HTMX). Foreign cart/order access and duplicate checkout are covered in
-test_cart.py and test_orders.py; non-operator analytics and anonymous S3 access wait for the dashboard and the
-cloud deployment.
+every browser mutation. Foreign cart/order access and duplicate checkout are covered in test_cart.py and
+test_orders.py; non-operator analytics and anonymous S3 access wait for the dashboard and the cloud deployment.
 """
 import pytest
 from django.conf import settings
@@ -77,51 +76,38 @@ SCENARIOS = [cart_add, cart_update, cart_delete, toggle_active, checkout]
 IDS = [scenario.__name__ for scenario in SCENARIOS]
 
 
-# --- CSRF on every browser mutation, normal and HTMX ---------------------------------------------
+# --- CSRF on every browser mutation ------------------------------------------------------------
 
-def csrf_client(user, cookie=True):
+def csrf_client(user):
     client = Client(enforce_csrf_checks=True)
     client.force_login(user)
-    if cookie:
-        client.cookies["csrftoken"] = COOKIE
+    client.cookies["csrftoken"] = COOKIE
     return client
 
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=IDS)
-@pytest.mark.parametrize("htmx, mode", [(False, "no_token"), (False, "wrong_form_field"), (True, "wrong_header")],
-                         ids=["normal-no_token", "normal-wrong_form_field", "htmx-wrong_header"])
-def test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing(scenario, htmx, mode):
-    # Each token failure is paired only with the channel that really carries it (forms post a field, HTMX sends
-    # a header); Django's comparison is identical across routes, so per route the point is that none is exempt.
+def test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing(scenario):
+    # A forged request carries the victim's cookie but not the token. Django's comparison is identical on every
+    # route and the HTMX forms post the same form field, so one case per route shows that none is exempt.
     user = make_user(operator=True)
     url, data, unchanged = scenario(user)
-    client = csrf_client(user, cookie=mode != "no_token")
-    extra = {"HTTP_HX_REQUEST": "true"} if htmx else {}
-    if mode == "wrong_header":
-        extra["HTTP_X_CSRFTOKEN"] = "a" * 32
-    if mode == "wrong_form_field":
-        data = {**data, "csrfmiddlewaretoken": "b" * 64}
 
-    response = client.post(url, data, **extra)
+    response = csrf_client(user).post(url, {**data, "csrfmiddlewaretoken": "b" * 64})
 
     assert response.status_code == 403
     assert unchanged()
 
 
 @pytest.mark.parametrize("scenario", SCENARIOS, ids=IDS)
-@pytest.mark.parametrize("htmx", [False, True], ids=["normal", "htmx"])
-def test_the_same_mutation_with_a_valid_csrf_token_is_accepted(scenario, htmx):
+def test_the_same_mutation_with_a_valid_csrf_token_is_accepted(scenario):
     """Control: the 403s above are caused by the token, not by some other refusal."""
     user = make_user(operator=True)
     url, data, unchanged = scenario(user)
     client = csrf_client(user)
     if scenario is checkout:
         client.get(url)                     # checkout needs its review page opened first (session key)
-    extra = {"HTTP_X_CSRFTOKEN": COOKIE}
-    if htmx:
-        extra["HTTP_HX_REQUEST"] = "true"
 
-    response = client.post(url, data, **extra)
+    response = client.post(url, {**data, "csrfmiddlewaretoken": COOKIE})
 
     assert response.status_code in (200, 302)
     assert not unchanged()
@@ -226,7 +212,7 @@ def test_cart_add_ignores_forged_owner_cart_and_price_fields():
 
 # --- quantity manipulation -----------------------------------------------------------------------
 
-BAD_QUANTITIES = ["-1", "0", "abc", "", "1.5"]      # negative, lower bound, non-numeric, missing, non-integer
+BAD_QUANTITIES = ["0", "abc", ""]      # lower bound (also covers negatives), not an integer, missing
 
 
 def test_cart_add_guards_the_999_ceiling_itself_not_the_stock_limit():

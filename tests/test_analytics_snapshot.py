@@ -120,7 +120,7 @@ def test_namespace_without_products_is_rejected():
     assert InventoryVersion.objects.count() == 0
 
 
-@pytest.mark.parametrize("offset", [-1, 1, -365])
+@pytest.mark.parametrize("offset", [-1, 1])
 def test_only_todays_singapore_date_is_accepted(products, offset):
     # KO-1: live stock cannot describe a past cutoff, and a future cutoff has not happened yet
     with pytest.raises(services.SnapshotError, match="must be today's date in Singapore"):

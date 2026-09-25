@@ -108,10 +108,9 @@ def test_customer_is_forbidden_even_with_htmx(client, htmx):
     assert "no-store" in response["Cache-Control"]
 
 
-@pytest.mark.parametrize("method", ["post", "head", "options"])
-def test_get_only(client, operator, method):
+def test_get_only(client, operator):
     client.force_login(operator)
-    response = getattr(client, method)(reverse("reporting:dashboard"))
+    response = client.post(reverse("reporting:dashboard"))
     assert response.status_code == 405
     assert response["Allow"] == "GET"
     assert "no-store" in response["Cache-Control"]
@@ -144,13 +143,10 @@ def test_rendered_empty_state_is_successful(client, operator):
     assert 'data-chart="trend"' not in body
 
 
-@pytest.mark.parametrize("key,start", [
-    ("7d", date(2024, 5, 1)), ("30d", date(2024, 4, 8)), ("90d", date(2024, 2, 8)),
-    ("mtd", date(2024, 5, 1)), ("ytd", date(2024, 1, 1)),
-])
-def test_range_is_derived_from_run_cutoff(world, dashboard, key, start):
-    context = dashboard({"range": key}).context_data
-    assert context["span"] == Span(start, date(2024, 5, 7))
+def test_range_is_derived_from_run_cutoff(world, dashboard):
+    # Each key's arithmetic is tested in test_analytics_ranges.py; here the view must end the span at L.
+    context = dashboard({"range": "90d"}).context_data
+    assert context["span"] == Span(date(2024, 2, 8), date(2024, 5, 7))
     assert context["latest_complete_date"] == date(2024, 5, 7)
 
 

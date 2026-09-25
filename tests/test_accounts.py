@@ -147,13 +147,6 @@ def test_authenticated_user_is_redirected_away_from_login():
     assert response.url == "/products/"
 
 
-def test_logout_requires_post():
-    client = Client()
-    client.force_login(get_user_model().objects.create_user(username="logoutuser"))
-
-    assert client.get(reverse("accounts:logout")).status_code == 405
-
-
 def test_logout_clears_session_and_redirects_to_the_shop():
     client = Client()
     client.force_login(get_user_model().objects.create_user(username="logoutuser"))

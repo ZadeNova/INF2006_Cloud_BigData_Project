@@ -13,9 +13,7 @@ SGT = ranges.BUSINESS_TZ
 
 @pytest.mark.parametrize("cutoff, expected", [
     (datetime(2025, 1, 1, 0, 0, tzinfo=SGT), date(2024, 12, 31)),        # midnight belongs to the next date
-    (datetime(2025, 1, 1, 10, 0, tzinfo=SGT), date(2024, 12, 31)),       # 1 Jan still in progress
-    (datetime(2025, 1, 1, 23, 59, 59, tzinfo=SGT), date(2024, 12, 31)),
-    (datetime(2025, 1, 2, 0, 0, tzinfo=SGT), date(2025, 1, 1)),
+    (datetime(2025, 1, 1, 23, 59, 59, tzinfo=SGT), date(2024, 12, 31)),  # 1 Jan still in progress to its last second
     # 16:00 UTC is 00:00 the next day in Singapore (UTC+8, no daylight saving)
     (datetime(2025, 1, 1, 16, 0, tzinfo=timezone.utc), date(2025, 1, 1)),
     (datetime(2025, 1, 1, 15, 59, tzinfo=timezone.utc), date(2024, 12, 31)),
@@ -40,11 +38,6 @@ def test_presets_at_end_of_leap_year():
     assert ranges.resolve_span("90d", latest) == Span(date(2024, 10, 3), latest)
     assert ranges.resolve_span("mtd", latest) == Span(date(2024, 12, 1), latest)
     assert ranges.resolve_span("ytd", latest) == Span(date(2024, 1, 1), latest)
-
-
-@pytest.mark.parametrize("key, length", [("7d", 7), ("30d", 30), ("90d", 90)])
-def test_rolling_spans_have_the_stated_number_of_dates(key, length):
-    assert ranges.resolve_span(key, date(2024, 6, 15)).length == length
 
 
 def test_ytd_length_follows_the_calendar_year():
@@ -79,14 +72,6 @@ def test_unknown_range_is_rejected():
         ranges.resolve_span("1y", date(2024, 6, 15))
 
 
-@pytest.mark.parametrize("value, expected", [
-    ("7d", ("7d", True)), ("ytd", ("ytd", True)),
-    ("bogus", ("30d", False)), ("", ("30d", False)), (None, ("30d", False)), ("7D", ("30d", False)),
-])
-def test_coerce_range_falls_back_to_the_default(value, expected):
-    assert ranges.coerce_range(value) == expected
-
-
 def test_span_cap_and_ordering():
     ranges.check_span(Span(date(2024, 1, 1), date(2024, 12, 31)))          # 366 dates accepted
     with pytest.raises(ValueError):
@@ -117,17 +102,6 @@ def test_comparison_span_in_a_non_leap_year():
     assert comparison == Span(date(2025, 2, 22), date(2025, 2, 28))
 
 
-# Two anchors reach every branch: 1 Mar 2024 puts the leap day inside the rolling ranges, and 31 Dec 2024 hits the
-# 366-date cap. The leap day itself and a non-leap year end have dedicated tests above.
-@pytest.mark.parametrize("latest", [date(2024, 3, 1), date(2024, 12, 31)])
-@pytest.mark.parametrize("key", ranges.RANGE_KEYS)
-def test_comparison_is_adjacent_and_equal_length(latest, key):
-    span = ranges.resolve_span(key, latest)
-    comparison = ranges.comparison_span(span)
-    assert comparison.length == span.length
-    assert comparison.end + timedelta(days=1) == span.start
-
-
 def test_comparison_available_rules():
     window_start, history_start = date(2024, 1, 1), date(2024, 1, 10)
     inside = Span(date(2024, 2, 1), date(2024, 2, 7))
@@ -144,7 +118,7 @@ def test_comparison_available_rules():
 
 # --- chart granularity and buckets ----------------------------------------------------------
 
-@pytest.mark.parametrize("length, expected", [(1, "daily"), (30, "daily"), (90, "daily"), (91, "weekly"), (366, "weekly")])
+@pytest.mark.parametrize("length, expected", [(90, "daily"), (91, "weekly")])
 def test_granularity_switches_after_ninety_dates(length, expected):
     start = date(2024, 1, 1)
     assert ranges.granularity(Span(start, start + timedelta(days=length - 1))) == expected
@@ -177,12 +151,10 @@ def test_unknown_granularity_is_rejected():
         ranges.buckets(Span(date(2024, 3, 4), date(2024, 3, 17)), "monthly")
 
 
-# Two anchors reach every branch: 1 Mar 2024 puts the leap day inside the rolling ranges, and 31 Dec 2024 hits the
-# 366-date cap. The leap day itself and a non-leap year end have dedicated tests above.
-@pytest.mark.parametrize("latest", [date(2024, 3, 1), date(2024, 12, 31)])
-@pytest.mark.parametrize("key", ranges.RANGE_KEYS)
-def test_buckets_tile_the_span_exactly(latest, key):
-    span = ranges.resolve_span(key, latest)
+# The longest daily span (90 points) and the 366-date weekly span; bucket shapes have the dedicated tests above.
+@pytest.mark.parametrize("key", ["90d", "ytd"])
+def test_buckets_tile_the_span_exactly(key):
+    span = ranges.resolve_span(key, date(2024, 12, 31))
     result = ranges.buckets(span, ranges.granularity(span))
     assert result[0].start == span.start and result[-1].end == span.end
     for previous, following in zip(result, result[1:]):

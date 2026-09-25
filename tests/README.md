@@ -1,6 +1,6 @@
 # Automated tests
 
-pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. 459 tests passed in a local Docker run on 25 September 2026 (commit `9e07dcf`); re-run before quoting a number. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
+pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. 392 tests passed in a local Docker run on 25 September 2026 (after the test trim on `f72a872`, see [../docs/reviews/test-trim.md](../docs/reviews/test-trim.md)); re-run before quoting a number. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
 
 ```powershell
 docker compose run --rm web pytest -q -p no:cacheprovider /app/tests

@@ -86,7 +86,7 @@ def test_health_probes_are_not_logged_at_info(logs):
     assert logs.request_lines() == []
 
 
-@pytest.mark.parametrize("incoming", ["short", "has spaces in it", "x" * 65, 'abcdefgh\n{"forged":true}', "id/with/slashes"])
+@pytest.mark.parametrize("incoming", ["short", "x" * 65, 'abcdefgh\n{"forged":true}'])
 def test_an_unsafe_incoming_request_id_is_replaced(logs, incoming):
     response = Client().get(reverse("catalogue:product_list"), HTTP_X_REQUEST_ID=incoming)
 

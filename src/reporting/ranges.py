@@ -55,13 +55,6 @@ def run_window_start(latest):
     return latest - timedelta(days=MAX_SPAN_DATES - 1)
 
 
-def coerce_range(value):
-    """Whitelist a client-supplied range key. Returns (key, valid); invalid falls back to the default."""
-    if value in RANGE_KEYS:
-        return value, True
-    return DEFAULT_RANGE, False
-
-
 def resolve_span(range_key, latest):
     """Span for a whitelisted range key, ending at *L*. Unknown keys raise ValueError."""
     if range_key in ROLLING_DATES:
