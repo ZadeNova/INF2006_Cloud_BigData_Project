@@ -91,6 +91,30 @@ Costs are rough on-demand estimates; check them against the AWS pricing pages an
 - **Application changes** before stage 3, backend-owned and through the review gate: configurable Gunicorn workers (`GUNICORN_WORKERS`, currently hardcoded 2 in the Dockerfile), and S3 media storage (`django-storages` with pre-signed URLs, only when the teammate's image fields land).
 - **Stage-1 lab checks:** secret creation and retrieval with `LabInstanceProfile`; Session Manager access to an instance; budget and WAF permissions. Record actual results; listing APIs does not establish creation permission.
 
+## Reference IAM policies (planned 26 September 2026; written in stage 1, never applied)
+
+**Why.** The lab denies IAM role, user and policy creation, so every job runs as `LabRole` and per-job least privilege cannot be enforced (see the IAM row above). The brief grades "least privilege" explicitly. Writing the policies we *would* attach in production shows the design was done and the limit is the platform's, not ours. About an hour; high return for the Security criterion.
+
+**Where.** `src/infrastructure/iam-reference/`, one JSON file per role plus a short `README.md`. These files are documentation: Terraform does not read them, `terraform plan` must show no `aws_iam_*` resources, and the README says so in its first line.
+
+| File | Production role for | Allows (scoped to named resources, no `*` actions) |
+|---|---|---|
+| `web-runtime.json` | Web instances in the Auto Scaling group | `secretsmanager:GetSecretValue` on the **web runtime secret only**; `ecr:GetAuthorizationToken` plus pull actions on the `inf2006-app` repository; `s3:GetObject` on `media/*` (for pre-signed URLs); `logs:CreateLogStream`/`PutLogEvents` on the app log group; the AWS-managed `AmazonSSMManagedInstanceCore` for Session Manager |
+| `migration.json` | The one-off migration run | `GetSecretValue` on the **migration secret only**; ECR pull; logs. No S3 |
+| `bootstrap.json` | The one-off `db_bootstrap` run | `GetSecretValue` on the **bootstrap secret only**; ECR pull; logs. Nothing else |
+| `maintenance.json` | One-off Django commands: `import_dataset`, `refresh_analytics`, `load_customer_segments`, `clearsessions` | `GetSecretValue` on the **web runtime secret** (these are Django management commands, per the runtime handoff); `s3:GetObject` on `data/*` and `exports/*`; logs |
+| `batch-trainer.json` | Standalone training and the refresh verifier | `GetSecretValue` on the **trainer/verifier secret only** (no Django signing key); `s3:GetObject` on `data/*`; `s3:GetObject`/`PutObject` on `exports/*`; logs |
+| `scheduler.json` (optional side quest) | EventBridge Scheduler's execution role | `ssm:SendCommand` limited to the `AWS-RunShellScript` document and instances tagged `Project=inf2006` |
+
+Each file also carries its trust policy (who may assume the role: `ec2.amazonaws.com`, or `scheduler.amazonaws.com` for the scheduler). Secret and bucket ARNs are written with placeholders (`<account>`, `<region>`), which also satisfies the redaction rule.
+
+**How it is used as evidence.**
+- Threat-control map: rows T8 and T9 (secrets, database and storage access) show status "Partial, lab constraint", citing these files as the intended control and listing what *is* enforced (separate database roles, a separate secret per job, security groups, S3 Block Public Access and TLS-only policy, no access keys).
+- Report §4: one paragraph, "designed per-job roles; the lab permits only `LabRole`; here is what enforces least privilege instead".
+- Validation (cheap and optional): run each file through IAM Access Analyzer's policy validation (`aws accessanalyzer validate-policy`) if the lab allows it, and record the output next to the files. A policy that validates cleanly is stronger evidence than one that only looks right.
+
+**Acceptance.** Six JSON files that parse; a README stating they are not applied and why; no `aws_iam_*` resource in any plan; the threat-map rows cite them.
+
 ## Review
 
 Terraform is team infrastructure configuration. Each stage's code is self-reviewed, and before the first apply of stages 1 to 3 the configuration goes to the review gate (fresh-session Opus 5.5 or Astra Medium), findings logged in `docs/reviews/aws-terraform.md`. No apply without the user's explicit approval.
