@@ -23,6 +23,60 @@ The image copies `src/` at build time and only `tests/` is mounted, so run `dock
 | `test_import.py` | Dataset import, replay, conflicts, date shifts, sealed inventory |
 | `test_frontend.py` | Presentation pages, including the statistics preview |
 
-`analytics/tests/` holds seven tests: four for the independent pandas verifier (`test_verify_refresh.py`) and three for the offline segmentation script (`test_segment_customers.py`). They need pandas and, for segmentation, scikit-learn, and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
+`analytics/tests/` covers independent pandas reconciliation (`test_verify_refresh.py`), offline segmentation quality and batch identity (`test_segment_customers.py`), producer/loader integration (`test_segment_loader_integration.py`), and fake production credential delivery (`test_startup_credentials.py`). They need pandas and, for segmentation, scikit-learn, and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
 
 Locking and concurrency tests use real independent connections. A passing suite is not by itself a functional or security claim; record the command, date and outcome in the files under [../evidence/](../evidence/README.md). No load, scaling or AWS test exists yet.
+
+
+## Local runtime image and TLS verification
+
+`verify_runtime_image.py` is a manual verification helper, not an AWS/deployment test. Its
+`SENTINELS` tuple lists every harmless context marker; `audit-image` checks the actual image
+filesystem, UID, public CA and absence of ML packages. `make-context` copies tracked `src/`
+files from the working tree, so untracked real local secrets are not copied. The destination
+must be new. From the repository root (PowerShell), choose a fresh scratch directory:
+
+```powershell
+$runtimeScratch = Join-Path $env:TEMP ('inf2006-runtime-' + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $runtimeScratch | Out-Null
+python tests/verify_runtime_image.py make-context "$runtimeScratch/context"
+docker build -t inf2006-runtime-sentinel "$runtimeScratch/context"
+docker run --rm --mount "type=bind,source=${PWD}/tests/verify_runtime_image.py,target=/checks/verify_runtime_image.py,readonly" inf2006-runtime-sentinel python /checks/verify_runtime_image.py audit-image
+docker build -t inf2006-runtime-final src
+docker run --rm --mount "type=bind,source=${PWD}/tests/verify_runtime_image.py,target=/checks/verify_runtime_image.py,readonly" inf2006-runtime-final python /checks/verify_runtime_image.py audit-image
+docker image inspect inf2006-runtime-final --format '{{.Id}} {{json .RepoDigests}} {{json .Config.User}} {{json .Config.ExposedPorts}} {{json .Config.Cmd}}'
+```
+
+Expected metadata: UID/GID `10001:10001`, port `8000/tcp`, the Dockerfile's Gunicorn command.
+A Docker-local ID/RepoDigest is not evidence of ECR publication; record the pushed ECR digest
+separately only after an authorised push. Check Git patterns without creating Terraform files:
+`git check-ignore --no-index src/infrastructure/secret.tfvars src/infrastructure/saved.tfplan`
+should match; `main.tf`, `.terraform.lock.hcl`, `terraform.tfvars.example` and
+`terraform.tfvars.json.example` under that directory must not match.
+
+For a real TLS handshake, create an isolated PostgreSQL 17 fixture with the following command
+(the password is deliberately disposable test data). The private key stays inside the temporary
+server container. The one-day self-signed certificate has only `DNS:localhost`:
+
+```powershell
+New-Item -ItemType Directory -Path "$runtimeScratch/tls" | Out-Null
+docker run -d --name inf2006-runtime-tls-db -e POSTGRES_PASSWORD=disposable-tls-only --entrypoint bash postgres:17-bookworm@sha256:051f7b7b3abdd564d5d1bd1e8c4b9c1b6e77087d1dd22020ede611c096a272e0 -c 'set -e
+openssl req -x509 -newkey rsa:2048 -nodes -keyout /tmp/server.key -out /tmp/server.crt -days 1 -subj /CN=localhost -addext subjectAltName=DNS:localhost >/dev/null 2>&1
+chown postgres:postgres /tmp/server.key /tmp/server.crt
+chmod 600 /tmp/server.key
+exec docker-entrypoint.sh postgres -c ssl=on -c ssl_cert_file=/tmp/server.crt -c ssl_key_file=/tmp/server.key'
+# Wait for pg_isready to report ready; copy only the public certificate.
+docker exec inf2006-runtime-tls-db pg_isready -U postgres
+docker cp inf2006-runtime-tls-db:/tmp/server.crt "$runtimeScratch/tls/server.crt"
+docker run --rm --network container:inf2006-runtime-tls-db --mount "type=bind,source=$runtimeScratch/tls,target=/tls,readonly" --mount "type=bind,source=${PWD}/tests/verify_runtime_image.py,target=/checks/verify_runtime_image.py,readonly" -e PYTHONPATH=/app inf2006-runtime-final python /checks/verify_runtime_image.py tls /tls/server.crt
+```
+
+The helper uses fake secret retrieval with the real shared production connection policy. It
+requires an actual encrypted connection with the trusted fixture CA, rejects hostname
+`127.0.0.1` against the localhost-only certificate, and rejects the unrelated RDS CA bundle.
+It checks the corresponding libpq hostname-mismatch or certificate-verification reason internally;
+an unrelated connection error cannot count as a passing negative check, and raw errors are not printed.
+No AWS calls occur. This proves local certificate/hostname verification, not RDS/ALB/IAM access.
+After review/testing, remove only the named fixture containers with their anonymous volumes,
+then verify the resolved scratch path is the directory created above before recursively removing
+it. Do not run broad Docker pruning or delete another task's resources.

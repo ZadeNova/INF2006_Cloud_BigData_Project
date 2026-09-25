@@ -9,3 +9,14 @@ analytics/segments.json
 src/staticfiles/
 *.tfstate*
 .terraform/
+
+# Terraform plans/variable values may contain secrets; examples and provider locks stay versionable.
+*.tfplan
+*.plan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+!*.tfvars.json.example
+!*.tfvars.example.json
+crash.log
+crash.*.log

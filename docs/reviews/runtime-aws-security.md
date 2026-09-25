@@ -1,6 +1,6 @@
 # Runtime and AWS security preparation
 
-Date: 25 September 2026. Status: checkpoints A and B independently cleared locally; C pending. No deployed AWS readiness claim.
+Date: 25 September 2026. Status: checkpoints A, B and C independently cleared; bounded local application preparation complete. Deployed AWS readiness remains open.
 
 ## Baseline and ownership
 
@@ -252,3 +252,83 @@ Independent rejected-Host HTTP/security-event correlation reproduced successfull
 B gate clear only; C packaging/final-image and deployed verification remain open. Coordinator updates only completion metadata before scoped staging and local commit.
 
 B coordinator staged verification: exactly 24 task paths; all 21 frozen implementation/test/contract hashes match. Staged content matches working text after newline normalization, decodes as UTF-8, and contains no AWS-key/private-key pattern matches in additions. No generated/static/credential files staged; no unstaged tracked changes. `git diff --cached --check` passed. Scoped scan is not exhaustive secret detection. Only coordinator metadata changed after independent clearance.
+
+## Checkpoint C — packaging and final handoff
+
+B local commit: `4f77fdd45e6d9c47734deefaa18cc7af6384f056`, descriptive body verified and clean post-commit tree (eight ahead of fetched origin). C baseline is this commit. No push/deployment.
+
+Astra Low now owns Docker/Git build exclusions, disposable sentinel context verification, final web image build/inspection, bounded local TLS handshake checks, affected backend/analytics regressions and the final canonical infrastructure handoff. Coordinator retains review/tracker/Git ownership. All test resources are task-created; cleanup must preserve unrelated resources, data and volumes. Actual AWS/IAM/ALB/RDS verification remains excluded and open.
+
+### C frozen round 1
+
+Baseline `4f77fdd45e6d9c47734deefaa18cc7af6384f056`; seven files below. Packaging changes exclude infrastructure, nested sensitive state/plans/tfvars, local secrets/private keys, caches and virtual environments. Git keeps safe examples/provider lockfiles. New manual helper `tests/verify_runtime_image.py` durably defines the 16 harmless sentinels, image assertions and fake-secret/local TLS procedure; executable reproduction is in `tests/README.md`. Terraform remains untouched.
+
+### Newly executed final-image verification (implementer)
+
+- Sentinel build from a disposable copy of tracked `src/` only: all 16 markers absent from actual image filesystem; safe `.env.example` and exact vendored CA hash retained; UID 10001; numpy/pandas/sklearn/scipy absent.
+- Clean `docker build -t inf2006-runtime-final src` succeeded. Image metadata: `USER 10001:10001`, `8000/tcp`, unchanged Gunicorn CMD. Audit helper passed against clean image too.
+- Final image local ID: `sha256:d28a64e0ad38f48ce3eaf14e5569922a08938e8b632f1fc3f5003bb6db3edf8c`. `docker image inspect inf2006-runtime-final --format '{{.Id}} {{json .RepoDigests}} {{json .RepoTags}}'` returned that ID, `["inf2006-runtime-final@sha256:d28a64e0ad38f48ce3eaf14e5569922a08938e8b632f1fc3f5003bb6db3edf8c"]`, and `["inf2006-runtime-final:latest"]`. These are local descriptors, not ECR publication or a verified registry digest.
+- Production-policy TLS with fake secret retrieval against isolated PostgreSQL 17: successful trusted certificate handshake, rejected wrong hostname and rejected unrelated CA. Before review, coordinator requested tightening negative evidence from any OperationalError to the specific libpq hostname/trust reasons. Revised helper passed all three in **2.30s**, suppressing raw errors. Private test key stayed inside its temporary server container; only public certificate copied out. No real AWS retrieval or TLS verification disablement.
+- Final-image runtime checks without source overlay (tests mounted only): **69 passed in 8.71s**. This exercises actual packaged code/dependencies/default CA configuration.
+- Affected analytics/batch/loader/reconciliation checks in isolated analytics environment atop final image: **71 passed in 5.20s**, `pip check` clean. Initial run 69 passed / 2 failed because `/work/src` recipe-fingerprint checkout input was not mounted; adding the documented read-only checkout path fixed the runner. No application correction was needed.
+- Default Gunicorn CMD started in task container `inf2006-runtime-c-web` using synthetic local fixture settings; live `/health/` returned 200/no-store, UID 10001 confirmed, two sanitised worker startup release events observed.
+- Packaged-source comparison: **119 runtime/source files byte-identical** to working files; only `src/README.md` differs because final handoff documentation followed image build. No runtime differences; no rebuild solely to embed its own image identity.
+- `git check-ignore --no-index` matched sensitive tfvars/state/plans and did not match Terraform source, provider lock or safe example paths. `git diff --check` passed.
+
+Durable commands use fresh scratch paths; actual scratch was `C:/Users/limch/AppData/Local/Temp/inf2006-runtime-c-_vkoenbd`. Task containers/images/scratch/staticfiles are retained only until review/cleanup; pre-existing `inf2006-ml-loader-db-1` and its data/volumes must remain untouched. Final image will be retained for handoff. No full-suite, hosted CI, load, ALB/RDS, real Secrets Manager/IAM, WAF/SNS/CloudTrail, ECR push or deployment result is claimed.
+
+| Path | C frozen SHA-256 |
+|---|---|
+| .gitignore | 28af9e2f45bd43e9e52cddbbe1975dbb07c615b1fce0bdcd991a69a64157d375 |
+| src/.dockerignore | fc0b7cec89e8ecfba8bfb8982f855839725edc1bb85414d42b122029fe8e39b8 |
+| tests/verify_runtime_image.py | f7e73d67a514ef6181ef9480d3e2839a2e1e62abef769b36e8455d7c16415c97 |
+| tests/README.md | 3a7ae5aba9c91cc81f64341364b3355c900d66011cb6b83940f9b6e7cdc8b75a |
+| docs/AWS_INFRASTRUCTURE.md | bd8311c8f992b8fdd97d44d6c406f733e658e5b2fdeff7aabb573e7242765371 |
+| docs/plans/deploy-readiness.md | 35f657fdd72a8800cdb4452c07687609f8ed9ace9d5be474c3835abb156a88bb |
+| src/README.md | efbd8c29da3de42073854190743a870567186b9c3926cb14c02be91eb0619aa9 |
+
+C exact test selections (fixture environment as in B; task-only values are not real secrets):
+
+```sh
+# Final image, only tests mounted read-only at /app/tests; network container:inf2006-runtime-a-db.
+# PYTHONPATH=/app; local DB runtime_test_owner/runtime_test_runner, localhost:5432.
+python -m pytest -q -p no:cacheprovider /app/tests/test_secrets.py /app/tests/test_settings.py /app/tests/test_health.py /app/tests/test_request_logging.py /app/tests/test_database_policy.py /app/tests/test_db_bootstrap.py
+# Analytics container based on final image, tests:/app/tests, analytics:/work/analytics,
+# src:/work/src all read-only; PYTHONPATH=/app:/app/tests; OMP_NUM_THREADS=1, OPENBLAS_NUM_THREADS=1.
+python -m venv --system-site-packages /tmp/checks
+/tmp/checks/bin/python -m pip install -q -r /work/analytics/requirements.txt
+/tmp/checks/bin/python -m pip check
+/tmp/checks/bin/python -m pytest -q -c /app/pytest.ini -p no:cacheprovider /work/analytics/tests/test_segment_customers.py /work/analytics/tests/test_segment_loader_integration.py /work/analytics/tests/test_verify_refresh.py /work/analytics/tests/test_startup_credentials.py /app/tests/test_customer_segments_command.py
+```
+
+Runtime used `docker run --rm` with actual final image; no `/app` source overlay. Analytics container names `inf2006-runtime-c-analytics` (initial runner failure) and `inf2006-runtime-c-analytics2` (corrected/pass), user 0 only for isolated dependency environment. Bootstrap DSN supplied only for focused runtime bootstrap fixtures.
+
+Live smoke: `docker run -d --name inf2006-runtime-c-web --network container:inf2006-runtime-a-db` with local fixture environment, allowed hosts `localhost,127.0.0.1`, release `runtime-c-smoke`, final image and no command override. Check:
+
+```sh
+docker exec inf2006-runtime-c-web python -c 'import urllib.request,os; r=urllib.request.urlopen("http://127.0.0.1:8000/health/",timeout=2); assert r.status==200 and r.read()==b"{\"status\": \"ok\"}" and r.headers["Cache-Control"]=="no-store"; assert os.getuid()==10001; print("PASS")'
+```
+
+`docker logs --tail 6 inf2006-runtime-c-web` showed two worker startup events with release `runtime-c-smoke` and environment `local`, no secret payloads.
+
+Cleanup inventory: `inf2006-runtime-a-db`, `inf2006-runtime-b-check`, `inf2006-runtime-c-tls-db`, `inf2006-runtime-c-analytics`, `inf2006-runtime-c-analytics2`, `inf2006-runtime-c-web`; task-created PostgreSQL anonymous volumes; scratch path above; task-created `src/staticfiles`; image `inf2006-runtime-c-sentinel`. No task-specific network was created. Preserve final image and pre-existing stopped `inf2006-ml-loader-db-1` plus all unrelated volumes/networks/data.
+
+### C round 1 — independent gate clear
+
+Independent (fresh session) `/root/runtime_reviewer`, explicitly `gpt-6-astra` / `medium`, reviewed the complete seven-file C diff and relevant consumers. **No actionable findings; RAS-001–007 remain resolved.** All seven frozen hashes matched. Independent helper syntax, Git sensitive/safe-file pattern checks and `git diff --check` passed.
+
+Reviewer Docker-engine access was unavailable in its read-only sandbox. Image audits, TLS handshakes, final-image tests and live Gunicorn results remain implementer-executed evidence, not independently rerun. This limitation does not turn local evidence into AWS proof. All three bounded application-preparation review gates are clear; actual deployment/integration remains open.
+
+Coordinator authorised removal only of recorded task resources after review, preserving the final image, pre-existing container and unrelated data. Cleanup and final scoped commit verification follow below.
+
+### Cleanup and completion
+
+After C gate clearance, Low removed exactly the six recorded task containers with `docker rm -f -v` (web/dependency/analytics containers before their network-namespace database containers). Both task PostgreSQL anonymous volumes were identified before removal and verified absent afterward. Removed only the task sentinel image. Native PowerShell resolved and checked the exact task TEMP scratch and workspace `src/staticfiles` paths, confirmed no link target, then used `Remove-Item -LiteralPath -Recurse`; both paths are absent. No broad pruning or network changes.
+
+Pre-existing stopped `inf2006-ml-loader-db-1` remains unchanged (ID `24543c8a4ae58f7c3090a4766f53494341c50ae7e2986fefcfe14a0a4dd3e337`), as do unrelated images/resources. Final image `sha256:d28a64e0ad38f48ce3eaf14e5569922a08938e8b632f1fc3f5003bb6db3edf8c` remains available locally. All seven reviewed C hashes still matched after cleanup.
+
+Bounded Phase 5 application preparation is complete locally, with independent gates clear for A/B/C and RAS-001–007 resolved. The infrastructure owner has the [canonical handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff): image/startup/port, required nonsecret settings and secret schemas, role/migration separation, CA/TLS, probe and proxy boundary, log fields/failure conditions and remaining deployed checks. READY-004 packaging is locally verified; READY-007 runtime behavior is locally prepared, not AWS-verified. No Terraform changed, no real secret retrieved, nothing pushed or deployed.
+
+Remaining application work: lifecycle UI and lifetime-period copy, separately scoped immutable snapshots, accepted-dataset reevaluation, and other tracker-owned application work. Remaining deployed checks include lab permissions/region/budget/certificate, ECR publication/digest, least-privilege Secrets Manager/KMS and database access/denial, real RDS TLS, ALB Host/HTTPS/network behavior, coordinated migration/readiness, shared sessions/carts/signing across instances, logs/alarms/SNS, WAF/CloudTrail, scaling/recovery and required S3 evidence. Full suite, hosted CI and load tests were not run in this task. Overall AWS readiness remains open.
+
+C coordinator staged verification: exactly ten reviewed task/metadata paths; all seven frozen C hashes match. Staged bytes match working text after newline normalization and decode as UTF-8. Scoped added-text AWS-key/private-key scan found no matches; all 12 added local Markdown link targets exist. No generated/static/credential artifacts or unrelated changes staged; no unstaged changes. `git diff --cached --check` passed. Final completion metadata does not change reviewed implementation or handoff contracts.

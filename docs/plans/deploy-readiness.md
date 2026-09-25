@@ -5,7 +5,9 @@ Status (25 September 2026): code present at `e58e3a1` on `erfan/analytics`; auth
 The role/ownership procedure below is a historical description of `e58e3a1` and is
 superseded by the [production database contract](../AWS_INFRASTRUCTURE.md#database-runtime-preparation).
 Current bootstrap separates runtime and migration ownership, refuses foreign-owned databases,
-and applies one shared TLS policy. Do not follow the historical ownership-transfer step.
+and applies one shared TLS policy. Startup secret delivery, the ALB probe exception and image
+exclusions are now specified by the [runtime handoff](../AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary);
+its local checks do not claim AWS integration. Do not follow the historical ownership-transfer step.
 
 ## Why
 

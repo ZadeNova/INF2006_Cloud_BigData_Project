@@ -1,6 +1,29 @@
-.env
-.env.*
+# Runtime image never receives local configuration or credentials.
+**/.env
+**/.env.*
 !.env.example
-__pycache__
-.pytest_cache
+**/.aws
+**/.ssh
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.pem
+!certs/rds-global-bundle.pem
+# Infrastructure is maintained separately from the application image.
+infrastructure
+infra
+terraform
+**/.terraform
+**/*.tfstate*
+**/*.tfplan
+**/*.plan
+**/*.tfvars
+**/*.tfvars.json
+**/crash.log
+**/crash.*.log
+**/.git
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/*.py[cod]
 staticfiles

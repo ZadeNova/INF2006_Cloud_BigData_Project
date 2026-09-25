@@ -127,3 +127,10 @@ python manage.py check_database
 ```
 
 Local Compose remains unchanged and requires no AWS settings or SDK access.
+
+
+Build the production image locally with `docker build -t inf2006-runtime-final src` from the
+repository root. The same image serves the web and one-off commands; ML dependencies remain
+in the separate analytics environment. Use the [manual image/TLS verification procedure](../tests/README.md#local-runtime-image-and-tls-verification)
+before handing its immutable identity to the infrastructure owner. An authorised ECR push and
+its registry digest are a separate integration step; a local build does not deploy anything.

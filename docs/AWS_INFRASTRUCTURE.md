@@ -4,7 +4,7 @@ Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for bud
 
 ## Baseline
 
-- Terraform under src/; concrete subdirectory/provider versions established during scaffolding.
+- Reserve `src/infrastructure/` for Terraform-owner implementation; no Terraform files exist at this preparation baseline. Provider versions remain the infrastructure owner's scoped decision.
 - HTTPS ALB across two permitted Availability Zones, health-checked EC2 targets in an ASG.
 - Same container image, signing configuration and database sessions on every instance; stickiness disabled.
 - Private Single-AZ RDS PostgreSQL, inbound only from application security group. State its availability limitation.
@@ -160,3 +160,35 @@ Primary references: [ALB probe Host](https://docs.aws.amazon.com/elasticloadbala
 [SDK role credentials](https://docs.aws.amazon.com/boto3/latest/guide/credentials.html).
 Grant `kms:Decrypt` only when needed for the selected customer-managed key; provision/access
 failures block deployment rather than permitting plaintext launch configuration.
+
+## Image and infrastructure-owner handoff
+
+Build from `src/` with its Dockerfile. The `.dockerignore` excludes the dedicated infrastructure
+directory (and common `infra`/`terraform` alternatives), nested state/plans/variable values,
+local environment/credential files and private keys. Only the vendored public RDS PEM is allowed.
+Git ignores sensitive state/plans/tfvars while preserving safe example variables and provider
+lockfiles. Keep all infrastructure in its dedicated directory; an arbitrary filename is not a
+secret classification system. Never bake retrieved secrets into an image, build argument or layer.
+
+| Owner input / step | Required handoff |
+|---|---|
+| Image and launch | Pin the published ECR digest after authorised publication; set the same nonsecret release ID on every instance. Run the image's nonroot Gunicorn CMD on port 8000; no per-instance migrations. A local Docker image ID is not an ECR deployment result. |
+| Network / HTTPS | ALB-only instance ingress, exact instance probe Host, explicit public application hosts/CSRF origins, trusted ALB protocol boundary and permitted certificate/hostname/client trust. Verify real headers and probes. |
+| Database / credentials | Private RDS endpoint, read-only CA delivery, role-separated secrets/IAM and coordinated bootstrap then migration then runtime readiness according to the contracts above. Verify both required access and forbidden access. |
+| Operations | Collect existing stdout JSON logs, retain release identity and readiness results, and verify replacement instances share signing/session state. Retain measured thresholds and teardown ownership. |
+
+Use the existing [security log-field contract](SECURITY.md): request ID, status, duration and
+sanitised exception class support request/error correlation; startup events add release/environment.
+The infrastructure owner must wire and calibrate failure/alert conditions for secret/config startup
+failure, failed migrations/readiness, unhealthy targets or process exits, elevated 5xx/database 503
+rates or latency, and failed/stale batch runs. Batch freshness is judged against the explicitly
+selected completed run and agreed operational age, not an assumed recurring scheduler. Thresholds,
+CloudWatch/SNS wiring and alert delivery remain unverified infrastructure work. Never use customer
+IDs as metric dimensions or emit secret values/personal payloads; no additional telemetry is added here.
+
+Reproducible local image/sentinel/TLS procedures are in [tests/README.md](../tests/README.md#local-runtime-image-and-tls-verification)
+and [the executable helper](../tests/verify_runtime_image.py). Exact locally built image identities,
+executed results and remaining integration limitations are recorded in the
+[runtime review](reviews/runtime-aws-security.md), not inferred from a successful build.
+The tests do not establish AWS permissions, region/budget, real Secrets Manager delivery,
+certificate availability, security groups, ALB/RDS behavior or ECR publication.
