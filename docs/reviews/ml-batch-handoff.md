@@ -122,3 +122,21 @@ After gate clearance, Low verified the resolved task directory was exactly `C:/U
 Local commit authorised only after the cleared gate and checks above. Coordinator stages the 16 explicit task paths, reviews staged scope/content and verifies the resulting commit subject/body and clean tree. Nothing pushed or deployed.
 
 Final staged inspection: exactly 16 reviewed task paths; no generated customer exports, secrets, dependency/model/migration/frontend/AWS or raw-data changes. Staged text matches the working snapshot after Git newline normalization; implementation/test/evidence hashes match the cleared round 2 snapshot. Only completion metadata and heading spacing in coordinator-owned records changed afterward. All 16 paths decode as UTF-8; staged whitespace check passed, no unstaged changes, and added-text credential/private-key pattern scan found zero matches. This is a scoped inspection, not a claim of exhaustive secret detection. Commit includes a descriptive body with verification and unrun limits; final hash/tree verification is reported to the user after creation.
+
+## Committed-snapshot verification on renewed request
+
+25 September 2026: the requested Phase 4 work was already committed as `3c75f4d9ef03c88a49bfc3fb5196197a4ce73bbf` when this coordination pass started. Implementation baseline remains `d9348597589c51bb19b16cedddae3babc7cece9d`; this pass starts from `3c75f4d`. Tree/index were clean and no merge/rebase was in progress. Fresh `git fetch origin` succeeded; origin remains `89019b4bc10a22d7ce8d40769582652bd35030e7`, with five local and zero incoming commits. No backup, rebase or semantic resolution was required.
+
+Separate explicitly assigned subagents: `/root/phase4_implementer`, `gpt-6-astra` / `low`, inspected the existing implementation and ran focused verification; `/root/phase4_reviewer`, `gpt-6-astra` / `medium`, Independent (fresh session), reviewed the frozen exact diff `d934859..3c75f4d` read-only. Neither changed files or performed Git mutations. Reviewer outcome: **no actionable findings**; MLH-001/002 remain resolved. This additional review is code/contract inspection, not a new test-suite pass.
+
+Newly executed Low verification, host venv with `PYTHONDONTWRITEBYTECODE=1` and `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS`, `MKL_NUM_THREADS` all set to `1`:
+
+```powershell
+.venv\Scripts\python.exe -B -m pytest -q -c src/pytest.ini -p no:cacheprovider -p no:django analytics/tests/test_segment_customers.py
+```
+
+Result: **16 passed in 4.68s**, with one expected unknown `DJANGO_SETTINGS_MODULE` configuration warning because the Django plugin was disabled. Initial attempts failed before collection due to sandbox temporary-file restrictions, then missing Django settings; approved temporary-file access and the disabled Django plugin enabled the successful pure test run. No database or application resources were recreated.
+
+Coordinator checks: all six current raw CSV SHA-256 values match the Phase 3 aggregate evidence; raw data and that evidence JSON have no changes in `d934859..3c75f4d`. An initial PowerShell result-formatting attempt failed under constrained language mode; rerunning with plain string output confirmed all six matches. `git diff d934859 HEAD --check` passed. The existing implementation commit has a descriptive body and remains intact.
+
+The recorded 69-test suites, pinned 16+53 checks and scoped-role 18-customer CLI/E2E recovery remain historical execution evidence; none was rerun in this pass. No implementation change requires repeating them. Full suite, hosted CI, image build, browser, AWS and full-dataset reevaluation remain unrun here. Current-cohort validation, undetected same-ID feature drift and cloned configuration limitations remain unchanged. Lifecycle/lifetime copy, immutable snapshots, runtime security and broader S-006/ML-AWS readiness remain deferred. This pass adds only this review record and tracker verification metadata. Nothing pushed or deployed.
