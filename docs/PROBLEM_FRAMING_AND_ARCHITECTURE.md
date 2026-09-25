@@ -79,24 +79,19 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
      in `PROJECT_SCOPE_INF2006.md` §1.
 
 2. **Service model and deployment model, stated as a decision (report §3).** State plainly: IaaS —
-   EC2 instances in an Auto Scaling Group behind an ALB, managed via Terraform, backed by managed
-   RDS PostgreSQL and S3. This is a deliberate choice, not the only option — which leads to:
+   EC2 instances in an Auto Scaling Group behind an ALB, backed by managed RDS PostgreSQL and S3,
+   provisioned with Terraform (see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md), "Deployment
+   method", and [aws-terraform.md](plans/aws-terraform.md)). This is a deliberate choice,
+   not the only option — which leads to:
 
-3. **Pick two (or three, for margin) alternatives and write the rejection reasoning.** Everything
-   below is already implied in `ARCHITECTURE.md`; the job is to turn it into justified prose with a
-   real reason, not "we didn't have time":
-   - **Managed container/PaaS platform** (ECS Fargate, or Elastic Beanstalk) — rejected: the module
-     syllabus targets explicit IaaS-level understanding (virtual machines, ASG, ALB configuration);
-     a managed platform would hide exactly the mechanics being assessed, and adds lab-quota and
-     learning-curve risk inside a fixed four-week timeline.
-   - **Serverless** (Lambda + API Gateway for the whole application, not just analytics) —
-     rejected: Django's session-backed, HTMX-fragment request model and persistent database
-     connections don't map cleanly onto short-lived functions; cold starts would hurt the p95
-     checkout latency target. (This mirrors an earlier project decision to reject Lambda for the
-     main app while still considering it narrowly for a batch analytics job.)
-   - **Optional third, for depth:** container orchestration (ECS/EKS with a service mesh) —
-     rejected as unjustified complexity for this workload's size and the team's two-developer
-     infrastructure capacity.
+3. **Justify the choice from the workload, then reject the alternatives against it.** Written
+   25 September 2026 as report-ready material for §3; see
+   [Service-model justification](#service-model-justification-report-3-material) below. The rule:
+   every reason must be a property of **Northstar's workload**, never of the project's
+   circumstances. "The lab budget is small" or "the deadline is close" explains why *we* chose,
+   not why the *shop* needs it, and other groups will have made different choices (some use
+   Elastic Beanstalk) under the same circumstances. Cost is argued as the shop's operating cost,
+   not as lab credits.
    - **A second, deployment-*configuration* trade-off already drafted in the scope doc**: public
      EC2 subnets with ALB-restricted security groups vs. private subnets behind a NAT gateway.
      Chosen: public subnets with ingress restricted to the ALB security group, to avoid a
@@ -109,6 +104,97 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
    as a working cap (~USD 10 reserved), ASG minimum 1 / test maximum 2, RDS Single-AZ as an
    explicit, named compromise (not hidden), short CloudWatch log retention, and browse-heavy
    expected traffic with a small checkout share (from the load-test plan).
+
+### Service-model justification (report §3 material)
+
+Structure: state the decision drivers first, each traced to the story, then test every option
+against them. The choice then follows from the requirements instead of being defended after the
+fact.
+
+**Decision drivers.** Northstar is a small online shoe shop in Singapore run by one store operator.
+
+| Driver | Traced to |
+|---|---|
+| **D1. Checkout stays correct under contention.** Demand for a popular shoe or a restock arrives in bursts; many buyers decrement the same stock at once, and the database is the bottleneck. | Transactional, idempotent checkout and "no negative stock" ([scope](../PROJECT_SCOPE_INF2006.md)); the scope's proposed starting objective of p95 checkout below 2 s and unexpected errors below 1%, to be calibrated after the one-instance measurement; sold-out rejections reported separately |
+| **D2. The storefront is always open, with steady traffic and bursts.** It never scales to zero, and it must absorb a burst. | ASG minimum 1, test maximum 2; measured scaling ([AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md)) |
+| **D3. Any web server can be lost without losing carts or logins.** | Database-backed sessions; the session-continuity test |
+| **D4. Every security boundary is explicit and auditable,** because the shop holds customer accounts and order history. | Threat-control map; trust boundaries on the diagram |
+| **D5. Cost and complexity proportionate to one deployable run by a small business,** with a path to grow. | One Django service, one database |
+
+**Chosen: EC2 in an Auto Scaling group behind an ALB.** Replaceable instances running one container
+image (D3), a fixed ceiling of instances and Gunicorn workers (D1), a scaling signal chosen for the
+workload (ALBRequestCountPerTarget, because requests are the load that matters), and security groups
+chaining ALB → app:8000 → RDS:5432 as explicit resources (D4).
+
+**Lambda (with API Gateway) for the whole application: rejected on D1 and D2.** This is the
+strongest argument. Under a burst, Lambda scales out to many concurrent functions, and each opens
+its own PostgreSQL connection. That hits the database with unbounded concurrency at the moment rows
+are locked for stock decrements. The failure mode is connection exhaustion and lock queues exactly
+when sales matter most. The ASG gives **bounded concurrency** (instances × Gunicorn workers), so the
+application tier applies back-pressure and the database stays within what it can serve. Lambda's
+main benefit, scaling to zero, is worthless for a storefront that is always open, and its cold
+starts land on the first buyers after a quiet period. Making it work needs RDS Proxy and a Django
+adapter (Mangum or Zappa) in front of API Gateway: more components for a worse fit. Lambda remains
+a reasonable fit for the batch refresh alone; it is not used because the refresh already runs
+inside the application image under a database lock.
+
+**EKS: rejected on D5.** Kubernetes solves scheduling many services across a fleet; Northstar has
+one deployable. The control plane is a fixed hourly charge before any request is served (verify
+and cite the current price from the AWS pricing page, with its date), plus manifests, an ingress
+controller and node groups. That is a disproportionate operating cost for a small shop, not a
+technical impossibility.
+
+**Elastic Beanstalk: same runtime topology, rejected on ownership (D4).** Beanstalk provisions EC2,
+an Auto Scaling group and an ALB underneath, so do **not** claim the chosen design performs better.
+Claim what is owned rather than generated:
+- The trust boundaries are designed, not defaulted: the security-group chain and the private
+  database subnets are explicit, reviewable resources.
+- The database lifecycle is independent of the application. Beanstalk can create RDS inside an
+  environment, and AWS documents that terminating that environment deletes the database (cite the
+  AWS page). Order history must outlive any deployment. A decoupled Beanstalk setup is possible,
+  but it then configures the same pieces this design owns.
+- Health checks (`/health/`) and the scaling signal are chosen for the workload, and every resource
+  maps one-to-one into Terraform, so the configuration is auditable and reproducible.
+
+Report sentence: *"Elastic Beanstalk would provision this same topology; we own each component
+explicitly because the security boundaries and the data lifecycle are requirements, not
+defaults."* Never disparage Beanstalk: other groups use it, and it is a sound platform.
+
+**ECS on Fargate: the honest near-miss, rejected narrowly on D5.** It meets D1 to D4 about as well
+as EC2: bounded tasks, stateless containers, explicit security groups. An orchestrator's value is
+placing many kinds of containers, and Northstar runs exactly one, so ECS adds clusters, task
+definitions and services with nothing to orchestrate yet. Because the application is already
+containerised, moving to ECS is a deployment change, not a rewrite. Present it as the evolution
+path: *"If the shop adds a second service, such as a separated analytics or image-processing
+worker, ECS becomes the right choice, and the image moves unchanged."* Knowing when the choice
+stops being right is part of the argument.
+
+**Summary matrix for the report.**
+
+| | D1 bounded DB concurrency | D2 always on, with bursts | D3 replaceable instances | D4 explicit boundaries | D5 proportionate |
+|---|---|---|---|---|---|
+| **EC2 + ASG (chosen)** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Elastic Beanstalk | ✓ | ✓ | ✓ | ~ generated | ✓ |
+| ECS on Fargate | ✓ | ✓ | ✓ | ✓ | ~ orchestration unused |
+| EKS | ✓ | ✓ | ✓ | ✓ | ✗ fixed control-plane cost |
+| Lambda | ✗ unbounded connections | ✗ scale to zero wasted, cold starts | ✓ | ✓ | ~ adds API Gateway and RDS Proxy |
+
+**Also considered and rejected: splitting analytics into a separate service on its own admin
+instance.** Both services would share one PostgreSQL schema (a distributed monolith without data
+separation); operators sign in through Django sessions, so a split adds a new authentication
+boundary; and dashboard reads are light because aggregation is precomputed. The heavy work is
+isolated in time instead: `refresh_analytics` runs as a scheduled batch under an advisory lock, off
+the request path. Revisit if analytics needs its own data store or independent scaling.
+
+**Evidence each claim needs** (a claim without a linked artifact earns nothing):
+- D1: during the Locust run, capture the RDS `DatabaseConnections` CloudWatch metric next to p95
+  checkout latency and the absence of negative stock. That turns the Lambda argument into a
+  measurement: connections stayed within the bounded ceiling at peak.
+- D2: the fixed-capacity versus autoscaling comparison.
+- D3: the session-continuity test (terminate an instance mid-session).
+- D4: the threat-control map and the redacted security-group configuration.
+- Prices and AWS guidance (EKS control plane, Beanstalk-coupled RDS deletion): cite the page and
+  the date checked. Do not reuse unverified numbers.
 
 ### Phase B — build the one diagram
 
@@ -123,11 +209,14 @@ repo, not generic terms:
 |---|---|
 | Users | Customer and Store Operator, as two distinct actors |
 | Application components | "Django/Gunicorn (EC2 ASG)" — matches `ARCHITECTURE.md`'s own wording |
-| Cloud services | EC2, ALB, Auto Scaling Group, RDS PostgreSQL, S3, CloudWatch — each its own labeled box |
-| Trust boundaries | At minimum: the VPC boundary, and the public app subnet vs. the private RDS subnet, as drawn boxes, not implied |
-| Data stores | RDS and S3 as distinct labeled stores |
-| Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected |
-| Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP, internal), app to RDS (5432), S3 to import command to RDS (data pipeline) |
+| Cloud services | EC2, ALB, Auto Scaling Group, RDS PostgreSQL 17, S3, ACM, ECR, Secrets Manager, IAM (`LabInstanceProfile`), Systems Manager, CloudWatch, SNS — each its own labeled box; EventBridge Scheduler and AWS Budgets dashed until the lab confirms them |
+| Trust boundaries | At minimum: the VPC boundary, and the public app subnet vs. the private RDS subnet, as drawn boxes, not implied; label the security-group chain sg-alb → sg-app → sg-db |
+| Data stores | RDS and the one S3 bucket (dataset, exports, images, `.glb` models) as distinct labeled stores |
+| Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected; SNS alert to the team; CloudTrail event history for API audit |
+| Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP 8000, internal), app to RDS (5432, TLS), browser to S3 (pre-signed GET, CORS), S3 to import command to RDS (data pipeline), secrets and image at instance boot |
+
+A review draft following this checklist was drawn on 25 September 2026 (outside the repository);
+the submission copy is still to be drawn in draw.io.
 
 Save both `evidence/architecture.drawio` (source, for traceability) and `evidence/architecture.png`
 (the path the manifest schema requires exactly).
@@ -164,9 +253,9 @@ they reuse reasoning already sitting in this repo:
   restriction, S3 block-public-access). Draw and reason about it once, cite it from both places.
 - **Avoid the generic-diagram failure mode.** A marker reading many submissions will see dozens of
   undifferentiated "browser → app → database" boxes with no trust boundary and no real alternative
-  beyond "we could have used a different database." This project already has concrete,
-  project-specific constraints (a $30 lab budget, a two-person infrastructure team, a gated
-  dataset) — use them as the actual reasoning, not filler.
+  beyond "we could have used a different database." Ground the reasoning in the shop's workload
+  (the decision drivers above), not in the project's circumstances; circumstances such as the lab
+  budget belong in the assumptions and constraints paragraph, not in the justification.
 - **Every claim needs an artifact path.** Per the brief's evidence rules table: state limitations
   honestly and link every claim to something a marker can open. A claim with no linked file is
   worth nothing under the marker principle, however well written.

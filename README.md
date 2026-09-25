@@ -55,8 +55,8 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 | Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
 | Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
 | Analytics | Django management commands/SQL; pandas where useful |
-| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch |
-| Access and secrets | IAM roles and Secrets Manager where the student lab permits |
+| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, ECR, private S3, CloudWatch, SNS |
+| Access and secrets | Lab-provided IAM instance profile, Secrets Manager, ACM certificate, Systems Manager (no SSH) |
 | Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
 
 ```text
@@ -147,7 +147,7 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 
 ## Current limitations and continuation
 
-- AWS permissions, exact costs and HTTPS prerequisites remain unverified.
+- AWS: a read-only probe (25 September 2026) found every planned service reachable in the lab, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
 - Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Functional and security evidence files record no run yet, although the automated tests exist; a recorded live walkthrough of the redesigned storefront is also outstanding.
 - The redesign and the dashboard re-theme (24 September 2026) are not independently reviewed and have no recorded browser walkthrough yet. See [storefront redesign](docs/plans/storefront-redesign.md).
 - The imported dataset has weak weekly variation and 32–40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).

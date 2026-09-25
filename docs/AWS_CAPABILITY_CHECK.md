@@ -155,4 +155,4 @@ docker compose run --rm web pytest -q -p no:cacheprovider /app/tests/test_aws_ca
 
 ## What to do with the result
 
-Share the record with the group. It supplies the gates for the console build (runbook item B7 in [cloud-independent-prep.md](plans/cloud-independent-prep.md)): the capability record, the HTTPS answer, the balance and cap, and the image route. Keep it under `evidence/` so the report can cite it. The console build then proves what the probe could only list.
+Share the record with the group. It supplies the gates for the Terraform build ([aws-terraform.md](plans/aws-terraform.md)): the capability record, the HTTPS answer, the balance and cap, and the image route. Keep it under `evidence/` so the report can cite it, after replacing lab-generated role names (long random-looking prefixes) with `<lab-generated>`. The Terraform apply then proves what the probe could only list. The first run, on 25 September 2026, is summarised under B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md).

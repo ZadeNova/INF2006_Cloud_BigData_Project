@@ -1,6 +1,6 @@
 # AWS infrastructure contract
 
-Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before deployment.
+Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before deployment. Lab capability probe run 25 September 2026 (`us-east-1`, AWS Academy Learner Lab): every service in the baseline is reachable; only `LabRole` and `LabInstanceProfile` are available for IAM; the vCPU quota lookup is denied.
 
 ## Baseline
 
@@ -11,6 +11,7 @@ Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for bud
 - Private S3 for checked inputs/optional exports; block public access and restrict object permissions. Retain local input mode.
 - CloudWatch sanitised logs/metrics with short retention.
 - IAM instance roles and Secrets Manager where permitted; no baked-in access keys.
+- Decided 25 September 2026 (details in [aws-terraform.md](plans/aws-terraform.md)): RDS pinned to PostgreSQL 17.x (the lab default is 18.3); Secrets Manager for `DJANGO_SECRET_KEY` and the application database password, with the RDS master password managed by RDS; one S3 bucket with `data/`, `exports/`, `media/images/` and `media/models/` (`.glb`) prefixes, served through pre-signed URLs, with a CORS rule for the application origin; ECR for the image; CloudTrail event history (default) for audit; EventBridge Scheduler plus SSM Run Command for scheduled jobs if the lab accepts `LabRole`, otherwise cron on one instance.
 
 Initial/minimum ASG capacity one, default test maximum two. Have two healthy targets before failure demonstration. Additional capacity requires quota/cost checks. Budget baseline: EC2 public subnets with application ingress restricted to ALB to avoid mandatory NAT cost; RDS private. Restrict management access separately through permitted facilities.
 
@@ -38,7 +39,7 @@ Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, R
 
 ## Setup order and verification
 
-Use dependency order and small reviewable changes, not an unexamined full deployment. **Deployment method (decided 25 September 2026):** the team builds the stack once through the console, together, for learning, recording every setting in a runbook, and then reproduces the same architecture in Terraform. Console-built resources are named `inf2006-<component>` and tagged `ManagedBy=console` so they can be inventoried; they are not managed by Terraform. Terraform is applied only after the console stack's evidence is captured and the stack is torn down, so nothing is duplicated, doubled in cost or left unmanaged. The report says which evidence came from which method. Once the Terraform pass is done, team-managed resources belong in Terraform; pre-existing lab roles/resources must be recorded as external dependencies rather than recreated. Record authorised emergency/manual changes and reconcile configuration afterwards. See [cloud-independent-prep.md](plans/cloud-independent-prep.md) B7 and B5.
+Use dependency order and small reviewable changes, not an unexamined full deployment. **Deployment method (revised 25 September 2026): Terraform first.** Terraform creates and owns every team-managed resource (named `inf2006-<component>`, tagged `ManagedBy=terraform`). The console is for learning and inspection only: reading settings, logs, metrics and CloudTrail event history, plus the few steps Terraform cannot do (the ACM validation record at the external domain registrar, confirming the SNS email subscription, reading the lab balance). Anything created by hand is imported into Terraform or deleted, so there is no drift. This replaces the earlier "console first, then reproduce in Terraform" decision. The user is learning Terraform while building it, so the work goes phase by phase with a guide per phase, and it starts only when the user says so. Pre-existing lab roles (`LabRole`, `LabInstanceProfile`) are referenced as external dependencies, never recreated. Record authorised emergency/manual changes and reconcile configuration afterwards. Plan and decisions: [aws-terraform.md](plans/aws-terraform.md).
 
 | Stage | Work and verification |
 |---|---|
@@ -52,6 +53,6 @@ Use dependency order and small reviewable changes, not an unexamined full deploy
 
 IAM/runtime credentials and logs must exist before dependent verification; do not postpone all observability to the final stage. Reuse an authorised smoke instance for probes where practical instead of adding unnecessary disposable infrastructure.
 
-During the console pass the equivalent of a plan review is reading each settings page aloud against the runbook before saving it. Before an AWS mutation in the Terraform pass, inspect the Terraform plan for creations/replacements/deletions, broad IAM, public exposure, unexpected NAT gateways, Multi-AZ DB choices, capacity and costs. Terraform success is not functional/security evidence. Honour existing user authorisation; if a plan exceeds it or disrupts shared resources, present the concrete plan and obtain the missing approval before applying. No blanket apply/destroy permission is implied by this document.
+Before an AWS mutation, inspect the Terraform plan for creations/replacements/deletions, broad IAM, public exposure, unexpected NAT gateways, Multi-AZ DB choices, capacity and costs. Terraform success is not functional/security evidence. Honour existing user authorisation; if a plan exceeds it or disrupts shared resources, present the concrete plan and obtain the missing approval before applying. No blanket apply/destroy permission is implied by this document.
 
 With two infrastructure developers, choose one state owner/writer per environment. Prefer appropriately secured shared state with locking when lab capabilities permit. If using local state, agree custody and secure backup/handover; never create independent states managing the same resources. State/plan files may contain secrets and must not be committed or submitted. After any approved change, preserve a sanitised record, verify expected behaviour and coordinate teardown with the other developer.

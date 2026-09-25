@@ -7,7 +7,10 @@ Status: planned, not deployed. Read the [scope](../PROJECT_SCOPE_INF2006.md).
 - Browser -> HTTPS ALB -> Django/Gunicorn containers in EC2 ASG -> private RDS PostgreSQL.
 - Django renders templates and HTMX fragments. WhiteNoise serves packaged, versioned static assets. No independent frontend service.
 - Private S3 -> authorised validation/import command -> PostgreSQL -> aggregation command -> summary tables -> protected dashboard.
-- CloudWatch collects sanitised logs and infrastructure metrics.
+- Product images and `.glb` shoe models live in the same private S3 bucket (`media/`); browsers fetch them directly through short-lived pre-signed URLs, with a CORS rule limited to the application origin. Locally they stay on the filesystem.
+- Instances read the Django secret key and the application database password from Secrets Manager at boot through the lab-provided instance profile; RDS manages its own master password.
+- CloudWatch collects sanitised logs and infrastructure metrics; SNS emails alarms to the team; CloudTrail event history records API changes.
+- Scheduled jobs (`refresh_analytics`, `clearsessions`) run from EventBridge Scheduler through SSM Run Command if the lab permits, otherwise from cron on one designated instance.
 - Django database sessions and persistent carts are shared by all instances with shared signing configuration. Stickiness disabled.
 
 Foundation package paths: src/config/ holds project configuration/WSGI; src/accounts/, src/catalogue/, src/cart/, src/orders/ and src/reporting/ are domain packages. Frontend-owned directories are src/templates/ and src/static/. Local Docker web/db configuration and framework migrations are verified in batch 2; initial domain schema and sealed inventory persistence are supplied by batch 3; batch 4 supplies process health and separate database readiness; the business workflows (auth, catalogue, cart, checkout, order history, import, analytics refresh and dashboard) are implemented locally on top of that. The local Compose deployment is not evidence of AWS deployment. Use explicit business functions callable from views/commands; avoid signals that deduct stock during historical import.
@@ -23,7 +26,8 @@ If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded
 - One Django deployment reduces integration work compared with a separate SPA/API.
 - Managed RDS demonstrates cloud persistence; local Docker PostgreSQL supports reproducibility and INF2003.
 - ALB/ASG provide measurable app scaling. Queues/microservices are outside baseline.
-- CloudFront omitted for current workload/budget; private S3 retained for datasets/exports.
+- CloudFront omitted for current workload/budget; private S3 retained for datasets, exports and media.
+- Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([aws-terraform.md](plans/aws-terraform.md)).
 
 Create the submission diagram during implementation with users, services, trust boundaries, flows and observability. Planned output: `evidence/architecture.png`; do not claim it exists before creation. INF2003 extends the preserved submission later.
 
