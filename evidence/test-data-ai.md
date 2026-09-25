@@ -128,6 +128,19 @@ working-code hashes/diff identity, runtime versions, population/eligibility, exa
 features, candidate metrics, profiles, selection and unrun experiments. No assignment
 exports are retained in Git. This is agent-executed evidence, not teammate execution.
 
+The 26 September integration rebase rewrote that starting commit (`529a0f9` maps to
+`ab90415` in the [commit mapping](../docs/reviews/ml-upstream-integration.md#commit-mapping)),
+so the artifact's `identity.git_head` no longer resolves here and its
+`identity.working_files_sha256` no longer match the current files. The commits after it
+changed only plumbing: Secrets Manager/TLS connection setup, the completed-batch envelope
+in `src/reporting/segment_contract.py`, and the boto3 pins added to
+`analytics/requirements.txt`. `feature_matrix`, `fit_candidates`, `fit_segments`,
+`_segment_name_mapping` and `_stability_against_published` are untouched, as are the
+numpy/pandas/scikit-learn/scipy pins, so the recorded metrics and selection still describe
+the current model code. The artifact also predates the `selection.policy` field and still
+carries the retired `rfm-kmeans-v2` label; recipe identity is now `rfm-v3-<sha256>`.
+Regenerating it would refresh those identity fields without changing a measured value.
+
 All six raw CSV SHA-256 values matched the accepted release in [data/README.md](../data/README.md).
 The shoe remap is plan-only; a validated adopted revision needs fresh evaluation.
 Task-only PostgreSQL 17 used `inf2006-phase3-20260925-db-1`, matching task network,

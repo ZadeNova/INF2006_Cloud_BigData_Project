@@ -27,7 +27,7 @@ evidence:
 data_ai:
   dataset: "data/README.md"
   method: "Accepted synthetic CSV import with sealed historical inventory; SQL refresh independently checked by raw-table pandas recomputation and a separately exported production coverage target."
-  evaluation: "evidence/test-data-ai.md: independent deterministic refresh verification and executed ML checks; evidence/ml-quality-evaluation.json: accepted raw revision aggregate comparison, lifetime eligibility, source/code identity, k=2..4 profiles/separation/seed stability. Selected descriptive rfm-kmeans-v2 uses log-frequency preprocessing, k=2 on this cohort; no predictive claim. ML quality review status: docs/reviews/ml-quality-evaluation.md."
+  evaluation: "evidence/test-data-ai.md: independent deterministic refresh verification and executed ML checks; evidence/ml-quality-evaluation.json: accepted raw revision aggregate comparison, lifetime eligibility, source/code identity, k=2..4 profiles/separation/seed stability. Selected descriptive recipe (rfm-v3-<sha256>, exact value per training run in evidence/test-data-ai.md) uses log-frequency preprocessing, k=2 on this cohort; no predictive claim. ML quality review status: docs/reviews/ml-quality-evaluation.md."
   reproducible_command: "python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json; first export with analytics/export_coverage.py (full setup in evidence/test-data-ai.md)"
   source_version: "Analytics Engineering Ecommerce Sales & Returns v1.0.0; downloaded 2026-09-22; data/raw/checksums.txt"
   verified_scratch_namespace: "synthetic/revision-a/demo/v1"
