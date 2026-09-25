@@ -147,10 +147,10 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 
 ## Current limitations and continuation
 
-- AWS: a read-only probe (25 September 2026) found every planned service reachable in the lab, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
+- AWS: a teammate-reported read-only probe (25 September 2026) reached the probed lab APIs, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
 - Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Functional and security evidence files record no run yet, although the automated tests exist; a recorded live walkthrough of the redesigned storefront is also outstanding.
 - The redesign and the dashboard re-theme (24 September 2026) are not independently reviewed and have no recorded browser walkthrough yet. See [storefront redesign](docs/plans/storefront-redesign.md).
-- The imported dataset has weak weekly variation and 32â€“40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
+- The imported dataset has weak weekly variation and 32–40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 

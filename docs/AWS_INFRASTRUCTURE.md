@@ -1,6 +1,6 @@
 # AWS infrastructure contract
 
-Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before deployment. Lab capability probe run 25 September 2026 (`us-east-1`, AWS Academy Learner Lab): every service in the baseline is reachable; only `LabRole` and `LabInstanceProfile` are available for IAM; the vCPU quota lookup is denied.
+Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before deployment. Teammate-reported probe (25 September 2026, us-east-1 Learner Lab): probed list/describe APIs were reachable, lab roles/profiles were listed and the vCPU quota lookup was denied. These observations were not rerun during integration and do not establish creation permissions or coverage of every selected service.
 
 ## Baseline
 

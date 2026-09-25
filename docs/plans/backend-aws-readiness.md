@@ -12,7 +12,7 @@ The user owns application/ML remediation; their groupmate owns Terraform. This p
 ML is included by the user's current decision; Phase 0 reconciles the active optional/deferred language. Offline training/loading use an explicitly triggered batch workflow. Saved-model inference is optional and unimplemented; EventBridge Scheduler and Lambda are not selected. Keep segmentation descriptive and removable, and preserve deterministic sales/inventory calculations. No forecasting replacement, SPA, queue architecture, dedicated model server or automatic marketing actions.
 Secrets Manager is selected for database credentials and the shared Django signing key. Terraform provisions or references the permitted secrets and access policies; runtime retrieves them through roles, never baked-in values. Systems Manager is not selected. Agree a secure administration/diagnostic method with the Terraform owner.
 
-The recorded console-first learning pass followed by Terraform reproduction remains the documented deployment method unless the team changes it. Terraform file development can proceed in parallel. Avoid duplicate resources/state ownership; validate/plan is not evidence of apply or successful deployment.
+The integrated teammate plan supersedes console-first sequencing: Terraform creates and owns team resources; the console is for inspection and learning. See [Terraform plan](aws-terraform.md). Avoid duplicate resources/state ownership; validate/plan is not evidence of apply or successful deployment.
 
 ## B0 - Reconcile status, scope and security advice
 

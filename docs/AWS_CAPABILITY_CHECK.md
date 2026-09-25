@@ -1,10 +1,10 @@
 # How to use the AWS capability check
 
-The capability check is a small script, `src/tools/aws_capability_check.py`, that records read API and EC2 dry-run outcomes from your AWS lab account and writes the answer as a Markdown file. It is item B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). Run it **once, before the console build**, to identify deployment blockers. ECR and Secrets Manager are already selected; listing them does not prove push/pull or secret retrieval permission.
+The capability check is a small script, `src/tools/aws_capability_check.py`, that records read API and EC2 dry-run outcomes from your AWS lab account and writes the answer as a Markdown file. It is item B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). Run it **once, before the Terraform build**, to identify deployment blockers. ECR and Secrets Manager are already selected; listing them does not prove push/pull or secret retrieval permission.
 
 **It is safe.** It only lists and describes things. For "could I create a VPC?" and "could I launch an instance?" it uses the AWS `--dry-run` option, which asks AWS whether the call *would* work and creates nothing. It provisions no resources; check current API pricing and lab limits when running it. A test (`test_no_probe_can_change_anything`) fails if anyone adds a call that could create, change or delete something.
 
-**It does not tell you:** your remaining balance (read it from the lab page), the price of anything, or whether you can *create* an ALB, Auto Scaling group, RDS database, S3 bucket, IAM role or certificate. A Terraform plan does not prove creation permission either. Verify authorised console creation, then Terraform reproduction, and actual behaviour.
+**It does not tell you:** your remaining balance (read it from the lab page), the price of anything, or whether you can *create* an ALB, Auto Scaling group, RDS database, S3 bucket, IAM role or certificate. A Terraform plan does not prove creation permission either. Verify the authorised Terraform apply and actual deployed behaviour.
 
 ## What you need
 
