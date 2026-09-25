@@ -132,13 +132,62 @@
         });
     }
 
+    function sizeChart(canvas, payload) {
+        var c = palette();
+        var datasets = [{
+            label: "Selected period units",
+            data: payload.units,
+            backgroundColor: c.primary,
+            borderColor: c.primary,
+            borderWidth: 1,
+            borderRadius: 0,
+            maxBarThickness: 30
+        }];
+        if (payload.comparison) {
+            datasets.push({
+                label: "Previous period units (outline)",
+                data: payload.comparison.units,
+                backgroundColor: "transparent",
+                borderColor: c.muted,
+                borderWidth: 2,
+                borderRadius: 0,
+                maxBarThickness: 30
+            });
+        }
+        return new window.Chart(canvas, {
+            type: "bar",
+            data: { labels: payload.labels, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { usePointStyle: true, color: c.tick } },
+                    tooltip: { callbacks: { label: function (context) { return " " + Number(context.parsed.y).toLocaleString() + " units"; } } }
+                },
+                scales: {
+                    x: { ticks: { color: c.tick }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { color: c.tick }, grid: { color: c.grid } }
+                }
+            }
+        });
+    }
+
     function drawCharts(root) {
         if (!window.Chart || !root) {
             return;
         }
-        window.Chart.defaults.font.family = themeColor("--font-sans", "sans-serif");
+        // DESIGN.md: figures are set in Space Mono, labels in uppercase Work Sans, and nothing is rounded.
+        var defaults = window.Chart.defaults;
+        defaults.font.family = themeColor("--font-mono", "monospace");
+        defaults.elements.point.pointStyle = "rect";
+        defaults.plugins.legend.labels.pointStyle = "rect";
+        defaults.plugins.legend.labels.font = { family: themeColor("--font-sans", "sans-serif"), weight: "700", size: 11 };
+        defaults.plugins.tooltip.cornerRadius = 0;
+        defaults.plugins.tooltip.usePointStyle = true;
+        defaults.plugins.tooltip.titleFont = { family: themeColor("--font-sans", "sans-serif"), weight: "700" };
         var trend = root.querySelector("[data-chart='trend']");
         var categories = root.querySelector("[data-chart='categories']");
+        var sizes = root.querySelector("[data-chart='sizes']");
         if (trend) {
             destroyChart(trend);
             var trendPayload = readPayload("analytics-trend-data");
@@ -151,6 +200,13 @@
             var categoryPayload = readPayload("analytics-category-data");
             if (categoryPayload) {
                 categoryChart(categories, categoryPayload);
+            }
+        }
+        if (sizes) {
+            destroyChart(sizes);
+            var sizePayload = readPayload("analytics-size-data");
+            if (sizePayload) {
+                sizeChart(sizes, sizePayload);
             }
         }
     }

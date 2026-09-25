@@ -17,7 +17,7 @@ from django.db import IntegrityError
 
 from accounts.models import CustomerProfile
 from cart.models import Cart, CartItem
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
 from config import dataset
 from orders.models import Order, OrderItem
 from orders.services import checkout, fingerprint_for
@@ -246,13 +246,48 @@ def test_replay_verifies_generated_values_against_sealed_snapshot(source, monkey
     assert list(InventorySnapshot.objects.values()) == snapshots
 
 
+def sized(source):
+    """P1 and P2 become two sizes of one shoe; P3 stays size-less."""
+    for product, size in zip(source[1]["products"][:2], ("9", "9.5")):
+        product.update(product_name="Runner", shoe_id="S1", size=size)
+    source[1]["products"][2].update(shoe_id="", size="")
+    return source
+
+
+def test_sized_products_create_a_shoe_model_and_replay_unchanged(source):
+    sized(source)
+    run_import(source)
+    model = ShoeModel.objects.get(namespace=NS, external_id="S1")
+    assert (model.name, model.category) == ("Runner", "home")
+    assert list(model.skus.order_by("size").values_list("external_id", "size")) == [
+        ("P1", Decimal("9.0")), ("P2", Decimal("9.5"))]
+    assert Product.objects.get(external_id="P3").shoe_model is None
+    output = run_import(source)
+    assert "shoe_models: created=0 unchanged=1" in output and "products: created=0 unchanged=3" in output
+
+
+@pytest.mark.parametrize("field, value, reason", [
+    ("product_name", "Other", "shoe name/category differs"),
+    ("size", "9", "duplicate shoe size"),
+    ("size", "9.3", "half size"),
+])
+def test_inconsistent_shoe_sizes_rejected(source, field, value, reason):
+    sized(source)
+    source[1]["products"][1][field] = value
+    with pytest.raises(CommandError, match="Rejected rows"):
+        run_import(source)
+    audit = json.loads((source[0].parent / f"{source[0].name}-rejects.json").read_text())
+    assert any(reason in message for row in audit["rejects"] for message in row["reasons"])
+    assert not ShoeModel.objects.exists()
+
+
 def test_seed_demo_without_products():
     call_command("seed_demo", no_products=True)
     assert not Product.objects.exists()
     operator = get_user_model().objects.get(username="demo-operator")
     assert operator.groups.filter(name="store_operator").exists()
     call_command("seed_demo")
-    assert Product.objects.count() == 14
+    assert Product.objects.count() == 200
 
 
 def test_demo_products_rejected_and_clean_import_inventory_validates(source):

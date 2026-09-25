@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Manage products — Northstar Market{% endblock %}
+{% block title %}Manage products — 42Factors{% endblock %}
 {% block content %}
 <div class="page">
     <div class="page__header">
@@ -22,7 +22,7 @@
         </div>
         {% for product in products %}
         <div class="optable__row">
-            <span class="optable__name">{{ product.name }}</span>
+            <span class="optable__name">{{ product.display_name }}</span>
             <span class="optable__muted">{{ product.category }}</span>
             <span class="optable__num">{{ product.display_price }}</span>
             <span class="optable__num optable__num--{{ product.stock_status }}">{{ product.stock }}</span>

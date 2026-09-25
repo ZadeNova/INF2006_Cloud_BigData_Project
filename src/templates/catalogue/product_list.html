@@ -1,21 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Products — Northstar Market{% endblock %}
+{% block title %}Products — 42Factors{% endblock %}
 {% block content %}
 <div class="page">
     <div class="page__header">
         <div>
             <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Catalogue</p>
             <h1 class="page__title">Products</h1>
-            <p class="page__lead">Stock counts are indicative and are checked again when you place an order.</p>
+            <p class="page__lead">Every shoe comes in US sizes 7 to 11.5. Stock counts are indicative and are checked again when you place an order.</p>
         </div>
-        {% if products %}
+        {% if shoes %}
         <p class="page__meta">Showing <strong>{{ page_obj.start_index }}-{{ page_obj.end_index }}</strong> of {{ paginator.count }}</p>
         {% endif %}
     </div>
 
-    {% if products %}
+    {% if shoes %}
     <div class="product-grid">
-        {% for product in products %}
+        {% for shoe in shoes %}
         {% include "catalogue/_product_card.html" %}
         {% endfor %}
     </div>
@@ -44,4 +44,7 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
 {% endblock %}

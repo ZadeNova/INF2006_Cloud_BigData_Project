@@ -27,7 +27,7 @@ class CheckoutView(LoginRequiredMixin, View):
         Returns an HttpResponse to return immediately, or a list of cart items.
         """
         cart = services.get_cart(request.user)
-        items = list(cart.items.select_related("product").order_by("product__name", "pk"))
+        items = list(cart.items.select_related("product").order_by("product__name", "product__size", "pk"))
         if not items:
             self._clear_session(request)
             messages.info(request, "Your cart is empty.")

@@ -16,7 +16,7 @@ from .services import CartValidationError
 class CartDetailView(HtmxLoginRequiredMixin, View):
     def get(self, request):
         cart = services.get_cart(request.user)
-        items = cart.items.select_related("product").order_by("product__name", "pk")
+        items = cart.items.select_related("product").order_by("product__name", "product__size", "pk")
         context = {"cart": cart, "items": items, "subtotal": services.cart_subtotal(items), "error": None}
         return render(request, "cart/detail.html", context)
 
@@ -24,7 +24,7 @@ class CartDetailView(HtmxLoginRequiredMixin, View):
 class CartMutationView(HtmxLoginRequiredMixin, View):
     def _respond(self, request, error=None):
         cart = services.get_cart(request.user)
-        items = cart.items.select_related("product").order_by("product__name", "pk")
+        items = cart.items.select_related("product").order_by("product__name", "product__size", "pk")
         context = {"cart": cart, "items": items, "subtotal": services.cart_subtotal(items), "error": error}
         if request.headers.get("HX-Request") == "true":
             return render(request, "cart/_content.html", context, status=200)

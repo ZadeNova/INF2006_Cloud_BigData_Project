@@ -16,9 +16,10 @@ Required feature: explainable sales/inventory planning. Descriptive customer-seg
 |---|---|
 | Sales amount | Sum historical unit price times quantity for completed lines in the window |
 | Daily/category sales | Group completed totals and quantities by business date/category |
-| Top sellers | Rank completed units in the selected window, top 10; stable product-ID tie break |
+| Top sellers | Rank shoe models by completed units in the selected window (all sizes of a model together), top 10; stable tie break on the model's lowest product ID. A product without a model ranks on its own |
+| Size sales | Completed units and sales amount per shoe size in the selected window, smallest size first; products without a size are left out. Compared like categories |
 | Average daily sales | Units in the seven complete business dates ending at *L*, divided by seven, including zero-sale dates |
-| Stock coverage | Aligned stock snapshot divided by average daily units |
+| Stock coverage | Aligned stock snapshot divided by average daily units, per product (for shoes, per size, because stock is held per size) |
 | Replenishment flag | Coverage <= configured lead-time days |
 
 Exclude refunded/cancelled orders; this metric is completed-sales value, not accounting net revenue. Use historical prices and explicit business-date boundaries. Display cutoff, run/version, refresh time, units and assumptions.

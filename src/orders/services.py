@@ -125,12 +125,12 @@ def checkout(user, idempotency_key, review):
         for item, product in lines:
             if not product.active:
                 raise InactiveProductError(
-                    f'"{product.name}" is no longer available; remove it from your cart instead.'
+                    f'"{product.display_name}" is no longer available; remove it from your cart instead.'
                 )
             if product.namespace != settings.DEMO_NAMESPACE:
-                raise InvalidProductError(f'"{product.name}" is not available for checkout.')
+                raise InvalidProductError(f'"{product.display_name}" is not available for checkout.')
             if item.quantity > product.stock:
-                raise InsufficientStockError(f'Only {product.stock} of "{product.name}" left in stock.')
+                raise InsufficientStockError(f'Only {product.stock} of "{product.display_name}" left in stock.')
 
         total = sum((product.price * item.quantity for item, product in lines), Decimal("0.00"))
 

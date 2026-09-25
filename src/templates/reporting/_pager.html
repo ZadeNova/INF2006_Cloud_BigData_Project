@@ -1,0 +1,16 @@
+{% comment %}Previous/next pager for one dashboard list. Needs `pager` (from reporting.views._pagers), `label` and `anchor` (the list heading's id).{% endcomment %}
+{% if pager.page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="{{ label }} pages">
+    {% if pager.previous_url %}
+    <a class="button button--compact button--outline-neutral" href="{{ pager.previous_url }}" hx-get="{{ pager.previous_url }}" hx-target="#analytics-panel" hx-swap="outerHTML show:#{{ anchor }}:top" hx-push-url="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
+    {% else %}
+    <span class="button button--compact button--disabled" aria-disabled="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</span>
+    {% endif %}
+    <p class="pager__status">Page <strong>{{ pager.page.number }}</strong> of {{ pager.page.paginator.num_pages }}</p>
+    {% if pager.next_url %}
+    <a class="button button--compact button--outline-neutral" href="{{ pager.next_url }}" hx-get="{{ pager.next_url }}" hx-target="#analytics-panel" hx-swap="outerHTML show:#{{ anchor }}:top" hx-push-url="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
+    {% else %}
+    <span class="button button--compact button--disabled" aria-disabled="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</span>
+    {% endif %}
+</nav>
+{% endif %}

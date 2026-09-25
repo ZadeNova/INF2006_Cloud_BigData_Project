@@ -7,7 +7,7 @@ Status: GET/HEAD /health/ (URL name health), GET / (URL name home, a 302 redirec
 | GET, POST `/register/` | Public | Registration form and validation |
 | GET, POST `/login/` | Public | Framework session authentication |
 | POST `/logout/` | Authenticated | Invalidate session; CSRF required |
-| GET `/products/` | Public | Paginated active catalogue; indicative stock |
+| GET `/products/` | Public | Paginated shoe models (12 per page) that have an active size; each card lists its active sizes as a `product_id` select posting to `cart:add`; sold-out sizes disabled; indicative stock |
 | GET `/products/manage/` | Operator | All products including inactive ones; scope addition beyond the assessed brief |
 | POST `/products/manage/<id>/toggle-active/` | Operator | Set a product's active state explicitly via `active=true`/`active=false`; CSRF required; no create/edit |
 | GET `/cart/` | Authenticated | Owner's persistent cart |
@@ -17,7 +17,7 @@ Status: GET/HEAD /health/ (URL name health), GET / (URL name home, a 302 redirec
 | GET, POST `/checkout/` | Authenticated | Review page that renders a fingerprint of the displayed cart lines; POST with CSRF and that `review` value, verified against the locked cart; session-derived idempotency key; atomic simulated checkout |
 | GET `/orders/` | Authenticated | Owner's paginated order history, most recent first |
 | GET `/orders/<id>/` | Owner | Persisted order confirmation/detail |
-| GET `/analytics/` | Operator | Period-labelled sales/inventory analytics from the latest completed run; optional `range` and `compare` query parameters; HTMX requests receive only the `#analytics-panel` fragment. See [analytics](ANALYTICS.md#dashboard-get-analytics-operator-only) |
+| GET `/analytics/` | Operator | Period-labelled sales/inventory analytics from the latest completed run; optional `range`, `compare`, `coverage_page` and `customers_page` query parameters; HTMX requests receive only the `#analytics-panel` fragment. See [analytics](ANALYTICS.md#dashboard-get-analytics-operator-only) |
 | GET, HEAD `/health/` | Infrastructure | Process liveness: 200 JSON {"status":"ok"}, no-store, no DB query; explicit allowed-host validation except the configured exact ALB probe Host for this safe-method path only (see [runtime boundary](AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary)) |
 | GET `/` | Public | 302 redirect to `/products/`; the storefront is the landing page (review finding CR-008) |
 | GET, HEAD `/foundation/` | Public preview | Presentation-only frontend foundation page, moved from `/` unchanged; no account, catalogue or checkout data |
@@ -48,7 +48,7 @@ Integration contracts (implementation status is recorded above):
 | Authentication | accounts:register / accounts/register.html | username, password1, password2; framework password validation |
 | Authentication | accounts:login / registration/login.html | username, password, optional safe next |
 | Authentication | accounts:logout | POST with CSRF; no owner/user ID supplied |
-| Catalogue | catalogue:product_list / catalogue/product_list.html | page: positive integer; backend-bounded pagination |
+| Catalogue | catalogue:product_list / catalogue/product_list.html | page: positive integer; backend-bounded pagination; context `shoes` (ShoeModel with prefetched active SKUs in `sizes`) |
 | Cart | cart:detail / cart/detail.html | GET owner cart; no owner ID supplied |
 | Cart add | cart:add | product_id, quantity integer 1..999 |
 | Cart update | cart:update | URL item ID, quantity integer 1..999 |
@@ -72,7 +72,7 @@ The later catalogue/cart backend must select an explicit demo fixture namespace 
 
 `AnalyticsDashboardView` returns `TemplateResponse` with `reporting/dashboard.html` normally and `reporting/_panel.html` only for `HX-Request: true`. Both templates keep an identical `#analytics-panel` wrapper. All view responses use never-cache/no-store; GET is the only supported method (including no implicit HEAD/OPTIONS). Anonymous GET redirects to login, anonymous HTMX GET returns 200 with `HX-Redirect`, and authenticated users lacking `reporting.view_analytics` receive 403, including HTMX.
 
-Only `range` and `compare` are read from the browser. `range` defaults to `30d`; invalid values fall back to it and populate `range_message`, which the template must show. Only the exact value `compare=1` enables comparison. The view selects one latest completed run for `settings.DEMO_NAMESPACE`, then calls the existing reporting range/query functions. It never reads live stock or aggregates orders. If retention removes the selected run during reads, the entire context is rebuilt from the latest completed run, with at most three attempts; repeated pruning returns a no-store 503 asking the operator to retry.
+Only `range`, `compare`, `coverage_page` and `customers_page` are read from the browser. The two page parameters page the replenishment list (every product in the run's inventory) and the segment customer list (the top 50), 10 rows each; invalid or out-of-range values fall back to the nearest valid page, and pager links keep the other parameters. `range` defaults to `30d`; invalid values fall back to it and populate `range_message`, which the template must show. Only the exact value `compare=1` enables comparison. The view selects one latest completed run for `settings.DEMO_NAMESPACE`, then calls the existing reporting range/query functions. It never reads live stock or aggregates orders. If retention removes the selected run during reads, the entire context is rebuilt from the latest completed run, with at most three attempts; repeated pruning returns a no-store 503 asking the operator to retry.
 
 | Context key | Meaning / frontend responsibility |
 |---|---|

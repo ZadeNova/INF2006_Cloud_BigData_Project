@@ -1,34 +1,47 @@
+{% load static %}
 <article class="surface-card product-card">
-    <div class="tile tile--{{ product.category|slugify }}{% if product.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
-        {% include "catalogue/_category_glyph.html" with category=product.category extra="tile__glyph" only %}
+    <div class="tile tile--{{ shoe.category|slugify }}{% if shoe.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
+        {% if shoe.model_asset %}
+        <model-viewer class="tile__model" src="{% static shoe.model_asset %}" alt="3D model of {{ shoe.name }}" loading="lazy" auto-rotate auto-rotate-delay="0" rotation-per-second="20deg" field-of-view="13deg" min-field-of-view="10deg" camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" environment-image="neutral"></model-viewer>
+        {% else %}
+        {% include "catalogue/_category_glyph.html" with category=shoe.category extra="tile__glyph" only %}
+        {% endif %}
     </div>
     <div class="product-card__body">
-        <span class="product-card__category">{{ product.category }}</span>
-        <h3 class="product-card__name">{{ product.name }}</h3>
-        {% if product.stock_status == "out-of-stock" %}
+        <span class="product-card__category">{{ shoe.category }}</span>
+        <h3 class="product-card__name">{{ shoe.name }}</h3>
+        {% if shoe.stock_status == "out-of-stock" %}
         <span class="stock stock--out-of-stock">{% include "_icon.html" with name="prohibit" size="sm" only %} Out of stock</span>
-        {% elif product.stock_status == "low-stock" %}
-        <span class="stock stock--low-stock">{% include "_icon.html" with name="warning" size="sm" only %} Only {{ product.stock }} left</span>
+        {% elif shoe.stock_status == "low-stock" %}
+        <span class="stock stock--low-stock">{% include "_icon.html" with name="warning" size="sm" only %} {{ shoe.sizes_in_stock }} of {{ shoe.sizes|length }} sizes in stock · some low</span>
         {% else %}
-        <span class="stock stock--in-stock">{% include "_icon.html" with name="check" size="sm" only %} In stock · {{ product.stock }}</span>
+        <span class="stock stock--in-stock">{% include "_icon.html" with name="check" size="sm" only %} In stock · all {{ shoe.sizes|length }} sizes</span>
         {% endif %}
-        <p class="product-card__price{% if product.stock_status == 'out-of-stock' %} product-card__price--muted{% endif %}">{{ product.display_price }}</p>
+        <p class="product-card__price{% if shoe.stock_status == 'out-of-stock' %} product-card__price--muted{% endif %}">{{ shoe.display_price }}</p>
         <div class="product-card__action">
-            {% if product.stock_status == "out-of-stock" %}
+            {% if shoe.stock_status == "out-of-stock" %}
             <button type="button" class="button button--block button--disabled" disabled>Sold out</button>
             {% elif user.is_authenticated %}
             <form method="post" action="{% url 'cart:add' %}">
                 {% csrf_token %}
-                <input type="hidden" name="product_id" value="{{ product.pk }}">
+                <label class="size-field__label" for="size-{{ shoe.pk }}">Size</label>
+                <span class="size-field">
+                <select class="size-select" id="size-{{ shoe.pk }}" name="product_id" required>
+                    <option value="" selected disabled>Choose a size</option>
+                    {% for sku in shoe.sizes %}
+                    <option value="{{ sku.pk }}"{% if sku.stock_status == "out-of-stock" %} disabled{% endif %}>{{ sku.size_label }}{% if sku.stock_status == "out-of-stock" %} · sold out{% elif sku.stock_status == "low-stock" %} · only {{ sku.stock }} left{% endif %}</option>
+                    {% endfor %}
+                </select>
+                </span>
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="button button--block button--dark">
                     {% include "_icon.html" with name="cart" size="sm" only %}
                     Add to cart
-                    <span class="visually-hidden">: {{ product.name }}</span>
+                    <span class="visually-hidden">: {{ shoe.name }}</span>
                 </button>
             </form>
             {% else %}
-            <a class="button button--block button--outline-neutral" href="{% url 'accounts:login' %}">Log in to add<span class="visually-hidden"> {{ product.name }}</span></a>
+            <a class="button button--block button--outline-neutral" href="{% url 'accounts:login' %}">Log in to add<span class="visually-hidden"> {{ shoe.name }}</span></a>
             {% endif %}
         </div>
     </div>

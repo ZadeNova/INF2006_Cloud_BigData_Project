@@ -291,7 +291,7 @@ Sharp, square edges are mandatory across every component. The magazine aesthetic
 ## As built in this project
 
 The sections above are the design system as supplied. This section records where
-the Northstar Market implementation deviates from it, so this file describes the
+the 42Factors implementation deviates from it, so this file describes the
 delivered system rather than an intention. Implementation lives in
 `src/static/css/site.css`, whose `:root` block carries the reasoning inline.
 
@@ -447,7 +447,8 @@ below the palette in the same block and are built from these values.
 ### 7. Attribution
 
 - **Typefaces**: Archivo Black, Work Sans and Space Mono, all SIL Open Font
-  License, loaded from Google Fonts.
+  License, loaded from Google Fonts. Pixelify Sans (SIL Open Font License) sets
+  only the "67" brand mark, loaded from Google Fonts as a two-glyph subset.
 - **Icons**: Phosphor Icons regular weight, MIT, vendored as one SVG sprite at
   `src/static/img/icons.svg` with the licence in the file header.
 - **This design system**: supplied by the project owner. Its original source

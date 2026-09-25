@@ -2,13 +2,16 @@
 from collections import Counter
 from decimal import Decimal, ROUND_HALF_UP
 from itertools import zip_longest
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
@@ -20,6 +23,10 @@ from accounts.mixins import HtmxLoginRequiredMixin
 from . import queries, ranges
 from .forms import DashboardRangeForm
 from .models import AnalyticsRun
+
+
+# Rows per page for the replenishment and segment customer lists.
+PAGE_SIZE = 10
 
 
 class AnalyticsAccessMixin(HtmxLoginRequiredMixin, PermissionRequiredMixin):
@@ -68,11 +75,13 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     summary=queries.sales_summary(run, span),
                     series=queries.bucket_sales(run, buckets),
                     categories=queries.category_sales(run, span),
+                    sizes=queries.size_sales(run, span),
                     top_sellers=queries.top_sellers(run, span, limit=10),
                     # The query owns ordering and flags. Hide the numeric partial-history
                     # average at the presentation boundary, without changing its formula.
-                    coverage=[row._replace(avg_daily_units=None) if row.status == "insufficient_history" else row
-                              for row in coverage[:25]],
+                    coverage_page=Paginator(
+                        [row._replace(avg_daily_units=None) if row.status == "insufficient_history" else row
+                         for row in coverage], PAGE_SIZE).get_page(request.GET.get("coverage_page")),
                     coverage_counts={status: counts[status] for status in
                                      ("flagged", "ok", "unavailable", "insufficient_history")},
                     comparison_span=None,
@@ -80,7 +89,9 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     comparison_summary=None,
                     comparison_series=[],
                     comparison_categories=[],
+                    comparison_sizes=[],
                     comparison_top_sellers=[],
+                    segment_customers_page=None,
                 )
                 # The loader takes this same run lock while replacing assignments.
                 # Finish both eager reads before release so totals and sample agree.
@@ -88,10 +99,15 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     if not AnalyticsRun.objects.select_for_update().filter(pk=run.pk).exists():
                         continue  # Retention pruned this run; rebuild the whole context.
                     context["segment_overview"] = queries.customer_segment_overview(run)
-                    context["segment_customers"] = (
-                        queries.customer_segment_customers(
-                            run, model_version=context["segment_overview"].model_version, limit=50)
-                        if context["segment_overview"] is not None else [])
+                    sample = (queries.customer_segment_customers(
+                        run, model_version=context["segment_overview"].model_version, limit=50)
+                        if context["segment_overview"] is not None else None)
+                # Paginate the bounded balanced sample for display only; selection stays in queries.
+                if sample is not None:
+                    context["segment_customers_page"] = Paginator(
+                        sample, PAGE_SIZE).get_page(request.GET.get("customers_page"))
+                context.update(_pagers(range_key, compare, context["coverage_page"],
+                                       context["segment_customers_page"]))
                 if compare:
                     previous = ranges.comparison_span(span)
                     available = ranges.comparison_available(
@@ -102,10 +118,12 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                             comparison_summary=queries.sales_summary(run, previous),
                             comparison_series=queries.bucket_sales(run, ranges.shift_buckets(buckets, span.length)),
                             comparison_categories=queries.category_sales(run, previous),
+                            comparison_sizes=queries.size_sales(run, previous),
                             comparison_top_sellers=queries.top_sellers(run, previous, limit=10),
                         )
                 category_rows = _category_rows(
                     context["categories"], context["comparison_categories"], context["comparison_available"])
+                size_rows = _size_rows(context["sizes"], context["comparison_sizes"], context["comparison_available"])
                 context.update(
                     sales_cards=_sales_cards(context["summary"], context["comparison_summary"], compare,
                                              context["comparison_available"]),
@@ -114,6 +132,8 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     trend_rows=[{"selected": selected, "comparison": previous}
                                 for selected, previous in zip_longest(context["series"], context["comparison_series"] or [])],
                     category_rows=category_rows,
+                    size_chart=_size_chart_payload(size_rows, context["comparison_available"]),
+                    size_rows=size_rows,
                     run_short_id=str(run.summary_version).split("-")[0],
                     cutoff_label=run.cutoff.astimezone(ranges.BUSINESS_TZ).strftime("%d %b %Y, %H:%M SGT"),
                     refreshed_label=(run.finished_at.astimezone(ranges.BUSINESS_TZ).strftime("%d %b %Y, %H:%M SGT")
@@ -197,3 +217,39 @@ def _category_rows(categories, comparison, comparison_available):
         "comparison": previous.get(category, queries.CategorySales(category, 0, Decimal("0")))
                       if comparison_available else None,
     } for category in dict.fromkeys([*selected, *previous])]
+
+
+def _size_rows(sizes, comparison, comparison_available):
+    """Align selected and previous size totals by size, smallest first; a missing size shows zero."""
+    selected = {item.size: item for item in sizes}
+    previous = {item.size: item for item in comparison}
+    return [{
+        "selected": selected.get(size, queries.SizeSales(size, 0, Decimal("0"))),
+        "comparison": previous.get(size, queries.SizeSales(size, 0, Decimal("0"))) if comparison_available else None,
+    } for size in sorted(selected.keys() | previous.keys())]
+
+
+def _size_chart_payload(rows, comparison_available):
+    return {
+        "labels": [row["selected"].label for row in rows],
+        "units": [row["selected"].units for row in rows],
+        "comparison": {"units": [row["comparison"].units for row in rows]} if comparison_available else None,
+    }
+
+
+def _pagers(range_key, compare, coverage_page, customers_page):
+    """Previous/next links for both paged lists; each link keeps the range, compare and the other list's page."""
+    state = {"range": range_key, **({"compare": "1"} if compare else {}), "coverage_page": coverage_page.number,
+             **({"customers_page": customers_page.number} if customers_page else {})}
+
+    def pager(page, key):
+        def url(number):
+            return reverse("reporting:dashboard") + "?" + urlencode({**state, key: number})
+        return {"page": page,
+                "previous_url": url(page.previous_page_number()) if page.has_previous() else None,
+                "next_url": url(page.next_page_number()) if page.has_next() else None}
+
+    return {"coverage": coverage_page.object_list,
+            "coverage_pager": pager(coverage_page, "coverage_page"),
+            "segment_customers": customers_page.object_list if customers_page else [],
+            "customers_pager": pager(customers_page, "customers_page") if customers_page else None}

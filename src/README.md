@@ -62,8 +62,8 @@ Management commands (run as `docker compose run --rm web python manage.py <comma
 
 | Command | Purpose |
 |---|---|
-| `seed_demo --seed 42 [--no-products]` | Create the demo operator (`store_operator` group) and, unless `--no-products`, 14 demo products. Create-only. |
-| `import_dataset --source /app/data/raw --namespace NS` | Import the checksummed dataset with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
+| `seed_demo --seed 42 [--no-products]` | Create the demo operator (`store_operator` group) and, unless `--no-products`, the 20 demo shoes in 10 sizes each (200 products) from `catalogue/shoes.py`. Create-only. |
+| `import_dataset --source /app/data/derived/shoes --namespace NS` | Import the derived shoe dataset (or `/app/data/raw` for the original) with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
 | `snapshot_inventory --as-of YYYY-MM-DD` | Seal live stock as an immutable inventory version (today's Singapore date only). Leaves a permanent version, so avoid it on the shared dev database. |
 | `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
 | `load_customer_segments --run-id ID --input FILE` | Load the optional customer segments made by `analytics/segment_customers.py` for one analytics run; see [analytics/README.md](../analytics/README.md). |
@@ -73,11 +73,17 @@ On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manua
 
 ## Demo data
 
-A fresh start has an empty store and an empty dashboard. This loads the full dataset (1,200 products, 100,000 historical orders) and a completed analytics run. Run it on a **new database**: if `seed_demo` has ever run without `--no-products`, its 14 demo products sit in the same namespace and the import refuses with a conflict. To start over, `docker compose down --volumes` deletes the local database (this is the only case where that is intended).
+A fresh start has an empty store and an empty dashboard. This loads the derived shoe dataset (20 shoes in 10 sizes, so 200 products, and 100,000 historical orders) and a completed analytics run. First build the derived files on the host from the repository root (Python 3, standard library only; `data/raw/` is not changed):
+
+```powershell
+python analytics/build_shoe_dataset.py
+```
+
+Run the rest on a **new database**: if `seed_demo` has ever run without `--no-products`, its demo shoes sit in the same namespace and the import refuses with a conflict. To start over, `docker compose down --volumes` deletes the local database (this is the only case where that is intended).
 
 ```powershell
 docker compose up --build -d
-docker compose run --rm web python manage.py import_dataset --source /app/data/raw --namespace synthetic/revision-a/demo/v1
+docker compose run --rm web python manage.py import_dataset --source /app/data/derived/shoes --namespace synthetic/shoes/revision-a/demo/v1
 docker compose run --rm web python manage.py seed_demo --no-products
 docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-02
 ```
@@ -87,7 +93,7 @@ docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-0
 - `--as-of 2026-01-02` matches the import's cutoff, so the refresh uses the importer's sealed inventory without naming it. The dashboard then covers 1 January 2025 to 1 January 2026.
 - Imported customers have unusable passwords by design. To shop, register a new account at `/register/`. Live orders placed today fall after the historical cutoff, so they do not appear on this dashboard run.
 
-Verified on 24 September 2026 in a disposable Compose project on a fresh volume: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP `/` redirected to the catalogue, the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
+Shoe dataset verified on 26 September 2026 in a disposable Compose project on a fresh volume: 20 shoe models and 200 products, 100,000 orders and 237,537 lines imported with zero rejects and replayed unchanged; refresh wrote 41,345 daily rows; the pandas cross-check found zero mismatches. The earlier raw-dataset run on 24 September 2026: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP `/` redirected to the catalogue, the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
 
 ```powershell
 docker compose down

@@ -315,8 +315,10 @@ A successful comparison exits 0 and prints a JSON summary without customer field
 For historical imports always pass the importer-reported namespace, cutoff and
 inventory version to refresh. Do not run snapshot_inventory to backdate live stock.
 Run IDs in the evidence identify a removed disposable database; reproduce import
-and refresh to obtain new IDs. Tests live in `analytics/tests/` for this verifier, the segmentation script and the SQL/export/import contract,
-outside ordinary web tests because pandas is intentionally absent from the web image.
+and refresh to obtain new IDs. Tests live in `analytics/tests/` for this verifier, the segmentation script, the SQL/export/import
+contract, startup credential delivery and `build_shoe_dataset.py`, outside ordinary web tests because pandas is intentionally
+absent from the web image. The shoe-dataset tests need no pandas: from `src/`, run
+`docker compose run --rm -v "$PWD/../analytics:/app/analytics:ro" web python -m pytest /app/analytics/tests/test_build_shoe_dataset.py`.
 The evidence gives the combined 410-test invocation using the built `/app` settings.
 
 Independent Astra Medium round-1 review is **CLEAR**. Phase 3 is complete locally;

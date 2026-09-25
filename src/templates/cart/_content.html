@@ -17,7 +17,7 @@
                     </span>
                     <div class="line__main">
                         <p class="line__name">{{ item.product.name }}</p>
-                        <p class="line__meta">{{ item.product.display_price }} each · {{ item.product.category }}</p>
+                        <p class="line__meta">{% if item.product.size_label %}{{ item.product.size_label }} · {% endif %}{{ item.product.display_price }} each · {{ item.product.category }}</p>
                     </div>
                     <div class="line__figures">
                         <div class="line__qty">
@@ -28,9 +28,9 @@
                                   hx-trigger="change, submit" hx-sync="this:replace">
                                 {% csrf_token %}
                                 <div class="stepper">
-                                    <button class="stepper__button" type="button" data-step="-1" data-step-target="qty-{{ item.pk }}" aria-label="Decrease quantity of {{ item.product.name }}">{% include "_icon.html" with name="minus" size="sm" only %}</button>
+                                    <button class="stepper__button" type="button" data-step="-1" data-step-target="qty-{{ item.pk }}" aria-label="Decrease quantity of {{ item.product.display_name }}">{% include "_icon.html" with name="minus" size="sm" only %}</button>
                                     <input class="stepper__input" id="qty-{{ item.pk }}" type="number" name="quantity" min="1" max="999" value="{{ item.quantity }}">
-                                    <button class="stepper__button" type="button" data-step="1" data-step-target="qty-{{ item.pk }}" aria-label="Increase quantity of {{ item.product.name }}">{% include "_icon.html" with name="plus" size="sm" only %}</button>
+                                    <button class="stepper__button" type="button" data-step="1" data-step-target="qty-{{ item.pk }}" aria-label="Increase quantity of {{ item.product.display_name }}">{% include "_icon.html" with name="plus" size="sm" only %}</button>
                                 </div>
                                 <button type="submit" class="button button--compact button--outline-neutral stepper-submit">Update</button>
                             </form>
@@ -44,7 +44,7 @@
                     <form method="post" action="{% url 'cart:delete' item.pk %}"
                           hx-post="{% url 'cart:delete' item.pk %}" hx-target="#cart-content" hx-swap="outerHTML">
                         {% csrf_token %}
-                        <button type="submit" class="line__remove" aria-label="Remove {{ item.product.name }} from your cart">{% include "_icon.html" with name="trash" only %}</button>
+                        <button type="submit" class="line__remove" aria-label="Remove {{ item.product.display_name }} from your cart">{% include "_icon.html" with name="trash" only %}</button>
                     </form>
                 </div>
                 {% if not item.product.active %}

@@ -213,7 +213,7 @@ def test_coverage_is_fixed_and_ignores_live_stock(world, dashboard):
 
 def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, operator, django_assert_num_queries):
     assert operator.has_perm("reporting.view_analytics")
-    with django_assert_num_queries(17):
+    with django_assert_num_queries(19):
         small = dashboard({"range": "7d", "compare": "1"})
     assert small.context_data["comparison_available"]
     extra = make_products(names=tuple(f"extra-{i}" for i in range(30)))
@@ -222,12 +222,33 @@ def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, opera
     for i, product in enumerate(extra.values()):
         add_order(operator, f"extra-{i}", [(product, 1, "10.00")], at(2024, 5, 7))
     services.refresh_analytics(namespace=NS, as_of=inventory.cutoff.astimezone(SGT).date(), inventory_version=inventory.version)
-    with django_assert_num_queries(17):
+    with django_assert_num_queries(19):
         large = dashboard({"range": "7d", "compare": "1"})
     context = large.context_data
-    assert len(context["coverage"]) == 25
+    assert len(context["coverage"]) == 10
     assert sum(context["coverage_counts"].values()) == 33
     assert len(context["top_sellers"]) == 10
+
+
+def test_replenishment_pages_every_product_in_urgency_order(world, dashboard, client, operator):
+    extra = make_products(names=tuple(f"extra-{i}" for i in range(30)))
+    inventory = make_inventory({**world[0], **extra}, cutoff=world[1].cutoff, version="larger")
+    run = services.refresh_analytics(namespace=NS, as_of=inventory.cutoff.astimezone(SGT).date(),
+                                     inventory_version=inventory.version).run
+    full = [row.product_id for row in queries.coverage(run)]
+    page = lambda value: dashboard({"range": "7d", "compare": "1", "coverage_page": value}).context_data
+    assert [row.product_id for row in page("2")["coverage"]] == full[10:20]
+    last = page("4")
+    assert [row.product_id for row in last["coverage"]] == full[30:]
+    assert last["coverage_counts"]["unavailable"] == page("1")["coverage_counts"]["unavailable"]   # counts stay whole
+    assert page("not-a-number")["coverage_pager"]["page"].number == 1
+    assert page("99")["coverage_pager"]["page"].number == 4
+    # Links keep the range and comparison, and the other list's page is untouched.
+    assert page("2")["coverage_pager"]["next_url"] == "/analytics/?range=7d&compare=1&coverage_page=3"
+    client.force_login(operator)
+    body = client.get(reverse("reporting:dashboard"), {"range": "7d", "coverage_page": "2"}).content.decode()
+    assert "showing 11–20 of 33" in body and 'aria-label="Replenishment pages"' in body
+    assert 'hx-swap="outerHTML show:#coverage-title:top"' in body
 
 
 def test_rendered_full_and_fragment_include_accessible_charts_and_preserve_controls(client, world, operator):
@@ -241,7 +262,8 @@ def test_rendered_full_and_fragment_include_accessible_charts_and_preserve_contr
     assert 'hx-get="/analytics/?range=30d&amp;compare=1"' in body
     assert 'aria-current="page"' in body
     assert "View trend data table" in body and "View category data table" in body
-    assert "Top ten sellers" in body and "Replenishment attention" in body
+    assert "Top ten shoes" in body and "Replenishment attention" in body
+    assert 'data-chart="sizes"' in body and 'id="analytics-size-data"' in body and "View size data table" in body
     trend_json = re.search(r'id="analytics-trend-data" type="application/json">(.*?)</script>', body, re.S)
     assert trend_json and json.loads(trend_json.group(1))["comparison"]
 
@@ -316,7 +338,14 @@ def test_pruned_selected_run_rebuilds_complete_context(world, dashboard):
         context = dashboard({"range": "7d", "compare": "1"}).context_data
     assert select.call_count == 2
     assert context["run"].pk == replacement.pk
-    assert context == expected
+
+    def comparable(values):
+        # Django Page objects have no equality; compare their rows and numbers instead.
+        values = dict(values)
+        page = values.pop("coverage_page")
+        pager = dict(values.pop("coverage_pager"), page=None)
+        return values, list(page.object_list), page.number, pager
+    assert comparable(context) == comparable(expected)
 
 
 def test_category_comparison_aligns_prior_only_categories(dashboard):
@@ -375,6 +404,20 @@ def test_dashboard_shows_ml_segment_panel_when_assignments_exist(client, operato
         assert "08 May 2024, 00:00 SGT" in rendered
         assert "Lifetime completed-order history is measured strictly before this run" in rendered
         assert "independently of the dashboard range and comparison filters" in rendered
+    assert 'aria-label="Segment customer pages"' not in body      # two customers fit on one page
+
+
+def test_segment_customers_page_ten_at_a_time(dashboard, operator):
+    products = make_products()
+    inventory = make_inventory(products, cutoff=at(2024, 5, 8, 0))
+    run = make_run(inventory, [(date(2024, 5, 7), products["alpha"], 7, "70.00")])
+    users = [get_user_model().objects.create_user(username=f"customer-{i:02d}") for i in range(12)]
+    load_segments(run, [(user, 0, "core", 5, 2, f"{100 + i}.00") for i, user in enumerate(users)])
+    first = dashboard({"range": "7d"}).context_data
+    second = dashboard({"range": "7d", "customers_page": "2", "coverage_page": "1"}).context_data
+    assert len(first["segment_customers"]) == 10 and len(second["segment_customers"]) == 2
+    assert {row.customer_id for row in first["segment_customers"] + second["segment_customers"]} == {u.pk for u in users}
+    assert first["customers_pager"]["next_url"] == "/analytics/?range=7d&coverage_page=1&customers_page=2"
 
 
 def test_rendered_comparison_includes_category_series_and_previous_sellers(client, operator):

@@ -20,7 +20,7 @@ The image copies `src/` at build time and only `tests/` is mounted, so run `dock
 | `test_analytics_dashboard.py` | The `/analytics/` view: permissions, HTMX fragment, context, and the optional segment panel |
 | `test_customer_segments_command.py` | The `load_customer_segments` command |
 | `test_aws_capability_check.py` | The read-only AWS lab probe (`src/tools/aws_capability_check.py`), run against a fake CLI; nothing is contacted |
-| `test_import.py` | Dataset import, replay, conflicts, date shifts, sealed inventory |
+| `test_import.py` | Dataset import, replay, conflicts, date shifts, sealed inventory, shoe models and sizes |
 | `test_frontend.py` | Presentation pages, including the statistics preview |
 
 `analytics/tests/` covers independent pandas reconciliation (`test_verify_refresh.py`), offline segmentation quality and batch identity (`test_segment_customers.py`), producer/loader integration (`test_segment_loader_integration.py`), and fake production credential delivery (`test_startup_credentials.py`). They need pandas and, for segmentation, scikit-learn, and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.

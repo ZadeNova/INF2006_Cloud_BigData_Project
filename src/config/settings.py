@@ -131,7 +131,7 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/products/"
 LOGOUT_REDIRECT_URL = "/products/"
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
-DEMO_NAMESPACE = "synthetic/revision-a/demo/v1"
+DEMO_NAMESPACE = "synthetic/shoes/revision-a/demo/v1"
 
 # One JSON line per event on standard output (collected by Docker and CloudWatch). Only our own request and
 # error loggers, Django's 5xx error records and Django's security warnings are routed here; the formatter

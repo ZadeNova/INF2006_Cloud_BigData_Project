@@ -105,6 +105,44 @@ Default audit files are in the container temporary directory and disappear with
 `--rm`; capture stdout or set `--rejects-file` on a writable bind mount to retain them.
 Audit files are forbidden inside the source directory.
 
+## Derived shoe dataset
+
+Added 26 September 2026 ([plan](../docs/plans/shoe-sizes-catalogue.md); professor approval for
+modifying the dataset recorded 24 September 2026 in the
+[implementation plan](../docs/IMPLEMENTATION_PLAN.md)). The application imports
+`data/derived/shoes/`, not `raw/`. Build it from the repository root with host Python 3
+(standard library only):
+
+```sh
+python analytics/build_shoe_dataset.py
+```
+
+The script reads `raw/` (never modified) and writes `customers.csv`, `products.csv`,
+`orders.csv`, `order_items.csv`, `product_map.csv`, a README with the CC BY 4.0 change note,
+and `checksums.txt`. Only `checksums.txt` and `product_map.csv` are committed. Same input
+and seed (42) give byte-identical files, so compare against the committed checksums.
+
+- **Products:** 20 shoe models from `src/catalogue/shoes.py`, each in US sizes 7 to 11.5,
+  so 200 products (`product_id` such as `S05-095`, plus `shoe_id` and `size` columns).
+- **Mapping:** each source category pairs with one shoe category (apparel to Lifestyle,
+  beauty to Luxury, electronics to Running, home to Classics, office to Basketball, outdoors
+  to Trail). Each source product maps to one shoe of its paired category by a seeded weighted
+  choice (`product_map.csv`); each order line then gets a size by a seeded weighted choice
+  keyed on its `order_item_id`. Category totals keep their shape; some shoes are bestsellers.
+- **Money:** `unit_price` = shoe list price x (source unit price / source list price); the
+  discount keeps its source rate; `line_total`, `subtotal`, `tax_amount` (source tax rate)
+  and `order_total` are recomputed in Decimal, ROUND_HALF_UP, so the importer's three
+  identities hold exactly. Shipping, customers, order IDs, dates, statuses and quantities are
+  unchanged. Payments and refunds are omitted because their amounts no longer match.
+- **Checked 26 September 2026:** the importer's validation gives 20,000 customers, 200
+  products, 100,000 orders, 237,537 order lines and zero rejects. In a disposable Compose
+  project the import and replay succeeded, refresh at `2026-01-02` wrote 41,345 daily rows,
+  and `verify_refresh.py` found zero daily, unit, amount and coverage mismatches (9 of 200
+  products without recent sales, 80 flagged).
+- Sizes, shoe names, prices and the mapping are synthetic choices. Do not read shoe demand,
+  size distribution or seasonality from this data. `profile_dataset.py` still profiles only
+  `raw/` (it expects payments/refunds and the published counts).
+
 ## Limitations
 
 Daily orders vary (32..120, mean 91.158), but weekday max/min mean is only 1.025:

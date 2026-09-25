@@ -51,6 +51,7 @@ not implement payments or refund accounting.
 | User.email/first_name/last_name | Empty defaults; no contacts fabricated or mail sent |
 | User.date_joined | Imported signup instant at creation only |
 | Product.active | True on creation only |
+| Product.shoe_model / size | From optional `products.csv` columns `shoe_id` and `size` (both empty for size-less products). One ShoeModel per distinct `shoe_id` (name and category must agree across its sizes); `size` a half size 1..20, unique per shoe. Only the derived shoe dataset uses them |
 | Product.lead_time_days | First draw from `random.Random(f"{seed}:{external_product_id}")`, integer 3..14 |
 | Product.stock | Second draw gives 2..20 day factor; ROUND_HALF_UP(recent completed units × factor / 7) to integer; seven complete Singapore dates before cutoff |
 | Product.stock with no recent sales | After lead-time/factor draws, draw integer 20..200 |
