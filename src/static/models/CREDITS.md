@@ -1,7 +1,8 @@
 # 3D model credits
 
 All models are from Sketchfab and have been compressed (textures resized to
-1024px or 512px, meshes simplified) for web use. CC BY models require
+1024px or 512px, meshes simplified) for web use. Models supplied as a pair,
+or with a shoebox, were cut down to a single shoe. CC BY models require
 attribution; CC BY-NC models are for non-commercial use only.
 
 | File | Source model | Author | Licence |
