@@ -4,18 +4,14 @@
 {% block title %}Analytics — Northstar Market{% endblock %}
 
 {% block content %}
-<div class="page-shell analytics-page">
-    <section class="analytics-hero" aria-labelledby="analytics-title">
+<div class="page">
+    <div class="page__header">
         <div>
             <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> Operator workspace</p>
-            <h1 id="analytics-title">Sales and inventory analytics</h1>
-            <p class="analytics-hero__lead">A clear read on what sold, what is moving quickly and where a stock check deserves attention.</p>
+            <h1 class="page__title">Sales and inventory analytics</h1>
+            <p class="page__lead">A clear read on what sold, what is moving quickly and where a stock check deserves attention.</p>
         </div>
-        <div class="analytics-hero__mark" aria-hidden="true">
-            <span>✦</span>
-            <small>REPORTING</small>
-        </div>
-    </section>
+    </div>
 
     {% include "reporting/_panel.html" %}
 </div>

@@ -176,7 +176,15 @@
         if (!window.Chart || !root) {
             return;
         }
-        window.Chart.defaults.font.family = themeColor("--font-sans", "sans-serif");
+        // DESIGN.md: figures are set in Space Mono, labels in uppercase Work Sans, and nothing is rounded.
+        var defaults = window.Chart.defaults;
+        defaults.font.family = themeColor("--font-mono", "monospace");
+        defaults.elements.point.pointStyle = "rect";
+        defaults.plugins.legend.labels.pointStyle = "rect";
+        defaults.plugins.legend.labels.font = { family: themeColor("--font-sans", "sans-serif"), weight: "700", size: 11 };
+        defaults.plugins.tooltip.cornerRadius = 0;
+        defaults.plugins.tooltip.usePointStyle = true;
+        defaults.plugins.tooltip.titleFont = { family: themeColor("--font-sans", "sans-serif"), weight: "700" };
         var trend = root.querySelector("[data-chart='trend']");
         var categories = root.querySelector("[data-chart='categories']");
         var sizes = root.querySelector("[data-chart='sizes']");

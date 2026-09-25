@@ -2,12 +2,15 @@
 from collections import Counter
 from decimal import Decimal, ROUND_HALF_UP
 from itertools import zip_longest
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
@@ -19,6 +22,10 @@ from accounts.mixins import HtmxLoginRequiredMixin
 from . import queries, ranges
 from .forms import DashboardRangeForm
 from .models import AnalyticsRun
+
+
+# Rows per page for the replenishment and segment customer lists.
+PAGE_SIZE = 10
 
 
 class AnalyticsAccessMixin(HtmxLoginRequiredMixin, PermissionRequiredMixin):
@@ -71,8 +78,9 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     top_sellers=queries.top_sellers(run, span, limit=10),
                     # The query owns ordering and flags. Hide the numeric partial-history
                     # average at the presentation boundary, without changing its formula.
-                    coverage=[row._replace(avg_daily_units=None) if row.status == "insufficient_history" else row
-                              for row in coverage[:25]],
+                    coverage_page=Paginator(
+                        [row._replace(avg_daily_units=None) if row.status == "insufficient_history" else row
+                         for row in coverage], PAGE_SIZE).get_page(request.GET.get("coverage_page")),
                     coverage_counts={status: counts[status] for status in
                                      ("flagged", "ok", "unavailable", "insufficient_history")},
                     comparison_span=None,
@@ -83,11 +91,14 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     comparison_sizes=[],
                     comparison_top_sellers=[],
                     segment_overview=queries.customer_segment_overview(run),
-                    segment_customers=[],
+                    segment_customers_page=None,
                 )
                 if context["segment_overview"] is not None:
-                    context["segment_customers"] = queries.customer_segment_customers(
-                        run, model_version=context["segment_overview"].model_version, limit=50)
+                    context["segment_customers_page"] = Paginator(queries.customer_segment_customers(
+                        run, model_version=context["segment_overview"].model_version, limit=50), PAGE_SIZE,
+                    ).get_page(request.GET.get("customers_page"))
+                context.update(_pagers(range_key, compare, context["coverage_page"],
+                                       context["segment_customers_page"]))
                 if compare:
                     previous = ranges.comparison_span(span)
                     available = ranges.comparison_available(
@@ -216,3 +227,20 @@ def _size_chart_payload(rows, comparison_available):
         "comparison": {"units": [row["comparison"].units for row in rows]} if comparison_available else None,
     }
 
+
+def _pagers(range_key, compare, coverage_page, customers_page):
+    """Previous/next links for both paged lists; each link keeps the range, compare and the other list's page."""
+    state = {"range": range_key, **({"compare": "1"} if compare else {}), "coverage_page": coverage_page.number,
+             **({"customers_page": customers_page.number} if customers_page else {})}
+
+    def pager(page, key):
+        def url(number):
+            return reverse("reporting:dashboard") + "?" + urlencode({**state, key: number})
+        return {"page": page,
+                "previous_url": url(page.previous_page_number()) if page.has_previous() else None,
+                "next_url": url(page.next_page_number()) if page.has_next() else None}
+
+    return {"coverage": coverage_page.object_list,
+            "coverage_pager": pager(coverage_page, "coverage_page"),
+            "segment_customers": customers_page.object_list if customers_page else [],
+            "customers_pager": pager(customers_page, "customers_page") if customers_page else None}

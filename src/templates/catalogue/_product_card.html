@@ -24,13 +24,15 @@
             {% elif user.is_authenticated %}
             <form method="post" action="{% url 'cart:add' %}">
                 {% csrf_token %}
-                <label class="field-label" for="size-{{ shoe.pk }}">Size</label>
+                <label class="size-field__label" for="size-{{ shoe.pk }}">Size</label>
+                <span class="size-field">
                 <select class="size-select" id="size-{{ shoe.pk }}" name="product_id" required>
                     <option value="" selected disabled>Choose a size</option>
                     {% for sku in shoe.sizes %}
                     <option value="{{ sku.pk }}"{% if sku.stock_status == "out-of-stock" %} disabled{% endif %}>{{ sku.size_label }}{% if sku.stock_status == "out-of-stock" %} · sold out{% elif sku.stock_status == "low-stock" %} · only {{ sku.stock }} left{% endif %}</option>
                     {% endfor %}
                 </select>
+                </span>
                 <input type="hidden" name="quantity" value="1">
                 <button type="submit" class="button button--block button--dark">
                     {% include "_icon.html" with name="cart" size="sm" only %}
