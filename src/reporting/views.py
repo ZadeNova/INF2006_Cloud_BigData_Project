@@ -6,6 +6,7 @@ from itertools import zip_longest
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.utils.decorators import method_decorator
@@ -80,12 +81,17 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     comparison_series=[],
                     comparison_categories=[],
                     comparison_top_sellers=[],
-                    segment_overview=queries.customer_segment_overview(run),
-                    segment_customers=[],
                 )
-                if context["segment_overview"] is not None:
-                    context["segment_customers"] = queries.customer_segment_customers(
-                        run, model_version=context["segment_overview"].model_version, limit=50)
+                # The loader takes this same run lock while replacing assignments.
+                # Finish both eager reads before release so totals and sample agree.
+                with transaction.atomic():
+                    if not AnalyticsRun.objects.select_for_update().filter(pk=run.pk).exists():
+                        continue  # Retention pruned this run; rebuild the whole context.
+                    context["segment_overview"] = queries.customer_segment_overview(run)
+                    context["segment_customers"] = (
+                        queries.customer_segment_customers(
+                            run, model_version=context["segment_overview"].model_version, limit=50)
+                        if context["segment_overview"] is not None else [])
                 if compare:
                     previous = ranges.comparison_span(span)
                     available = ranges.comparison_available(

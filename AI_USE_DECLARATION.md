@@ -30,3 +30,8 @@ OpenAI Codex coordinates Phase 4 on `erfan/analytics`, with explicitly assigned 
 ## Production runtime and AWS security preparation (25 September 2026)
 
 OpenAI Codex coordinates Phase 5 on `erfan/analytics`, with explicitly assigned `gpt-6-astra` / `low` implementation and separate fresh-context `gpt-6-astra` / `medium` read-only review. Assistance covers runtime TLS, bootstrap privilege safety, startup secret configuration, packaging, focused verification and the infrastructure handoff. The coordinator owns Git, tracker and review records; subagents do not stage, commit or push. [Runtime review](docs/reviews/runtime-aws-security.md) records actual checks, findings and limitations. This attribution does not claim deployment, verified AWS permissions or human execution of agent-run tests.
+
+
+## Local integration and ML display (25–26 September 2026)
+
+OpenAI Codex coordinates Phase 6 on `erfan/analytics`, with explicit `gpt-6-astra` / `low` backend implementation and isolated verification, `gpt-5.6-luna` / `max` frontend implementation/visual verification, and a separate fresh-context `gpt-6-astra` / `medium` read-only review gate. Assistance covers truthful ML display, coherent segment reads, local integration checks and release/handoff documentation. Coordinator owns Git, evidence and review records. [Phase 6 review](docs/reviews/ml-local-release-readiness.md) records actual checks, reviewer outcome and limitations; assignments alone are not completed checks. No human team execution, hosted CI or AWS deployment is inferred from agent-run local tests.

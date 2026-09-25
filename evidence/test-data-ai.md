@@ -402,3 +402,18 @@ and raw-file SHA-256
 The metrics and assignments were unchanged. The prior export retained its original
 raw-file hash and remained retryable without matching the current producer recipe.
 This verifies provenance separation and recovery, not additional model evaluation.
+
+
+## Phase 6 accepted-data local integration — 25–26 September 2026
+
+Objective: reproduce accepted input through completed analytics, isolated ML training/export, validated import and operator display, including failure/retry. Exact source/image hashes, commands, browser results and limitations are in [the Phase 6 release record](../docs/reviews/ml-local-release-readiness.md).
+
+All six raw CSV SHA-256 values still match [the evaluation](ml-quality-evaluation.json). No derived shoe dataset is present; raw v1.0.0 remains the accepted revision. Retain the existing evaluation, with no training-policy change or new claim of immutable feature provenance. Any later accepted feature-changing shoe revision still requires reevaluation.
+
+The isolated import accepted 20,000 customers, 1,200 products, 100,000 orders and 237,537 lines with zero rejects. Inventory is `import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f`. Completed run `0d42256e-fc61-4410-b434-a04d6f74a8d8`, cutoff `2026-01-01T16:00:00Z`, published 65,589 daily rows from 71,079 lines. Independent raw-table/coverage verification: all mismatch counts zero, maximum money difference 0.00.
+
+Pinned read-only-role training produced 19,766 assignments, k=2, silhouette 0.4347 and seed ARI 0.984; all assignments were imported. Recipe `rfm-v3-ef86b30f1c76ca4e093bd20319478e1fb8b88bb41dd70d046a79c931e3bdfd34`; completed batch ID `fade785eec25e49e2f87c800ee77353993c03e866a57aa3c692a3dbf582dc56a`; export SHA-256 `d0f6f363a633730311cb1dadeffd0a0b8521dae486de847ac5bcdd2522dd21be`. Customer exports remain outside Git. Metrics describe synthetic historical groups, not churn/prediction or real-customer behavior.
+
+A nonexistent explicit training run failed without changing the valid export. The first import failed safely on output-file ownership; correcting ownership of that exact private file allowed retry without retraining. An altered source envelope with recomputed digest was rejected after assignments existed; all 19,766 persisted rows retained canonical digest `190c02aebccd6b4212715050eeabc4b4f17a6af53cb6d8efabe2e9e22823b60b`. Replaying the original exact file succeeded with the same digest.
+
+Pinned pure ML: 16 passes; Django-dependent analytics/strict loader: 54 passes; standalone startup-credential checks: 2 passes. These overlap application tests and are not summed as unique cases. Hosted CI, load and actual S3/RDS/AWS execution remain unverified. The earlier evaluation remains historical quality evidence supported by unchanged data identity, not a newly rerun experiment.

@@ -55,3 +55,18 @@ run:
 declarations:
   ai_use: "AI_USE_DECLARATION.md"
   contributions: "TEAM_CONTRIBUTIONS.md"
+
+# Local checks do not establish hosted CI, ECR publication or deployed AWS behavior.
+local_release:
+  review: "docs/reviews/ml-local-release-readiness.md"
+  functional_record: "evidence/test-functional.md"
+  data_record: "evidence/test-data-ai.md"
+  baseline: "430e4c85eae7d770b7a0c7fbdbe6bada05d2604b"
+  tested_source: "Phase 6 runtime file SHA-256 values in the review; containing commit identifies the final reviewed source."
+  local_image: "inf2006-phase6-final"
+  local_image_id: "sha256:db198bc83e76aa59e4070568c5d39685da7471d95cc5086c62af888f133c2907"
+  hosted_ci: "unverified for this revision"
+  aws_integration: "unverified; docs/AWS_INFRASTRUCTURE.md joint integration checklist"
+  load: "unrun; supported workload not yet implemented"
+  submission_gap: "evidence/architecture.png remains absent; original project/team placeholders still require human completion"
+  status: "Local implementation and independent review clear on 2026-09-26; hosted/deployed/submission gates remain open"

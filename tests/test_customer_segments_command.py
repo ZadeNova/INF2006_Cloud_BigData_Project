@@ -331,3 +331,67 @@ def test_status_and_cohort_are_checked_after_acquiring_run_lock(snapshot, change
     assert len(errors) == 1 and isinstance(errors[0], CommandError)
     assert ("not completed" if changed == "status" else "eligible customers") in str(errors[0])
     assert CustomerSegment.objects.get(run=run).customer_id == user.pk
+
+
+@pytest.mark.django_db(transaction=True)
+def test_dashboard_reads_one_assignment_set_during_replacement(snapshot, rf, settings, monkeypatch):
+    import threading
+    from django.contrib.auth.models import Permission
+    from django.db import connection
+    from db_helpers import wait_until_blocked
+    from reporting import queries
+    from reporting.views import AnalyticsDashboardView
+
+    run, _, _, data, load = snapshot
+    settings.DEMO_NAMESPACE = run.inventory.namespace
+    operator = get_user_model().objects.create_user(username="reader")
+    operator.user_permissions.add(Permission.objects.get(codename="view_analytics"))
+    data["rows"][0]["monetary_total"] = "20.00"
+    data["batch_id"] = batch_id(data)
+    overview_read, release = threading.Event(), threading.Event()
+    errors, contexts = [], []
+    original = queries.customer_segment_overview
+
+    def pause_after_overview(selected_run):
+        result = original(selected_run)
+        overview_read.set()
+        assert release.wait(15), "test did not release dashboard"
+        return result
+
+    monkeypatch.setattr(queries, "customer_segment_overview", pause_after_overview)
+
+    def read():
+        try:
+            request = rf.get("/analytics/")
+            request.user = operator
+            contexts.append(AnalyticsDashboardView.as_view()(request).context_data)
+        except Exception as error:
+            errors.append(error)
+        finally:
+            connection.close()
+
+    def replace():
+        try:
+            load()
+        except Exception as error:
+            errors.append(error)
+        finally:
+            connection.close()
+
+    reader = threading.Thread(target=read)
+    writer = threading.Thread(target=replace)
+    reader.start()
+    try:
+        assert overview_read.wait(10)
+        writer.start()
+        wait_until_blocked()
+    finally:
+        release.set()
+        reader.join(15)
+        if writer.ident is not None:
+            writer.join(15)
+    assert not reader.is_alive() and not writer.is_alive()
+    assert not errors, errors
+    assert contexts[0]["segment_overview"].sales_amount == Decimal("10.00")
+    assert contexts[0]["segment_customers"][0].monetary_total == Decimal("10.00")
+    assert CustomerSegment.objects.get(run=run).monetary_total == Decimal("20.00")

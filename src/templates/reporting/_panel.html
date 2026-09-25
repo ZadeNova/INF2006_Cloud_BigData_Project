@@ -176,9 +176,23 @@
         </div>
     </section>
 
-    {% if segment_overview %}
     <section class="analytics-section" aria-labelledby="segments-title">
-        <div class="section-heading section-heading--compact"><p class="eyebrow">Descriptive ML</p><h2 id="segments-title">Customer segments</h2><p>Cluster assignments are loaded for this run and model version {{ segment_overview.model_version }}. They support operator targeting and do not change sales or replenishment metrics.</p></div>
+        <div class="section-heading section-heading--compact">
+            <p class="eyebrow">Descriptive ML</p>
+            <h2 id="segments-title">Customer segments</h2>
+            {% if segment_overview %}
+            <p>Assignments are loaded for analytics run <code class="analytics-identity">{{ run.pk }}</code>, with data through the cutoff <strong>{{ cutoff_label }}</strong>. They support operator targeting and do not change sales or replenishment metrics.</p>
+            <p class="analytics-segment-period">Lifetime completed-order history is measured strictly before this run's cutoff, independently of the dashboard range and comparison filters.</p>
+            <details class="analytics-segment-identity">
+                <summary>View segmentation recipe version</summary>
+                <p><strong>Recipe version</strong> <code class="analytics-identity">{{ segment_overview.model_version }}</code></p>
+            </details>
+            {% else %}
+            <p class="analytics-segment-state" role="status">No segmentation results loaded for this run.</p>
+            <p class="analytics-segment-period">When assignments are present, they describe lifetime completed-order history strictly before this run's cutoff, independently of the dashboard range and comparison filters. This panel is for analytics run <code class="analytics-identity">{{ run.pk }}</code>, with data through <strong>{{ cutoff_label }}</strong>.</p>
+            {% endif %}
+        </div>
+        {% if segment_overview %}
         <div class="analytics-cards">
             <article class="analytics-card surface-card"><p class="analytics-card__label">Total segmented customers</p><p class="analytics-card__value">{{ segment_overview.customers|units }}</p><div class="analytics-card__comparison"><span>K={{ segment_overview.k_clusters }} clusters</span></div></article>
             <article class="analytics-card surface-card"><p class="analytics-card__label">Segment sales value</p><p class="analytics-card__value">S${{ segment_overview.sales_amount|money }}</p><div class="analytics-card__comparison">{% if segment_overview.silhouette_score is not None %}<span>Silhouette {{ segment_overview.silhouette_score }}</span>{% else %}<span>Silhouette unavailable</span>{% endif %}</div></article>
@@ -199,8 +213,8 @@
                 </tbody></table>
             </div>
         </div>
+        {% endif %}
     </section>
-    {% endif %}
 
     <footer class="analytics-assumptions">
         <p class="eyebrow">Assumptions and limits</p>

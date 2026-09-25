@@ -167,6 +167,21 @@
         if (heading) {
             heading.setAttribute("tabindex", "-1");
             heading.focus({ preventScroll: true });
+            var header = document.querySelector(".site-header");
+            if (header) {
+                var headingRect = heading.getBoundingClientRect();
+                var headerRect = header.getBoundingClientRect();
+                if (headingRect.top < headerRect.bottom) {
+                    var rootStyles = getComputedStyle(document.documentElement);
+                    var rootFontSize = parseFloat(rootStyles.fontSize) || 16;
+                    var gapRem = parseFloat(rootStyles.getPropertyValue("--space-2")) || 0;
+                    var gap = rootFontSize * gapRem;
+                    window.scrollBy({
+                        top: headingRect.top - headerRect.bottom - gap,
+                        behavior: "auto"
+                    });
+                }
+            }
         }
     }
 
@@ -241,11 +256,18 @@
         target.setAttribute("aria-busy", "true");
     });
 
-    document.body.addEventListener("htmx:load", function (event) {
-        var target = event.detail && event.detail.elt;
-        var panel = target && target.id === "analytics-panel" ? target : document.getElementById("analytics-panel");
+    document.body.addEventListener("htmx:afterSwap", function (event) {
+        var target = event.detail && event.detail.target;
+        if (!target || target.id !== "analytics-panel") {
+            return;
+        }
+        var panel = document.getElementById("analytics-panel");
         drawCharts(panel);
         announcePanel(panel);
+    });
+
+    document.body.addEventListener("htmx:historyRestore", function () {
+        drawCharts(document.getElementById("analytics-panel"));
     });
 
     document.body.addEventListener("htmx:responseError", panelError);

@@ -53,7 +53,7 @@ Validate `range` against this whitelist (a Django form choice); an invalid value
 
 **Range independence.** Average daily sales, coverage and replenishment flags always use the seven complete business dates ending at *L*, whatever range is selected. The page states this beside the flags so changing the range never appears to change them.
 
-**Delivery.** Full page for a normal request; only the `#analytics-panel` fragment for an HTMX request (`HX-Request`), with `hx-push-url` so links and the back button work. Chart.js is pinned and served from `src/static/` (no CDN dependency, so the app runs offline); series are embedded with Django's `json_script`, and the chart is re-created on `htmx:load`, destroying any previous instance. Reuse the existing HTMX-aware login redirect and an operator permission check (403 for non-operators). Routes and parameters are recorded in [API](API.md).
+**Delivery.** Full page for a normal request; only the `#analytics-panel` fragment for an HTMX request (`HX-Request`), with `hx-push-url` so links and the back button work. Chart.js is pinned and served from `src/static/` (no CDN dependency, so the app runs offline); series are embedded with Django's `json_script`, and the chart is drawn on initial document load and re-created after an actual analytics-panel swap or HTMX history restoration, destroying any previous instance. History restoration redraws without moving focus. Focus/announcement moves to the panel heading only after that swap, not on initial load. Reuse the existing HTMX-aware login redirect and an operator permission check (403 for non-operators). Routes and parameters are recorded in [API](API.md).
 
 ## Calendar correctness
 
@@ -96,11 +96,11 @@ Included by the 25 September scope decision; evaluate whether the dataset has su
 - Evaluate cluster sizes and profiles (mean RFM and share of sales per cluster), silhouette and stability across seeds or resamples. Do not report classification accuracy without true labels. State that synthetic customers may reflect the generator's structure rather than real behaviour.
 - Offline training writes JSON via `analytics/segment_customers.py`; Django command `load_customer_segments` loads
   assignments into one dedicated table keyed by model version and analytics run. Removal means deleting that module and table.
-- The dashboard shows a segment panel (sizes, share of sales, mean RFM) only when assignments exist for the run. It tells the operator which customer groups drive sales; it does not change any deterministic metric or replenishment flag, and it is secondary to the sales-driven inventory planning.
+- The dashboard always explains segmentation availability for the selected completed analytics run. Loaded groups show sizes, share of sales and mean RFM; a run without assignments shows "No segmentation results loaded for this run". It does not change any deterministic metric or replenishment flag, and remains secondary to sales-driven inventory planning.
 
 Use the simplest algorithm that can be justified for the store; more complex models are not planned.
 
-Labels describe cluster-profile means relative to their unweighted medians: recent/older, more/fewer orders and higher/lower spend. Equality uses recent/fewer/lower. A deterministic profile rank prefix keeps labels unique, within the 40-character field. They make no loyalty, churn or future-purchase claim. Existing plain-text template rendering and alphabetical fallback ordering support these labels without a frontend change; historical high_value/core/at_risk priority remains compatible with older imports. The lifetime period is defined here; further dashboard period-copy clarification remains frontend work.
+Labels describe cluster-profile means relative to their unweighted medians: recent/older, more/fewer orders and higher/lower spend. Equality uses recent/fewer/lower. A deterministic profile rank prefix keeps labels unique, within the 40-character field. They make no loyalty, churn or future-purchase claim. Existing plain-text template rendering and alphabetical fallback ordering support these labels without a frontend change; historical high_value/core/at_risk priority remains compatible with older imports. The dashboard labels the lifetime feature period separately from its sales date filters.
 
 `analytics/evaluate_segments.py` retains source/code hashes, cohort counts, cutoff/period, runtime, candidates, invalid reasons, seed ARI, sizes and profiles in aggregate-only evidence. It compares exactly the baseline and log-frequency alternative, without AOV or tenure normalization. One-order histories remain eligible and are counted; unequal purchasing opportunity limits interpretation. Seed stability is not resampling robustness. Raw accepted data is evaluated; the planned shoe remap needs new evaluation after validated adoption.
 
@@ -111,6 +111,14 @@ Operator segment rows expose `CUS-<customer User primary key>` as `customer_refe
 The customer list is a sample, with an overall limit of 50 and at most 25 per segment label. Within each label, rank by monetary total descending, then customer ID ascending. Allocate one row per populated label per round, ordered by existing high_value/core/at_risk priority, then other labels alphabetically. Small groups release unused capacity to other groups up to the per-group cap. When populated labels exceed available slots, only the first labels in that deterministic order receive a row; the list does not claim universal representation. After selection, group the bounded rows by the same label priority and sort members by monetary total descending/customer ID ascending. No hard-coded number of clusters is assumed.
 
 The overview retains total group counts and metrics; sampled rows and their displayed count must be labelled separately. Selection uses a single window query without per-customer lookups. Run/model selection, eligibility, cluster names, RFM values and cutoff semantics are unchanged.
+
+### Segment display and lifecycle contract
+
+Use only the selected completed analytics run's assignments; never fall back to an older run. The loaded panel identifies that run, its cutoff and the selected model recipe version. Full recipe identity may be disclosed on demand rather than filling the summary with a hash. Persistence does not retain the completed export's batch ID, so the interface must not claim to identify a fitted model or immutable batch artifact.
+
+RFM uses lifetime completed-order history strictly before that run's cutoff, independently of dashboard range and comparison controls. Eligibility and unequal-tenure limitations above still apply. Without assignments, say "No segmentation results loaded for this run"; absence does not prove that training is running, failed or stale. A failed replacement preserves valid loaded results under the import contract. A new completed analytics run requires its own explicit batch.
+
+Read segment overview and the eager customer sample together under the same run lock used by the loader, so a concurrent replacement cannot combine summaries and rows from different publications. Keep the existing whole-context retry when run retention removes the selected run. No status model or orchestration state is introduced.
 
 ### Segment import safety contract
 
@@ -159,6 +167,6 @@ retried after import failure without retraining; cohort drift requires regenerat
 Legacy files missing the envelope are rejected and must be regenerated. Keep completed
 exports in the authorised output location for provenance; existing persistence stores
 only run/model version and assignments, and no migration is needed. A new refresh
-requires its own explicit batch. Pending/failed/stale UX, immutable snapshots and
-lifetime-period frontend copy remain separate work. Executable operations and recovery:
+requires its own explicit batch. The minimal loaded/unavailable display follows the lifecycle contract above. Immutable
+feature snapshots remain deferred; no persisted running/failed state is inferred. Executable operations and recovery:
 [batch runbook](../analytics/README.md#included-descriptive-ml-explicit-batch-handoff).

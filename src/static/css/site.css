@@ -3560,7 +3560,7 @@ h2 {
 .analytics-hero__mark small { margin-top:.5rem; color:var(--band-ink); font-size:.9rem; font-weight:700; letter-spacing:.16em; }
 .analytics-panel { scroll-margin-top:var(--anchor-offset); }
 .analytics-panel:focus { outline:none; }
-.analytics-panel h2:focus,.analytics-panel h3:focus { outline:none; }
+.analytics-panel h2:focus,.analytics-panel h3:focus { outline:none; box-shadow:var(--focus-ring); scroll-margin-top:var(--anchor-offset); }
 .analytics-panel__header { display:flex; align-items:flex-start; justify-content:space-between; gap:var(--space-5); margin-bottom:var(--space-4); }
 .analytics-panel__header h2 { margin-bottom:var(--space-2); font-size:clamp(2.6rem,4vw,4.2rem); font-weight:600; }
 .analytics-panel__intro { margin-bottom:0; color:var(--color-text-secondary); font-size:1.5rem; }
@@ -3634,6 +3634,12 @@ h2 {
 .analytics-table-card--segment-summary { margin-top:var(--space-3); }
 .analytics-table-card--segment-customers { margin-top:var(--space-4); padding-top:var(--space-4); }
 .analytics-table-card--segment-customers .analytics-subsection-title { margin-bottom:var(--space-3); }
+.analytics-segment-period { max-width:88rem; color:var(--color-text-secondary); font-size:1.4rem; }
+.analytics-segment-state { margin:var(--space-4) 0 var(--space-3); padding:var(--space-3) var(--space-4); border-left:var(--border-structural) solid var(--color-secondary-ink); background:var(--color-surface-raised); color:var(--color-text-primary); font-size:1.5rem; font-weight:700; }
+.analytics-segment-identity { max-width:88rem; margin-top:var(--space-3); border-top:1px solid var(--color-border-subtle); padding-top:var(--space-2); }
+.analytics-segment-identity summary { color:var(--color-secondary-ink); cursor:pointer; font-size:1.3rem; font-weight:700; }
+.analytics-segment-identity p { margin:var(--space-2) 0 0; color:var(--color-text-secondary); font-size:1.3rem; }
+.analytics-identity { font-family:var(--font-mono); font-size:.95em; overflow-wrap:anywhere; word-break:break-word; }
 .analytics-data-table--segments-customers th,
 .analytics-data-table--segments-customers td { padding-top:var(--space-4); padding-bottom:var(--space-4); }
 .rank-badge { display:grid; width:2.8rem; height:2.8rem; place-items:center; border-radius:0; background:var(--color-surface-raised); color:var(--color-text-primary); font-size:1.2rem; font-weight:700; }

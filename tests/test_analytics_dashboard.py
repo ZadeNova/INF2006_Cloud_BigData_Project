@@ -213,7 +213,7 @@ def test_coverage_is_fixed_and_ignores_live_stock(world, dashboard):
 
 def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, operator, django_assert_num_queries):
     assert operator.has_perm("reporting.view_analytics")
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(17):
         small = dashboard({"range": "7d", "compare": "1"})
     assert small.context_data["comparison_available"]
     extra = make_products(names=tuple(f"extra-{i}" for i in range(30)))
@@ -222,7 +222,7 @@ def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, opera
     for i, product in enumerate(extra.values()):
         add_order(operator, f"extra-{i}", [(product, 1, "10.00")], at(2024, 5, 7))
     services.refresh_analytics(namespace=NS, as_of=inventory.cutoff.astimezone(SGT).date(), inventory_version=inventory.version)
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(17):
         large = dashboard({"range": "7d", "compare": "1"})
     context = large.context_data
     assert len(context["coverage"]) == 25
@@ -370,6 +370,11 @@ def test_dashboard_shows_ml_segment_panel_when_assignments_exist(client, operato
         assert private_value not in fragment
     assert f"CUS-{operator.pk}" in fragment and f"CUS-{second.pk}" in fragment
     assert "Silhouette 0.5123" in body
+    for rendered in (body, fragment):
+        assert str(run.pk) in rendered and "rfm-kmeans-v1" in rendered
+        assert "08 May 2024, 00:00 SGT" in rendered
+        assert "Lifetime completed-order history is measured strictly before this run" in rendered
+        assert "independently of the dashboard range and comparison filters" in rendered
 
 
 def test_rendered_comparison_includes_category_series_and_previous_sellers(client, operator):
@@ -406,3 +411,35 @@ def test_repeated_pruning_returns_bounded_retry_response(world, dashboard):
     assert response.status_code == 503
     assert "no-store" in response["Cache-Control"]
     assert b"Please retry" in response.content
+
+
+def test_segments_stay_with_current_run_and_ignore_dashboard_filters(dashboard):
+    products = make_products()
+    inventory = make_inventory(products)
+    user = get_user_model().objects.create_user(username="segment-customer")
+    old = make_run(inventory, [])
+    load_segments(old, [(user, 0, "older_run", 1, 1, "999.00")])
+    current = make_run(inventory, [])
+    response = dashboard()
+    unloaded = response.context_data
+    assert unloaded["run"] == current
+    assert unloaded["segment_overview"] is None
+    assert unloaded["segment_customers"] == []
+    for response in (response, dashboard(htmx=True)):
+        body = response.render().content.decode()
+        assert "No segmentation results loaded for this run." in body
+        assert str(current.pk) in body
+        assert "older_run" not in body and str(old.pk) not in body
+        assert "Total segmented customers" not in body
+
+    load_segments(current, [(user, 0, "older_model", 2, 2, "888.00")])
+    load_segments(current, [(user, 0, "loaded_model", 3, 12, "120.00")], model_version="new-recipe")
+    selected = dashboard({"range": "7d"}).context_data
+    compared = dashboard({"range": "90d", "compare": "1"}, htmx=True).context_data
+    assert selected["run"] == compared["run"] == current
+    assert selected["segment_overview"] == compared["segment_overview"]
+    assert selected["segment_customers"] == compared["segment_customers"]
+    assert selected["segment_overview"].model_version == "new-recipe"
+    assert selected["segment_overview"].sales_amount == Decimal("120.00")
+    assert selected["segment_customers"][0].frequency_orders == 12
+    assert selected["segment_customers"][0].segment_label == "loaded_model"

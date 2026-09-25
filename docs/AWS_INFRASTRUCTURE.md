@@ -192,3 +192,16 @@ executed results and remaining integration limitations are recorded in the
 [runtime review](reviews/runtime-aws-security.md), not inferred from a successful build.
 The tests do not establish AWS permissions, region/budget, real Secrets Manager delivery,
 certificate availability, security groups, ALB/RDS behavior or ECR publication.
+
+
+## Joint integration checklist after Phase 6
+
+The [Phase 6 release record](reviews/ml-local-release-readiness.md) owns the exact locally tested source/image and limits. Local completion does not clear the following joint gates. The infrastructure owner implements the cloud configuration; the application owner supplies the reviewed image/contracts and checks behavior together with that owner. This checklist does not authorise an apply or deployment.
+
+1. Confirm actual lab region, account, budget, service/role permissions and the permitted certificate/hostname/client-trust route. Review Terraform plan and costs; preserve shared-state coordination and teardown ownership.
+2. After separate publication authorisation, publish the tested application image through the agreed ECR route, record the registry manifest digest, and pin that digest plus the same release ID on every instance. A local Docker image ID is not this evidence.
+3. Wire the role-separated Secrets Manager schemas above, required KMS access if applicable and private RDS networking. Coordinate bootstrap, one migration and runtime readiness in that order. Verify runtime access and denied owner/bootstrap actions, trainer read-only access, real RDS hostname/CA validation and refused insecure configuration.
+4. Verify HTTPS and exact ALB health Host handling on port 8000, ALB-only application ingress, explicit hosts/CSRF origins, trusted forwarded protocol and private RDS. Prove sessions/carts/signing continuity across two instances without sticky sessions.
+5. Store the accepted checksummed input and authorised batch exports in private S3. Verify permitted reads and anonymous denial; reproduce import, explicit completed analytics run, separate training/export and exact-file import with role separation. Check own-run loaded/unavailable display and failure/retry preservation. No Scheduler or Lambda is selected; agree operational freshness thresholds without claiming persisted orchestration state.
+6. Wire sanitised release/request logs, CloudWatch thresholds and SNS delivery, WAF's scoped login rule and CloudTrail. Exercise both allowed and denied requests and an actual failure/alert path. Calibrate fixed-capacity load before ASG comparisons; retain scaling, instance-loss, database-outage and recovery evidence.
+7. Record exact source, ECR digest, configuration, data checksums, command results, costs and limitations in the existing evidence records. Keep hosted CI, submission artefact completion and deployed behavior distinct. Teardown only the jointly owned test resources after retaining redacted evidence.
