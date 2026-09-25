@@ -1,5 +1,7 @@
 # Shoe dataset handoff
 
+> **26 September 2026:** no longer needed for a teammate: the user built it with sizes; see [shoe-sizes-catalogue.md](shoe-sizes-catalogue.md).
+
 Written 25 September 2026 for the teammate who builds the shoe dataset, and for the Claude Code session they work with. Companion to the design, [shoe-dataset-remap.md](shoe-dataset-remap.md): that file says **what** and **why**; this one says how to start, how to check your work in seconds, and what not to break. If the two disagree, the design wins; tell the user so it can be fixed.
 
 ## The job

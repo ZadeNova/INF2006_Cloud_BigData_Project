@@ -30,7 +30,7 @@ data_ai:
   evaluation: "evidence/test-data-ai.md: two identical refreshes; 65,589 daily rows, zero unit/amount/coverage mismatches, exact 0.00 maximum monetary difference; 410 combined tests passed at Phase 3 (22 September 2026). Optional ML: offline RFM K-means (analytics/segment_customers.py) loaded per analytics run by load_customer_segments, descriptive only; its evaluation metrics are not yet committed to evidence/. Synthetic descriptive use only; independent Phase 3 review status in docs/reviews/analytics-phase3.md."
   reproducible_command: "python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json; first export with analytics/export_coverage.py (full setup in evidence/test-data-ai.md)"
   source_version: "Analytics Engineering Ecommerce Sales & Returns v1.0.0; downloaded 2026-09-22; data/raw/checksums.txt"
-  verified_scratch_namespace: "synthetic/revision-a/demo/v1"
+  verified_scratch_namespace: "synthetic/shoes/revision-a/demo/v1"
   verified_seed: 42
   verified_shift_offset_days: 0
   verified_inventory_cutoff: "2026-01-02T00:00:00+08:00"

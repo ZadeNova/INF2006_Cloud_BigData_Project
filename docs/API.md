@@ -7,7 +7,7 @@ Status: GET/HEAD /health/ (URL name health), GET / (URL name home, a 302 redirec
 | GET, POST `/register/` | Public | Registration form and validation |
 | GET, POST `/login/` | Public | Framework session authentication |
 | POST `/logout/` | Authenticated | Invalidate session; CSRF required |
-| GET `/products/` | Public | Paginated active catalogue; indicative stock |
+| GET `/products/` | Public | Paginated shoe models (12 per page) that have an active size; each card lists its active sizes as a `product_id` select posting to `cart:add`; sold-out sizes disabled; indicative stock |
 | GET `/products/manage/` | Operator | All products including inactive ones; scope addition beyond the assessed brief |
 | POST `/products/manage/<id>/toggle-active/` | Operator | Set a product's active state explicitly via `active=true`/`active=false`; CSRF required; no create/edit |
 | GET `/cart/` | Authenticated | Owner's persistent cart |
@@ -48,7 +48,7 @@ Integration contracts (implementation status is recorded above):
 | Authentication | accounts:register / accounts/register.html | username, password1, password2; framework password validation |
 | Authentication | accounts:login / registration/login.html | username, password, optional safe next |
 | Authentication | accounts:logout | POST with CSRF; no owner/user ID supplied |
-| Catalogue | catalogue:product_list / catalogue/product_list.html | page: positive integer; backend-bounded pagination |
+| Catalogue | catalogue:product_list / catalogue/product_list.html | page: positive integer; backend-bounded pagination; context `shoes` (ShoeModel with prefetched active SKUs in `sizes`) |
 | Cart | cart:detail / cart/detail.html | GET owner cart; no owner ID supplied |
 | Cart add | cart:add | product_id, quantity integer 1..999 |
 | Cart update | cart:update | URL item ID, quantity integer 1..999 |

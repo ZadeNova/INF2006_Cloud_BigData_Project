@@ -2,7 +2,7 @@
 
 Status: source integrity passed on 22 September 2026; the user explicitly accepted the checksummed dataset for descriptive sales/inventory use despite flat-noise risk (DATA-003). Import complete locally; independent round-2 review resolved DATA-001–003 with no new actionable findings. **Gate CLEAR.** [Review log](reviews/analytics-data-import.md), [reproduction](../analytics/README.md), [profile](../data/PROFILE.md). **Switched 22 September 2026**: the original LaelaZ selection was gated and access never granted by the decision deadline. Analytics Engineering describes the replacement as synthetic educational data under CC BY 4.0; this is not an independent generator audit.
 
-The CSV source tables from https://www.analyticsengineering.com/datasets/ecommerce-sales are pinned under data/raw/. Published counts and UTC order coverage match; payments/refunds are retained and profiled but not imported. [Actual fields, dates, checksums and attribution](../data/README.md).
+The CSV source tables from https://www.analyticsengineering.com/datasets/ecommerce-sales are pinned under data/raw/. The application imports a **derived shoe dataset** built from them by `analytics/build_shoe_dataset.py` into `data/derived/shoes/` (20 shoes in 10 sizes; [data/README.md](../data/README.md#derived-shoe-dataset), [plan](plans/shoe-sizes-catalogue.md)); the raw files stay unchanged. Published counts and UTC order coverage match; payments/refunds are retained and profiled but not imported. [Actual fields, dates, checksums and attribution](../data/README.md).
 
 ## Reproducible processing
 

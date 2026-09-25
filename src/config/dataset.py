@@ -61,6 +61,20 @@ def text(value, length):
     return value
 
 
+def shoe_size(row):
+    """Optional shoe columns: both empty/absent (a size-less product) or a shoe ID with a half size."""
+    shoe_id, size = row.get("shoe_id", ""), row.get("size", "")
+    if not shoe_id and not size:
+        return {"shoe_id": None, "size": None}
+    try:
+        number = Decimal(size)
+    except InvalidOperation:
+        raise ValueError("invalid shoe size") from None
+    if not number.is_finite() or not Decimal(1) <= number <= Decimal(20) or number * 2 % 1:
+        raise ValueError("shoe size must be a half size from 1 to 20")
+    return {"shoe_id": text(shoe_id, 100), "size": number.quantize(Decimal("0.1"))}
+
+
 def validate(source):
     """Return typed valid rows and auditable rejects; an incomplete order is rejected whole."""
     parsed = {table: {} for table in TABLES}
@@ -90,6 +104,7 @@ def validate(source):
                     typed.update(name=text(row["product_name"], 200), category=text(row["category"], 100),
                                  price=unit_money(row["list_price"]),
                                  cost=unit_money(row["unit_cost"]) if row.get("unit_cost", "") else None)
+                    typed.update(shoe_size(row))
                 elif table == "orders":
                     if row["order_status"] not in STATUS:
                         raise ValueError("unknown order status")
@@ -112,6 +127,19 @@ def validate(source):
             except (ValueError, InvalidOperation, OverflowError) as exc:
                 reject(table, index, str(exc))
 
+    # Every size of one shoe must agree on name and category, and each size appears once per shoe.
+    shoes, sizes = {}, Counter()
+    for row in parsed["products"].values():
+        if row["shoe_id"] is not None:
+            shoes.setdefault(row["shoe_id"], (row["name"], row["category"]))
+            sizes[row["shoe_id"], row["size"]] += 1
+    for row in parsed["products"].values():
+        if row["shoe_id"] is None:
+            continue
+        if shoes[row["shoe_id"]] != (row["name"], row["category"]):
+            reject("products", row["_row"], "shoe name/category differs between sizes")
+        if sizes[row["shoe_id"], row["size"]] != 1:
+            reject("products", row["_row"], "duplicate shoe size")
     for row in parsed["orders"].values():
         customer = parsed["customers"].get(row["customer_id"])
         if customer is None:

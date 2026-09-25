@@ -1500,6 +1500,18 @@ h1 {
     padding-top: var(--space-2);
 }
 
+/* Size picker: same field treatment as .form-field input. */
+.size-select {
+    width: 100%;
+    min-height: 4.6rem;
+    margin-bottom: var(--space-2);
+    border: var(--border-structural) solid var(--color-border-medium);
+    border-radius: 0;
+    padding: 1rem 1.2rem;
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+}
+
 .product-card__note {
     margin: 0;
     color: var(--color-text-secondary);

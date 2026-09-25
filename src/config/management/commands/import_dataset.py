@@ -10,7 +10,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction, IntegrityError
 
 from accounts.models import CustomerProfile
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
 from config import dataset
 from orders.models import Order, OrderItem
 from reporting.models import InventorySnapshot, InventoryVersion
@@ -115,16 +115,37 @@ class Command(BaseCommand):
         result["users"] = (len(new_users), len(names) - len(new_users))
         result["customer_profiles"] = (len(new_profiles), len(names) - len(new_profiles))
 
+        # Shoe models come first: each is the distinct shoe_id of its sized product rows.
+        models = {m.external_id: m for m in ShoeModel.objects.filter(namespace=namespace)}
+        wanted = {row["shoe_id"]: (row["name"], row["category"]) for row in data["products"].values() if row["shoe_id"]}
+        if models.keys() - wanted.keys():
+            conflict("namespace contains shoe models outside the accepted source")
+        new_models = []
+        for key, (name, category) in wanted.items():
+            if key in models:
+                if not replay:
+                    conflict(f"shoe model {key} exists without accepted manifest")
+                verify(models[key], {"name": name, "category": category}, f"shoe model {key}")
+            else:
+                if replay:
+                    conflict(f"shoe model {key} missing on replay")
+                new_models.append(ShoeModel(namespace=namespace, external_id=key, name=name, category=category))
+        ShoeModel.objects.bulk_create(new_models, batch_size=1000)
+        models.update({m.external_id: m for m in new_models})
+        result["shoe_models"] = (len(new_models), len(wanted) - len(new_models))
+
         new_products = []
         for key, row in data["products"].items():
+            shoe = models[row["shoe_id"]] if row["shoe_id"] else None
             if key in products:
                 if not replay:
                     conflict(f"product {key} exists without accepted manifest")
-                verify(products[key], {"category": row["category"]}, f"product {key}")
+                verify(products[key], {"category": row["category"], "size": row["size"],
+                                       "shoe_model_id": shoe.pk if shoe else None}, f"product {key}")
             else:
                 if replay:
                     conflict(f"product {key} missing on replay")
-                new_products.append(Product(namespace=namespace, external_id=key,
+                new_products.append(Product(namespace=namespace, external_id=key, shoe_model=shoe, size=row["size"],
                                             **{f: row[f] for f in ("name", "category", "price", "cost", "stock", "lead_time_days")}))
         Product.objects.bulk_create(new_products, batch_size=1000)
         products.update({p.external_id: p for p in new_products})

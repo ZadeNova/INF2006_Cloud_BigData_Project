@@ -136,14 +136,29 @@
     </section>
     {{ trend_chart|json_script:"analytics-trend-data" }}
     {{ category_chart|json_script:"analytics-category-data" }}
+    {{ size_chart|json_script:"analytics-size-data" }}
+
+    <section class="analytics-section" aria-labelledby="size-sales-title">
+        <article class="surface-card chart-card">
+            <div class="chart-card__header"><div><p class="eyebrow">Fit</p><h3 id="size-sales-title">Units sold by size</h3></div><span class="chart-card__mode">Completed units</span></div>
+            <div class="chart-wrap"><canvas data-chart="sizes" aria-labelledby="size-sales-title"></canvas></div>
+            <p class="chart-summary">Completed units per US size across every shoe, smallest size first. Sizes in this synthetic dataset are assigned by seeded weights, not observed demand.{% if compare %}{% if comparison_available %} Solid bars show the selected period; outlined bars show the previous period.{% else %} Previous-period size comparison is unavailable because there is insufficient history.{% endif %}{% endif %}</p>
+            <details class="chart-table">
+                <summary>View size data table</summary>
+                <div class="table-scroll" tabindex="0" role="region" aria-label="Size sales data table"><table><caption class="visually-hidden">Size sales data</caption><thead><tr><th scope="col">Size</th><th scope="col">Selected units</th><th scope="col">Selected sales value</th>{% if comparison_available %}<th scope="col">Previous units</th><th scope="col">Previous sales value</th>{% endif %}</tr></thead><tbody>
+                    {% for row in size_rows %}<tr><th scope="row">{{ row.selected.label }}</th><td>{{ row.selected.units|units }}</td><td>S${{ row.selected.sales_amount|money }}</td>{% if comparison_available %}<td>{{ row.comparison.units|units }}</td><td>S${{ row.comparison.sales_amount|money }}</td>{% endif %}</tr>{% empty %}<tr><td colspan="{% if comparison_available %}5{% else %}3{% endif %}">No sized products sold in this span.</td></tr>{% endfor %}
+                </tbody></table></div>
+            </details>
+        </article>
+    </section>
 
     <section class="analytics-section" aria-labelledby="top-sellers-title">
-        <div class="section-heading section-heading--compact"><p class="eyebrow">What sold</p><h2 id="top-sellers-title">Top ten sellers</h2><p>Ranked by completed units in the selected span, with product ID as the stable tie break.{% if compare %}{% if comparison_available %} The previous-period table uses the same ranking rules.{% else %} Previous-period sellers are unavailable because there is insufficient history.{% endif %}{% else %} Comparison is off.{% endif %}</p></div>
+        <div class="section-heading section-heading--compact"><p class="eyebrow">What sold</p><h2 id="top-sellers-title">Top ten shoes</h2><p>Ranked by completed units in the selected span, all sizes of a shoe together, with the lowest product ID as the stable tie break.{% if compare %}{% if comparison_available %} The previous-period table uses the same ranking rules.{% else %} Previous-period sellers are unavailable because there is insufficient history.{% endif %}{% else %} Comparison is off.{% endif %}</p></div>
         <div class="analytics-comparison-grid">
             <div class="surface-card analytics-table-card analytics-comparison-table">
                 <h3 class="analytics-subsection-title">Selected period</h3>
                 <div class="table-scroll" tabindex="0" role="region" aria-label="Selected period top sellers">
-                    <table class="analytics-data-table analytics-data-table--top"><caption class="visually-hidden">Selected period top sellers</caption><thead><tr><th scope="col">Rank</th><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Units</th><th scope="col">Sales value</th></tr></thead><tbody>
+                    <table class="analytics-data-table analytics-data-table--top"><caption class="visually-hidden">Selected period top sellers</caption><thead><tr><th scope="col">Rank</th><th scope="col">Shoe</th><th scope="col">Category</th><th scope="col">Units</th><th scope="col">Sales value</th></tr></thead><tbody>
                         {% for item in top_sellers %}<tr><td class="analytics-data-table__rank"><span class="rank-badge" aria-label="Rank {{ forloop.counter }}">{{ forloop.counter }}</span></td><th scope="row" class="operator-row__name">{{ item.name }}</th><td class="operator-row__category">{{ item.category }}</td><td>{{ item.units|units }}</td><td class="operator-row__price">S${{ item.sales_amount|money }}</td></tr>{% empty %}<tr><td class="table-empty" colspan="5">No completed sales in this span.</td></tr>{% endfor %}
                     </tbody></table>
                 </div>
@@ -153,7 +168,7 @@
                 <h3 class="analytics-subsection-title">Previous period</h3>
                 {% if comparison_available %}
                 <div class="table-scroll" tabindex="0" role="region" aria-label="Previous period top sellers">
-                    <table class="analytics-data-table analytics-data-table--top"><caption class="visually-hidden">Previous period top sellers</caption><thead><tr><th scope="col">Rank</th><th scope="col">Product</th><th scope="col">Category</th><th scope="col">Units</th><th scope="col">Sales value</th></tr></thead><tbody>
+                    <table class="analytics-data-table analytics-data-table--top"><caption class="visually-hidden">Previous period top sellers</caption><thead><tr><th scope="col">Rank</th><th scope="col">Shoe</th><th scope="col">Category</th><th scope="col">Units</th><th scope="col">Sales value</th></tr></thead><tbody>
                         {% for item in comparison_top_sellers %}<tr><td class="analytics-data-table__rank"><span class="rank-badge" aria-label="Rank {{ forloop.counter }}">{{ forloop.counter }}</span></td><th scope="row" class="operator-row__name">{{ item.name }}</th><td class="operator-row__category">{{ item.category }}</td><td>{{ item.units|units }}</td><td class="operator-row__price">S${{ item.sales_amount|money }}</td></tr>{% empty %}<tr><td class="table-empty" colspan="5">No completed sales in the previous period.</td></tr>{% endfor %}
                     </tbody></table>
                 </div>
@@ -166,11 +181,11 @@
     </section>
 
     <section class="analytics-section" aria-labelledby="coverage-title">
-        <div class="section-heading section-heading--compact"><p class="eyebrow">Why it matters</p><h2 id="coverage-title">Replenishment attention</h2><p>Up to 25 products are shown in urgency order. The complete inventory counts are <strong>{{ coverage_counts.flagged|units }} flagged</strong>, {{ coverage_counts.unavailable|units }} without recent sales and {{ coverage_counts.insufficient_history|units }} with insufficient history.</p></div>
+        <div class="section-heading section-heading--compact"><p class="eyebrow">Why it matters</p><h2 id="coverage-title">Replenishment attention</h2><p>Stock is held per size, so each row is one shoe in one size. Up to 25 are shown in urgency order. The complete inventory counts are <strong>{{ coverage_counts.flagged|units }} flagged</strong>, {{ coverage_counts.unavailable|units }} without recent sales and {{ coverage_counts.insufficient_history|units }} with insufficient history.</p></div>
         <div class="surface-card analytics-table-card">
             <div class="table-scroll" tabindex="0" role="region" aria-label="Replenishment attention">
                 <table class="analytics-data-table analytics-data-table--coverage"><caption class="visually-hidden">Replenishment attention products</caption><thead><tr><th scope="col">Product</th><th scope="col">Stock</th><th scope="col">Lead time</th><th scope="col">Average / day</th><th scope="col">Coverage</th><th scope="col">Status</th></tr></thead><tbody>
-                    {% for item in coverage %}<tr><th scope="row" class="operator-row__name">{{ item.name }}</th><td>{{ item.stock|units }}</td><td>{{ item.lead_time_days|units }} days</td><td>{% if item.status == "insufficient_history" %}—{% else %}{{ item.avg_daily_units|rate }}{% endif %}</td><td>{% if item.status == "insufficient_history" or item.status == "unavailable" %}—{% else %}{{ item.coverage_days|rate }} days{% endif %}</td><td>{% if item.status == "flagged" %}<span class="status-label status-label--flagged">Flagged</span>{% elif item.status == "ok" %}<span class="status-label status-label--ok">On track</span>{% elif item.status == "unavailable" %}<span class="status-label status-label--unavailable">No recent sales; coverage unavailable</span>{% else %}<span class="status-label status-label--insufficient">Insufficient history</span>{% endif %}</td></tr>{% empty %}<tr><td class="table-empty" colspan="6">No inventory rows are available for this run.</td></tr>{% endfor %}
+                    {% for item in coverage %}<tr><th scope="row" class="operator-row__name">{{ item.name }}{% if item.size is not None %} · US {{ item.size|floatformat:"-1" }}{% endif %}</th><td>{{ item.stock|units }}</td><td>{{ item.lead_time_days|units }} days</td><td>{% if item.status == "insufficient_history" %}—{% else %}{{ item.avg_daily_units|rate }}{% endif %}</td><td>{% if item.status == "insufficient_history" or item.status == "unavailable" %}—{% else %}{{ item.coverage_days|rate }} days{% endif %}</td><td>{% if item.status == "flagged" %}<span class="status-label status-label--flagged">Flagged</span>{% elif item.status == "ok" %}<span class="status-label status-label--ok">On track</span>{% elif item.status == "unavailable" %}<span class="status-label status-label--unavailable">No recent sales; coverage unavailable</span>{% else %}<span class="status-label status-label--insufficient">Insufficient history</span>{% endif %}</td></tr>{% empty %}<tr><td class="table-empty" colspan="6">No inventory rows are available for this run.</td></tr>{% endfor %}
                 </tbody></table>
             </div>
         </div>

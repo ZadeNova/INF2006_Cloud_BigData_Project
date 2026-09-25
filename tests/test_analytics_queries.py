@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 
 from analytics_helpers import (
     NS, OTHER_NS, SGT, add_order, at, load_segments, make_inventory, make_products, make_run)
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
 from reporting import queries, ranges, services
 from reporting.models import AnalyticsRun
 from reporting.ranges import Bucket, Span
@@ -152,6 +152,24 @@ def test_top_sellers_rank_by_units_and_break_ties_on_product_id(world):
     assert sellers[0] == queries.TopSeller(1, products["delta"].pk, "delta", "Delta", "Tools", 49, Decimal("490.00"))
 
 
+def test_top_sellers_group_every_size_of_a_shoe_and_size_sales_split_them(world):
+    products, _, _ = world
+    model = ShoeModel.objects.create(namespace=NS, external_id="S1", name="Runner", category="Running")
+    small, large = (Product.objects.create(namespace=NS, external_id=f"S1-{size}", name="Runner", category="Running",
+                                           price="10.00", cost="4.00", stock=5, lead_time_days=7, shoe_model=model,
+                                           size=size) for size in ("8.0", "9.5"))
+    # 30 + 25 units across two sizes outrank delta's 49 as one shoe; alpha and the others have no size.
+    inventory = make_inventory({**products, "small": small, "large": large}, version="inv-sizes")
+    run = make_run(inventory, [(D(2024, 3, 6), small, 30, "300.00"), (D(2024, 3, 7), large, 25, "250.00"),
+                               (D(2024, 3, 4), products["delta"], 49, "490.00")])
+    sellers = queries.top_sellers(run, WEEK)
+    assert sellers[0] == queries.TopSeller(1, small.pk, "S1", "Runner", "Running", 55, Decimal("550.00"))
+    assert [item.external_id for item in sellers] == ["S1", "delta"]
+    assert queries.size_sales(run, WEEK) == [queries.SizeSales(Decimal("8.0"), 30, Decimal("300.00")),
+                                             queries.SizeSales(Decimal("9.5"), 25, Decimal("250.00"))]
+    assert [row.label for row in queries.size_sales(run, WEEK)] == ["US 8", "US 9.5"]
+
+
 def test_top_sellers_limit(world):
     _, _, run = world
     assert [item.external_id for item in queries.top_sellers(run, WEEK, limit=2)] == ["delta", "epsilon"]
@@ -164,7 +182,7 @@ def test_coverage_of_every_product_sorted_by_urgency(world):
     rows = {row.external_id: row for row in queries.coverage(run)}
     # the documented example: 35 units in seven dates is 5 a day; stock 30 covers 6 days; lead time 7 flags it
     assert rows["alpha"] == queries.CoverageRow(
-        products["alpha"].pk, "alpha", "Alpha", "Tools", 30, 7, 35, Decimal("5.00"), Decimal("6.00"), "flagged")
+        products["alpha"].pk, "alpha", "Alpha", "Tools", None, 30, 7, 35, Decimal("5.00"), Decimal("6.00"), "flagged")
     # exactly at the threshold: 49 units is 7 a day, stock 49 covers exactly 7 days, lead time 7 flags it
     assert (rows["delta"].coverage_days, rows["delta"].status) == (Decimal("7.00"), "flagged")
     # one unit more stock and it is no longer flagged: 50 / 7 = 7.14 days

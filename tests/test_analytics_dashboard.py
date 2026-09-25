@@ -217,7 +217,7 @@ def test_coverage_is_fixed_and_ignores_live_stock(world, dashboard):
 
 def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, operator, django_assert_num_queries):
     assert operator.has_perm("reporting.view_analytics")
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(16):
         small = dashboard({"range": "7d", "compare": "1"})
     assert small.context_data["comparison_available"]
     extra = make_products(names=tuple(f"extra-{i}" for i in range(30)))
@@ -226,7 +226,7 @@ def test_query_count_stays_bounded_and_tables_are_capped(world, dashboard, opera
     for i, product in enumerate(extra.values()):
         add_order(operator, f"extra-{i}", [(product, 1, "10.00")], at(2024, 5, 7))
     services.refresh_analytics(namespace=NS, as_of=inventory.cutoff.astimezone(SGT).date(), inventory_version=inventory.version)
-    with django_assert_num_queries(14):
+    with django_assert_num_queries(16):
         large = dashboard({"range": "7d", "compare": "1"})
     context = large.context_data
     assert len(context["coverage"]) == 25
@@ -245,7 +245,8 @@ def test_rendered_full_and_fragment_include_accessible_charts_and_preserve_contr
     assert 'hx-get="/analytics/?range=30d&amp;compare=1"' in body
     assert 'aria-current="page"' in body
     assert "View trend data table" in body and "View category data table" in body
-    assert "Top ten sellers" in body and "Replenishment attention" in body
+    assert "Top ten shoes" in body and "Replenishment attention" in body
+    assert 'data-chart="sizes"' in body and 'id="analytics-size-data"' in body and "View size data table" in body
     trend_json = re.search(r'id="analytics-trend-data" type="application/json">(.*?)</script>', body, re.S)
     assert trend_json and json.loads(trend_json.group(1))["comparison"]
 

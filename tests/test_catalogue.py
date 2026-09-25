@@ -8,25 +8,43 @@ from django.core.management.base import CommandError
 from django.test import Client, override_settings
 from django.urls import reverse
 
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
+from catalogue.shoes import SHOES, SIZES
 
 pytestmark = pytest.mark.django_db
 
 HISTORICAL_NAMESPACE = "synthetic/revision-a/historical/v1"
 
 
-def make_product(external_id, namespace=None, active=True):
+def make_product(external_id, namespace=None, active=True, shoe_model=None, size=None, stock=10):
     return Product.objects.create(
         namespace=namespace or settings.DEMO_NAMESPACE,
         external_id=external_id,
-        name=f"Product {external_id}",
+        name=shoe_model.name if shoe_model else f"Product {external_id}",
         category="Sample",
         price="10.00",
         cost="5.00",
-        stock=10,
+        stock=stock,
         lead_time_days=5,
         active=active,
+        shoe_model=shoe_model,
+        size=size,
     )
+
+
+def make_shoe(external_id, sizes=("9",), namespace=None, active=True, stock=10):
+    """A shoe model and one SKU per size, as the importer and seed_demo create them."""
+    namespace = namespace or settings.DEMO_NAMESPACE
+    model = ShoeModel.objects.create(namespace=namespace, external_id=external_id, name=f"Shoe {external_id}",
+                                     category="Sample")
+    for size in sizes:
+        make_product(f"{external_id}-{size}", namespace=namespace, active=active, shoe_model=model, size=size,
+                     stock=stock)
+    return model
+
+
+def listed(response):
+    return [shoe.external_id for shoe in response.context["shoes"]]
 
 
 def make_operator():
@@ -37,7 +55,7 @@ def make_operator():
 
 
 def test_product_list_is_public():
-    make_product("p1")
+    make_shoe("s1")
 
     response = Client().get(reverse("catalogue:product_list"))
 
@@ -45,39 +63,71 @@ def test_product_list_is_public():
     assert response.templates[0].name == "catalogue/product_list.html"
 
 
-def test_product_list_excludes_inactive_products():
-    make_product("active", active=True)
-    make_product("inactive", active=False)
+def test_product_list_shows_one_card_per_shoe_with_its_active_sizes():
+    shoe = make_shoe("s1", sizes=("9.5", "8", "10"))
+    Product.objects.filter(external_id="s1-10").update(active=False)
+    make_shoe("retired", active=False)
+    make_product("size-less")
+    client = Client()
+    client.force_login(get_user_model().objects.create_user(username="customer"))
 
-    response = Client().get(reverse("catalogue:product_list"))
+    response = client.get(reverse("catalogue:product_list"))
 
-    external_ids = [p.external_id for p in response.context["products"]]
-    assert external_ids == ["active"]
+    assert listed(response) == ["s1"]
+    assert [sku.size_label for sku in response.context["shoes"][0].sizes] == ["US 8", "US 9.5"]
+    assert f'<select class="size-select" id="size-{shoe.pk}" name="product_id" required>' in response.content.decode()
+
+
+def test_product_list_disables_sold_out_sizes():
+    make_shoe("s1", sizes=("9",), stock=0)
+    make_shoe("s2", sizes=("8", "9"))
+    Product.objects.filter(external_id="s2-8").update(stock=0)
+    client = Client()
+    client.force_login(get_user_model().objects.create_user(username="customer"))
+
+    response = client.get(reverse("catalogue:product_list"))
+
+    body = response.content.decode()
+    sold_out = Product.objects.get(external_id="s2-8")
+    assert f'<option value="{sold_out.pk}" disabled>US 8 · sold out</option>' in body
+    assert "1 of 2 sizes in stock" in body
+    assert [s.stock_status for s in response.context["shoes"]] == ["out-of-stock", "low-stock"]
+
+
+def test_chosen_size_is_added_to_the_cart():
+    make_shoe("s1", sizes=("8", "9"))
+    chosen = Product.objects.get(external_id="s1-9")
+    client = Client()
+    user = get_user_model().objects.create_user(username="customer")
+    client.force_login(user)
+
+    client.post(reverse("cart:add"), {"product_id": chosen.pk, "quantity": 1})
+
+    assert list(user.cart.items.values_list("product__external_id", flat=True)) == ["s1-9"]
 
 
 def test_product_list_excludes_other_namespaces():
-    make_product("demo-item", namespace=settings.DEMO_NAMESPACE)
-    make_product("historical-item", namespace=HISTORICAL_NAMESPACE)
+    make_shoe("demo-item", namespace=settings.DEMO_NAMESPACE)
+    make_shoe("historical-item", namespace=HISTORICAL_NAMESPACE)
 
     response = Client().get(reverse("catalogue:product_list"))
 
-    external_ids = [p.external_id for p in response.context["products"]]
-    assert external_ids == ["demo-item"]
+    assert listed(response) == ["demo-item"]
 
 
 def test_product_list_paginates_at_twelve_per_page():
     for i in range(13):
-        make_product(f"p{i:02d}")
+        make_shoe(f"s{i:02d}")
 
     first_page = Client().get(reverse("catalogue:product_list"))
     second_page = Client().get(reverse("catalogue:product_list"), {"page": 2})
 
-    assert len(first_page.context["products"]) == 12
-    assert len(second_page.context["products"]) == 1
+    assert len(first_page.context["shoes"]) == 12
+    assert len(second_page.context["shoes"]) == 1
 
 
 def test_product_list_rejects_invalid_page():
-    make_product("p1")
+    make_shoe("s1")
     client = Client()
 
     assert client.get(reverse("catalogue:product_list"), {"page": 999}).status_code == 404
@@ -85,7 +135,7 @@ def test_product_list_rejects_invalid_page():
 
 
 def test_product_list_labels_stock_as_indicative():
-    make_product("p1")
+    make_shoe("s1")
 
     response = Client().get(reverse("catalogue:product_list"))
 
@@ -138,7 +188,8 @@ def test_toggle_requires_post():
 
 
 def test_operator_can_deactivate_and_reactivate_a_product():
-    product = make_product("p1", active=True)
+    make_shoe("s1")
+    product = Product.objects.get(external_id="s1-9")
     client = Client()
     client.force_login(make_operator())
     url = reverse("catalogue:product_toggle_active", args=[product.pk])
@@ -147,12 +198,12 @@ def test_operator_can_deactivate_and_reactivate_a_product():
     client.post(url, {"active": "false"})
     product.refresh_from_db()
     assert product.active is False
-    assert product.external_id not in [p.external_id for p in Client().get(public_url).context["products"]]
+    assert listed(Client().get(public_url)) == []
 
     client.post(url, {"active": "true"})
     product.refresh_from_db()
     assert product.active is True
-    assert product.external_id in [p.external_id for p in Client().get(public_url).context["products"]]
+    assert listed(Client().get(public_url)) == ["s1"]
 
 
 def test_toggle_rejects_invalid_active_value():
@@ -214,19 +265,21 @@ def test_seed_demo_allows_fallback_password_in_local(monkeypatch):
     assert operator.check_password("Str0ngDemoOperator!2026")
 
 
-def test_seed_demo_creates_sneakers_and_deactivates_retired_demo_products(monkeypatch):
+def test_seed_demo_creates_every_shoe_in_every_size_and_deactivates_retired_demo_products(monkeypatch):
     monkeypatch.delenv("DEMO_OPERATOR_PASSWORD", raising=False)
     retired = make_product("demo-001")
+    old_sneaker = make_product("sneaker-001")
     other_namespace = make_product("demo-001", namespace=HISTORICAL_NAMESPACE)
 
     with override_settings(LOCAL=True):
         call_command("seed_demo")
         call_command("seed_demo")
 
-    retired.refresh_from_db()
-    other_namespace.refresh_from_db()
-    sneakers = Product.objects.filter(namespace=settings.DEMO_NAMESPACE, external_id__startswith="sneaker-")
-    assert sneakers.count() == 12
-    assert all(product.active and product.category == "Sneakers" for product in sneakers)
-    assert retired.active is False
+    for product in (retired, old_sneaker, other_namespace):
+        product.refresh_from_db()
+    assert ShoeModel.objects.filter(namespace=settings.DEMO_NAMESPACE).count() == len(SHOES) == 20
+    skus = Product.objects.filter(namespace=settings.DEMO_NAMESPACE, shoe_model__isnull=False)
+    assert skus.count() == len(SHOES) * len(SIZES) == 200
+    assert all(sku.active and sku.name == sku.shoe_model.name for sku in skus.select_related("shoe_model"))
+    assert retired.active is False and old_sneaker.active is False
     assert other_namespace.active is True

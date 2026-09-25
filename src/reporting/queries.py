@@ -48,15 +48,29 @@ GROUP BY p.category
 ORDER BY SUM(d.sales_amount) DESC, p.category
 """
 
+# Top sellers are shoe models: every size (SKU) of a model counts together. A product without a model
+# (legacy or size-less rows) is its own group. Ties break on the group's lowest product ID.
 TOP_SELLERS_SQL = """
-SELECT ROW_NUMBER() OVER (ORDER BY SUM(d.units) DESC, p.id) AS rank,
-       p.id, p.external_id, p.name, p.category, SUM(d.units), SUM(d.sales_amount)
+SELECT ROW_NUMBER() OVER (ORDER BY SUM(d.units) DESC, MIN(p.id)) AS rank,
+       MIN(p.id), MIN(COALESCE(m.external_id, p.external_id)), MIN(COALESCE(m.name, p.name)),
+       MIN(COALESCE(m.category, p.category)), SUM(d.units), SUM(d.sales_amount)
 FROM reporting_dailyproductsales d
 JOIN catalogue_product p ON p.id = d.product_id
+LEFT JOIN catalogue_shoemodel m ON m.id = p.shoe_model_id
 WHERE d.run_id = %s AND d.business_date BETWEEN %s AND %s
-GROUP BY p.id
-ORDER BY SUM(d.units) DESC, p.id
+GROUP BY m.id, CASE WHEN m.id IS NULL THEN p.id END
+ORDER BY SUM(d.units) DESC, MIN(p.id)
 LIMIT %s
+"""
+
+# Units and sales per shoe size across all models. Products without a size are left out.
+SIZE_SQL = """
+SELECT p.size, SUM(d.units), SUM(d.sales_amount)
+FROM reporting_dailyproductsales d
+JOIN catalogue_product p ON p.id = d.product_id
+WHERE d.run_id = %s AND d.business_date BETWEEN %s AND %s AND p.size IS NOT NULL
+GROUP BY p.size
+ORDER BY p.size
 """
 
 # Stock and lead time come from the run's sealed snapshot, never from mutable Product values. The flag
@@ -64,7 +78,7 @@ LIMIT %s
 # stock is cast to numeric first: a PostgreSQL integer stock * 7 overflows above about 307 million, which
 # the schema allows (AQRY-001). `sufficient` is false when the run has fewer than seven complete dates.
 COVERAGE_SQL = """
-SELECT p.id, p.external_id, p.name, p.category, s.stock, s.lead_time_days,
+SELECT p.id, p.external_id, p.name, p.category, p.size, s.stock, s.lead_time_days,
        COALESCE(w.units, 0) AS units_7d,
        ROUND(COALESCE(w.units, 0) / %(dates)s::numeric, 2) AS avg_daily_units,
        CASE WHEN %(sufficient)s AND COALESCE(w.units, 0) > 0
@@ -102,9 +116,19 @@ class CategorySales(NamedTuple):
     sales_amount: Decimal
 
 
+class SizeSales(NamedTuple):
+    size: Decimal
+    units: int
+    sales_amount: Decimal
+
+    @property
+    def label(self):
+        return f"US {self.size.normalize():f}"
+
+
 class TopSeller(NamedTuple):
     rank: int
-    product_id: int
+    product_id: int         # lowest product ID of the shoe model (the tie break)
     external_id: str
     name: str
     category: str
@@ -117,6 +141,7 @@ class CoverageRow(NamedTuple):
     external_id: str
     name: str
     category: str
+    size: Decimal | None
     stock: int
     lead_time_days: int
     units_7d: int
@@ -191,8 +216,13 @@ def category_sales(run, span):
             for category, units, amount in _fetch_all(CATEGORY_SQL, [run.pk, span.start, span.end])]
 
 
+def size_sales(run, span):
+    """Units and sales per shoe size over the span, smallest size first."""
+    return [SizeSales(size, int(units), amount) for size, units, amount in _fetch_all(SIZE_SQL, [run.pk, span.start, span.end])]
+
+
 def top_sellers(run, span, limit=10):
-    """Top products by completed units in the span; ties break on the lower product ID."""
+    """Top shoe models by completed units in the span (all sizes together); ties break on the lower product ID."""
     return [TopSeller(int(rank), product_id, external_id, name, category, int(units), amount)
             for rank, product_id, external_id, name, category, units, amount
             in _fetch_all(TOP_SELLERS_SQL, [run.pk, span.start, span.end, limit])]
@@ -213,14 +243,15 @@ def coverage(run):
         "dates": COVERAGE_DATES, "sufficient": sufficient, "run_id": run.pk, "first": first, "last": latest,
         "inventory_id": run.inventory_id})
     result = []
-    for product_id, external_id, name, category, stock, lead, units, average, days, flagged in rows:
+    for product_id, external_id, name, category, size, stock, lead, units, average, days, flagged in rows:
         if not sufficient:
             status = "insufficient_history"
         elif units == 0:
             status = "unavailable"
         else:
             status = "flagged" if flagged else "ok"
-        result.append(CoverageRow(product_id, external_id, name, category, stock, lead, int(units), average, days, status))
+        result.append(CoverageRow(product_id, external_id, name, category, size, stock, lead, int(units), average, days,
+                                  status))
     return result
 
 

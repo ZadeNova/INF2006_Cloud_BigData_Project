@@ -10,7 +10,7 @@ from django.db.models.deletion import ProtectedError
 
 from accounts.models import CustomerProfile
 from cart.models import Cart, CartItem
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
 from orders.models import Order, OrderItem
 from reporting.models import AnalyticsRun, DailyProductSales, InventorySnapshot, InventoryVersion
 
@@ -51,6 +51,18 @@ def historical_order(owner, **changes):
 def test_product_invalid_values_rejected(product, changes):
     with pytest.raises(IntegrityError), transaction.atomic():
         Product.objects.filter(pk=product.pk).update(**changes)
+
+
+def test_shoe_size_pairs_with_a_model_stays_in_range_and_is_unique_per_model(product):
+    model = ShoeModel.objects.create(namespace=NAMESPACE, external_id="s1", name="Example", category="Example")
+    for changes in ({"shoe_model": model}, {"size": "9.0"}, {"shoe_model": model, "size": "0.5"},
+                    {"shoe_model": model, "size": "20.5"}):
+        with pytest.raises(IntegrityError), transaction.atomic():
+            Product.objects.filter(pk=product.pk).update(**changes)
+    Product.objects.filter(pk=product.pk).update(shoe_model=model, size="9.5")
+    with pytest.raises(IntegrityError), transaction.atomic():
+        Product.objects.create(namespace=NAMESPACE, external_id="p2", name="Example", category="Example", price="1.00",
+                               cost="1.00", stock=1, lead_time_days=1, shoe_model=model, size="9.5")
 
 
 @pytest.mark.parametrize("column", ["price", "cost"])

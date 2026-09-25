@@ -1,5 +1,7 @@
 # Shoe dataset remap
 
+> **26 September 2026:** extended and built by [shoe-sizes-catalogue.md](shoe-sizes-catalogue.md). The user took over the build, added 10 sizes per shoe (superseding "Not in scope: sizes" below), fixed the count at 20 shoes and moved the catalogue from `analytics/shoe_catalogue.csv` to `src/catalogue/shoes.py`. Where they differ, that plan wins.
+
 Written 24 September 2026, branch `erfan/analytics`. Status: **approved, plan only, nothing built.** How to start and what not to break: [shoe-dataset-handoff.md](shoe-dataset-handoff.md). Goal: turn the imported catalogue of 1,200 mixed products into a shoe shop of a few dozen products (the teammate decides the count; the user's estimate is 20 to 40) without touching the downloaded raw files, keeping the sales history, the analytics numbers and every integrity check meaningful. Agreed with the user: raw data stays unchanged and a reproducible script makes a separate derived dataset ([AGENTS.md](../../AGENTS.md), [data pipeline](../DATA_PIPELINE.md)); the remap approach was chosen over a subset.
 
 ## Why a remap and not a subset

@@ -9,3 +9,6 @@ analytics/segments.json
 src/staticfiles/
 *.tfstate*
 .terraform/
+data/derived/shoes/*
+!data/derived/shoes/checksums.txt
+!data/derived/shoes/product_map.csv

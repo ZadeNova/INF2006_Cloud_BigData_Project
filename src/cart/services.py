@@ -23,7 +23,7 @@ def get_cart(user):
 
 def _check_stock(product, quantity):
     if quantity > product.stock:
-        raise CartValidationError(f'Only {product.stock} of "{product.name}" in stock (indicative).')
+        raise CartValidationError(f'Only {product.stock} of "{product.display_name}" in stock (indicative).')
 
 
 def add_item(cart, product, quantity):
@@ -48,7 +48,7 @@ def add_item(cart, product, quantity):
         new_quantity = item.quantity + quantity
         if new_quantity > MAX_QUANTITY:
             raise CartValidationError(
-                f'Cannot add {quantity} more of "{product.name}": cart is limited to {MAX_QUANTITY}.'
+                f'Cannot add {quantity} more of "{product.display_name}": cart is limited to {MAX_QUANTITY}.'
             )
         _check_stock(product, new_quantity)
         item.quantity = new_quantity
@@ -64,7 +64,7 @@ def set_item_quantity(cart, item, quantity):
             raise CartItemNotFound from None
         if not item.product.active:
             raise CartValidationError(
-                f'"{item.product.name}" is no longer available; remove it from your cart instead.'
+                f'"{item.product.display_name}" is no longer available; remove it from your cart instead.'
             )
         _check_stock(item.product, quantity)
         item.quantity = quantity

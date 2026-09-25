@@ -30,7 +30,7 @@
                         </span>
                         <div class="line__main">
                             <p class="line__name">{{ item.product.name }}</p>
-                            <p class="line__meta">{{ item.product.category }}</p>
+                            <p class="line__meta">{% if item.product.size_label %}{{ item.product.size_label }} · {% endif %}{{ item.product.category }}</p>
                         </div>
                         <div class="line__figures">
                             <span class="line__unit"><span class="visually-hidden">Unit price </span>S${{ item.unit_price }}</span>

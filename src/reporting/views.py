@@ -67,6 +67,7 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     summary=queries.sales_summary(run, span),
                     series=queries.bucket_sales(run, buckets),
                     categories=queries.category_sales(run, span),
+                    sizes=queries.size_sales(run, span),
                     top_sellers=queries.top_sellers(run, span, limit=10),
                     # The query owns ordering and flags. Hide the numeric partial-history
                     # average at the presentation boundary, without changing its formula.
@@ -79,6 +80,7 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     comparison_summary=None,
                     comparison_series=[],
                     comparison_categories=[],
+                    comparison_sizes=[],
                     comparison_top_sellers=[],
                     segment_overview=queries.customer_segment_overview(run),
                     segment_customers=[],
@@ -96,10 +98,12 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                             comparison_summary=queries.sales_summary(run, previous),
                             comparison_series=queries.bucket_sales(run, ranges.shift_buckets(buckets, span.length)),
                             comparison_categories=queries.category_sales(run, previous),
+                            comparison_sizes=queries.size_sales(run, previous),
                             comparison_top_sellers=queries.top_sellers(run, previous, limit=10),
                         )
                 category_rows = _category_rows(
                     context["categories"], context["comparison_categories"], context["comparison_available"])
+                size_rows = _size_rows(context["sizes"], context["comparison_sizes"], context["comparison_available"])
                 context.update(
                     sales_cards=_sales_cards(context["summary"], context["comparison_summary"], compare,
                                              context["comparison_available"]),
@@ -108,6 +112,8 @@ class AnalyticsDashboardView(AnalyticsAccessMixin, View):
                     trend_rows=[{"selected": selected, "comparison": previous}
                                 for selected, previous in zip_longest(context["series"], context["comparison_series"] or [])],
                     category_rows=category_rows,
+                    size_chart=_size_chart_payload(size_rows, context["comparison_available"]),
+                    size_rows=size_rows,
                     run_short_id=str(run.summary_version).split("-")[0],
                     cutoff_label=run.cutoff.astimezone(ranges.BUSINESS_TZ).strftime("%d %b %Y, %H:%M SGT"),
                     refreshed_label=(run.finished_at.astimezone(ranges.BUSINESS_TZ).strftime("%d %b %Y, %H:%M SGT")
@@ -191,3 +197,22 @@ def _category_rows(categories, comparison, comparison_available):
         "comparison": previous.get(category, queries.CategorySales(category, 0, Decimal("0")))
                       if comparison_available else None,
     } for category in dict.fromkeys([*selected, *previous])]
+
+
+def _size_rows(sizes, comparison, comparison_available):
+    """Align selected and previous size totals by size, smallest first; a missing size shows zero."""
+    selected = {item.size: item for item in sizes}
+    previous = {item.size: item for item in comparison}
+    return [{
+        "selected": selected.get(size, queries.SizeSales(size, 0, Decimal("0"))),
+        "comparison": previous.get(size, queries.SizeSales(size, 0, Decimal("0"))) if comparison_available else None,
+    } for size in sorted(selected.keys() | previous.keys())]
+
+
+def _size_chart_payload(rows, comparison_available):
+    return {
+        "labels": [row["selected"].label for row in rows],
+        "units": [row["selected"].units for row in rows],
+        "comparison": {"units": [row["comparison"].units for row in rows]} if comparison_available else None,
+    }
+

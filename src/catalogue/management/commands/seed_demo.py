@@ -1,5 +1,5 @@
-"""Deterministic demo sneaker catalogue and store_operator role; create-only apart from
-deactivating retired demo products, safe to re-run."""
+"""Deterministic demo shoe catalogue (every model in every size) and store_operator role; create-only apart
+from deactivating retired demo products, safe to re-run."""
 import os
 import random
 from decimal import ROUND_HALF_UP, Decimal
@@ -9,26 +9,13 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand, CommandError
 
-from catalogue.models import Product
+from catalogue.models import Product, ShoeModel
+from catalogue.shoes import SHOES, SIZES, sku
 
-DEMO_PRODUCTS = [
-    ("Air Jordan 1 High", "Sneakers"),
-    ("Air Jordan 1 Low Dior", "Sneakers"),
-    ("Classic Brown Sneaker", "Sneakers"),
-    ("Converse Chuck High", "Sneakers"),
-    ("FILA Chunky Sneaker", "Sneakers"),
-    ("New Balance 997", "Sneakers"),
-    ("Air Jordan 1 Classic", "Sneakers"),
-    ("Nike Air Max 90", "Sneakers"),
-    ("RTFKT Creator One", "Sneakers"),
-    ("Salomon XT-6", "Sneakers"),
-    ("Adidas Yellow & Black Runner", "Sneakers"),
-    ("New Balance 574 Classic", "Sneakers"),
-]
-
-# Earlier general-goods demo rows used this prefix. They are deactivated, not
-# deleted, because carts, orders and reporting rows may still reference them.
-RETIRED_EXTERNAL_ID_PREFIX = "demo-"
+# Earlier demo rows used these prefixes: general goods ("demo-") and one size-less row per sneaker
+# ("sneaker-"). They are deactivated, not deleted, because carts, orders and reporting rows may still
+# reference them.
+RETIRED_EXTERNAL_ID_PREFIXES = ("demo-", "sneaker-")
 
 
 def money(value):
@@ -51,29 +38,36 @@ class Command(BaseCommand):
 
         rng = random.Random(options["seed"])
         created = 0
-        products = [] if options["no_products"] else DEMO_PRODUCTS
-        for index, (name, category) in enumerate(products, start=1):
-            price = money(rng.uniform(5, 150))
-            cost = money(price * Decimal(str(round(rng.uniform(0.4, 0.7), 2))))
-            _, was_created = Product.objects.get_or_create(
+        shoes = [] if options["no_products"] else SHOES
+        for shoe_id, name, category, price, cost, _, _ in shoes:
+            model, _ = ShoeModel.objects.get_or_create(
+                namespace=settings.DEMO_NAMESPACE, external_id=shoe_id,
+                defaults={"name": name, "category": category})
+            for size in SIZES:
+                _, was_created = Product.objects.get_or_create(
+                    namespace=settings.DEMO_NAMESPACE,
+                    external_id=sku(shoe_id, size),
+                    defaults={
+                        "name": name,
+                        "category": category,
+                        "price": money(price),
+                        "cost": money(cost),
+                        "stock": rng.randint(0, 40),
+                        "lead_time_days": rng.randint(3, 14),
+                        "shoe_model": model,
+                        "size": size,
+                    },
+                )
+                created += was_created
+        total = len(shoes) * len(SIZES)
+        self.stdout.write(f"Created {created} demo product(s); {total - created} already existed.")
+        retired = 0
+        for prefix in RETIRED_EXTERNAL_ID_PREFIXES:
+            retired += Product.objects.filter(
                 namespace=settings.DEMO_NAMESPACE,
-                external_id=f"sneaker-{index:03d}",
-                defaults={
-                    "name": name,
-                    "category": category,
-                    "price": price,
-                    "cost": cost,
-                    "stock": rng.randint(0, 200),
-                    "lead_time_days": rng.randint(3, 14),
-                },
-            )
-            created += was_created
-        self.stdout.write(f"Created {created} demo product(s); {len(products) - created} already existed.")
-        retired = Product.objects.filter(
-            namespace=settings.DEMO_NAMESPACE,
-            external_id__startswith=RETIRED_EXTERNAL_ID_PREFIX,
-            active=True,
-        ).update(active=False)
+                external_id__startswith=prefix,
+                active=True,
+            ).update(active=False)
         if retired:
             self.stdout.write(f"Deactivated {retired} retired demo product(s).")
 
