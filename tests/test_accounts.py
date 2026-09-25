@@ -154,14 +154,14 @@ def test_logout_requires_post():
     assert client.get(reverse("accounts:logout")).status_code == 405
 
 
-def test_logout_clears_session_and_redirects_home():
+def test_logout_clears_session_and_redirects_to_the_shop():
     client = Client()
     client.force_login(get_user_model().objects.create_user(username="logoutuser"))
 
     response = client.post(reverse("accounts:logout"))
 
     assert response.status_code == 302
-    assert response.url == "/"
+    assert response.url == "/products/"
     assert "_auth_user_id" not in client.session
 
 
@@ -192,7 +192,7 @@ def test_logout_without_csrf_token_is_rejected():
 def test_logout_with_csrf_token_succeeds():
     client = Client(enforce_csrf_checks=True)
     client.force_login(get_user_model().objects.create_user(username="logoutuser"))
-    token = csrf_token_from(client.get(reverse("home")))
+    token = csrf_token_from(client.get(reverse("foundation-preview")))
 
     response = client.post(reverse("accounts:logout"), {"csrfmiddlewaretoken": token})
 

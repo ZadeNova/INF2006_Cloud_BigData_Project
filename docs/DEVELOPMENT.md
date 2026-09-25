@@ -55,15 +55,24 @@ Maintain source licences and AI-use records. Documentation creation does not its
 
 ## Backend review gate
 
-This is the canonical review procedure required by [AGENTS.md](../AGENTS.md). The user authorises a separate Astra Medium reviewer and Astra Low remediation for backend-owned work, including database, import/analytics, infrastructure and supporting tests. Apply it per coherent completed task/feature/fix, not per keystroke. Documentation-only and frontend-only changes do not require this backend gate; mixed tasks review the backend changes and relevant integration boundaries.
+This is the canonical review procedure required by [AGENTS.md](../AGENTS.md). The user authorises a separate independent reviewer — Astra Medium, or Claude Opus 5.5 (see "Reviewer tier" below) — and Astra Low remediation for backend-owned work, including database, import/analytics, infrastructure and supporting tests. Apply it per coherent completed task/feature/fix, not per keystroke. Documentation-only and frontend-only changes do not require this backend gate; mixed tasks review the backend changes and relevant integration boundaries.
+
+### Reviewer tier
+
+Two ways to satisfy the independent-reviewer requirement, chosen by the user per task:
+
+- **Fresh-session (the default gate).** The reviewer — Astra Medium, or Opus 5.5 in a session that has never seen the implementing conversation — receives only the task context: the requirement, spec sections, exact diff/snapshot, changed paths and check outputs. It has no memory of writing the code, so a finding it reports carries the same evidentiary weight as Astra's. Log it as `Independent (fresh session)`.
+- **Same-session (a logged exception, not the default).** The implementing session also runs the review. Only the user can authorise this, per task. It is faster and cheaper but is not independent of the author: shared context can hide the same blind spot from both passes, so an absence of findings is not evidence a fresh reviewer would find nothing. State plainly in the log and in the tracker that the review ran in the same session, not a fresh context, and that the gate is treated as cleared by the owner's acceptance rather than by independent review — as [opus-delta-review.md](reviews/opus-delta-review.md) does — every time this tier is used, not only the first.
+
+Whichever tier is used, the reviewer is still read-only, performs the same checks, and the same stop/completion rules below apply. A same-session review that finds no actionable issues is still worth doing; it is just not proof against a shared blind spot, and the tracker and review log must say so plainly rather than reading like a fresh-session result.
 
 ### Review handoff
 
 Keep one Markdown file per review task in `docs/reviews/`, containing all review rounds, findings, fixes and concise verification results. Do not create separate review verification Markdown files or raw `.txt` output files in `evidence/` or `docs/reviews/`. The rubric's submission evidence remains separate from agent review records.
 
 - Record the task's starting commit and owned paths; identify pre-existing/unrelated changes. Freeze the review snapshot while the reviewer examines it. Include tracked edits and newly created task files; plain git diff alone omits untracked files.
-- Give the independent reviewer `gpt-6-astra` / `medium`, the user requirement, relevant spec sections, exact diff/snapshot, changed paths and check outputs. Use explicit bounded context rather than a full-history fork when model overrides require it.
-- Reviewer must not have authored the implementation. It performs read-only inspection and may run focused non-mutating checks where supported; no edits, staging, commits, deployment or further delegation.
+- Give the independent reviewer — `gpt-6-astra` / `medium`, or Opus 5.5 per the chosen tier — the user requirement, relevant spec sections, exact diff/snapshot, changed paths and check outputs. Use explicit bounded context rather than a full-history fork when model overrides require it. A fresh-session Opus 5.5 reviewer gets nothing beyond this bounded context; it must not be shown the implementing conversation.
+- Reviewer must not have authored the implementation. It performs read-only inspection and may run focused non-mutating checks where supported; no edits, staging, commits, deployment or further delegation. A same-session reviewer inherently fails the "must not have authored" test for shared blind spots even though it did not write this particular diff; that is exactly what the same-session label in the log discloses.
 - Check correctness, specification gaps, security, failure handling, duplicated logic, unnecessary complexity, dead/unreachable or obsolete code introduced/affected by the task, migrations and meaningful test coverage. Recommend the simplest correct approach when fewer moving parts can satisfy the same requirement; do not mistake needed safeguards for overengineering. Trace relevant callers/dependencies before declaring code dead. Do not turn stylistic preferences or unrelated legacy issues into invented blockers.
 
 ### Findings and remediation
@@ -75,11 +84,11 @@ The coordinator creates `docs/reviews/<task-id>.md` on the first review. It reco
 
 Include findings for mistakes, omitted requirements and dead code. Record 'no actionable findings' explicitly when appropriate. Keep round history and stable IDs; do not overwrite the first report. Link the review log from IMPLEMENTATION_PLAN rather than copying detailed findings there.
 
-Hand actionable findings to Astra Low (the original Low implementer or an explicitly assigned Low fixer). Only one writer edits a given task scope. Low fixes the issues, reruns relevant checks and records the changed paths/results. Medium then re-reviews the updated task diff and prior findings; reviewing only a fix snippet is insufficient if it introduces regressions.
+Hand actionable findings to Astra Low (the original Low implementer or an explicitly assigned Low fixer). Only one writer edits a given task scope. Low fixes the issues, reruns relevant checks and records the changed paths/results. The same reviewer tier then re-reviews the updated task diff and prior findings; reviewing only a fix snippet is insufficient if it introduces regressions.
 
 ### Stop and completion rules
 
-If a finding remains unresolved or recurs in the review following its Low remediation attempt, **stop the current task**. Match the underlying defect/requirement, not just wording or line number. Preserve the work and report the finding ID, both review outcomes, attempted fix, failing evidence and log path. Set tracker status to 'Awaiting user manual Astra Medium escalation'. Do not reset the task/finding ID, spawn another Low retry, upgrade implementation automatically, mark complete or publish the affected work.
+If a finding remains unresolved or recurs in the review following its Low remediation attempt, **stop the current task**. Match the underlying defect/requirement, not just wording or line number. Preserve the work and report the finding ID, both review outcomes, attempted fix, failing evidence and log path. Set tracker status to 'Awaiting user manual Astra Medium or fresh-session Opus 5.5 escalation'. Do not reset the task/finding ID, spawn another Low retry, upgrade implementation automatically, mark complete or publish the affected work.
 
 If the second review finds only genuinely new issues, send those to Low and apply the same repeat-after-fix stop rule per finding. Disputed findings require evidence and reviewer resolution; a genuine unresolved spec ambiguity goes to the user, not silent dismissal. Reviewer inability to execute checks is recorded as a limitation, not a passed check.
 

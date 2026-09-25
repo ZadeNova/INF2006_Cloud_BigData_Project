@@ -199,6 +199,16 @@
         showDesignNotesError();
     });
 
+    // A cart line updated after it was removed elsewhere (another tab, or placed as an order) answers 404,
+    // which HTMX does not swap. Reload so the current cart is shown instead of a stale one.
+    document.body.addEventListener("htmx:responseError", function (event) {
+        var detail = event.detail || {};
+        var target = detail.target;
+        if (detail.xhr && detail.xhr.status === 404 && target && target.id === "cart-content") {
+            window.location.reload();
+        }
+    });
+
     // HTMX does not swap error responses, so a 503 (database temporarily unavailable) would otherwise be silent.
     document.body.addEventListener("htmx:responseError", function (event) {
         var xhr = event.detail && event.detail.xhr;

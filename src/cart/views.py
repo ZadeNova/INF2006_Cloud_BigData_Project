@@ -1,23 +1,16 @@
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponse
-from django.shortcuts import get_object_or_404, redirect, render, resolve_url
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import View
 
+from accounts.mixins import HtmxLoginRequiredMixin
 from catalogue.models import Product
 
 from . import services
 from .forms import AddToCartForm, UpdateCartItemForm
 from .models import CartItem
 from .services import CartValidationError
-
-
-class HtmxLoginRequiredMixin(LoginRequiredMixin):
-    def handle_no_permission(self):
-        if self.request.headers.get("HX-Request") == "true":
-            return HttpResponse(status=200, headers={"HX-Redirect": resolve_url(self.get_login_url())})
-        return super().handle_no_permission()
 
 
 class CartDetailView(HtmxLoginRequiredMixin, View):

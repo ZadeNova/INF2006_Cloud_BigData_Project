@@ -1,6 +1,6 @@
 # Astra review brief
 
-Purpose: the single entry point for the independent Astra Medium reviewer. **Rounds 1 to 4 are complete and the backend review gate is cleared at `7eea9b7` (22 September 2026)** for every task in the queue below; their findings, fixes and re-review outcomes are recorded in `docs/reviews/`. This file now does two jobs: it briefs the **current round** (immediately below), and it remains the standing reference for the cleared tasks — owned paths, specifications, tests, decisions already made, and the things worth scrutinising. Procedure, logging format, finding table and the stop-and-escalate rule are in [DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate) and [AGENTS.md](../../AGENTS.md); this file does not replace them.
+Purpose: the single entry point for the independent Astra Medium reviewer. **Rounds 1 to 4 are complete and the backend review gate is cleared at `7eea9b7` (22 September 2026)** for every task in the queue below; their findings, fixes and re-review outcomes are recorded in `docs/reviews/`. Later analytics rounds (dataset import, refresh verification, dashboard) were also cleared; see the section below. This file remains the standing reference for the cleared tasks — owned paths, specifications, tests, decisions already made, and the things worth scrutinising. Procedure, logging format, finding table and the stop-and-escalate rule are in [DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate) and [AGENTS.md](../../AGENTS.md); this file does not replace them.
 
 Rules that matter for the reviewer:
 - Read-only. No edits, staging, commits or deployment. Focused non-mutating checks (for example running a test file) are allowed; report anything you could not run as a limitation, not a pass.
@@ -13,19 +13,13 @@ Verification: at the gate-cleared commit `7eea9b7` the author's full-suite count
 
 Frontend and visual work (templates, CSS) is outside this backend gate. The checkout, receipt and order-history pages are functional-only by design; a design pass is deferred and is not a finding.
 
-## Current round (PR #2)
+## Current status (24 September 2026)
 
-[PR #2](https://github.com/ZadeNova/INF2006_Cloud_BigData_Project/pull/2) (`erfan/backend` into `main`, draft, not to be merged without the user's explicit instruction) is the active review vehicle. PR #1 carried rounds 1 to 4 and was closed when the branch was renamed from `erfan/backend-auth`; its full review history remains readable there.
+**No review round is open.** [PR #2](https://github.com/ZadeNova/INF2006_Cloud_BigData_Project/pull/2) (`erfan/backend` into `main`) was reviewed and merged at `0887e81` ([final review](../reviews/pr-2-final.md)). PR #1 carried rounds 1 to 4 and was closed when the branch was renamed from `erfan/backend-auth`; its review history remains readable there.
 
-**Scope of this round: `7eea9b7..HEAD` only.** Those commits are documentation and data; no application code changed.
+Cleared after the backend gate, each with its own log: [analytics-data-import](../reviews/analytics-data-import.md) (dataset import, round 2), [analytics-phase3](../reviews/analytics-phase3.md) (refresh cross-check against pandas, round 1) and [analytics-dashboard](../reviews/analytics-dashboard.md) (dashboard, round 3). The dataset-switch commits (`4403337`, `63f6787`, `b95905a`) were covered by the PR #2 final review.
 
-| Commit | What |
-|---|---|
-| `4403337` | The dataset switch, recorded across the scope, the pipeline contract and the 6a plans |
-| `63f6787` | [backend-completion-roadmap.md](backend-completion-roadmap.md), sequencing the remaining dataset and analytics work |
-| `b95905a` | The raw dataset CSVs, SHA-256 checksums and the publisher's licence and data dictionary under `data/raw/` |
-
-Worth scrutinising in this round: whether the recorded mapping decisions (the `partially_refunded` collapse to `refunded`, and discarding `subtotal`/`tax_amount`/`shipping_amount`/`discount_amount`/`order_total`) are stated consistently across `PROJECT_SCOPE_INF2006.md` §5, [DATA_PIPELINE.md](../DATA_PIPELINE.md) and [batch-06a-data-import.md](batch-06a-data-import.md); whether committing roughly 27 MB of CSVs is justified on the grounds recorded in that plan's decision 7; and whether CC BY 4.0's attribution requirement is actually satisfied by what is committed. The cleared findings below are **not** reopened by this round.
+**Not Astra-reviewed:** the dashboard re-theme to the VoiceBox tokens (`766d837`, CSS and `analytics.js` only) and the UIUX storefront redesign (frontend-only, outside the mandatory backend gate). The backend-owned delta after the cleared dashboard state (`config/urls.py`, `config/views.py`, `orders/views.py`, the compose data mount) was reviewed on 24 September 2026 by Claude Opus 5.5, **accepted by the project owner as a substitute reviewer** and recorded as a deviation from this gate; it is not independent of the author. See [opus-delta-review.md](../reviews/opus-delta-review.md). The three advisory findings from that review were fixed the same day. Anything new under `src/` that changes routes, models, forms or migrations needs the gate again.
 
 ## Cleared review queue (rounds 1 to 4)
 
@@ -106,7 +100,7 @@ For a snapshot use `git diff <base>..<snapshot> -- <owned paths>`; all reviewed 
   - Retention: the ordering, the per-namespace scope, and the race with a reader who has just selected a run (the design relies on always keeping at least two).
   - Date arithmetic in `ranges.py` around leap years and month ends, bucket clipping, and shifted comparison buckets; the `zoneinfo` dependency in the slim image.
   - Test strength: would the lock, boundary, rollback and retention tests fail if the guarded behaviour were removed?
-- **Not defects:** no incremental refresh (deliberate), no scheduler design yet (infrastructure phase), not yet run on real data (the dataset was switched and downloaded on 22 September 2026, but is not yet profiled or imported — see [backend-completion-roadmap.md](backend-completion-roadmap.md)).
+- **Not defects:** no incremental refresh (deliberate), no scheduler design yet (infrastructure phase), not run on real data at the time of that review (it has since been run on the imported dataset and cross-checked; see [analytics-phase3](../reviews/analytics-phase3.md)).
 
 ## `analytics-queries`
 
@@ -133,11 +127,11 @@ A cross-cutting review of the implemented code against [SECURITY.md](../SECURITY
 - Session lifetime is 14 days (`SESSION_COOKIE_AGE`); confirm this is intended.
 - Confirm debug is off and allowed hosts are enforced outside local, and that `SECURE_PROXY_SSL_HEADER` is only set under the intended condition.
 - Sessions use the database backend (`SESSION_ENGINE = "django.contrib.sessions.backends.db"`), which matches the shared-state rule. Cross-instance behaviour cannot be verified until a multi-instance deployment exists; record that as a limitation.
-- Negative tests required by the contract: unauthenticated checkout, foreign cart or order access, non-operator analytics (not built yet), missing or invalid CSRF, quantity or price manipulation, duplicate checkout, anonymous S3 access (cloud, not yet). Map each to an existing test or record it as missing.
+- Negative tests required by the contract: unauthenticated checkout, foreign cart or order access, non-operator analytics (built since; covered by `tests/test_analytics_dashboard.py`), missing or invalid CSRF, quantity or price manipulation, duplicate checkout, anonymous S3 access (cloud, not yet). Map each to an existing test or record it as missing.
 
-## Upcoming review queue (not implemented or not yet committed)
+## Upcoming review queue
 
-`analytics-refresh` and `analytics-queries` are already in the queue above. Still to come, each needing the same gate: `analytics-data-import` (batch 6a, [plan](batch-06a-data-import.md)), the deterministic generator — now scoped to the correctness and load-test fixtures rather than being the import fallback ([plan](batch-06a-dataset-generator.md)) — and the backend part of the analytics dashboard (batch 6c, [plan](batch-06c-dashboard.md)). Add them to the table above with their commit hashes when they land; current status is in [analytics-status.md](analytics-status.md). Infrastructure changes are backend-owned work and also require the gate before being marked complete.
+`analytics-data-import`, `analytics-phase3` and `analytics-dashboard` are cleared (see Current status). Still to come, needing the same gate: the deterministic generator, scoped to the correctness and load-test fixtures ([plan](batch-06a-dataset-generator.md); not implemented), the 24 September checkout subtotal fix in `orders/views.py` (display arithmetic only, [plan](two-small-defects.md)), and all infrastructure work, which is backend-owned. Current status is in [analytics-status.md](analytics-status.md).
 
 ## Reviewer output checklist
 

@@ -8,7 +8,7 @@ All domain primary keys are BigAutoField unless stated. Foreign keys are NOT NUL
 
 | Entity | Fields and constraints / deletion behaviour |
 |---|---|
-| Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions. No auth routes yet. Source profiles are optional for locally registered users. |
+| Django User | Built-in auth.User selected before initial migrations; framework hashing/permissions/sessions; auth routes are implemented in `accounts`. Source profiles are optional for locally registered users. |
 | CustomerProfile | One-to-one User (PROTECT); namespace/external ID; aware source_signup_at distinct from User.date_joined; channel/country up to 100 characters. |
 | Product | namespace/external ID; name 200, category 100; price/cost decimal(12,2), finite and nonnegative; stock/lead_time_days nonnegative integers; active boolean. Retire via active rather than deleting historical references. Custom permission `catalogue.toggle_product_active` gates operator activate/deactivate; no other field is operator-writable. |
 | Cart | One-to-one owner User (CASCADE); one persistent cart per user, emptied after later checkout rather than keeping multiple active carts. |
@@ -17,8 +17,9 @@ All domain primary keys are BigAutoField unless stated. Foreign keys are NOT NUL
 | OrderItem | Order and Product (PROTECT); nullable nonempty external_id unique within order; positive quantity; finite nonnegative decimal(12,2) historical unit_price. Product namespace must match order namespace. |
 | InventoryVersion | namespace/version (version up to 100), unique pair; aware cutoff; sealed boolean initially false. Append-only identity/cutoff; only false-to-true seal transition is allowed and requires at least one row. |
 | InventorySnapshot | InventoryVersion and Product (PROTECT); nonnegative stock and lead_time_days; unique version/product. Product namespace must match version namespace. Rows are append-only, and inserts require an unsealed version. |
-| AnalyticsRun | UUID primary key; InventoryVersion (PROTECT); aware window_start/cutoff, cutoff strictly later; status running/completed/failed; started_at, nullable finished_at; nonnegative processed_count; unique UUID summary_version. Running requires null finished_at; terminal status requires finished_at. Selection/window immutable; selected version must be sealed at the same cutoff. |
+| AnalyticsRun | UUID primary key; InventoryVersion (PROTECT); aware window_start/cutoff, cutoff strictly later; status running/completed/failed; started_at, nullable finished_at; nonnegative processed_count; unique UUID summary_version. Running requires null finished_at; terminal status requires finished_at. Selection/window immutable; selected version must be sealed at the same cutoff. Custom permission `reporting.view_analytics` gates the dashboard; migration `0004_analyticsrun_permissions` changes model options only, with no table alteration. |
 | DailyProductSales | AnalyticsRun (CASCADE), Product (PROTECT), business_date, nonnegative units, finite nonnegative decimal(18,2) sales_amount; unique run/date/product. Each reported product must have a row in the run's selected inventory version. |
+| CustomerSegment | Optional ML output (migration `reporting/0005_customersegment.py`). AnalyticsRun (CASCADE) and customer User (PROTECT); model_version (up to 100, nonempty); nonnegative smallint cluster_id; nonempty segment_label (up to 40); nonnegative recency_days and frequency_orders; finite nonnegative decimal(18,2) monetary_total; k_clusters at least 2; nullable decimal(5,4) silhouette_score within -1..1; auto created_at. Unique run/customer/model_version. Loaded by `load_customer_segments` from a JSON file made offline by `analytics/segment_customers.py`; it never changes sales, coverage or replenishment metrics. Because it is keyed to a run, a new refresh starts with no segments until the loader is run again. |
 
 Daily uniqueness is scoped to the run so independently published versions cannot overwrite one another. The later publisher must expose only one completed version per selected reporting context; it must never sum across versions. App business validation must enforce date-window membership and publication completeness; these are not claimed as implemented by the foundation schema.
 
@@ -26,13 +27,23 @@ Demo display currency: SGD as an explicit simulation convention, not a claim abo
 
 Historical Order rows have an external ID and no idempotency key/fingerprint. Live simulated orders have no external ID, require a user-scoped UUID key plus a 64-character lowercase SHA-256 fingerprint, and are completed only. Database uniqueness permits the same key for different users but never two orders for the same user/key. The later checkout service owns canonical fingerprint generation and replay handling.
 
+## Reporting SQL view
+
+`reporting_completed_sale_lines` is created by `reporting/0003_completed_sale_lines_view.py`
+(`RunSQL`, reversed by dropping the view). It joins `orders_order` to `orders_orderitem`
+and exposes completed lines only: namespace, order_id, placed_at, product_id, quantity,
+historical unit_price, quantity-times-unit_price line_total, and the Asia/Singapore
+business_date. Refresh uses placed_at for an indexable window bound and business_date
+for complete-date membership. Formulas and sparse publication are owned by
+[the analytics contract](ANALYTICS.md#processing-and-validation).
+
 ## Foundation decisions: DOC-001 and DOC-002
 
-Imported accounts must be created with unusable passwords and never matched to existing accounts by email/name. CustomerProfile explicitly maps source identity to User; the future importer must preserve that mapping and authentication state. Initial models do not implement an importer or create demo accounts.
+Imported accounts have unusable passwords and are never matched by email/name. CustomerProfile explicitly maps source identity to User. The dataset importer uses a full SHA-256 namespaced username and preserves authentication state on replay. Its accepted-input fingerprint is held in the immutable `InventoryVersion.version` identity (`import-v1-` plus SHA-256), allowing original product inputs to be verified independently of mutable Product fields. One accepted manifest per namespace; changed source revisions require new namespaces. No schema migration was required. Mapping details are in [data dictionary](../data/DATA_DICTIONARY.md); implementation passed independent round-2 review ([record](reviews/analytics-data-import.md)).
 
 Persist immutable dated inventory separately from Product's mutable live stock AND lead time. Build an InventoryVersion and its rows in a transaction, verify all expected products, then seal. Row inserts lock the version to serialize with sealing; update/delete of snapshot rows and changes/unsealing of sealed versions fail at the database level. Corrections use a new version. Historical runs select an explicit namespace/version/cutoff and reject incomplete/mismatched snapshots; there is no fallback to Product values. A run cannot refer to an unsealed or differently dated version.
 
-Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimport-and-fixture-ownership). Mode/source revision/fixture version are part of namespace identity. Default imports and supplemental seeds are create-only, verifying existing rows and preserving live state. Import, controlled reset, checkout and aggregation commands are follow-up tasks; their end-to-end regression tests remain required. Foundation tests demonstrate immutable snapshot persistence and separation from live Product updates, not checkout or analytics execution.
+Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimport-and-fixture-ownership). Mode/source revision/fixture version are part of namespace identity. Default imports and supplemental seeds are create-only, verifying existing rows and preserving live state. Import (`import_dataset`), checkout, snapshot and aggregation (`refresh_analytics`) are implemented and covered by `tests/test_import.py`, `test_orders.py` and the analytics tests; a controlled reset command is not implemented. Foundation tests separately demonstrate immutable snapshot persistence and separation from live Product updates.
 
 ## Checkout transaction
 
@@ -42,4 +53,4 @@ Reimport and field ownership follow [data pipeline](DATA_PIPELINE.md#safe-reimpo
 4. Enforce unique non-null user/idempotency key at DB level; handle concurrent uniqueness conflicts so only one order persists.
 5. Clear purchased cart state transactionally; confirm only after commit. Never use cached stock/prices to authorise checkout.
 
-Historical import bypasses live checkout and stock deductions. Include migrations with model changes and validate concurrency against PostgreSQL, not SQLite. No checkout service is implemented in foundation work.
+Historical import bypasses live checkout and stock deductions. Include migrations with model changes and validate concurrency against PostgreSQL, not SQLite. The checkout service is `orders/services.py`; its concurrency tests use real PostgreSQL connections.

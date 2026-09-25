@@ -56,7 +56,38 @@ docker run --rm --mount "type=bind,source=${PWD}/src,target=/work" python:3.13-s
 
 Never commit .env or paste resolved Compose configuration: it contains secrets. Change APP_PORT if port 8000 is occupied.
 
-Gunicorn serves a presentation-only frontend foundation at http://127.0.0.1:8000/ and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Registration/login/logout (`/register/`, `/login/`, `/logout/`) and a public paginated product catalogue (`/products/`, seeded via `manage.py seed_demo --seed 42`) are implemented; cart, checkout and analytics routes remain unimplemented. Batch 3 supplies initial domain migrations and sealed historical inventory constraints. The local migration service applies pending migrations before web starts.
+Gunicorn serves the application at http://127.0.0.1:8000/ (which redirects to the catalogue) and the liveness probe at http://127.0.0.1:8000/health/ (200 JSON status ok). Implemented routes: `/register/`, `/login/`, `/logout/`; `/products/` (public catalogue) and `/products/manage/` (operator); `/cart/`; `/checkout/`, `/orders/`, `/orders/<id>/`; and `/analytics/` (operator dashboard). `/foundation/` is the Phase 1 design preview and `/foundation/statistics/` a design-only page with invented numbers. [API.md](../docs/API.md) owns the route contract. The local migration service applies pending migrations before web starts.
+
+Management commands (run as `docker compose run --rm web python manage.py <command>`):
+
+| Command | Purpose |
+|---|---|
+| `seed_demo --seed 42 [--no-products]` | Create the demo operator (`store_operator` group) and, unless `--no-products`, 14 demo products. Create-only. |
+| `import_dataset --source /app/data/raw --namespace NS` | Import the checksummed dataset with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
+| `snapshot_inventory --as-of YYYY-MM-DD` | Seal live stock as an immutable inventory version (today's Singapore date only). Leaves a permanent version, so avoid it on the shared dev database. |
+| `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
+| `load_customer_segments --run-id ID --input FILE` | Load the optional customer segments made by `analytics/segment_customers.py` for one analytics run; see [analytics/README.md](../analytics/README.md). |
+| `check_database` | Connectivity and applied-migration gate. |
+
+On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manual `chcon` is needed.
+
+## Demo data
+
+A fresh start has an empty store and an empty dashboard. This loads the full dataset (1,200 products, 100,000 historical orders) and a completed analytics run. Run it on a **new database**: if `seed_demo` has ever run without `--no-products`, its 14 demo products sit in the same namespace and the import refuses with a conflict. To start over, `docker compose down --volumes` deletes the local database (this is the only case where that is intended).
+
+```powershell
+docker compose up --build -d
+docker compose run --rm web python manage.py import_dataset --source /app/data/raw --namespace synthetic/revision-a/demo/v1
+docker compose run --rm web python manage.py seed_demo --no-products
+docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-02
+```
+
+- The import takes about 20 seconds and prints row counts, the cutoff `2026-01-02T00:00:00+08:00` and the sealed inventory name. Re-running it changes nothing (every row reports `unchanged`).
+- `seed_demo --no-products` creates the operator `demo-operator`. Locally its password is the fallback in `src/catalogue/management/commands/seed_demo.py` unless `DEMO_OPERATOR_PASSWORD` is set; outside local the variable is required.
+- `--as-of 2026-01-02` matches the import's cutoff, so the refresh uses the importer's sealed inventory without naming it. The dashboard then covers 1 January 2025 to 1 January 2026.
+- Imported customers have unusable passwords by design. To shop, register a new account at `/register/`. Live orders placed today fall after the historical cutoff, so they do not appear on this dashboard run.
+
+Verified on 24 September 2026 in a disposable Compose project on a fresh volume: 1,200 products and 237,537 order lines imported with zero rejects, refresh wrote 65,589 daily rows, and over HTTP `/` redirected to the catalogue, the operator login succeeded and `/analytics/` rendered with data for the default and `90d` compare views.
 
 ```powershell
 docker compose down

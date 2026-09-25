@@ -6,7 +6,8 @@
     <p class="form-error" id="{{ field.id_for_label }}-error">{{ error }}</p>
     {% endfor %}
     {% if field.help_text %}
-    <p class="form-note" id="{{ field.id_for_label }}-help">{{ field.help_text|safe }}</p>
+    {# No |safe: Django's password help is already a SafeString list; any other help text stays escaped. #}
+    <div class="form-note" id="{{ field.id_for_label }}-help">{{ field.help_text }}</div>
     {% endif %}
 </div>
 {% endfor %}

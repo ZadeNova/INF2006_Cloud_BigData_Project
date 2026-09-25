@@ -1,6 +1,6 @@
 # Project evidence plan
 
-Status: **plan only, to be handled later.** Nothing in this file is evidence. It records what evidence the submission needs, where each item comes from, what can be produced now versus later, and who leads it. Rules: [testing](../TESTING.md), [scope §12–13](../../PROJECT_SCOPE_INF2006.md), and the [evidence README](../../evidence/README.md). Placeholder or planned results must never be presented as run results; every claim in the report links to a dated artefact.
+Status (updated 24 September 2026): **plan.** Only `evidence/test-data-ai.md` holds executed results; the other files are templates or do not exist. Nothing in this file is evidence. It records what evidence the submission needs, where each item comes from, what can be produced now versus later, and who leads it. Rules: [testing](../TESTING.md), [scope §12–13](../../PROJECT_SCOPE_INF2006.md), and the [evidence README](../../evidence/README.md). Placeholder or planned results must never be presented as run results; every claim in the report links to a dated artefact.
 
 Role-based ownership (no names): the three testing/report/administration members lead test execution, evidence organisation and the report; the two developers set up tests, fix defects and provide technical context. The testing/evidence lead coordinates coverage. Record actual contributions honestly in `TEAM_CONTRIBUTIONS.md`.
 
@@ -10,7 +10,7 @@ Role-based ownership (no names): the three testing/report/administration members
 |---|---|---|
 | Problem framing and architecture (15) | Problem statement and measurable objectives, architecture diagram with trust boundaries, two alternatives with trade-offs | Diagram draft and objectives: yes. Deployed parts: labelled as target until built |
 | Cloud implementation and functionality (20) | Runnable ecommerce workflow, Terraform/config, deployment record, functional results | Local workflow: yes. Cloud deployment: later |
-| Cloud data and analytics/AI (20) | Dataset provenance, licence and dictionary, import reconciliation, aggregation, dashboard, independent validation, limitations | After dataset access and batches 6a to 6c |
+| Cloud data and analytics/AI (20) | Dataset provenance, licence and dictionary, import reconciliation, aggregation, dashboard, independent validation, limitations | Local parts done and recorded (`evidence/test-data-ai.md`); the S3 import path is cloud work |
 | Security and responsible cloud practice (15) | Threat-control map, redacted configuration, authentication and authorisation tests, secrets and data handling | Map and application tests: partly now. Cloud controls: later |
 | Scalability, resilience and operations (15) | Scaling and recovery runs, metrics, repeated workload comparison, monitoring interpretation, cost record | Later (needs AWS) |
 | Engineering quality and reproducibility (10) | Structure, pinned dependencies, local run, test scripts, valid manifest paths, clean-machine rehearsal | Mostly now, rehearsal last |
@@ -24,10 +24,10 @@ Each test file records: objective, setup, command or steps, expected result, act
 |---|---|---|---|
 | `evidence/architecture.png` | Users, components, cloud services, trust boundaries, data stores, observability, data flows | TODO | Draft now; final after deployment |
 | `evidence/threat-control-map.md` | Threats mapped to controls, where implemented, and proof | TODO (template) | Rows for implemented controls now |
-| `evidence/test-functional.md` | End-to-end workflow: register, log in, browse, cart, checkout, order history, operator page | Template plus foundation-only notes | Local now; cloud after deployment |
-| `evidence/test-security.md` | Negative tests with expected and actual results | Template plus foundation-only notes | Application tests now; cloud controls later |
-| `evidence/test-data-ai.md` | Analytics fixtures, independent recomputation, results and limits | Template | After 6b |
-| `evidence/data-validation.md` | Source counts, integrity checks, transformations, import reconciliation | Not created | After 6a |
+| `evidence/test-functional.md` | End-to-end workflow: register, log in, browse, cart, checkout, order history, operator page | Template plus foundation-only notes; workflow implemented, no run recorded | Local now; cloud after deployment |
+| `evidence/test-security.md` | Negative tests with expected and actual results | Template plus foundation-only notes; tests exist, no run recorded | Application tests now; cloud controls later |
+| `evidence/test-data-ai.md` | Analytics fixtures, independent recomputation, results and limits | Executed results recorded (22 September 2026) | Done locally |
+| `evidence/data-validation.md` | Source counts, integrity checks, transformations, import reconciliation | Not created; the content exists in `data/PROFILE.md` and `evidence/test-data-ai.md` and needs collecting | Now |
 | `evidence/test-resilience.md` | Scaling baseline and autoscaling, instance failure, session continuity, safe checkout retry | Template | Cloud phase |
 | `evidence/monitoring.md` | What is monitored, query or dashboard export, sanitised logs, interpretation | Template | Cloud phase |
 | `evidence/storage.md` | S3 object provenance, access-control tests, import reconciliation | Not created | Cloud phase |
@@ -49,12 +49,12 @@ Threats already addressed by code, with where to look. Each row needs a real tes
 | Customer using operator functions | Permission-gated views (403) | `src/catalogue/views.py`, `tests/test_catalogue.py` |
 | Price or total tampering | Owner, prices and totals derived server-side; no client-supplied price | `src/orders/services.py` |
 | Duplicate or concurrent checkout, overselling | Idempotency key and fingerprint, row locks, DB constraints | `src/orders/services.py`, concurrent tests in `tests/test_orders.py` |
-| Imported accounts used to log in | Unusable passwords, explicit profile mapping | Import command (6a, not yet built) |
-| Non-operator reads analytics | Permission on the analytics view | 6c (not yet built) |
+| Imported accounts used to log in | Unusable passwords, explicit profile mapping | `src/config/management/commands/import_dataset.py`, `tests/test_import.py` |
+| Non-operator reads analytics | `reporting.view_analytics` permission (403, including HTMX) | `src/reporting/views.py`, `tests/test_analytics_dashboard.py` |
 | Host header abuse, open redirect | Allowed hosts, safe `next` handling | `settings.py`, `tests/test_accounts.py` |
 | Cloud controls (private RDS and S3, security groups, IAM, secrets) | To be designed and evidenced | Cloud phase |
 
-Known unimplemented control from the security contract: sanitised request logging (see [cloud-independent-prep](cloud-independent-prep.md) B2).
+Sanitised request logging is implemented (`config/jsonlog.py`, `tests/test_request_logging.py`; see [SECURITY.md](../SECURITY.md)). Known unimplemented controls from the security contract: expired-session cleanup and login throttling; the cloud controls above.
 
 ## C2 and C3: diagrams
 
@@ -63,7 +63,7 @@ Known unimplemented control from the security contract: sanitised request loggin
 
 ## C4: test results to record now
 
-The application currently has 135 automated tests (checked at commit `a11247b`) plus the foundation results in `docs/reviews/`. When the testing members run them, record the command, date, environment and full outcome in `test-functional.md` and `test-security.md`, citing the specific tests behind each claim. A count of passing tests is not a security or functional claim on its own; tie each test to the behaviour it proves.
+The application has an automated suite (438 tests per the tracker on 24 September 2026; the count was 135 when this section was first written) plus the foundation results in `docs/reviews/`. Re-run it before citing a number. When the testing members run them, record the command, date, environment and full outcome in `test-functional.md` and `test-security.md`, citing the specific tests behind each claim. A count of passing tests is not a security or functional claim on its own; tie each test to the behaviour it proves.
 
 ## C5: manifest and declarations
 
@@ -76,6 +76,6 @@ Eight headings (scope §13): problem and users, solution and architecture, cloud
 ## Order of work
 
 1. Now to Phase 2: architecture and ER diagram drafts, threat-control seed rows tied to real tests, functional and security results for what is implemented.
-2. After 6a and 6b: `data-validation.md` and `test-data-ai.md` from actual command output.
+2. `test-data-ai.md` is done; collect `data-validation.md` from `data/PROFILE.md` and the recorded import reconciliation.
 3. Cloud phase: resilience, monitoring, storage, session continuity, costs; then finalise the diagram.
 4. Final week: report, manifest, declarations, clean-machine rehearsal, package check.

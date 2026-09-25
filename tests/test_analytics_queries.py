@@ -10,7 +10,7 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from analytics_helpers import (
-    NS, OTHER_NS, SGT, add_order, at, make_inventory, make_products, make_run)
+    NS, OTHER_NS, SGT, add_order, at, load_segments, make_inventory, make_products, make_run)
 from catalogue.models import Product
 from reporting import queries, ranges, services
 from reporting.models import AnalyticsRun
@@ -267,3 +267,49 @@ def test_queries_read_what_refresh_analytics_published():
     run = queries.latest_completed_run(NS)
     assert queries.sales_summary(run, Span(D(2024, 3, 5), D(2024, 3, 7))) == (5, Decimal("35.00"))
     assert [(item.external_id, item.units) for item in queries.top_sellers(run, WEEK)] == [("beta", 3), ("alpha", 2)]
+
+
+def test_customer_segment_overview_returns_none_when_unloaded(world):
+    _, _, run = world
+    assert queries.customer_segment_overview(run) is None
+
+
+def test_customer_segment_overview_groups_rows_and_sales_share(world):
+    _, _, run = world
+    owner = get_user_model().objects.create_user(username="segment-owner")
+    second = get_user_model().objects.create_user(username="segment-owner-2")
+    load_segments(run, [
+        (owner, 0, "high_value", 2, 8, "900.00"),
+        (second, 1, "at_risk", 35, 1, "100.00"),
+    ], silhouette="0.6000")
+
+    overview = queries.customer_segment_overview(run)
+    assert overview.model_version == "rfm-kmeans-v1"
+    assert overview.k_clusters == 3
+    assert overview.silhouette_score == Decimal("0.6000")
+    assert overview.customers == 2
+    assert overview.sales_amount == Decimal("1000.00")
+    assert [(item.segment_label, item.customers, item.sales_share_percent)
+            for item in overview.segments] == [("high_value", 1, Decimal("90.0")), ("at_risk", 1, Decimal("10.0"))]
+
+
+def test_customer_segment_customers_caps_per_segment_and_prioritises_high_value(world):
+    _, _, run = world
+    users = [get_user_model().objects.create_user(username=f"segment-user-{index}") for index in range(6)]
+    load_segments(run, [
+        (users[0], 0, "core", 10, 2, "200.00"),
+        (users[1], 0, "core", 9, 3, "190.00"),
+        (users[2], 0, "core", 8, 4, "180.00"),
+        (users[3], 1, "high_value", 3, 7, "500.00"),
+        (users[4], 1, "high_value", 4, 6, "450.00"),
+        (users[5], 2, "at_risk", 30, 1, "50.00"),
+    ])
+
+    rows = queries.customer_segment_customers(run, model_version="rfm-kmeans-v1", limit=5, per_segment_limit=2)
+    assert [(item.segment_label, item.monetary_total) for item in rows] == [
+        ("high_value", Decimal("500.00")),
+        ("high_value", Decimal("450.00")),
+        ("core", Decimal("200.00")),
+        ("core", Decimal("190.00")),
+        ("at_risk", Decimal("50.00")),
+    ]

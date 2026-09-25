@@ -37,7 +37,7 @@
 
     <header class="site-header">
         <div class="site-header__inner">
-            <a class="brand" href="{% url 'home' %}" aria-label="Northstar Market home">
+            <a class="brand" href="{% url 'catalogue:product_list' %}" aria-label="Northstar Market home">
                 <span class="brand__mark" aria-hidden="true">{% include "_icon.html" with name="star" only %}</span>
                 <span class="brand__name">Northstar <span>Market</span></span>
             </a>
@@ -57,6 +57,9 @@
             <div class="site-header__meta">
                 {% if perms.catalogue.toggle_product_active %}
                 <a class="nav-pill nav-pill--quiet" href="{% url 'catalogue:manage_list' %}"{% if request.resolver_match.view_name == 'catalogue:manage_list' %} aria-current="page"{% endif %}>Manage products</a>
+                {% endif %}
+                {% if perms.reporting.view_analytics %}
+                <a class="button button--compact" href="{% url 'reporting:dashboard' %}">Analytics</a>
                 {% endif %}
                 {% if user.is_authenticated %}
                 {% with cart_count=user.cart.items.count %}
@@ -120,9 +123,9 @@
             <div>
                 <p class="site-footer__heading">Project evidence</p>
                 <ul class="site-footer__links">
-                    <li><a href="{% url 'home' %}#overview">Foundation preview</a></li>
-                    <li><a href="{% url 'home' %}#patterns">Patterns</a></li>
-                    <li><a href="{% url 'home' %}#states">States</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#overview">Foundation preview</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#patterns">Patterns</a></li>
+                    <li><a href="{% url 'foundation-preview' %}#states">States</a></li>
                     <li><a href="{% url 'statistics-preview' %}">Statistics preview</a></li>
                     <li><a href="{% url 'health' %}">System status</a></li>
                 </ul>
@@ -130,7 +133,7 @@
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.4/dist/htmx.min.js" defer></script>
+    <script src="{% static 'vendor/htmx/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/site.js' %}" defer></script>
     {% block scripts %}{% endblock %}
 </body>

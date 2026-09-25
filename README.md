@@ -2,7 +2,7 @@
 
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-**Status:** The local backend foundation has verified Docker/PostgreSQL startup, initial migrations and health/readiness checks. The presentation-only frontend foundation is also delivered locally. Ecommerce features, dataset/analytics and AWS delivery remain planned; foundation completion does not complete all Phase 1 requirements. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+**Status (24 September 2026):** The application runs locally in Docker. Registration/login, catalogue, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh and the operator dashboard are implemented and were independently reviewed as recorded in [docs/reviews/](docs/reviews/). The storefront was redesigned after that (VoiceBox look, dark mode) and the dashboard was re-themed to match; those changes have had no independent review or documented browser walkthrough yet. **Nothing is deployed to AWS**: there is no Terraform, no load test and no scaling, recovery or monitoring evidence, and most submission evidence files are still templates. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
 
 **Module:** INF2006 Cloud Computing & Big Data
 
@@ -22,13 +22,19 @@ To be completed by the team. Keep final details consistent with the manifest and
 | TODO | TODO | TODO |
 | TODO | TODO | TODO |
 
-## Planned features
+## Features
+
+Implemented locally (not yet deployed):
 
 - Registration, login/logout and shared database-backed sessions.
 - Product catalogue and persistent shopping cart.
 - Simulated checkout with server-side prices, transactional stock updates and duplicate-request protection.
 - Owner-only order confirmation and history.
-- Operator-only sales and inventory dashboard with reporting dates, freshness and interpretable replenishment flags.
+- Operator-only sales and inventory dashboard at `/analytics/` with reporting dates, freshness and interpretable replenishment flags.
+- A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
+- Optional customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
+
+Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, and load tests.
 
 Payments are simulated; no real payment-card data is collected. Analytics is required; customer-segmentation ML is optional. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
 
@@ -36,7 +42,7 @@ Payments are simulated; no real payment-card data is collected. Analytics is req
 
 The required analytics reports daily/category sales, top-selling products, previous-seven-complete-day average sales, estimated stock coverage and replenishment flags. Calculations use completed orders and historical line prices, with independently checked fixtures and documented limitations.
 
-Selected historical source: the [Ecommerce Sales Dataset from Analytics Engineering](https://www.analyticsengineering.com/datasets/ecommerce-sales) (customers, products, orders and order items; CC BY 4.0). Switched 22 September 2026 from the original selection, LaelaZ/synthetic-ecommerce on Hugging Face, after its gated access was never granted. Downloaded, checksummed and committed under `data/raw/`; row counts confirmed exact against the publisher's data dictionary. Full integrity validation (`analytics/profile_dataset.py`) is still pending. Only synthetic data is permitted by this project's chosen data policy; the publisher states this dataset is fully synthetic.
+Selected historical source: the [Ecommerce Sales Dataset from Analytics Engineering](https://www.analyticsengineering.com/datasets/ecommerce-sales) (customers, products, orders and order items; CC BY 4.0). Switched 22 September 2026 from the original selection, LaelaZ/synthetic-ecommerce on Hugging Face, after its gated access was never granted. Downloaded, checksummed and committed under `data/raw/`; row counts confirmed exact against the publisher's data dictionary. Integrity profiling (`analytics/profile_dataset.py`, output in [data/PROFILE.md](data/PROFILE.md)) passed with zero rejected rows, the import (`import_dataset`) and the analytics refresh ran on the full data, and an independent pandas recomputation (`analytics/verify_refresh.py`) found zero mismatches; see [evidence/test-data-ai.md](evidence/test-data-ai.md). The patterns in this dataset are weak, so results are descriptive only. Only synthetic data is permitted by this project's chosen data policy; the publisher states this dataset is fully synthetic.
 
 Generate missing stock snapshots, lead times and demo account/cart fixtures separately. Preserve source identities, document date alignment and prevent reimports from overwriting live state. See the [data pipeline contract](docs/DATA_PIPELINE.md), [data documentation](data/README.md) and [analytics contract](docs/ANALYTICS.md).
 
@@ -68,7 +74,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-The local backend foundation is delivered in four independently reviewed batches. See [the Docker quickstart](src/README.md) and [foundation review](docs/reviews/foundation-batch-4.md) for local configuration, startup and checks. The presentation-only frontend foundation is also available; business routes remain follow-ups and this does not complete Phase 1.
+See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). The local run is the only supported environment today; no AWS deployment exists yet.
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -115,7 +121,7 @@ Backend implementation uses Astra Low and independent Astra Medium diff review. 
 
 ## Testing and submission evidence
 
-Planned verification covers functional workflows, security controls, data/analytics correctness, concurrent checkout, scaling, recovery/session continuity, private S3 access and monitoring. Actual commands and results belong in [tests](tests/README.md), [analytics](analytics/README.md) and [evidence](evidence/README.md). Existing templates are not completed test evidence.
+The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (459 passed in a local Docker run on 25 September 2026 at `9e07dcf`; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
 
 Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
 
@@ -128,11 +134,11 @@ DESIGN.md                    Visual reference
 README.md                    Human/marker entry point
 project_manifest.yaml        Submission metadata and evidence index
 docs/                        Contracts, tracker and review records
-src/                         Application/infrastructure scaffolding
-data/                        Dataset documentation and eventual fixtures
-analytics/                   Analytics documentation and eventual implementation
-tests/                       Test documentation and eventual repeatable checks
-evidence/                    Evidence templates and eventual dated results
+src/                         Django application (infrastructure code not yet written)
+data/                        Raw dataset, profile, provenance and data dictionary
+analytics/                   Dataset profiler, independent refresh verifier and reproduction notes
+tests/                       Automated pytest suite (real PostgreSQL)
+evidence/                    Dated results (data/analytics done) and templates (the rest)
 TEAM_CONTRIBUTIONS.md         Contribution record
 AI_USE_DECLARATION.md         Tools, verification, licences and attribution
 ```
@@ -142,8 +148,9 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 ## Current limitations and continuation
 
 - AWS permissions, exact costs and HTTPS prerequisites remain unverified.
-- Dataset validation, ecommerce/analytics workflows and cloud evidence remain pending. Local backend and presentation-only frontend foundation review summaries are available; business-frontend workflow evidence awaits those later features. See the quickstart and [frontend foundation review](docs/reviews/frontend-foundation.md).
-- DOC-001/002 are resolved at the foundation contract/persistence boundary and DOC-003 is corrected. Import-after-checkout and analytics-recompute regressions remain required when those workflows are implemented.
+- Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Functional and security evidence files record no run yet, although the automated tests exist; a recorded live walkthrough of the redesigned storefront is also outstanding.
+- The redesign and the dashboard re-theme (24 September 2026) are not independently reviewed and have no recorded browser walkthrough yet. See [storefront redesign](docs/plans/storefront-redesign.md).
+- The imported dataset has weak weekly variation and 32–40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 

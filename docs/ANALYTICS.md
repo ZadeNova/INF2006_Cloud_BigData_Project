@@ -29,7 +29,7 @@ Zero sales means coverage unavailable, not infinity or a confident recommendatio
 
 Historical inventory selection (DOC-001): require an explicit immutable snapshot namespace/version/cutoff matching the reporting cutoff, with a row for every reported product. Use its stock and lead time, never mutable Product values. Missing/misaligned snapshots are validation errors. Persist the selection on AnalyticsRun. InventoryVersion must be sealed before a run can reference it; snapshot rows include stock and lead time. DailyProductSales is unique per run/date/product so versioned publication does not overwrite a prior run; readers must select one completed run, never sum across versions. A live stock or lead-time change must leave historical coverage and flags unchanged on recomputation; test this when aggregation is implemented. Snapshot persistence is owned by [schema](SCHEMA.md#foundation-decisions-doc-001-and-doc-002).
 
-**Live inventory snapshots (KO-1).** `snapshot_inventory` seals current live stock and lead times and accepts only today's Singapore date as `--as-of`, because live values are captured when it runs and cannot describe another cutoff. This is a disclosed approximation: the cutoff is labelled 00:00 that day, but sales between midnight and the moment of capture are already deducted from stock. Since nothing in the application raises stock (it only decreases through checkout), the captured stock is at most the true midnight stock, so coverage errs low and flags may fire slightly early, never late. That argument no longer holds if a restock feature is added; revisit it then. Historical inventories are not made by this command: the import seals its generated stock at import time. The dashboard states that stock is a snapshot captured on the refresh day.
+**Live inventory snapshots (KO-1).** `snapshot_inventory` seals current live stock and lead times and accepts only today's Singapore date as `--as-of`, because live values are captured when it runs and cannot describe another cutoff. This is a disclosed approximation: the cutoff is labelled 00:00 that day, but sales between midnight and the moment of capture are already deducted from stock. Since nothing in the application raises stock (it only decreases through checkout), the captured stock is at most the true midnight stock, so coverage errs low and flags may fire slightly early, never late. That argument no longer holds if a restock feature is added; revisit it then. Historical inventories are not made by this command: the import seals generated stock against its historical reporting cutoff. The dashboard uses the sealed snapshot associated with the completed run; its general disclosure distinguishes generated historical inventory aligned to that cutoff from a live snapshot captured after midnight, which approximates the midnight cutoff, without inferring provenance the run model does not expose.
 
 ## Dashboard (`GET /analytics/`, operator only)
 
@@ -56,6 +56,14 @@ Validate `range` against this whitelist (a Django form choice); an invalid value
 **Delivery.** Full page for a normal request; only the `#analytics-panel` fragment for an HTMX request (`HX-Request`), with `hx-push-url` so links and the back button work. Chart.js is pinned and served from `src/static/` (no CDN dependency, so the app runs offline); series are embedded with Django's `json_script`, and the chart is re-created on `htmx:load`, destroying any previous instance. Reuse the existing HTMX-aware login redirect and an operator permission check (403 for non-operators). Routes and parameters are recorded in [API](API.md).
 
 ## Calendar correctness
+
+Dataset acceptance (22 September 2026): source orders carry explicit UTC `Z` offsets,
+which the importer preserves. Published UTC coverage ends 31 December 2025, but the
+last Singapore order is 1 January 2026 at 07:59:03. The unshifted generated inventory
+cutoff is therefore 2 January 2026 at 00:00 Singapore. Naive signup dates assume
+Singapore. `--shift-anchor` is an exclusive midnight cutoff; a constant whole-day
+offset puts the latest order on the preceding date. This clarifies source handling
+without changing reporting formulas; see [data provenance](../data/README.md).
 
 Never hardcode 365, 366 or 30 in logic. Derive spans, day counts and comparison spans from date arithmetic, and derive any per-date denominator from the actual span (the seven-date average stays fixed at seven by definition). Convert stored UTC timestamps to `Asia/Singapore` in SQL with an explicit time zone; Singapore has no daylight saving. The source dataset covers January 2023 to December 2025 and so contains 29 February 2024. The unshifted historical fixture keeps that real leap day; the shifted demo fixture moves every date by a recorded whole-number-of-days offset, which may move it off 29 February, so leap-day behaviour is verified with explicit-date test fixtures rather than the imported data either way. A shift must be a fixed number of days, never adding a year, which is invalid for 29 February.
 
@@ -84,7 +92,8 @@ Begins only after the required work passes and the dataset profile shows custome
 - Train and evaluate offline in `analytics/` with its own requirements; the web image has no ML dependency.
 - Features per customer, as of the run cutoff and using only completed orders before it: recency (days since last order), frequency (order count) and monetary value (sum of order totals). Scale the features, transform skewed monetary values, fit K-means with a fixed random seed and choose k by silhouette over a small range.
 - Evaluate cluster sizes and profiles (mean RFM and share of sales per cluster), silhouette and stability across seeds or resamples. Do not report classification accuracy without true labels. State that synthetic customers may reflect the generator's structure rather than real behaviour.
-- A management command loads cluster assignments into one dedicated table, keyed by model version and analytics run. Removal means deleting that module and table.
+- Offline training writes JSON via `analytics/segment_customers.py`; Django command `load_customer_segments` loads
+  assignments into one dedicated table keyed by model version and analytics run. Removal means deleting that module and table.
 - The dashboard shows a segment panel (sizes, share of sales, mean RFM) only when assignments exist for the run. It tells the operator which customer groups drive sales; it does not change any deterministic metric or replenishment flag, and it is secondary to the sales-driven inventory planning.
 
 Use the simplest algorithm that can be justified for the store; more complex models are not planned.

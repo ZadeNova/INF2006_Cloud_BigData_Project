@@ -6,13 +6,16 @@ inventory snapshot, with the SQL kept as named constants so the same queries can
 (docs/INF2003_BASELINE.md rule 4). Dates are business dates (Singapore calendar dates).
 """
 from datetime import timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import NamedTuple
 
+from accounts.models import CustomerProfile
 from django.db import connection
+from django.db.models import Avg, Case, Count, F, IntegerField, Max, Sum, Value, When, Window
+from django.db.models.functions import RowNumber
 
 from . import ranges
-from .models import AnalyticsRun
+from .models import AnalyticsRun, CustomerSegment
 
 # Days used for average daily sales, coverage and flags. Defined by the metric, not by the calendar.
 COVERAGE_DATES = 7
@@ -122,6 +125,37 @@ class CoverageRow(NamedTuple):
     status: str          # flagged | ok | unavailable | insufficient_history
 
 
+class SegmentBreakdown(NamedTuple):
+    segment_label: str
+    cluster_id: int
+    customers: int
+    sales_amount: Decimal
+    sales_share_percent: Decimal
+    mean_recency_days: Decimal
+    mean_frequency_orders: Decimal
+    mean_monetary_total: Decimal
+
+
+class SegmentOverview(NamedTuple):
+    model_version: str
+    k_clusters: int
+    silhouette_score: Decimal | None
+    customers: int
+    sales_amount: Decimal
+    segments: list[SegmentBreakdown]
+
+
+class SegmentCustomer(NamedTuple):
+    customer_id: int
+    customer_reference: str
+    username_short: str
+    username_full: str
+    segment_label: str
+    recency_days: int
+    frequency_orders: int
+    monetary_total: Decimal
+
+
 def latest_completed_run(namespace):
     """The newest completed run for the namespace, or None. Failed and running runs are never returned."""
     return (AnalyticsRun.objects
@@ -188,6 +222,104 @@ def coverage(run):
             status = "flagged" if flagged else "ok"
         result.append(CoverageRow(product_id, external_id, name, category, stock, lead, int(units), average, days, status))
     return result
+
+
+def customer_segment_overview(run):
+    """Latest customer-segment snapshot for the run, or None when no optional ML output is loaded."""
+    latest = (CustomerSegment.objects.filter(run=run)
+              .values("model_version")
+              .annotate(last_loaded=Max("created_at"))
+              .order_by("-last_loaded", "-model_version")
+              .first())
+    if latest is None:
+        return None
+
+    model_version = latest["model_version"]
+    rows = list(
+        CustomerSegment.objects.filter(run=run, model_version=model_version)
+        .values("segment_label", "cluster_id")
+        .annotate(
+            customers=Count("id"),
+            sales_amount=Sum("monetary_total"),
+            mean_recency_days=Avg("recency_days"),
+            mean_frequency_orders=Avg("frequency_orders"),
+            mean_monetary_total=Avg("monetary_total"),
+            k_clusters=Max("k_clusters"),
+            silhouette_score=Max("silhouette_score"),
+        )
+        .order_by("-sales_amount", "cluster_id")
+    )
+    if not rows:
+        return None
+
+    total_customers = sum(int(row["customers"]) for row in rows)
+    total_sales = sum((row["sales_amount"] or Decimal("0") for row in rows), Decimal("0"))
+    result = []
+    for row in rows:
+        sales = row["sales_amount"] or Decimal("0")
+        share = (Decimal("0.0") if total_sales == 0 else
+                 (Decimal(sales) / total_sales * Decimal("100")).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
+        result.append(
+            SegmentBreakdown(
+                segment_label=row["segment_label"],
+                cluster_id=int(row["cluster_id"]),
+                customers=int(row["customers"]),
+                sales_amount=sales,
+                sales_share_percent=share,
+                mean_recency_days=Decimal(row["mean_recency_days"]).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+                mean_frequency_orders=Decimal(row["mean_frequency_orders"]).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+                mean_monetary_total=Decimal(row["mean_monetary_total"]).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+            ))
+
+    return SegmentOverview(
+        model_version=model_version,
+        k_clusters=int(rows[0]["k_clusters"]),
+        silhouette_score=rows[0]["silhouette_score"],
+        customers=total_customers,
+        sales_amount=total_sales,
+        segments=result,
+    )
+
+
+def customer_segment_customers(run, *, model_version, limit=50, per_segment_limit=25):
+    """Top segment members for operator targeting, capped per segment and ordered by segment priority."""
+    rows = (CustomerSegment.objects
+            .filter(run=run, model_version=model_version)
+            .annotate(
+                segment_priority=Case(
+                    When(segment_label="high_value", then=Value(0)),
+                    When(segment_label="core", then=Value(1)),
+                    When(segment_label="at_risk", then=Value(2)),
+                    default=Value(9),
+                    output_field=IntegerField(),
+                ),
+                segment_rank=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("segment_label")],
+                    order_by=[F("monetary_total").desc(), F("customer_id").asc()],
+                ),
+            )
+            .filter(segment_rank__lte=per_segment_limit)
+            .select_related("customer")
+            .order_by("segment_priority", "segment_label", "-monetary_total", "customer_id")[:limit])
+    user_ids = [row.customer_id for row in rows]
+    references = dict(CustomerProfile.objects.filter(user_id__in=user_ids).values_list("user_id", "external_id"))
+    return [SegmentCustomer(
+        customer_id=row.customer_id,
+        customer_reference=references.get(row.customer_id, f"U{row.customer_id}"),
+        username_short=_short_username(row.customer.get_username()),
+        username_full=row.customer.get_username(),
+        segment_label=row.segment_label,
+        recency_days=row.recency_days,
+        frequency_orders=row.frequency_orders,
+        monetary_total=row.monetary_total,
+    ) for row in rows]
+
+
+def _short_username(username, keep=12):
+    if len(username) <= keep * 2 + 1:
+        return username
+    return f"{username[:keep]}…{username[-keep:]}"
 
 
 def _fetch_one(sql, params):
