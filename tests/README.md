@@ -1,6 +1,6 @@
 # Automated tests
 
-pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. The tracker recorded 438 passing tests on 24 September 2026; re-run before quoting a number. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
+pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. 459 tests passed in a local Docker run on 25 September 2026 (commit `9e07dcf`); re-run before quoting a number. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
 
 ```powershell
 docker compose run --rm web pytest -q -p no:cacheprovider /app/tests
@@ -17,10 +17,12 @@ The image copies `src/` at build time and only `tests/` is mounted, so run `dock
 | `test_cart.py`, `test_orders.py` | Cart rules and HTMX contract; checkout, idempotency, history, and real-thread concurrency tests |
 | `test_security_negative.py` | CSRF, anonymous access, forged fields and quantity manipulation across every mutation |
 | `test_analytics_ranges.py`, `test_analytics_view.py`, `test_analytics_refresh.py`, `test_analytics_snapshot.py`, `test_analytics_queries.py` | Date ranges, the SQL view, refresh and locking, inventory snapshots, dashboard queries |
-| `test_analytics_dashboard.py` | The `/analytics/` view: permissions, HTMX fragment, context |
+| `test_analytics_dashboard.py` | The `/analytics/` view: permissions, HTMX fragment, context, and the optional segment panel |
+| `test_customer_segments_command.py` | The `load_customer_segments` command |
+| `test_aws_capability_check.py` | The read-only AWS lab probe (`src/tools/aws_capability_check.py`), run against a fake CLI; nothing is contacted |
 | `test_import.py` | Dataset import, replay, conflicts, date shifts, sealed inventory |
 | `test_frontend.py` | Presentation pages, including the statistics preview |
 
-`analytics/tests/` holds four tests for the independent pandas verifier; they need pandas and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
+`analytics/tests/` holds seven tests: four for the independent pandas verifier (`test_verify_refresh.py`) and three for the offline segmentation script (`test_segment_customers.py`). They need pandas and, for segmentation, scikit-learn, and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
 
 Locking and concurrency tests use real independent connections. A passing suite is not by itself a functional or security claim; record the command, date and outcome in the files under [../evidence/](../evidence/README.md). No load, scaling or AWS test exists yet.

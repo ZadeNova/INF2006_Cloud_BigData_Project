@@ -154,7 +154,7 @@ A successful comparison exits 0 and prints a JSON summary without customer field
 For historical imports always pass the importer-reported namespace, cutoff and
 inventory version to refresh. Do not run snapshot_inventory to backdate live stock.
 Run IDs in the evidence identify a removed disposable database; reproduce import
-and refresh to obtain new IDs. Four independent tests live in `analytics/tests/`,
+and refresh to obtain new IDs. Seven tests live in `analytics/tests/` (four for this verifier, three for the segmentation script),
 outside ordinary web tests because pandas is intentionally absent from the web image.
 The evidence gives the combined 410-test invocation using the built `/app` settings.
 

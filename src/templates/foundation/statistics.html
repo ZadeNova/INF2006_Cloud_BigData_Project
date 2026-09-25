@@ -6,9 +6,10 @@
         {% include "_icon.html" with name="warning" only %}
         <div>
             <strong>Design comp. Every number on this page is invented.</strong>
-            <p>Nothing here is queried. The real dashboard is a later batch that reads the analytics
-               run, and it will live on its own protected operator route. Do not cite this page as a
-               result or as evidence that analytics works.</p>
+            <p>Nothing here is queried. The real dashboard is at
+               <a href="{% url 'reporting:dashboard' %}">/analytics/</a> (operator sign-in required) and
+               reads the latest analytics run. Do not cite this page as a result or as evidence that
+               analytics works.</p>
         </div>
     </div>
 

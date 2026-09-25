@@ -66,6 +66,7 @@ Management commands (run as `docker compose run --rm web python manage.py <comma
 | `import_dataset --source /app/data/raw --namespace NS` | Import the checksummed dataset with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
 | `snapshot_inventory --as-of YYYY-MM-DD` | Seal live stock as an immutable inventory version (today's Singapore date only). Leaves a permanent version, so avoid it on the shared dev database. |
 | `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
+| `load_customer_segments --run-id ID --input FILE` | Load the optional customer segments made by `analytics/segment_customers.py` for one analytics run; see [analytics/README.md](../analytics/README.md). |
 | `check_database` | Connectivity and applied-migration gate. |
 
 On SELinux hosts (Fedora) the compose bind mounts carry the `:z` label; no manual `chcon` is needed.

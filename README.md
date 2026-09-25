@@ -32,8 +32,9 @@ Implemented locally (not yet deployed):
 - Owner-only order confirmation and history.
 - Operator-only sales and inventory dashboard at `/analytics/` with reporting dates, freshness and interpretable replenishment flags.
 - A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
+- Optional customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
 
-Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, load tests, and the optional customer segmentation.
+Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, and load tests.
 
 Payments are simulated; no real payment-card data is collected. Analytics is required; customer-segmentation ML is optional. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
 
@@ -120,7 +121,7 @@ Backend implementation uses Astra Low and independent Astra Medium diff review. 
 
 ## Testing and submission evidence
 
-The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (438 tests per the tracker on 24 September 2026; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
+The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (459 passed in a local Docker run on 25 September 2026 at `9e07dcf`; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
 
 Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
 
