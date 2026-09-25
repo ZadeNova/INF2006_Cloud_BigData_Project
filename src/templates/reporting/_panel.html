@@ -178,9 +178,9 @@
 
     {% if segment_overview %}
     <section class="analytics-section" aria-labelledby="segments-title">
-        <div class="section-heading section-heading--compact"><p class="eyebrow">Optional ML</p><h2 id="segments-title">Customer segments</h2><p>Cluster assignments are loaded for this run and model version {{ segment_overview.model_version }}. They support operator targeting and do not change sales or replenishment metrics.</p></div>
+        <div class="section-heading section-heading--compact"><p class="eyebrow">Descriptive ML</p><h2 id="segments-title">Customer segments</h2><p>Cluster assignments are loaded for this run and model version {{ segment_overview.model_version }}. They support operator targeting and do not change sales or replenishment metrics.</p></div>
         <div class="analytics-cards">
-            <article class="analytics-card surface-card"><p class="analytics-card__label">Segmented customers</p><p class="analytics-card__value">{{ segment_overview.customers|units }}</p><div class="analytics-card__comparison"><span>K={{ segment_overview.k_clusters }} clusters</span></div></article>
+            <article class="analytics-card surface-card"><p class="analytics-card__label">Total segmented customers</p><p class="analytics-card__value">{{ segment_overview.customers|units }}</p><div class="analytics-card__comparison"><span>K={{ segment_overview.k_clusters }} clusters</span></div></article>
             <article class="analytics-card surface-card"><p class="analytics-card__label">Segment sales value</p><p class="analytics-card__value">S${{ segment_overview.sales_amount|money }}</p><div class="analytics-card__comparison">{% if segment_overview.silhouette_score is not None %}<span>Silhouette {{ segment_overview.silhouette_score }}</span>{% else %}<span>Silhouette unavailable</span>{% endif %}</div></article>
         </div>
         <div class="surface-card analytics-table-card analytics-table-card--segment-summary">
@@ -191,10 +191,11 @@
             </div>
         </div>
         <div class="surface-card analytics-table-card analytics-table-card--segment-customers">
-            <h3 class="analytics-subsection-title">Top customers by segment (up to 25 each, max 50)</h3>
+            <h3 class="analytics-subsection-title">Balanced customer sample (up to 25 per segment, max 50 total)</h3>
+            <p class="analytics-comparison-status">Showing {{ segment_customers|length }} of {{ segment_overview.customers }} segmented customers. The overview above includes the full assigned population.</p>
             <div class="table-scroll" tabindex="0" role="region" aria-label="Segment customer list">
-                <table class="analytics-data-table analytics-data-table--segments-customers"><caption class="visually-hidden">Segment customer list</caption><thead><tr><th scope="col">Segment</th><th scope="col">Customer ref</th><th scope="col">Login username</th><th scope="col">Recency (days)</th><th scope="col">Frequency</th><th scope="col">Monetary</th></tr></thead><tbody>
-                    {% for row in segment_customers %}<tr><td>{{ row.segment_label }}</td><td>{{ row.customer_reference }}</td><td title="{{ row.username_full }}"><span class="segment-username">{{ row.username_short }}</span></td><td>{{ row.recency_days|units }}</td><td>{{ row.frequency_orders|units }}</td><td>S${{ row.monetary_total|money }}</td></tr>{% empty %}<tr><td class="table-empty" colspan="6">No segment customer rows are available for this run.</td></tr>{% endfor %}
+                <table class="analytics-data-table analytics-data-table--segments-customers"><caption class="visually-hidden">Balanced segment customer sample</caption><thead><tr><th scope="col">Segment</th><th scope="col">Customer reference</th><th scope="col">Recency (days)</th><th scope="col">Frequency</th><th scope="col">Monetary</th></tr></thead><tbody>
+                    {% for row in segment_customers %}<tr><td>{{ row.segment_label }}</td><td>{{ row.customer_reference }}</td><td>{{ row.recency_days|units }}</td><td>{{ row.frequency_orders|units }}</td><td>S${{ row.monetary_total|money }}</td></tr>{% empty %}<tr><td class="table-empty" colspan="5">No segment customer rows are available for this run.</td></tr>{% endfor %}
                 </tbody></table>
             </div>
         </div>

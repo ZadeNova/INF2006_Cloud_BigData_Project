@@ -343,7 +343,10 @@ def test_dashboard_shows_ml_segment_panel_when_assignments_exist(client, operato
     products = make_products()
     inventory = make_inventory(products, cutoff=at(2024, 5, 8, 0))
     run = make_run(inventory, [(date(2024, 5, 7), products["alpha"], 7, "70.00")])
-    second = get_user_model().objects.create_user(username="import-" + ("a" * 60))
+    operator.username = "private-operator-login"
+    operator.save(update_fields=["username"])
+    second = get_user_model().objects.create_user(username="import-" + ("a" * 60),
+                                                 email="private@example.test", first_name="PrivateName")
     CustomerProfile.objects.create(
         user=second, namespace=NS, external_id="C000002", source_signup_at=at(2024, 1, 1), channel="web", country="SG")
     load_segments(run, [
@@ -354,12 +357,18 @@ def test_dashboard_shows_ml_segment_panel_when_assignments_exist(client, operato
     client.force_login(operator)
     body = client.get(reverse("reporting:dashboard"), {"range": "7d"}).content.decode()
     assert "Customer segments" in body
-    assert "Segmented customers" in body
-    assert "Top customers by segment (up to 25 each, max 50)" in body
-    assert "Customer ref" in body and "Login username" in body
+    assert "Total segmented customers" in body
+    assert "Balanced customer sample (up to 25 per segment, max 50 total)" in body
+    assert "Customer ref" in body and "Login username" not in body
     assert "high_value" in body and "at_risk" in body
-    assert "demo-operator" not in body
-    assert "C000002" in body and "import-" in body and "…" in body
+    for private_value in [operator.username, second.username, second.email, second.first_name, "C000002"]:
+        assert private_value not in body
+    assert f"CUS-{operator.pk}" in body and f"CUS-{second.pk}" in body
+    fragment = client.get(reverse("reporting:dashboard"), {"range": "7d"},
+                          headers={"HX-Request": "true"}).content.decode()
+    for private_value in [operator.username, second.username, second.email, second.first_name, "C000002"]:
+        assert private_value not in fragment
+    assert f"CUS-{operator.pk}" in fragment and f"CUS-{second.pk}" in fragment
     assert "Silhouette 0.5123" in body
 
 

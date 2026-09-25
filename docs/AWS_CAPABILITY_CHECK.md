@@ -114,12 +114,12 @@ What each area tells you, and the decision it feeds:
 | Load balancing, Scaling | ALB and Auto Scaling lists allowed | Whether the ALB and Auto Scaling group are reachable. |
 | Database | RDS list allowed; default PostgreSQL engine version | The engine version to choose for RDS. |
 | Storage | S3 list allowed | Bucket discovery only; creation and object access still need verification. |
-| IAM | instance profiles and roles: allowed, and their names | Record EC2 instance profile, Lambda execution and Scheduler invocation roles. Verify trust/resource policies and deployer iam:PassRole; list access proves none of these. Reference permitted lab roles where required. |
+| IAM | instance profiles and roles: allowed, and their names | Record the EC2 instance profile. Scheduler/Lambda roles are not required by the selected batch ML workflow. Verify trust/resource policies and deployer iam:PassRole; list access proves none of these. Reference permitted lab roles where required. |
 | Secrets | Secrets Manager allowed or denied | Secrets Manager is selected for database credentials/shared `DJANGO_SECRET_KEY`. Unavailable storage/retrieval blocks deployment; never use plaintext user data or launch-template secrets. Verify retrieval through least-privilege runtime roles. |
 | HTTPS | ACM and Route 53 allowed or denied | Listing does not prove issuance/import permission or hostname ownership. Test option B needs permitted import, a matching hostname and explicit client trust; it is not guaranteed. See B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). |
 | Registry | ECR allowed or denied | ECR is selected. Separately verify creation, push and instance pull access; resolve denied access before deployment. |
 | Audit, Protection | CloudTrail trails and regional WAF web ACLs | Discovery only; verify audit events and ALB rule enforcement after deployment. |
-| Scheduling, Inference | Scheduler schedules and Lambda functions | Discovery only; verify roles, invocation and successful publication. Saved-model inference/Lambda integration is not implemented. |
+| Scheduling, Inference | Scheduler schedules and Lambda functions | Legacy discovery only; these services are no longer selected. Probe availability is not a deployment requirement; ML uses an explicitly triggered batch workflow. |
 | Monitoring, Cost | CloudWatch, SNS, Budgets allowed | Discovery only; verify alarm delivery, SNS notification and cost controls separately. |
 
 Systems Manager is not selected; the AMI lookup uses EC2 image discovery. Agree a secure administration method with the infrastructure owner. The generated record includes role checks to complete manually; it does not inspect trust policies or simulate role permissions. No secret values are retrieved.

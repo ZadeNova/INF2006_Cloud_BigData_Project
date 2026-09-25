@@ -5,6 +5,7 @@ Read [scope](../PROJECT_SCOPE_INF2006.md) and [API](API.md). This defines contro
 - Use framework password hashing and database sessions; no custom cryptography or frontend token store.
 - Share signing configuration. Use Secure/HttpOnly cookies and SameSite=Lax under HTTPS. Verify logout/expiry across instances and plan expired-session cleanup.
 - Enforce ownership on every cart/order lookup and operator permission on every analytics request. Imported identities are not active logins by default.
+- Customer-segment display references reduce unnecessary account-data exposure; they are not authorisation or anonymisation. Never expose login usernames, names or email through segment rows. See the [serving contract](ANALYTICS.md#segment-serving-contract).
 - Enforce CSRF on browser mutations including HTMX. Validate bounds, use parameterised ORM queries and escape untrusted values.
 - Derive owner/prices/totals on server. Transactions, stock constraints and idempotency protect concurrent/retried checkout. Simulated payments only.
 - Disable production debug; restrict allowed hosts; configure trusted proxy handling and safe redirects correctly.

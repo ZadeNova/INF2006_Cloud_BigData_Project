@@ -25,7 +25,7 @@ before using it for the deployment import.
 
 ## Included descriptive ML: offline RFM K-means
 
-ML stays outside the web image. Saved-model inference and the intended EventBridge Scheduler/Lambda integration are not implemented; local training/loading remain available. Train/evaluate offline here, then load assignments
+ML stays outside the web image. ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected; local training/loading remain available. Train/evaluate offline here, then load assignments
 into the app table keyed by analytics run and model version:
 
 ```powershell

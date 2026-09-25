@@ -34,7 +34,7 @@ Implemented locally (not yet deployed):
 - A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
 - Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
 
-Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, saved-model inference/scheduled Lambda integration, and load tests.
+Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, optional saved-model inference, and load tests. ML uses an explicitly triggered batch workflow; EventBridge Scheduler and Lambda are not selected.
 
 Payments are simulated; no real payment-card data is collected. Analytics is required; descriptive customer-segmentation ML is included. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
 
@@ -55,7 +55,7 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 | Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
 | Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
 | Analytics | Django management commands/SQL; pandas where useful |
-| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, EventBridge Scheduler, Lambda (planned) |
+| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, Secrets Manager (planned) |
 | Access and secrets | IAM roles and selected Secrets Manager; unavailable access blocks deployment |
 | Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
 

@@ -23,13 +23,14 @@ The user problem is twofold: customers need reliable order placement, and a smal
 - Registration, login, logout, product browsing, cart, checkout, order confirmation and order history.
 - Correct server-side pricing, inventory updates, duplicate-request handling and access control.
 - Sales and inventory analytics, including explainable replenishment flags.
+- Descriptive customer segmentation using an explicitly triggered scikit-learn batch workflow.
 - AWS deployment, S3 object storage, infrastructure configuration, monitoring, security controls and scaling/recovery evidence.
 - Reproducible dataset import, supplemental data generation, processing and testing.
 - Complete submission package, report and contribution records.
 
 ### Optional, only after the required work passes
 
-- Customer segmentation using a small scikit-learn model.
+- Saved-model inference for customer segmentation.
 - Minor interface refinements that improve clarity or accessibility.
 
 ### Outside INF2006
@@ -50,7 +51,7 @@ The user problem is twofold: customers need reliable order placement, and a smal
 | Web serving | Gunicorn + WhiteNoise with versioned static assets packaged in the image | Same production static-file configuration across replaceable application instances |
 | Packaging | Docker; Docker Compose locally | Same application runs with local PostgreSQL and RDS |
 | Analytics | Django management commands and SQL, with pandas where useful | Reproducible transformations without a separate platform |
-| ML | scikit-learn | Offline training; intended scheduled Lambda inference, isolated from the web image |
+| ML | scikit-learn | Explicitly triggered offline batch workflow, isolated from the web image |
 | Infrastructure | Terraform | Reviewable, repeatable provisioning and teardown |
 | Cloud | EC2, ALB, Auto Scaling Group, RDS, S3, CloudWatch | Deployment, routing, elasticity, database/object storage and operations |
 | Secrets/access | IAM runtime roles and Secrets Manager (selected; unavailable access blocks deployment) | Avoid credentials in code and limit access |
@@ -197,14 +198,14 @@ The selected dataset has deliberately simplified synthetic relationships; it doe
 
 ## 6. Included ML: descriptive customer segmentation
 
-Included by the 25 September scope decision. Preserve required analytics, checkout and evidence work. Offline training and assignment loading exist; saved-model inference and scheduled Lambda integration are not implemented.
+Included by the 25 September scope decision. Preserve required analytics, checkout and evidence work. Offline training and assignment loading exist; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected.
 
 - Calculate recency, completed-order frequency and spending at a fixed cutoff.
 - Scale features and fit a small K-means model offline.
 - Compare a few cluster counts, silhouette scores, cluster sizes/profiles and stability across seeds.
 - Exclude customers without adequate purchase history or label them separately.
 - Interpret groups after inspecting their profiles; cluster IDs do not inherently mean loyal or at-risk customers.
-- Show summaries on the operator page. Retain a versioned offline-trained model and label mapping for intended scheduled Lambda inference. Keep local training/loading available; no dedicated model server.
+- Show summaries on the operator page. Run training and assignment loading through an explicitly triggered batch workflow. Saved-model inference is optional; keep local training/loading available, with no dedicated model server.
 - Document that the selected synthetic dataset cannot establish real customer behaviour. Check whether repeat purchasing and variation are sufficient before attempting clustering. Do not report classification accuracy without true class labels.
 
 The deterministic analytics criterion remains independently required; ML must not alter its formulas or become a checkout dependency.
@@ -221,7 +222,7 @@ S3 remains required for dataset/export object storage. Block public access, rest
 
 CloudFront is excluded from the current implementation. Discuss it as an alternative for edge caching and reducing static-origin traffic; its omission reflects this workload, budget and deadline, not a claim that CDNs require geographically distributed users. An ElastiCache product-data cache remains a candidate, subject to explicit scope selection, lab support and measured value; it is not required for session continuity.
 
-Retain the existing infrastructure and add ECR for the image route, SNS notifications, CloudTrail auditing, regional WAF protection, EventBridge Scheduler and Lambda for intended scheduled ML inference. Systems Manager is not selected. Verify each service, role and cost in the actual lab; these are selected requirements, not deployed controls.
+Retain the existing infrastructure and add ECR for the image route, SNS notifications, CloudTrail auditing, regional WAF protection. ML uses an explicitly triggered batch workflow; EventBridge Scheduler and Lambda are not selected. Systems Manager is not selected. Verify each service, role and cost in the actual lab; these are selected requirements, not deployed controls.
 
 CloudWatch receives sanitised application and infrastructure metrics/logs. The application obtains configuration through permitted secure mechanisms. Sessions and carts use PostgreSQL rather than instance-local state. New instances must run the same image, dependencies and shared Django signing configuration.
 

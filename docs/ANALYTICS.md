@@ -87,7 +87,7 @@ Synthetic patterns do not prove commercial demand, seasonality or behaviour. Sto
 
 ## Included descriptive ML: RFM customer segmentation (K-means)
 
-Included by the 25 September scope decision; evaluate whether the dataset has sufficient signal and report limitations. It remains additive and removable. Offline training/loading exist; intended saved-model inference through EventBridge Scheduler and Lambda is not implemented. Keep the local path and isolate cloud integration from deterministic analytics:
+Included by the 25 September scope decision; evaluate whether the dataset has sufficient signal and report limitations. It remains additive and removable. Offline training/loading form an explicitly triggered batch workflow. Saved-model inference is optional and unimplemented; EventBridge Scheduler and Lambda are not selected. Keep the local path and isolate cloud integration from deterministic analytics:
 
 - Train and evaluate offline in `analytics/` with its own requirements; the web image has no ML dependency.
 - Features per customer, as of the run cutoff and using only completed orders before it: recency (days since last order), frequency (order count) and monetary value (sum of order totals). Scale the features, transform skewed monetary values, fit K-means with a fixed random seed and choose k by silhouette over a small range.
@@ -98,6 +98,14 @@ Included by the 25 September scope decision; evaluate whether the dataset has su
 - The dashboard shows a segment panel (sizes, share of sales, mean RFM) only when assignments exist for the run. It tells the operator which customer groups drive sales; it does not change any deterministic metric or replenishment flag, and it is secondary to the sales-driven inventory planning.
 
 Use the simplest algorithm that can be justified for the store; more complex models are not planned.
+
+### Segment serving contract
+
+Operator segment rows expose `CUS-<customer User primary key>` as `customer_reference`, including for locally registered shoppers without CustomerProfile. Source external IDs are arbitrary text and unique only within a namespace, so they are unsuitable as a universal safe display reference. The segment query/context does not fetch or expose login usernames, email or names. These stable display references reduce unnecessary exposure; they are neither authorisation nor anonymisation. Existing operator permissions remain required.
+
+The customer list is a sample, with an overall limit of 50 and at most 25 per segment label. Within each label, rank by monetary total descending, then customer ID ascending. Allocate one row per populated label per round, ordered by existing high_value/core/at_risk priority, then other labels alphabetically. Small groups release unused capacity to other groups up to the per-group cap. When populated labels exceed available slots, only the first labels in that deterministic order receive a row; the list does not claim universal representation. After selection, group the bounded rows by the same label priority and sort members by monetary total descending/customer ID ascending. No hard-coded number of clusters is assumed.
+
+The overview retains total group counts and metrics; sampled rows and their displayed count must be labelled separately. Selection uses a single window query without per-customer lookups. Run/model selection, eligibility, cluster names, RFM values and cutoff semantics are unchanged.
 
 ### Segment import safety contract
 

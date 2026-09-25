@@ -51,7 +51,7 @@ Wanted for the operational evidence: at least one custom application metric (for
 Mostly the user's and teammate's actions; this is the tracker's open Phase 1 infrastructure item. Follow stage 1 of the [setup order](../AWS_INFRASTRUCTURE.md#setup-order-and-verification). Produce a short written capability record covering:
 
 - Account, region, and actual remaining balance. Credits are separate, not pooled. Budget rule: USD 30 planning cap of the integration account's initial USD 40, USD 10 reserved.
-- Which services and roles are actually permitted: EC2, ALB, Auto Scaling, RDS, S3, CloudWatch, IAM (roles and instance profiles), ACM, Secrets Manager, ECR, SNS, CloudTrail, WAF, EventBridge Scheduler and Lambda. Record EC2 instance, Lambda execution and Scheduler invocation roles, trust/resource policies and deployer PassRole permissions. List access proves none of these permissions.
+- Which services and roles are actually permitted: EC2, ALB, Auto Scaling, RDS, S3, CloudWatch, IAM (roles and instance profiles), ACM, Secrets Manager, ECR, SNS, CloudTrail, WAF. Record EC2 instance roles, trust/resource policies and deployer PassRole permissions. List access proves none of these permissions.
 - Instance types, quotas, and the RDS engine version available.
 - HTTPS arrangement: a hostname and certificate path. The generated ALB hostname is not a team-owned certificate. This blocks exposing login traffic.
 - Terraform: version and provider pins, and a single state owner per environment (two developers share infrastructure). Local versus remote state, custody, backup; state and secret-bearing plans are never committed.
@@ -120,7 +120,6 @@ The console-first build was replaced by Terraform first (B5). What carries over:
 | CloudWatch / SNS | Sanitised logs with short retention, a metric filter/alarm, dashboard and verified notification |
 | ECR / Secrets Manager | Verified image push/pull and role-based secret retrieval; no secrets in user data |
 | CloudTrail / WAF | Verify recorded management events and scoped login protection through ALB |
-| Scheduler / Lambda | Intended saved-model inference, isolated from web image; packaging/integration not yet implemented. Verify invocation/execution roles and actual scheduled publication |
 
 **Cost rules:** because Terraform can recreate the stack in minutes, prefer `terraform destroy` over leaving it idle for a day. For shorter gaps: set the Auto Scaling group's desired capacity to 0; stop RDS (AWS restarts a stopped instance after 7 days); the ALB cannot be stopped, only deleted, and costs roughly USD 0.5 a day (estimate; verify current prices). Recalculate the remaining balance at the start and end of each session.
 

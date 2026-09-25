@@ -3631,7 +3631,6 @@ h2 {
 .analytics-data-table__rank { width:5.4rem; }
 .analytics-data-table .operator-row__price { text-align:right; }
 .analytics-data-table .rank-badge { margin-inline:auto; }
-.segment-username { display:inline-block; max-width:34rem; overflow:hidden; text-overflow:ellipsis; vertical-align:bottom; }
 .analytics-table-card--segment-summary { margin-top:var(--space-3); }
 .analytics-table-card--segment-customers { margin-top:var(--space-4); padding-top:var(--space-4); }
 .analytics-table-card--segment-customers .analytics-subsection-title { margin-bottom:var(--space-3); }

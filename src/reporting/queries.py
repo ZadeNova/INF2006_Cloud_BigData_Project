@@ -9,7 +9,6 @@ from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from typing import NamedTuple
 
-from accounts.models import CustomerProfile
 from django.db import connection
 from django.db.models import Avg, Case, Count, F, IntegerField, Max, Sum, Value, When, Window
 from django.db.models.functions import RowNumber
@@ -148,8 +147,6 @@ class SegmentOverview(NamedTuple):
 class SegmentCustomer(NamedTuple):
     customer_id: int
     customer_reference: str
-    username_short: str
-    username_full: str
     segment_label: str
     recency_days: int
     frequency_orders: int
@@ -282,7 +279,11 @@ def customer_segment_overview(run):
 
 
 def customer_segment_customers(run, *, model_version, limit=50, per_segment_limit=25):
-    """Top segment members for operator targeting, capped per segment and ordered by segment priority."""
+    """Round-robin selection by within-label rank, then grouped display.
+
+    Small groups release slots to remaining groups up to their per-group cap.
+    If groups exceed slots, existing priority then label decides representation.
+    """
     rows = (CustomerSegment.objects
             .filter(run=run, model_version=model_version)
             .annotate(
@@ -300,26 +301,17 @@ def customer_segment_customers(run, *, model_version, limit=50, per_segment_limi
                 ),
             )
             .filter(segment_rank__lte=per_segment_limit)
-            .select_related("customer")
-            .order_by("segment_priority", "segment_label", "-monetary_total", "customer_id")[:limit])
-    user_ids = [row.customer_id for row in rows]
-    references = dict(CustomerProfile.objects.filter(user_id__in=user_ids).values_list("user_id", "external_id"))
+            .order_by("segment_rank", "segment_priority", "segment_label")[:limit])
+    rows = sorted(rows, key=lambda row: (
+        row.segment_priority, row.segment_label, -row.monetary_total, row.customer_id))
     return [SegmentCustomer(
         customer_id=row.customer_id,
-        customer_reference=references.get(row.customer_id, f"U{row.customer_id}"),
-        username_short=_short_username(row.customer.get_username()),
-        username_full=row.customer.get_username(),
+        customer_reference=f"CUS-{row.customer_id}",
         segment_label=row.segment_label,
         recency_days=row.recency_days,
         frequency_orders=row.frequency_orders,
         monetary_total=row.monetary_total,
     ) for row in rows]
-
-
-def _short_username(username, keep=12):
-    if len(username) <= keep * 2 + 1:
-        return username
-    return f"{username[:keep]}…{username[-keep:]}"
 
 
 def _fetch_one(sql, params):

@@ -11,8 +11,8 @@ Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for bud
 - Private S3 for checked inputs/optional exports; block public access and restrict object permissions. Retain local input mode.
 - CloudWatch sanitised logs/metrics with short retention.
 - IAM runtime roles and Secrets Manager for database credentials/shared Django signing key; unavailable storage or retrieval blocks deployment. No baked-in access keys or plaintext user-data/launch-template secrets.
-- ECR is the selected image route. SNS, CloudTrail, regional WAF, EventBridge Scheduler and Lambda are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. Systems Manager is not selected.
-- Offline ML training exists; versioned saved-model inference and scheduled Lambda integration remain unimplemented. Preserve local training/loading and keep ML libraries outside the web image.
+- ECR is the selected image route. SNS, CloudTrail and regional WAF are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. Systems Manager is not selected.
+- Offline ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected. Preserve local training/loading and keep ML libraries outside the web image.
 
 Initial/minimum ASG capacity one, default test maximum two. Have two healthy targets before failure demonstration. Additional capacity requires quota/cost checks. Budget baseline: EC2 public subnets with application ingress restricted to ALB to avoid mandatory NAT cost; RDS private. Restrict management access separately through permitted facilities.
 
@@ -36,7 +36,7 @@ Explicitly handle cache read/write connection failures and timeouts; fall back t
 
 Monitor latency/errors, target health, DB pressure and analytics freshness. Capture dated outputs and interpretation for an operational query/alert. Start with a USD 30 planning cap against the integration account's initial USD 40, reserve USD 10, and recalculate actual remaining funds.
 
-Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs, secrets, ECR, SNS, CloudTrail, WAF, Scheduler and Lambda. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
+Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs, secrets, ECR, SNS, CloudTrail, WAF. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
 
 ## Setup order and verification
 

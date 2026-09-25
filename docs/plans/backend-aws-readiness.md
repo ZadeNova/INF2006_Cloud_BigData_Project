@@ -6,10 +6,10 @@ Companion: [finding dispositions and evidence](../reviews/backend-aws-readiness.
 
 ## Goal and boundaries
 
-Resolve confirmed backend/ML issues, coordinate related frontend fixes, and prepare a reproducible application release and ML interface for the existing infrastructure plus ECR, SNS, CloudTrail, WAF, EventBridge Scheduler and Lambda.
+Resolve confirmed backend/ML issues, coordinate related frontend fixes, and prepare a reproducible application release and ML interface for the existing infrastructure plus ECR, SNS, CloudTrail, WAF and Secrets Manager.
 
 The user owns application/ML remediation; their groupmate owns Terraform. This plan does not authorise a Terraform rewrite, AWS creation, dataset replacement, commit or push. The original planning task wrote planning documents only; Phase 0 now reconciles contracts and the read-only probe without AWS calls.
-ML is included by the user's current decision; Phase 0 reconciles the active optional/deferred language. Offline training/loading exist; saved-model inference and Lambda integration are not implemented. Keep segmentation descriptive and removable, and preserve deterministic sales/inventory calculations. No forecasting replacement, SPA, queue architecture, dedicated model server or automatic marketing actions.
+ML is included by the user's current decision; Phase 0 reconciles the active optional/deferred language. Offline training/loading use an explicitly triggered batch workflow. Saved-model inference is optional and unimplemented; EventBridge Scheduler and Lambda are not selected. Keep segmentation descriptive and removable, and preserve deterministic sales/inventory calculations. No forecasting replacement, SPA, queue architecture, dedicated model server or automatic marketing actions.
 Secrets Manager is selected for database credentials and the shared Django signing key. Terraform provisions or references the permitted secrets and access policies; runtime retrieves them through roles, never baked-in values. Systems Manager is not selected. Agree a secure administration/diagnostic method with the Terraform owner.
 
 The recorded console-first learning pass followed by Terraform reproduction remains the documented deployment method unless the team changes it. Terraform file development can proceed in parallel. Avoid duplicate resources/state ownership; validate/plan is not evidence of apply or successful deployment.
@@ -73,17 +73,13 @@ Application runtime:
 - Test production-mode configuration locally with safe test credentials/certificates; fail on missing/insecure config. Real ALB/RDS checks belong to integration, not local readiness.
 - Reuse existing stdout JSON logging. Add only bounded operational fields/metrics required for readiness (release identity, analytics/ML run status/duration/freshness); do not emit customer IDs as metric dimensions or secrets in logs.
 
-ML contract, recommended design:
-- Separate offline training from inference. Save a versioned preprocessing pipeline, fitted KMeans and fixed label mapping. Artifact identity includes content digest, code/dependency versions and feature schema.
-- Accept a versioned RFM snapshot (namespace, analytics run, cutoff/window, eligibility policy, stable customer refs, source digest). Existing DB export remains authorised; Lambda reads only approved S3 prefixes and need not receive DB credentials.
-- Lambda adapter reuses the pure inference function; writes a versioned result plus completion metadata. Load only trusted artifacts; a checksum establishes identity, not trust in untrusted pickle/joblib code.
-- Declare who exports features and imports assignments: proposed existing designated maintenance runner. ML scheduling does not replace the analytics scheduler automatically, and runner loss remains a documented failure boundary.
-- Schedule only meaningful new snapshots. Key retries by input+model+run identity; no blind latest-file lookup or arbitrary model-version override. Concurrent/repeated events must not corrupt or republish mismatched data.
-- Display pending/unavailable/failed/stale state honestly. Keep the last valid result only when explicitly labelled with its own run/cutoff; default current-run panel never silently falls back.
-- Preserve local train/export/infer/load commands and keep ML dependencies out of the web image. Use user-owned output mounts rather than root+writable repository.
-- Proposed cadence: after a completed daily feature snapshot; timing/timezone confirmed with the owner. If data is fixed, demonstrate successive historical snapshots rather than pretending a recurring unchanged run adds value.
+ML contract, explicitly triggered batch workflow:
+- Keep offline training/export and validated assignment loading as the selected workflow, isolated from the web image. EventBridge Scheduler and Lambda are not selected.
+- Preserve run/cutoff, namespace and model-version coherence. Pending/failed/stale lifecycle handling and immutable feature snapshots remain deferred; the current-run panel must never silently fall back to another run.
+- Saved-model inference is optional future work. If adopted, retain a versioned preprocessing pipeline, model and fixed label mapping with feature schema and artifact identity; load only trusted artifacts.
+- The operator explicitly triggers a batch for an accepted source revision. Repeated imports retain the atomic replacement contract; no recurring cadence or cloud adapter is required.
 
-Verification before AWS: saved-artifact inference matches local expected assignments, schema/version mismatch rejection, repeated event safety, failed output not published, refresh without assignments, recovery import, runtime/memory measurement and image inspection. Standard Lambda suitability must be measured, not inferred from script existence. Cloud permissions, timeouts, retries and actual scheduled delivery are later checks.
+Later verification covers batch reproducibility, invalid imports preserving prior assignments, refresh without assignments and recovery loading. Optional saved-artifact inference needs its own equivalence and schema checks if selected. Runtime packaging and actual AWS permissions remain separate gates, not Phase 2 deliverables.
 
 ## B4 - Related frontend and operator fixes
 
@@ -122,17 +118,16 @@ IDs: F-06/M-12, M-06/11 and residual documentation/evidence issues.
 | WAF (W-03) | Login route/method, expected legitimate traffic, test scenario | Count then enforce selected rule, observed impact and residual distributed/shared-IP limitations |
 | CloudWatch / SNS | Sanitised stdout fields, run identifiers, freshness/error definitions | Log retention, metric/alarms and confirmed notification; no sensitive exports |
 | CloudTrail | Named audit actions for evidence | Permitted management-event history/trail and redacted evidence; object-access auditing is separate |
-| Scheduler / Lambda | Packaged handler/model contract, event identity, resource measurements, error semantics | Roles, cadence, delivery and execution failure handling, bounded retries/concurrency and actual run evidence |
 
-The backend must not claim WAF protection, notifications, S3 denial, RDS isolation or Lambda success before these joint tests run. No AWS resources are created by this plan.
+The backend must not claim WAF protection, notifications, S3 denial or RDS isolation before these joint tests run. No AWS resources are created by this plan.
 
 ## Exit criteria and immediate next step
 
 Backend ready for AWS integration means B0-B3 correctness/runtime contracts and B5 relevant checks are complete, with no unresolved actionable gate findings. Track B4 separately if only visual polish remains; complete it before final demonstration.
-AWS ready is a later status: full HTTPS workflow, S3 import/model path, WAF test, logs/alert, audit trail, scheduled ML publication, scaling/session continuity and failure recovery verified with dated evidence.
+AWS ready is a later status: full HTTPS workflow, S3 dataset/import path, WAF test, logs/alert, audit trail, explicitly triggered batch assignment and evaluation evidence, scaling/session continuity and failure recovery verified with dated evidence. Saved-model inference evidence is required only if that optional path is selected.
 Final report, architecture image and submission packaging remain tracked obligations, not hidden backend implementation blockers.
 
-Next implementation task: B0 status/security-advice corrections, then B1 loader/eligibility contract. Do not implement the entire list as one large unreviewable change.
+Current progress and the next bounded task are owned by [IMPLEMENTATION_PLAN](../IMPLEMENTATION_PLAN.md). Do not implement the entire list as one large unreviewable change.
 
 
 ## Upstream coordination update: e58e3a1

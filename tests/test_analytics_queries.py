@@ -3,6 +3,7 @@
 Run cutoff is 00:00 Asia/Singapore on 8 March 2024, so L is 7 March 2024 and the seven coverage dates are
 1 to 7 March. Daily rows (date, product, units, sales amount) are listed in RUN_ROWS.
 """
+from collections import Counter
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
@@ -11,6 +12,7 @@ from django.contrib.auth import get_user_model
 
 from analytics_helpers import (
     NS, OTHER_NS, SGT, add_order, at, load_segments, make_inventory, make_products, make_run)
+from accounts.models import CustomerProfile
 from catalogue.models import Product
 from reporting import queries, ranges, services
 from reporting.models import AnalyticsRun
@@ -313,3 +315,57 @@ def test_customer_segment_customers_caps_per_segment_and_prioritises_high_value(
         ("core", Decimal("190.00")),
         ("at_risk", Decimal("50.00")),
     ]
+
+
+@pytest.mark.parametrize("sizes,limit,cap,expected", [
+    ([30, 30, 30], 50, 25, [17, 17, 16]),
+    ([1, 30, 30], 10, 25, [1, 5, 4]),
+    ([30, 30, 30], 80, 25, [25, 25, 25]),
+    ([2, 2, 2, 2, 2], 4, 25, [1, 1, 1, 1, 0]),
+    ([2, 2, 2], 0, 25, [0, 0, 0]),
+])
+def test_segment_sample_balances_bounded_capacity_deterministically(world, sizes, limit, cap, expected,
+                                                                   django_assert_num_queries):
+    _, _, run = world
+    labels = ["high_value", "core", "at_risk", "alpha", "zeta"]
+    assignments = []
+    expected_ids = []
+    for group, size in enumerate(sizes):
+        users = get_user_model().objects.bulk_create([
+            get_user_model()(username=f"sample-{group}-{index}") for index in range(size)])
+        # Equal monetary values exercise the stable customer-ID tie break.
+        assignments.extend((user, group, labels[group], 1, 1, "10.00") for user in reversed(users))
+        expected_ids.extend(user.pk for user in users[:expected[group]])
+    load_segments(run, assignments, k_clusters=max(3, len(sizes)))
+    with django_assert_num_queries(1 if limit else 0):
+        rows = queries.customer_segment_customers(run, model_version="rfm-kmeans-v1",
+                                                  limit=limit, per_segment_limit=cap)
+    counts = Counter(row.segment_label for row in rows)
+    assert [counts[label] for label in labels[:len(sizes)]] == expected
+    assert [row.customer_id for row in rows] == expected_ids
+    assert queries.customer_segment_customers(run, model_version="rfm-kmeans-v1",
+                                              limit=limit, per_segment_limit=cap) == rows
+
+
+def test_segment_references_are_stable_internal_ids_without_customer_identity_fields(world,
+                                                                                     django_assert_num_queries):
+    _, inventory, run = world
+    users = [get_user_model().objects.create_user(username=f"private-login-{index}",
+             email=f"private-{index}@example.test", first_name="PrivateFirst", last_name="PrivateLast")
+             for index in range(2)]
+    CustomerProfile.objects.create(user=users[0], namespace=NS, external_id="source-private@example.test",
+                                   source_signup_at=at(2024, 1, 1), channel="web", country="SG")
+    assignments = [(user, index, label, 2, 1, "10.00")
+                   for index, (user, label) in enumerate(zip(users, ["high_value", "core"]))]
+    load_segments(run, assignments)
+    load_segments(run, [(users[0], 0, "wrong_model", 2, 1, "999.00")], model_version="other")
+    other_run = make_run(inventory, [])
+    load_segments(other_run, [(users[0], 0, "wrong_run", 2, 1, "999.00")])
+    with django_assert_num_queries(1):
+        rows = queries.customer_segment_customers(run, model_version="rfm-kmeans-v1")
+    assert [row.customer_reference for row in rows] == [f"CUS-{user.pk}" for user in users]
+    assert set(rows[0]._fields) == {"customer_id", "customer_reference", "segment_label",
+                                   "recency_days", "frequency_orders", "monetary_total"}
+    users[0].username = "renamed-private-login"
+    users[0].save(update_fields=["username"])
+    assert queries.customer_segment_customers(run, model_version="rfm-kmeans-v1") == rows
