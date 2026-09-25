@@ -26,11 +26,9 @@ from reporting.segment_contract import (FORMAT, FEATURE_SCHEMA, batch_id, model_
                                        run_binding, source_binding, validate_batch, validate_rows)
 
 
-def connect(database_url=None):
+def connect():
     env = load_environment(DB_FIELDS)
-    if database_url and env.get("DJANGO_ENV", "production") != "local":
-        raise ValueError("Production database URLs are forbidden; use Secrets Manager")
-    return psycopg.connect(**connection_parameters(database_url, environ=env))
+    return psycopg.connect(**connection_parameters(environ=env))
 
 
 def fetch_run(connection, run_id):

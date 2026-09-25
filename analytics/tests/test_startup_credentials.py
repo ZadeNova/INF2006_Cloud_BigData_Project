@@ -8,7 +8,7 @@ from config import secrets
 
 
 @pytest.mark.parametrize("filename", ["segment_customers.py", "verify_refresh.py"])
-def test_standalone_production_secret_delivery_and_dsn_refusal(monkeypatch, filename):
+def test_standalone_production_secret_delivery(monkeypatch, filename):
     spec = importlib.util.spec_from_file_location("startup_target", Path(__file__).resolve().parents[1] / filename)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -23,7 +23,8 @@ def test_standalone_production_secret_delivery_and_dsn_refusal(monkeypatch, file
     module.connect()
     assert connector.call_args.kwargs["user"] == "reader"
     assert connector.call_args.kwargs["sslmode"] == "verify-full"
-    connector.reset_mock()
-    with pytest.raises(ValueError, match="database URLs"):
-        module.connect("postgresql://ignored:ignored@localhost/ignored")
-    connector.assert_not_called()
+    if filename == "verify_refresh.py":
+        connector.reset_mock()
+        with pytest.raises(ValueError, match="database URLs"):
+            module.connect("postgresql://ignored:ignored@localhost/ignored")
+        connector.assert_not_called()
