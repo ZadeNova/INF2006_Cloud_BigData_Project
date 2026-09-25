@@ -26,3 +26,7 @@ OpenAI Codex coordinated Phase 3 on `erfan/analytics`, with explicitly assigned 
 ## ML batch handoff and recovery (25 September 2026)
 
 OpenAI Codex coordinates Phase 4 on `erfan/analytics`, with explicitly assigned `gpt-6-astra` / `low` implementation and separate fresh-context `gpt-6-astra` / `medium` read-only review. Assistance covers explicit batch provenance, export/import recovery, focused checks and operational documentation. The coordinator owns Git, tracker and review records; subagents do not stage, commit or push. Actual review status, executed checks and limitations are recorded in [ml-batch-handoff](docs/reviews/ml-batch-handoff.md). These are agent contributions, not claimed human test execution; source dataset attribution remains unchanged.
+
+## Production runtime and AWS security preparation (25 September 2026)
+
+OpenAI Codex coordinates Phase 5 on `erfan/analytics`, with explicitly assigned `gpt-6-astra` / `low` implementation and separate fresh-context `gpt-6-astra` / `medium` read-only review. Assistance covers runtime TLS, bootstrap privilege safety, startup secret configuration, packaging, focused verification and the infrastructure handoff. The coordinator owns Git, tracker and review records; subagents do not stage, commit or push. [Runtime review](docs/reviews/runtime-aws-security.md) records actual checks, findings and limitations. This attribution does not claim deployment, verified AWS permissions or human execution of agent-run tests.

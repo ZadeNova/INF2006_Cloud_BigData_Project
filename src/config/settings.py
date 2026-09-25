@@ -59,15 +59,17 @@ TEMPLATES = [{"BACKEND": "django.template.backends.django.DjangoTemplates",
         "django.contrib.auth.context_processors.auth",
         "django.contrib.messages.context_processors.messages",
     ]}}]
+from config.database import connection_parameters
+try:
+    database = connection_parameters()
+except ValueError as error:
+    raise ImproperlyConfigured(str(error)) from None
 DATABASES = {"default": {"ENGINE": "django.db.backends.postgresql",
-    "NAME": required("POSTGRES_DB"), "USER": required("POSTGRES_USER"),
-    "PASSWORD": required("POSTGRES_PASSWORD"), "HOST": required("POSTGRES_HOST"),
-    "PORT": os.environ.get("POSTGRES_PORT", "5432"), "CONN_MAX_AGE": 60,
-    "CONN_HEALTH_CHECKS": True,
-    "OPTIONS": {"connect_timeout": 3, "sslmode": "disable" if LOCAL else "verify-full"},
+    "NAME": database.pop("dbname"), "USER": database.pop("user"),
+    "PASSWORD": database.pop("password"), "HOST": database.pop("host"),
+    "PORT": database.pop("port", "5432"), "CONN_MAX_AGE": 60,
+    "CONN_HEALTH_CHECKS": True, "OPTIONS": {**database, "connect_timeout": 3},
 }}
-if not LOCAL:
-    DATABASES["default"]["OPTIONS"]["sslrootcert"] = required("POSTGRES_SSLROOTCERT")
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},

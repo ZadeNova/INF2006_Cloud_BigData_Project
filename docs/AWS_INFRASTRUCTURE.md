@@ -57,3 +57,46 @@ IAM/runtime credentials and logs must exist before dependent verification; do no
 Before an AWS mutation, inspect the Terraform plan for creations/replacements/deletions, broad IAM, public exposure, unexpected NAT gateways, Multi-AZ DB choices, capacity and costs. Terraform success is not functional/security evidence. Honour existing user authorisation; if a plan exceeds it or disrupts shared resources, present the concrete plan and obtain the missing approval before applying. No blanket apply/destroy permission is implied by this document.
 
 With two infrastructure developers, choose one state owner/writer per environment. Prefer appropriately secured shared state with locking when lab capabilities permit. If using local state, agree custody and secure backup/handover; never create independent states managing the same resources. State/plan files may contain secrets and must not be committed or submitted. After any approved change, preserve a sanitised record, verify expected behaviour and coordinate teardown with the other developer.
+
+## Database runtime preparation
+
+The application and standalone `analytics/segment_customers.py`, `analytics/verify_refresh.py`
+(including `--database-url`) share `src/config/database.py`. `DJANGO_ENV` defaults to
+`production`: connections require explicit database/user/password/host, `verify-full`,
+a readable CA bundle, and certificate hostname verification. GSS encryption fallback is
+disabled so it cannot replace this TLS check. DSNs accept only database/user/password/host/port
+and TLS mode/CA fields; service/address indirection is refused. The image vendors the RDS CA
+at `/app/certs/rds-global-bundle.pem`; standalone tools use `POSTGRES_SSLROOTCERT` pointing
+to that public file or an approved read-only CA mount. Explicit `DJANGO_ENV=local` preserves
+local PostgreSQL without TLS. This policy is local preparation, not proof of RDS connectivity.
+
+`python tools/db_bootstrap.py` is a coordinated one-off operation for a dedicated PostgreSQL
+17 application database, never an ASG startup action. Its inputs are `POSTGRES_HOST/PORT/DB`,
+`POSTGRES_USER/PASSWORD` (runtime), `MIGRATION_USER/PASSWORD` (schema owner), and
+`BOOTSTRAP_USER/PASSWORD` (administration); the three identities must differ. The same TLS
+policy applies; `BOOTSTRAP_SSLMODE` cannot weaken it. Credential delivery remains the Secrets
+Manager startup handoff; no real secret values belong in commands, images or launch templates.
+
+Bootstrap preflights both managed roles before changing passwords: no administrative attributes
+or parent-role memberships, no runtime-owned objects, database/schema creation rights or explicit database TEMPORARY grant,
+no excessive migration-owner global/public default privileges for runtime/PUBLIC, and no foreign
+database owner or unrelated public-schema object owner. Normal PUBLIC TEMPORARY defaults are
+removed during setup; an explicit runtime grant is refused before passwords change. Existing mismatches are
+refused, not silently adopted or reconciled. Use a new dedicated database, or separately plan
+an authorised migration of an old owner-role deployment. Leave the RDS initial database blank.
+The master manages roles but does not remain able to SET ROLE/inherit application ownership:
+PostgreSQL 17 creator ADMIN memberships remain for idempotent password updates, with INHERIT
+and SET false; temporary SET for database creation is restored. Unexpected broader pre-existing
+master memberships are refused. Membership direction is master-to-managed-role, never runtime
+to migration/master. CREATE DATABASE is not transactional: a failed run can leave safely scoped
+roles/database behind; inspect the sanitised failure and rerun after correcting its cause.
+
+The migration login owns the database/public schema and all migration-created objects. Bootstrap
+grants runtime CONNECT, schema USAGE, table SELECT/INSERT/UPDATE/DELETE, and sequence USAGE/SELECT;
+matching owner default privileges cover future migrations. PUBLIC schema CREATE and database
+TEMPORARY are revoked. Runtime cannot create/alter tables, create temporary tables, or SET ROLE
+to the owner. Functions/triggers remain migration-owned; ordinary invoker functions use runtime
+DML grants. Run `manage.py migrate --noinput` once using the migration credential profile, then
+`manage.py check_database` and the web process with the runtime profile. Never deliver migration
+or bootstrap credentials to web containers. Local Compose intentionally retains its existing
+single local owner/developer role and requires no AWS configuration.

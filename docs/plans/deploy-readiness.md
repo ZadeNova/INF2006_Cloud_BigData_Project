@@ -2,6 +2,11 @@
 
 Status (25 September 2026): code present at `e58e3a1` on `erfan/analytics`; author-reported checks below were not rerun in Phase 0. Backend-owned; independent review gate remains pending. RDS CA packaging, configurable HSTS and bootstrap are partial implementation, not AWS readiness. Review bootstrap TLS overrides, inherited privileges, database ownership and redaction before deployment. Secrets Manager remains the selected credential path; no plaintext launch-template/user-data fallback.
 
+The role/ownership procedure below is a historical description of `e58e3a1` and is
+superseded by the [production database contract](../AWS_INFRASTRUCTURE.md#database-runtime-preparation).
+Current bootstrap separates runtime and migration ownership, refuses foreign-owned databases,
+and applies one shared TLS policy. Do not follow the historical ownership-transfer step.
+
 ## Why
 
 The production settings already fail closed, but three things stop the image from running on AWS as it is. Terraform will reference the paths and variable names fixed here, so they are settled before any Terraform is written. See B6 in [cloud-independent-prep.md](cloud-independent-prep.md).

@@ -19,7 +19,7 @@ Configuration selects local PostgreSQL/files or AWS RDS/S3 without duplicate bus
 
 ## Failure boundaries and alternatives
 
-Replaceable app instances do not guarantee invisible failures. Retry uncertain checkout with the same key. Single-AZ RDS and the designated analytics scheduler remain shared availability limitations. Never confirm an order when the database commit is uncertain.
+Replaceable app instances do not guarantee invisible failures. Retry uncertain checkout with the same key. Single-AZ RDS and the designated analytics batch runner remain shared availability limitations. Never confirm an order when the database commit is uncertain.
 
 If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded expiry and explicit database fallback. Cache outage increases database load; this does not classify the whole app as CP/AP.
 

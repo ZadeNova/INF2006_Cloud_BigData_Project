@@ -20,21 +20,13 @@ from sklearn.preprocessing import StandardScaler
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+from config.database import connection_parameters
 from reporting.segment_contract import (FORMAT, FEATURE_SCHEMA, batch_id, model_version,
                                        run_binding, source_binding, validate_batch, validate_rows)
 
 
-def connect():
-    required = ("POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST")
-    if any(not os.environ.get(name) for name in required):
-        raise ValueError("Missing PostgreSQL environment configuration")
-    options = dict(dbname=os.environ["POSTGRES_DB"], user=os.environ["POSTGRES_USER"],
-                   password=os.environ["POSTGRES_PASSWORD"], host=os.environ["POSTGRES_HOST"],
-                   port=os.environ.get("POSTGRES_PORT", "5432"), connect_timeout=10)
-    for name in ("SSLMODE", "SSLROOTCERT"):
-        if os.environ.get("POSTGRES_" + name):
-            options[name.lower()] = os.environ["POSTGRES_" + name]
-    return psycopg.connect(**options)
+def connect(database_url=None):
+    return psycopg.connect(**connection_parameters(database_url))
 
 
 def fetch_run(connection, run_id):

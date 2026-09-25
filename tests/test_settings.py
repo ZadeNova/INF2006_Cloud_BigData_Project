@@ -33,7 +33,7 @@ assert not hasattr(s, 'SECURE_PROXY_SSL_HEADER')
 """
     result = subprocess.run([sys.executable, "-c", code], env={**os.environ,
         "DJANGO_ENV": "production", "DJANGO_DEBUG": "false",
-        "DJANGO_TRUST_PROXY": "false", "POSTGRES_SSLROOTCERT": "/certs/test-ca.pem"},
+        "DJANGO_TRUST_PROXY": "false", "POSTGRES_SSLROOTCERT": os.environ["POSTGRES_SSLROOTCERT"]},
         capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
 

@@ -127,3 +127,7 @@ Phase 4 baseline `d934859`; implementation/review status and actual checks are i
 | S-006 | Bounded explicit batch recovery only; lifecycle gap remains open | Later task: pending/failed/stale presentation and lifetime-period copy; never silently use another run's assignments |
 
 Immutable feature snapshots remain unimplemented and require a separately bounded decision. READY-002 and broader TLS/Secrets Manager/bootstrap/image/AWS gates are unchanged. Shoe-data adoption still requires separate reevaluation under READY-010.
+
+## Phase 5 checkpoint A disposition (25 September 2026)
+
+[Runtime security review](runtime-aws-security.md) records production database policy shared by Django/standalone/bootstrap tools and refusal-based bootstrap with distinct migration/runtime roles. READY-002 and the upstream bootstrap follow-up are resolved for this bounded application preparation after Astra Low checks and independent fresh-session Astra Medium round 3 (RAS-001–006 resolved). READY-007 remains partial pending startup/secrets/health integration and actual AWS verification; READY-004 packaging remains pending. READY-005/009 Phase 0 architecture corrections remain valid. No RDS, ALB, Secrets Manager IAM or other deployed control is claimed verified.
