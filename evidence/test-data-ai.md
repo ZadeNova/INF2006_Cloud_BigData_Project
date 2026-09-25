@@ -118,3 +118,122 @@ Codex, not human teammates. Cleanup and review outcome are recorded in the revie
 Final status: independent Astra Medium round-1 gate **CLEAR**, no actionable findings.
 Task containers, PostgreSQL volume and network were removed after review; all three
 project-label resource listings were empty. See the review log for commands and scope.
+
+## ML quality evaluation 25 September 2026
+
+Phase 3 ML quality starts at `529a0f9ee428af15524988dab2a2ccf74175b1b4` on
+`erfan/analytics`. Review status and cleanup: [ML quality review](../docs/reviews/ml-quality-evaluation.md).
+The versionable [aggregate artifact](ml-quality-evaluation.json) holds source hashes,
+working-code hashes/diff identity, runtime versions, population/eligibility, exact
+features, candidate metrics, profiles, selection and unrun experiments. No assignment
+exports are retained in Git. This is agent-executed evidence, not teammate execution.
+
+All six raw CSV SHA-256 values matched the accepted release in [data/README.md](../data/README.md).
+The shoe remap is plan-only; a validated adopted revision needs fresh evaluation.
+Task-only PostgreSQL 17 used `inf2006-phase3-20260925-db-1`, matching task network,
+tmpfs storage and loopback port 57704. Existing containers, networks and volumes
+were preserved. Credentials were generated only for this task, supplied through
+environment and never included in commands/output. The database stays available
+through independent review; its cleanup belongs in the review record.
+
+The unchanged importer loaded 20,000 customers, 1,200 products, 100,000 orders and
+237,537 lines with zero rejects. Inventory identity matched the manifest:
+`import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f`.
+Run `bb3e4ce4-9485-47a3-94df-6d6e1cdac98c` completed 65,589 daily rows; fixed cutoff
+`2026-01-02T00:00:00+08:00`, namespace `synthetic/revision-a/demo/v1`, no shift.
+ML uses lifetime completed history, not that run's dashboard date window. Of 20,000
+source customers, 19,766 qualified, 234 lacked a completed pre-cutoff order, and zero
+were privileged. Included one-order customers: 1,099. No tenure normalization was
+applied; this limitation is explicit. Source segment labels were neither inputs nor truth.
+
+Measured skew: recency 1.411, frequency 0.591, monetary 0.851, log-monetary −1.454.
+The one alternative changed raw frequency to log1p frequency (skew −0.417), leaving
+raw recency and log1p monetary unchanged. All three features are standardized.
+Frequency/log-monetary correlation 0.743 and negative log-monetary skew remain
+limitations; no additional transforms were tested.
+
+| Preprocessing | k | Sampled silhouette | Seed ARI mean | Cluster sizes |
+|---|---:|---:|---:|---|
+| Original baseline | 2 | 0.3885 | 0.9768 | 12,509 / 7,257 |
+| Original baseline | 3 | 0.3333 | 0.9419 | 7,456 / 9,033 / 3,277 |
+| Original baseline | 4 | 0.3176 | 0.7316 | 8,945 / 2,768 / 2,640 / 5,413 |
+| Log frequency | 2 | 0.4347 | 0.9840 | 13,679 / 6,087 |
+| Log frequency | 3 | 0.3360 | 0.9843 | 7,624 / 2,751 / 9,391 |
+| Log frequency | 4 | 0.3497 | 0.7963 | 6,094 / 1,675 / 8,902 / 3,095 |
+
+All six candidates were valid; no experiment failed. Fits use all customers; silhouette
+uses the same seed-42 sample of 5,000 to bound pairwise memory. ARI compares published
+seed 42 with 99, 123 and 777. Log-frequency k=2 improves sampled separation by 0.0462,
+retains strong seed stability and substantial interpretable groups, supporting the
+single preprocessing change for this revision. k remains selected by valid silhouette
+(ties prefer smaller k), never forced to obtain a particular label. Resampling was
+not run: chosen k=2 has strong seed stability and clear profiles; no resampling
+robustness or predictive-performance claim is made.
+
+Selected means: recent/more-orders/higher-spend group has recency 150.03 days,
+frequency 5.45 and monetary 3,503.85; older/fewer-orders/lower-spend group has
+415.94 days, 2.38 orders and 1,296.64. These are relative profile labels, not churn
+or loyalty labels. Labels fit the existing 40-character field and plain template
+rendering; alphabetical fallback serving order remains compatible. No frontend edit
+or browser check occurred. Further dashboard lifetime-period copy remains deferred.
+
+Executed host commands after configuring only the task database environment:
+
+```powershell
+.venv/Scripts/python.exe src/manage.py migrate --noinput
+.venv/Scripts/python.exe src/manage.py import_dataset --source data/raw --namespace synthetic/revision-a/demo/v1
+.venv/Scripts/python.exe src/manage.py refresh_analytics --as-of 2026-01-02 --namespace synthetic/revision-a/demo/v1 --inventory-version import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f
+.venv/Scripts/python.exe analytics/evaluate_segments.py --run-id bb3e4ce4-9485-47a3-94df-6d6e1cdac98c --source data/raw --output evidence/ml-quality-evaluation.json
+.venv/Scripts/python.exe analytics/segment_customers.py --run-id bb3e4ce4-9485-47a3-94df-6d6e1cdac98c --output "$env:TEMP/inf2006-phase3-20260925/segments.json"
+.venv/Scripts/python.exe src/manage.py load_customer_segments --run-id bb3e4ce4-9485-47a3-94df-6d6e1cdac98c --input "$env:TEMP/inf2006-phase3-20260925/segments.json" --model-version rfm-kmeans-v2
+.venv/Scripts/python.exe -m pytest -q -c src/pytest.ini -p no:cacheprovider --tb=short analytics/tests/test_segment_customers.py analytics/tests/test_segment_loader_integration.py analytics/tests/test_verify_refresh.py tests/test_customer_segments_command.py
+.venv/Scripts/python.exe src/manage.py check
+.venv/Scripts/python.exe src/manage.py makemigrations --check --dry-run
+git diff --check
+```
+
+Host Python 3.12.10 with pinned analytics libraries produced the aggregate artifact.
+Full-cohort export and strict load succeeded: 19,766 v2 assignments, selected k=2,
+silhouette 0.4347, seed ARI mean 0.9840/std 0.0111, lifetime sales S$55,821,834.61.
+The initial focused host suite passed **60 tests in 15.75s**. Final source was also
+tested in pinned Python 3.13 containers as follows; this separates runtime evidence
+from the host training result. Django checks found no issues/migration drift and
+whitespace validation passed.
+
+Pure ML CI-equivalent command (no Django installed), **13 passed in 3.86s**:
+
+```powershell
+docker run --rm --mount "type=bind,source=$PWD,target=/work,readonly" --workdir /work -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1 python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e sh -c 'pip install -q -r analytics/requirements.txt pytest==9.1.1 iniconfig==2.3.0 packaging==26.3 pluggy==1.6.0 Pygments==2.21.0 && python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py'
+```
+
+Separate Django-dependent pinned-container command, **47 passed in 25.55s**:
+
+```powershell
+docker run --rm --mount "type=bind,source=$PWD,target=/work,readonly" --workdir /work -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1 -e PYTHONPATH=/work/src:/work/tests -e DJANGO_ENV -e DJANGO_ALLOWED_HOSTS -e DJANGO_SECRET_KEY -e POSTGRES_DB -e POSTGRES_USER -e POSTGRES_PASSWORD -e POSTGRES_HOST=host.docker.internal -e POSTGRES_PORT python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e sh -c 'pip install -q -r src/requirements.txt -r analytics/requirements.txt && python -m pytest -q -c /work/src/pytest.ini -p no:cacheprovider /work/analytics/tests/test_segment_loader_integration.py /work/analytics/tests/test_verify_refresh.py /work/tests/test_customer_segments_command.py'
+```
+
+The local integration equivalent supplies `/work/src` settings and `/work/tests`
+helpers with host-database networking; hosted CI uses its built `/app` and Compose
+database. All intended modules collected, no silent skips. Both ephemeral test
+containers removed themselves. The production Dockerfile and requirements were
+unchanged; ML libraries were installed only in disposable test environments.
+
+No failed tests or experiments occurred. Initial read-only sandbox access to Docker
+was denied; approved escalation permitted the task-only operations. Hosted Actions,
+application image build, full suite, browser, resampling, predictive validation,
+immutable snapshots, saved-model inference and AWS were not run. Prior source
+acceptance and these geometric metrics do not establish real customer behaviour.
+
+Independent review round 1 found MLQ-001: the producer allowed k=32,768 while the
+strict loader accepts at most 32,767. The producer bound/message now match the
+loader; the existing boundary regression rejects 32,768 without adding test cases.
+The following host regression run passed **56 tests in 18.98s**:
+
+```powershell
+.venv/Scripts/python.exe -m pytest -q -c src/pytest.ini -p no:cacheprovider --tb=short analytics/tests/test_segment_customers.py analytics/tests/test_segment_loader_integration.py tests/test_customer_segments_command.py
+```
+
+The same aggregate-evaluation command above was rerun after this correction to
+refresh code/diff identity; the bounded k=2..4 metrics and selection were unchanged.
+The earlier pinned-container results precede this boundary-only correction; its
+independent re-review status is owned by the review log.

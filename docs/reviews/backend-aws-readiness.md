@@ -99,3 +99,17 @@ This follow-up is a targeted diff inspection, not a full independent review of t
 HEAD and fetched `origin/erfan/analytics` both resolve to `e58e3a1c670bfad87c3cb9821cd3d95f25617057`; no incoming commits. F-05/S-005 and W-01/W-02 corrections are in the baseline, and S-007 was removed by `0f7e9d4`. The original review above remains a historical snapshot. Phase 0 updates the selected-service contracts and read-only probe advice for READY-005/009; it does not approve Phase 1 loader changes or resolve later runtime integration findings.
 
 Phase 0 local verification: the existing `.venv` Python ran `PYTHONPATH=src python -m pytest -q -p no:cacheprovider -o addopts='' --confcutdir=tests tests/test_aws_capability_check.py`: **20 passed**, using fake CLI responses only. This covers selected-service calls, safe generated advice, AMI dependency, redaction, timeouts and Markdown escaping. Upstream suite/bootstrap claims remain author-reported, not rerun. No AWS calls, provisioning, database tests or bootstrap fixes occurred. Independent Phase 0 review remains pending; see [gate record](phase-0-baseline-alignment.md).
+
+## Phase 3 ML quality/evaluation reconciliation (25 September 2026)
+
+Current task baseline `529a0f9`; the original tables above remain historical findings. Phase 1 loader and Phase 2 serving dispositions are recorded in [ml-loader-safety](ml-loader-safety.md) and [ml-segment-serving](ml-segment-serving.md). This bounded Phase 3 follows [ml-quality-evaluation](ml-quality-evaluation.md); accepted-data evaluation and focused checks passed; independent Astra Medium round 2 cleared the gate after MLQ-001 remediation.
+
+| IDs | Current bounded disposition | Residual ownership |
+|---|---|---|
+| M-01 / F-01, M-03, M-05, M-06, M-07, READY-008 | Resolved in Phase 3: correctness, profile naming, bounded comparison and retained accepted-data evidence; independent gate clear | Phase 3 |
+| M-02 | Temporal prediction evaluation remains outside the descriptive claim; no churn or predictive accuracy claim introduced | Reconsider only if a predictive task is explicitly adopted |
+| M-04 | Lifetime completed history and short-history/tenure limitations explicitly retained; feature period differs from dashboard date filters | B4/frontend: clarify lifetime-to-cutoff card copy; no frontend change in Phase 3 |
+| F-06 / M-12 | Phase 1 extraction and Phase 2 meaningful privacy assertion preserved; dedicated analytics CI/environment coverage passed local equivalents and independent Phase 3 review | Hosted CI cannot be claimed from local checks |
+| READY-010 | Current accepted raw v1.0.0 source verified against recorded hashes, namespace and cutoff; shoe remap remains plan-only | Dataset owner/B3: rerun evaluation after accepted derived revision is adopted |
+
+Next bounded batch-workflow work is B3's run/cutoff/namespace/version handoff and recovery contract, with any lifecycle/snapshot publication decisions separately scoped. Saved-model inference remains optional; EventBridge Scheduler/Lambda are excluded. Runtime TLS/Secrets Manager/bootstrap, image publication and AWS integration are separate gates; this entry does not clear them.

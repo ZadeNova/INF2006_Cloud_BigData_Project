@@ -79,29 +79,20 @@ def fetch_rfm(connection, namespace, cutoff):
 
 
 def _segment_name_mapping(profiles):
-    """Assign readable segment names using recency+frequency+monetary, not spend alone."""
-    profile = profiles.copy()
-    for source, target in (("mean_monetary", "z_monetary"),
-                           ("mean_frequency", "z_frequency"),
-                           ("mean_recency", "z_recency")):
-        std = profile[source].std(ddof=0)
-        profile[target] = 0.0 if std == 0 else (profile[source] - profile[source].mean()) / std
-    profile["business_score"] = profile["z_monetary"] + profile["z_frequency"] - profile["z_recency"]
-    ordered = profile.sort_values(["business_score", "cluster_id"], ascending=[False, True])["cluster_id"].tolist()
+    """Describe relative profile means, without a loyalty or churn claim.
+
+    Ranks make labels unique even when two profiles have the same description;
+    ties are resolved by cluster ID. All labels fit the serving field's 40 chars.
+    """
+    ordered = profiles.sort_values(["mean_recency", "mean_frequency", "mean_monetary", "cluster_id"],
+                                  ascending=[True, False, False, True])
+    middle = profiles[["mean_recency", "mean_frequency", "mean_monetary"]].median()
     labels = {}
-    if len(ordered) == 1:
-        labels[ordered[0]] = "core"
-        return labels
-    labels[ordered[0]] = "high_value"
-    if len(ordered) == 2:
-        labels[ordered[1]] = "core"
-        return labels
-    labels[ordered[1]] = "core"
-    labels[ordered[-1]] = "at_risk"
-    extra = 1
-    for cluster_id in ordered[2:-1]:
-        labels[cluster_id] = f"cluster_{extra}"
-        extra += 1
+    for rank, row in enumerate(ordered.itertuples(index=False), 1):
+        recency = "recent" if row.mean_recency <= middle["mean_recency"] else "older"
+        frequency = "more_orders" if row.mean_frequency > middle["mean_frequency"] else "fewer_orders"
+        spend = "higher_spend" if row.mean_monetary > middle["mean_monetary"] else "lower_spend"
+        labels[row.cluster_id] = f"{rank}_{recency}_{frequency}_{spend}"
     return labels
 
 
@@ -117,24 +108,66 @@ def _stability_against_published(scaled, k_clusters, published_labels, seeds):
     return float(np.mean(scores)), float(np.std(scores, ddof=0))
 
 
-def fit_segments(frame, min_k=2, max_k=6, random_seed=42, stability_seeds=(42, 99, 123, 777)):
-    features = frame[["recency_days", "frequency_orders", "monetary_log"]].to_numpy(dtype=float)
-    if len(features) < min_k:
-        raise ValueError(f"Need at least {min_k} customers for clustering")
-    scaled = StandardScaler().fit_transform(features)
-    upper = min(max_k, len(features) - 1)
-    if upper < min_k:
-        upper = min_k
+def feature_matrix(frame, preprocessing="baseline"):
+    features = frame[["recency_days", "frequency_orders", "monetary_total"]].to_numpy(dtype=float)
+    if not np.isfinite(features).all() or (features < 0).any():
+        raise ValueError("RFM features must be finite and nonnegative")
+    features[:, 2] = np.log1p(features[:, 2])
+    if preprocessing == "log_frequency":
+        features[:, 1] = np.log1p(features[:, 1])
+    elif preprocessing != "baseline":
+        raise ValueError("Unknown preprocessing")
+    return StandardScaler().fit_transform(features)
 
-    candidates = []
-    for k in range(min_k, upper + 1):
-        model = KMeans(n_clusters=k, random_state=random_seed, n_init="auto")
-        labels = model.fit_predict(scaled)
-        score = silhouette_score(scaled, labels) if k > 1 and len(features) > k else -1.0
-        candidates.append((score, k, labels))
-    score, chosen_k, labels = max(candidates, key=lambda item: (item[0], -item[1]))
-    silhouette = None if score < 0 else float(score)
-    frame = frame.copy()
+
+def fit_candidates(scaled, min_k=2, max_k=4, random_seed=42):
+    if isinstance(min_k, bool) or isinstance(max_k, bool) or not isinstance(min_k, int) or not isinstance(max_k, int) or not 2 <= min_k <= max_k <= 32767:
+        raise ValueError("Require integer cluster bounds 2 <= min_k <= max_k <= 32767")
+    distinct = len(np.unique(scaled, axis=0))
+    candidates, fitted = [], {}
+    for k in range(min_k, max_k + 1):
+        item = {"k": k, "seed": random_seed, "silhouette": None, "invalid_reason": None,
+                "actual_clusters": 0, "cluster_sizes": []}
+        if k >= len(scaled):
+            item["invalid_reason"] = "k must be smaller than customer count"
+        elif k > distinct:
+            item["invalid_reason"] = "k exceeds distinct feature vectors"
+        else:
+            labels = KMeans(n_clusters=k, random_state=random_seed, n_init="auto").fit_predict(scaled)
+            _, sizes = np.unique(labels, return_counts=True)
+            item["actual_clusters"] = len(sizes)
+            item["cluster_sizes"] = sizes.tolist()
+            if not 2 <= len(sizes) < len(scaled):
+                item["invalid_reason"] = "actual fitted labels cannot define silhouette"
+            elif len(sizes) != k:
+                item["invalid_reason"] = "fit collapsed below requested k"
+            else:
+                sample = np.random.RandomState(random_seed).permutation(len(scaled))[:5000]
+                if not 2 <= len(np.unique(labels[sample])) < len(sample):
+                    item["invalid_reason"] = "silhouette sample cannot define metric"
+                    candidates.append(item)
+                    continue
+                score = float(silhouette_score(scaled[sample], labels[sample]))
+                if np.isfinite(score):
+                    item["silhouette"] = score
+                    fitted[k] = labels
+                else:
+                    item["invalid_reason"] = "silhouette is nonfinite"
+        candidates.append(item)
+    return candidates, fitted
+
+
+def fit_segments(frame, min_k=2, max_k=4, random_seed=42, stability_seeds=(42, 99, 123, 777),
+                 preprocessing="log_frequency"):
+    frame = frame.sort_values("customer_id", kind="stable").copy()
+    scaled = feature_matrix(frame, preprocessing)
+    candidates, fitted = fit_candidates(scaled, min_k, max_k, random_seed)
+    valid = [item for item in candidates if item["invalid_reason"] is None]
+    if not valid:
+        raise ValueError("No valid clustering candidate: " + json.dumps(candidates))
+    selected = max(valid, key=lambda item: (item["silhouette"], -item["k"]))
+    chosen_k, silhouette = selected["k"], selected["silhouette"]
+    labels = fitted[chosen_k]
     frame["cluster_id"] = labels
     profiles = frame.groupby("cluster_id", as_index=False).agg(
         mean_monetary=("monetary_total", "mean"),
@@ -198,9 +231,10 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True, type=UUID)
     parser.add_argument("--output", required=True, type=Path, help="JSON output consumed by load_customer_segments")
-    parser.add_argument("--model-version", default="rfm-kmeans-v1")
+    parser.add_argument("--model-version", default="rfm-kmeans-v2")
     parser.add_argument("--min-k", default=2, type=int)
-    parser.add_argument("--max-k", default=6, type=int)
+    parser.add_argument("--max-k", default=4, type=int)
+    parser.add_argument("--preprocessing", choices=("baseline", "log_frequency"), default="log_frequency")
     parser.add_argument("--seed", default=42, type=int)
     parser.add_argument("--database-url", default=None)
     args = parser.parse_args(argv)
@@ -209,7 +243,7 @@ def main(argv=None):
             run = fetch_run(connection, args.run_id)
             frame = fetch_rfm(connection, run["namespace"], run["cutoff"])
         segmented, chosen_k, silhouette, stability_ari_mean, stability_ari_std = fit_segments(
-            frame, min_k=args.min_k, max_k=args.max_k, random_seed=args.seed)
+            frame, min_k=args.min_k, max_k=args.max_k, random_seed=args.seed, preprocessing=args.preprocessing)
         payload = build_output(
             segmented, run["run_id"], args.model_version, chosen_k, silhouette, stability_ari_mean, stability_ari_std)
         args.output.write_text(json.dumps(payload, indent=2), encoding="utf-8")

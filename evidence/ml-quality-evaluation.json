@@ -1,0 +1,433 @@
+{
+  "result": "evaluated",
+  "run_id": "bb3e4ce4-9485-47a3-94df-6d6e1cdac98c",
+  "namespace": "synthetic/revision-a/demo/v1",
+  "cutoff": "2026-01-01T16:00:00+00:00",
+  "inventory_version": "import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f",
+  "source": {
+    "release": "Analytics Engineering Ecommerce Sales & Returns v1.0.0",
+    "sha256": {
+      "customers.csv": "aa564464d95a344e055c95dc96380dbdb4d3055112d56385a829b9863d499f98",
+      "products.csv": "45bccbc014c318d1902f50b94fe952e1d7a753638f6994a406d632e65b10c6f3",
+      "orders.csv": "7c244862a063c8313c73679d96d0b95cc21adc890bef5df4595ec3fcc4a5f03c",
+      "order_items.csv": "da2213afac3dedf2af1be7cffbfaa16518dad97d5bd611c54c05451d2261b646",
+      "payments.csv": "3490bcfefca40133229bc446b834a2685d3268df65995f55e85530f607aed05a",
+      "refunds.csv": "d4a030e15e3069f8df8620470ecb64b594ec1cf51e4c8766f4b9ce136a1b0005"
+    },
+    "adoption": "Accepted raw revision; shoe remap is approved plan only and requires separate evaluation after adoption."
+  },
+  "cohort": {
+    "population_definition": "Users with a source profile or any order in the namespace",
+    "population": 20000,
+    "included": 19766,
+    "excluded_privileged": 0,
+    "excluded_without_completed_pre_cutoff_order": 234,
+    "included_with_one_order": 1099,
+    "eligibility": "At least one completed order strictly before cutoff; exclude staff, superusers and store_operator members. No profile or minimum tenure required."
+  },
+  "features": {
+    "period": "Lifetime completed history strictly before cutoff, independent of dashboard date filter",
+    "earliest_completed_order": "2023-01-01T00:27:20+00:00",
+    "latest_completed_order": "2025-12-31T23:59:03+00:00",
+    "definitions": {
+      "recency_days": "Floor elapsed days since latest eligible completed order",
+      "frequency_orders": "Count of eligible completed orders",
+      "monetary_total": "Sum of application order totals (rounded unit price times quantity); simulated SGD"
+    },
+    "excluded_inputs": [
+      "source customer_segment",
+      "names",
+      "email",
+      "signup date"
+    ],
+    "skew": {
+      "recency_days": 1.4109133251928838,
+      "frequency_orders": 0.5906506104569882,
+      "monetary_total": 0.8506404345789714,
+      "monetary_log": -1.4538508320370995
+    },
+    "log_frequency_skew": -0.41724651073864977,
+    "correlation": {
+      "recency_days": {
+        "recency_days": 1.0,
+        "frequency_orders": -0.41727475091840643,
+        "monetary_total": -0.3355006899741155,
+        "monetary_log": -0.3790487771223752
+      },
+      "frequency_orders": {
+        "recency_days": -0.41727475091840643,
+        "frequency_orders": 1.0,
+        "monetary_total": 0.8018532712166295,
+        "monetary_log": 0.7431415180589006
+      },
+      "monetary_total": {
+        "recency_days": -0.3355006899741155,
+        "frequency_orders": 0.8018532712166295,
+        "monetary_total": 1.0,
+        "monetary_log": 0.8784874603452288
+      },
+      "monetary_log": {
+        "recency_days": -0.3790487771223752,
+        "frequency_orders": 0.7431415180589006,
+        "monetary_total": 0.8784874603452288,
+        "monetary_log": 1.0
+      }
+    }
+  },
+  "method": {
+    "algorithm": "KMeans",
+    "n_init": "auto",
+    "seeds": [
+      42,
+      99,
+      123,
+      777
+    ],
+    "published_seed": 42,
+    "k_range": [
+      2,
+      3,
+      4
+    ],
+    "k_rationale": "Small interpretable profile set; no k forced to obtain a desired label",
+    "baseline": "StandardScaler of recency, frequency, log1p monetary",
+    "alternative": "StandardScaler of recency, log1p frequency, log1p monetary",
+    "alternative_rationale": "Measured frequency skew is reduced in absolute magnitude by log1p; test one bounded change without changing RFM meaning",
+    "silhouette": "Fixed seed 42 sample of at most 5000 customers; all customers fitted",
+    "stability": "ARI against published labels for seeds 99,123,777 on the same full cohort",
+    "naming": "Relative cluster-profile medians: recent/older, more/fewer orders, higher/lower spend; stable profile rank prefix ensures unique labels. Equality uses recent/fewer/lower."
+  },
+  "experiments": [
+    {
+      "preprocessing": "baseline",
+      "candidates": [
+        {
+          "k": 2,
+          "seed": 42,
+          "silhouette": 0.38849535424009807,
+          "invalid_reason": null,
+          "actual_clusters": 2,
+          "cluster_sizes": [
+            12509,
+            7257
+          ],
+          "stability_ari_mean": 0.97682158384975,
+          "stability_ari_std": 0.015528909870582017,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 0,
+              "customers": 12509,
+              "sales_amount": "45494300.27",
+              "sales_share_percent": 81.5,
+              "mean_recency_days": 139.54,
+              "mean_frequency_orders": 5.62,
+              "mean_monetary_total": 3636.93
+            },
+            {
+              "segment_label": "2_older_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 7257,
+              "sales_amount": "10327534.34",
+              "sales_share_percent": 18.5,
+              "mean_recency_days": 391.15,
+              "mean_frequency_orders": 2.59,
+              "mean_monetary_total": 1423.11
+            }
+          ]
+        },
+        {
+          "k": 3,
+          "seed": 42,
+          "silhouette": 0.33334911106953385,
+          "invalid_reason": null,
+          "actual_clusters": 3,
+          "cluster_sizes": [
+            7456,
+            9033,
+            3277
+          ],
+          "stability_ari_mean": 0.9419133303281076,
+          "stability_ari_std": 0.004627323740535181,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 0,
+              "customers": 7456,
+              "sales_amount": "32507375.20",
+              "sales_share_percent": 58.2,
+              "mean_recency_days": 139.06,
+              "mean_frequency_orders": 6.63,
+              "mean_monetary_total": 4359.89
+            },
+            {
+              "segment_label": "2_recent_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 9033,
+              "sales_amount": "19194774.59",
+              "sales_share_percent": 34.4,
+              "mean_recency_days": 176.29,
+              "mean_frequency_orders": 3.57,
+              "mean_monetary_total": 2124.96
+            },
+            {
+              "segment_label": "3_older_fewer_orders_lower_spend",
+              "cluster_id": 2,
+              "customers": 3277,
+              "sales_amount": "4119684.82",
+              "sales_share_percent": 7.4,
+              "mean_recency_days": 596.51,
+              "mean_frequency_orders": 2.26,
+              "mean_monetary_total": 1257.15
+            }
+          ]
+        },
+        {
+          "k": 4,
+          "seed": 42,
+          "silhouette": 0.31759662509678077,
+          "invalid_reason": null,
+          "actual_clusters": 4,
+          "cluster_sizes": [
+            8945,
+            2768,
+            2640,
+            5413
+          ],
+          "stability_ari_mean": 0.7315541689967183,
+          "stability_ari_std": 0.16232177369373602,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 3,
+              "customers": 5413,
+              "sales_amount": "25346346.74",
+              "sales_share_percent": 45.4,
+              "mean_recency_days": 128.83,
+              "mean_frequency_orders": 7.17,
+              "mean_monetary_total": 4682.5
+            },
+            {
+              "segment_label": "2_recent_more_orders_higher_spend",
+              "cluster_id": 0,
+              "customers": 8945,
+              "sales_amount": "23890600.40",
+              "sales_share_percent": 42.8,
+              "mean_recency_days": 173.23,
+              "mean_frequency_orders": 4.19,
+              "mean_monetary_total": 2670.83
+            },
+            {
+              "segment_label": "4_older_fewer_orders_lower_spend",
+              "cluster_id": 2,
+              "customers": 2640,
+              "sales_amount": "4100122.70",
+              "sales_share_percent": 7.3,
+              "mean_recency_days": 662.84,
+              "mean_frequency_orders": 2.51,
+              "mean_monetary_total": 1553.08
+            },
+            {
+              "segment_label": "3_older_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 2768,
+              "sales_amount": "2484764.77",
+              "sales_share_percent": 4.5,
+              "mean_recency_days": 212.16,
+              "mean_frequency_orders": 2.23,
+              "mean_monetary_total": 897.68
+            }
+          ]
+        }
+      ],
+      "best_k": 2
+    },
+    {
+      "preprocessing": "log_frequency",
+      "candidates": [
+        {
+          "k": 2,
+          "seed": 42,
+          "silhouette": 0.4347495924294485,
+          "invalid_reason": null,
+          "actual_clusters": 2,
+          "cluster_sizes": [
+            13679,
+            6087
+          ],
+          "stability_ari_mean": 0.9839788983379951,
+          "stability_ari_std": 0.01106743356047748,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 0,
+              "customers": 13679,
+              "sales_amount": "47929180.41",
+              "sales_share_percent": 85.9,
+              "mean_recency_days": 150.03,
+              "mean_frequency_orders": 5.45,
+              "mean_monetary_total": 3503.85
+            },
+            {
+              "segment_label": "2_older_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 6087,
+              "sales_amount": "7892654.20",
+              "sales_share_percent": 14.1,
+              "mean_recency_days": 415.94,
+              "mean_frequency_orders": 2.38,
+              "mean_monetary_total": 1296.64
+            }
+          ]
+        },
+        {
+          "k": 3,
+          "seed": 42,
+          "silhouette": 0.3359585749778572,
+          "invalid_reason": null,
+          "actual_clusters": 3,
+          "cluster_sizes": [
+            7624,
+            2751,
+            9391
+          ],
+          "stability_ari_mean": 0.9842552270227597,
+          "stability_ari_std": 0.004819318030099601,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 2,
+              "customers": 9391,
+              "sales_amount": "38281886.40",
+              "sales_share_percent": 68.6,
+              "mean_recency_days": 141.35,
+              "mean_frequency_orders": 6.21,
+              "mean_monetary_total": 4076.44
+            },
+            {
+              "segment_label": "2_recent_fewer_orders_lower_spend",
+              "cluster_id": 0,
+              "customers": 7624,
+              "sales_amount": "14574411.27",
+              "sales_share_percent": 26.1,
+              "mean_recency_days": 207.13,
+              "mean_frequency_orders": 3.32,
+              "mean_monetary_total": 1911.65
+            },
+            {
+              "segment_label": "3_older_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 2751,
+              "sales_amount": "2965536.94",
+              "sales_share_percent": 5.3,
+              "mean_recency_days": 609.79,
+              "mean_frequency_orders": 1.99,
+              "mean_monetary_total": 1077.99
+            }
+          ]
+        },
+        {
+          "k": 4,
+          "seed": 42,
+          "silhouette": 0.34972814319619083,
+          "invalid_reason": null,
+          "actual_clusters": 4,
+          "cluster_sizes": [
+            6094,
+            1675,
+            8902,
+            3095
+          ],
+          "stability_ari_mean": 0.7963125209188463,
+          "stability_ari_std": 0.22660961473642197,
+          "profiles": [
+            {
+              "segment_label": "1_recent_more_orders_higher_spend",
+              "cluster_id": 2,
+              "customers": 8902,
+              "sales_amount": "36644099.17",
+              "sales_share_percent": 65.6,
+              "mean_recency_days": 130.11,
+              "mean_frequency_orders": 6.27,
+              "mean_monetary_total": 4116.39
+            },
+            {
+              "segment_label": "2_recent_fewer_orders_lower_spend",
+              "cluster_id": 0,
+              "customers": 6094,
+              "sales_amount": "11044910.13",
+              "sales_share_percent": 19.8,
+              "mean_recency_days": 144.26,
+              "mean_frequency_orders": 3.27,
+              "mean_monetary_total": 1812.42
+            },
+            {
+              "segment_label": "3_older_more_orders_higher_spend",
+              "cluster_id": 3,
+              "customers": 3095,
+              "sales_amount": "7177426.86",
+              "sales_share_percent": 12.9,
+              "mean_recency_days": 522.22,
+              "mean_frequency_orders": 3.54,
+              "mean_monetary_total": 2319.04
+            },
+            {
+              "segment_label": "4_older_fewer_orders_lower_spend",
+              "cluster_id": 1,
+              "customers": 1675,
+              "sales_amount": "955398.45",
+              "sales_share_percent": 1.7,
+              "mean_recency_days": 555.5,
+              "mean_frequency_orders": 1.44,
+              "mean_monetary_total": 570.39
+            }
+          ]
+        }
+      ],
+      "best_k": 2
+    }
+  ],
+  "selection": {
+    "preprocessing": "log_frequency",
+    "model_version": "rfm-kmeans-v2",
+    "k": 2,
+    "rationale": "Accepted-revision comparison supports the single log-frequency change: higher sampled separation, similar strong seed stability, substantial groups and the same interpretable relative profile ordering. Choose highest valid silhouette within this preprocessing; ties prefer lower k. This is descriptive geometry, not predictive performance. Reassess this policy for another revision."
+  },
+  "identity": {
+    "git_head": "529a0f9ee428af15524988dab2a2ccf74175b1b4",
+    "tracked_code_diff_sha256": "3be4161cac829c9bf4b090d22982e871807273dd333a40c52d26c20fba8ea77f",
+    "working_files_sha256": {
+      "analytics/segment_customers.py": "7ca159f71f905f255ba72e58ce1e8e759ee0a5092a7a03930c21e01eac7d6693",
+      "analytics/evaluate_segments.py": "7bf11f414127447f9a458177acb8d664b60fd707f1692204902a326340b2d8c7",
+      "analytics/requirements.txt": "19f768375fcbe4376aa812af0082a0654d890ee24728343e0621d972b4dd8021"
+    },
+    "python": "3.12.10",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "dependencies": {
+      "numpy": "2.3.3",
+      "pandas": "2.3.2",
+      "scikit-learn": "1.7.2",
+      "scipy": "1.16.2",
+      "psycopg": "3.3.5",
+      "joblib": "1.5.2",
+      "threadpoolctl": "3.6.0"
+    }
+  },
+  "reproduction": {
+    "setup": "Use isolated PostgreSQL; install src/requirements.txt plus analytics/requirements.txt in a separate analytics environment. Import verified data/raw namespace, refresh as-of 2026-01-02; see analytics/README.md. Supply credentials only through environment.",
+    "command": "python analytics/evaluate_segments.py --run-id <NEW_RUN_UUID> --source data/raw --output evidence/ml-quality-evaluation.json",
+    "thread_limits": "OMP_NUM_THREADS=OPENBLAS_NUM_THREADS=MKL_NUM_THREADS=1"
+  },
+  "limitations": [
+    "Synthetic generator structure, not evidence of real customer behaviour or churn/prediction",
+    "Lifetime frequency/spend depend on opportunity and tenure; one-order customers retained, no minimum-tenure correction",
+    "Correlated frequency and spend weight purchasing volume twice; not causal features",
+    "Silhouette measures geometry under each transform, not comparable predictive accuracy",
+    "Current database cohort, not immutable historical feature snapshot; raw hashes do not prove unchanged database history",
+    "No assignment rows or personal fields retained in this aggregate artifact"
+  ],
+  "unrun_experiments": [
+    "Resampling omitted: chosen k=2 has strong seed stability and clear profiles; this bounded check makes no resampling robustness claim",
+    "Temporal prediction, saved-model inference, AWS and shoe remap evaluation not run"
+  ]
+}

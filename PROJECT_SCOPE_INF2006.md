@@ -203,7 +203,7 @@ Included by the 25 September scope decision. Preserve required analytics, checko
 - Calculate recency, completed-order frequency and spending at a fixed cutoff.
 - Scale features and fit a small K-means model offline.
 - Compare a few cluster counts, silhouette scores, cluster sizes/profiles and stability across seeds.
-- Exclude customers without adequate purchase history or label them separately.
+- Include customers with at least one completed order strictly before cutoff; exclude privileged accounts and customers without such history. Retain short histories for descriptive profiles and report their count and tenure limitations; this is not sufficient history for prediction.
 - Interpret groups after inspecting their profiles; cluster IDs do not inherently mean loyal or at-risk customers.
 - Show summaries on the operator page. Run training and assignment loading through an explicitly triggered batch workflow. Saved-model inference is optional; keep local training/loading available, with no dedicated model server.
 - Document that the selected synthetic dataset cannot establish real customer behaviour. Check whether repeat purchasing and variation are sufficient before attempting clustering. Do not report classification accuracy without true class labels.

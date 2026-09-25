@@ -29,16 +29,17 @@ ML stays outside the web image. ML uses an explicitly triggered batch workflow; 
 into the app table keyed by analytics run and model version:
 
 ```powershell
-docker compose run --rm --no-deps --user 0 --volume "${PWD}:/work" --workdir /work web sh -lc "python -m venv /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r analytics/requirements.txt && /tmp/analytics-env/bin/python analytics/segment_customers.py --run-id <RUN_UUID> --output /work/analytics/segments.json --model-version rfm-kmeans-v1"
-docker compose run --rm --volume "${PWD}\analytics:/work/analytics" web python manage.py load_customer_segments --run-id <RUN_UUID> --input /work/analytics/segments.json --model-version rfm-kmeans-v1
+docker compose run --rm --no-deps --user 0 --volume "${PWD}:/work" --workdir /work web sh -lc "python -m venv /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r analytics/requirements.txt && /tmp/analytics-env/bin/python analytics/segment_customers.py --run-id <RUN_UUID> --output /work/analytics/segments.json --model-version rfm-kmeans-v2"
+docker compose run --rm --volume "${PWD}\analytics:/work/analytics" web python manage.py load_customer_segments --run-id <RUN_UUID> --input /work/analytics/segments.json --model-version rfm-kmeans-v2
 ```
 
-`segment_customers.py` reads completed orders before the run cutoff, computes RFM,
-scales features, log-transforms monetary, chooses k by silhouette on a bounded range,
+`segment_customers.py` reads lifetime completed orders strictly before the run cutoff, computes RFM,
+scales raw recency/log1p frequency/log1p monetary, chooses k by silhouette on k=2..4,
 checks stability by comparing each seed's labels against the published-label seed
-(ARI mean/std), and writes JSON rows plus cluster profiles. Segment naming uses
-recency, frequency and monetary together (`high_value`, `core`, `at_risk`) rather
-than spend alone. The dashboard shows a segment panel only when assignments exist
+(ARI mean/std), and writes JSON rows plus cluster profiles. The score uses a fixed
+sample of at most 5,000 customers; fitting uses all customers. Segment names describe
+relative recency/order-count/spend profile means, without churn or loyalty claims.
+The dashboard shows a segment panel only when assignments exist
 for the selected run.
 
 Segment exports cover completed-order owners in the run namespace before its cutoff, excluding staff, superusers and `store_operator` members. Ordinary local shoppers need no imported profile. The loader requires matching run/model metadata and the complete current eligible cohort; regenerate when eligibility has changed. Invalid files preserve prior assignments, and same-version reruns replace atomically. `--model-version` confirms the file version rather than changing it. See [import safety contract](../docs/ANALYTICS.md#segment-import-safety-contract).
@@ -46,6 +47,51 @@ Segment exports cover completed-order owners in the run namespace before its cut
 Results are descriptive on synthetic data and may reflect generator structure instead
 of real customer behavior. Treat this panel as descriptive operational guidance, not a
 predictive model.
+
+## ML quality evaluation
+
+The accepted raw v1.0.0 revision was evaluated on 25 September 2026; the shoe remap
+remains a plan and needs evaluation after validated adoption. The versionable
+[aggregate artifact](../evidence/ml-quality-evaluation.json) contains no customer
+assignments. [Executed checks and commands](../evidence/test-data-ai.md#ml-quality-evaluation-25-september-2026)
+record actual environments and limitations. The production image remains free of ML packages.
+
+Use an isolated PostgreSQL database and a separate environment with both pinned
+`src/requirements.txt` and `analytics/requirements.txt`. Supply database credentials
+through environment variables; never embed them in commands. Set `PYTHONPATH` to
+`src;tests` on Windows or `src:tests` on Linux, and use `DJANGO_ENV=local` plus the
+normal Django secret/allowed-host configuration. Migrate, then reproduce:
+
+```sh
+python src/manage.py import_dataset --source data/raw --namespace synthetic/revision-a/demo/v1
+python src/manage.py refresh_analytics --as-of 2026-01-02 --namespace synthetic/revision-a/demo/v1 --inventory-version import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f
+python analytics/evaluate_segments.py --run-id <NEW_RUN_UUID> --source data/raw --output evidence/ml-quality-evaluation.json
+python analytics/segment_customers.py --run-id <NEW_RUN_UUID> --output <TEMP_ASSIGNMENTS_JSON> --model-version rfm-kmeans-v2
+python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEMP_ASSIGNMENTS_JSON> --model-version rfm-kmeans-v2
+```
+
+Set `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS` and `MKL_NUM_THREADS` to 1 for this
+reproduction. `--preprocessing baseline` retains raw frequency; default
+`log_frequency` adds only log1p frequency, preserving lifetime RFM semantics. Both
+retain log1p monetary. The measured comparison supports v2: k=2 has higher sampled
+separation, similarly strong seed ARI and substantial interpretable groups. k is
+still selected, not forced. Seed stability does not establish resampling robustness;
+no resampling or predictive experiment was needed for this bounded descriptive claim.
+
+Pure ML tests must run in an environment with analytics dependencies and pinned
+pytest, without Django. PostgreSQL-dependent tests need application dependencies,
+settings and test helpers; no collection skips are used:
+
+```sh
+# Pure environment (Linux; CI uses pinned Python 3.13 container)
+python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py
+# Combined application/analytics environment, configured isolated PostgreSQL
+python -m pytest -q -c src/pytest.ini -p no:cacheprovider analytics/tests/test_segment_loader_integration.py analytics/tests/test_verify_refresh.py tests/test_customer_segments_command.py
+```
+
+The [dedicated CI job](../.github/workflows/ci.yml) supplies all exact runtime/test
+dependency pins, uses separate pure and Django environments and cleans only its
+own Compose database. Hosted CI, AWS and frontend validation remain separate claims.
 
 ## Executed verification, 22 September 2026
 
