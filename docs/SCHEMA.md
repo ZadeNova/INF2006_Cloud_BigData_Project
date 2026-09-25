@@ -27,6 +27,12 @@ Demo display currency: SGD as an explicit simulation convention, not a claim abo
 
 Historical Order rows have an external ID and no idempotency key/fingerprint. Live simulated orders have no external ID, require a user-scoped UUID key plus a 64-character lowercase SHA-256 fingerprint, and are completed only. Database uniqueness permits the same key for different users but never two orders for the same user/key. The later checkout service owns canonical fingerprint generation and replay handling.
 
+`CustomerSegment.model_version` holds the configuration/provenance-derived recipe
+identity for new batch imports. Full batch/source/run metadata and the output digest
+remain in the retained completed JSON export, not a new database model. Existing
+stored rows and atomic same-run/version replacement are preserved; legacy export
+files need regeneration under the [explicit batch contract](ANALYTICS.md#explicit-batch-handoff-contract).
+
 ## Reporting SQL view
 
 `reporting_completed_sale_lines` is created by `reporting/0003_completed_sale_lines_view.py`

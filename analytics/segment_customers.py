@@ -1,10 +1,14 @@
 """Offline RFM customer segmentation with K-means for one completed analytics run."""
 import argparse
 from datetime import datetime, timezone
+import hashlib
+import importlib.metadata
 import json
 import os
 from pathlib import Path
 import sys
+import platform
+import tempfile
 from uuid import UUID
 
 import numpy as np
@@ -14,10 +18,13 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score, silhouette_score
 from sklearn.preprocessing import StandardScaler
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+from reporting.segment_contract import (FORMAT, FEATURE_SCHEMA, batch_id, model_version,
+                                       run_binding, source_binding, validate_batch, validate_rows)
 
-def connect(database_url=None):
-    if database_url:
-        return psycopg.connect(database_url, connect_timeout=10)
+
+def connect():
     required = ("POSTGRES_DB", "POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_HOST")
     if any(not os.environ.get(name) for name in required):
         raise ValueError("Missing PostgreSQL environment configuration")
@@ -33,7 +40,7 @@ def connect(database_url=None):
 def fetch_run(connection, run_id):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT r.id, r.cutoff, r.status, v.namespace
+            SELECT r.id, r.cutoff, r.status, v.namespace, v.version, r.summary_version
             FROM reporting_analyticsrun r
             JOIN reporting_inventoryversion v ON v.id = r.inventory_id
             WHERE r.id = %s
@@ -41,7 +48,8 @@ def fetch_run(connection, run_id):
         row = cursor.fetchone()
     if row is None or row[2] != "completed":
         raise ValueError("Run must exist and be completed")
-    return {"run_id": str(row[0]), "cutoff": row[1], "namespace": row[3]}
+    return {"run_id": str(row[0]), "cutoff": row[1], "namespace": row[3],
+            "inventory_version": row[4], "summary_version": str(row[5])}
 
 
 def fetch_rfm(connection, namespace, cutoff):
@@ -227,30 +235,78 @@ def build_output(frame, run_id, model_version, k_clusters, silhouette, stability
     }
 
 
+def training_config(preprocessing="log_frequency", min_k=2, max_k=4, seed=42):
+    if not 2 <= min_k <= max_k <= 4 or not 0 <= seed <= 4294967295:
+        raise ValueError("Invalid batch training configuration")
+    code_paths = ("analytics/segment_customers.py", "analytics/requirements.txt", "src/reporting/segment_contract.py")
+    packages = ("numpy", "pandas", "scikit-learn", "scipy", "psycopg", "joblib", "threadpoolctl")
+    return {
+        "algorithm": "sklearn-kmeans", "feature_schema": FEATURE_SCHEMA,
+        "preprocessing": preprocessing, "min_k": min_k, "max_k": max_k, "seed": seed,
+        "stability_seeds": [42, 99, 123, 777], "n_init": "auto",
+        "selection": "highest-valid-silhouette-smaller-k-tie", "silhouette_sample_limit": 5000,
+        "provenance": {"python": platform.python_version(),
+                       "dependencies": {name: importlib.metadata.version(name) for name in packages},
+                       "code_sha256": {path: hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
+                                       for path in code_paths}},
+    }
+
+
+def complete_export(payload, run, source, training):
+    """Add the completed handoff envelope; the low-level builder is also used by evaluation."""
+    payload.update(format=FORMAT, status="completed", run=run_binding(run), source=source, training=training)
+    payload["batch_id"] = batch_id(payload)
+    validate_rows(payload, run["run_id"], model_version(training))
+    validate_batch(payload, run, source)
+    return payload
+
+
+def publish_output(path, payload):
+    """Only a validated complete file can replace the previous export on this filesystem."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent,
+                                         prefix=".rfm-", suffix=".tmp", delete=False) as handle:
+            temporary = Path(handle.name)
+            json.dump(payload, handle, indent=2, allow_nan=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True, type=UUID)
     parser.add_argument("--output", required=True, type=Path, help="JSON output consumed by load_customer_segments")
-    parser.add_argument("--model-version", default="rfm-kmeans-v2")
+    parser.add_argument("--model-version", help="Assert the derived configuration version; never relabel")
     parser.add_argument("--min-k", default=2, type=int)
     parser.add_argument("--max-k", default=4, type=int)
     parser.add_argument("--preprocessing", choices=("baseline", "log_frequency"), default="log_frequency")
     parser.add_argument("--seed", default=42, type=int)
-    parser.add_argument("--database-url", default=None)
     args = parser.parse_args(argv)
     try:
-        with connect(args.database_url) as connection:
+        training = training_config(args.preprocessing, args.min_k, args.max_k, args.seed)
+        version = model_version(training)
+        if args.model_version is not None and args.model_version != version:
+            raise ValueError("Model version assertion failed")
+        with connect() as connection:
+            source = source_binding(connection)
             run = fetch_run(connection, args.run_id)
             frame = fetch_rfm(connection, run["namespace"], run["cutoff"])
         segmented, chosen_k, silhouette, stability_ari_mean, stability_ari_std = fit_segments(
             frame, min_k=args.min_k, max_k=args.max_k, random_seed=args.seed, preprocessing=args.preprocessing)
         payload = build_output(
-            segmented, run["run_id"], args.model_version, chosen_k, silhouette, stability_ari_mean, stability_ari_std)
-        args.output.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+            segmented, run["run_id"], version, chosen_k, silhouette, stability_ari_mean, stability_ari_std)
+        complete_export(payload, run, source, training)
+        publish_output(args.output, payload)
         print(json.dumps({
             "result": "PASS",
             "run_id": run["run_id"],
-            "model_version": args.model_version,
+            "model_version": version,
+            "batch_id": payload["batch_id"],
             "customers": len(segmented),
             "k_clusters": chosen_k,
             "silhouette_score": None if silhouette is None else round(float(silhouette), 4),
@@ -259,14 +315,8 @@ def main(argv=None):
             "output": str(args.output),
         }, indent=2))
         return 0
-    except ValueError as exc:
-        print(f"FAIL: {exc}", file=sys.stderr)
-        return 1
-    except OSError as exc:
-        print(f"FAIL: {exc}", file=sys.stderr)
-        return 1
-    except TypeError:
-        print("FAIL: invalid input", file=sys.stderr)
+    except (ValueError, OSError, TypeError, OverflowError, importlib.metadata.PackageNotFoundError):
+        print("FAIL: invalid batch configuration, source, training result or output; previous export retained", file=sys.stderr)
         return 1
     except psycopg.Error:
         print("FAIL: database unavailable or invalid query", file=sys.stderr)

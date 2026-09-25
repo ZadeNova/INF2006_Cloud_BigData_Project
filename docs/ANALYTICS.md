@@ -114,8 +114,51 @@ The overview retains total group counts and metrics; sampled rows and their disp
 
 ### Segment import safety contract
 
-The export must be a JSON object with explicit matching `run_id`, nonempty `model_version`, top-level `k_clusters` and `silhouette_score`, and a nonempty `rows` assignment array. Duplicate JSON keys are rejected. `silhouette_score` must be present at both levels: use JSON `null` when undefined, otherwise a value in -1..1 with at most four decimal places (negative scores are valid). Each customer occurs once; row metadata must agree with the top level, cluster IDs must be below k, and numeric values must be finite and fit their database fields. Integers must be JSON integers, excluding booleans and numeric strings; money supports at most two decimal places. Cluster labels must agree within each cluster, but not every cluster needs an assignment. Extraction is ordered by customer ID. A supplied `--model-version` asserts the file identity; it must not silently relabel a different model.
+The export must be a JSON object with explicit matching `run_id`, nonempty derived `model_version`, top-level `k_clusters` and `silhouette_score`, a nonempty `rows` assignment array, and the completed batch envelope below. Duplicate JSON keys are rejected. `silhouette_score` must be present at both levels: use JSON `null` when undefined, otherwise a value in -1..1 with at most four decimal places (negative scores are valid). Each customer occurs once; row metadata must agree with the top level, cluster IDs must be below k, and numeric values must be finite and fit their database fields. Integers must be JSON integers, excluding booleans and numeric strings; money supports at most two decimal places. Cluster labels must agree within each cluster, but not every cluster needs an assignment. Extraction is ordered by customer ID. A supplied `--model-version` asserts the derived identity; neither training nor import may arbitrarily relabel it.
 
-The loader requires exactly the currently eligible customer set for that completed run. If source eligibility changes between export and loading, regenerate the export. This checks current source records at import time, not an immutable historical feature snapshot. Matching IDs does not prove submitted RFM values match the original feature computation or establish model quality. Immutable feature-snapshot and model-artifact identity are deferred to the training/inference phase. Staff/group or source changes after loading are not automatically reflected until the next export/load.
+The loader requires exactly the currently eligible customer set for that completed run. If source eligibility changes between export and loading, regenerate the export. This checks current source records at import time, not an immutable historical feature snapshot. Matching IDs does not prove submitted RFM values match the original feature computation or establish model quality; same-ID feature drift can remain undetected. Immutable feature snapshots and saved-model artifacts remain deferred. Staff/group or source changes after loading are not automatically reflected until the next export/load.
 
 Same-run/model loading replaces its assignments atomically, retaining the existing rerun contract: replay cannot duplicate assignments, and a different valid payload with the same identity replaces the prior set. Lock the analytics run while rechecking its completed status, eligibility and replacing rows so concurrent loaders cannot interleave partial publications. Invalid input leaves the prior assignments unchanged. Distinct model versions remain separate.
+
+### Explicit batch handoff contract
+
+Manually invoke `segment_customers.py --run-id UUID --output FILE`, then separately
+`load_customer_segments --run-id UUID --input FILE`. Both selections are mandatory;
+never infer the latest run or newest file. Each training invocation refits the scaler
+and K-means; no saved model, scheduling or persistent batch model is introduced.
+Namespace/cutoff come from the selected completed run. The existing Phase 2 serving
+selection and deterministic metrics are unchanged.
+
+The mandatory `rfm-batch-v1` envelope includes `status=completed`, generation time,
+source association, run namespace/UTC cutoff/inventory version/summary UUID,
+training configuration and provenance. Independently configured `ML_SOURCE_ID`
+(a deployment/database UUID), the actual PostgreSQL database name and all selected
+run fields must match the destination. An operator must provision a new association
+for a recreated/cloned database; configuration copied with a clone can defeat that
+distinction. This is declared traceability, not authentication. Namespace alone is
+not source proof. No hostnames or credentials are exported.
+
+Training configuration records lifetime-RFM feature schema, preprocessing, candidate
+bounds within 2..4, selection/tie policy, published seed, stability seeds, n_init and
+silhouette sample limit. Its provenance records Python/ML dependency versions and
+SHA-256 hashes of producer/shared-contract source and pinned analytics requirements.
+`model_version=rfm-v3-<SHA256>` hashes this complete training configuration/provenance,
+independently of the run/output. It is a recipe identity, not a fitted model identity.
+`batch_id` hashes the completed payload excluding only `generated_at` and itself:
+source/run, recipe, selected k, metrics, rows and profiles all contribute. Canonical
+JSON uses sorted keys, normalized equivalent JSON numbers and preserved array order;
+formatting and time alone do not change identity. Digests detect accidental mismatch;
+they do not authenticate an export, prove source truth or verify original RFM values.
+
+Producer and loader reuse standard-library field/batch validation; ML packages never
+enter the web image. Validate before writing a temporary sibling file, flush/fsync,
+then atomically replace the named output. Training, validation or publication failure
+must return nonzero with sanitized diagnostics and retain a valid prior export.
+Incomplete temporary files are never import inputs. A valid completed export can be
+retried after import failure without retraining; cohort drift requires regeneration.
+Legacy files missing the envelope are rejected and must be regenerated. Keep completed
+exports in the authorised output location for provenance; existing persistence stores
+only run/model version and assignments, and no migration is needed. A new refresh
+requires its own explicit batch. Pending/failed/stale UX, immutable snapshots and
+lifetime-period frontend copy remain separate work. Executable operations and recovery:
+[batch runbook](../analytics/README.md#included-descriptive-ml-explicit-batch-handoff).

@@ -113,3 +113,17 @@ Current task baseline `529a0f9`; the original tables above remain historical fin
 | READY-010 | Current accepted raw v1.0.0 source verified against recorded hashes, namespace and cutoff; shoe remap remains plan-only | Dataset owner/B3: rerun evaluation after accepted derived revision is adopted |
 
 Next bounded batch-workflow work is B3's run/cutoff/namespace/version handoff and recovery contract, with any lifecycle/snapshot publication decisions separately scoped. Saved-model inference remains optional; EventBridge Scheduler/Lambda are excluded. Runtime TLS/Secrets Manager/bootstrap, image publication and AWS integration are separate gates; this entry does not clear them.
+
+## Phase 4 batch handoff/recovery reconciliation (25 September 2026)
+
+Phase 4 baseline `d934859`; implementation/review status and actual checks are in [ml-batch-handoff](ml-batch-handoff.md). The original tables above describe historical findings; this entry records the bounded current disposition.
+
+| IDs | Phase 4 scope | Remaining boundary |
+|---|---|---|
+| M-08 | Resolved locally: configuration-derived version and separate completed batch identity, explicit run/source provenance; independent Phase 4 gate clear | No saved-model artifact, authentication or immutable source proof |
+| M-11 | Resolved for current batch runbook: isolated ordinary-user environments, dedicated output and environment/role credentials; independent Phase 4 gate clear | Production credential retrieval and TLS remain separate runtime-security work |
+| READY-003 | Phase 1 validation/replacement preserved; completed batch/destination checks and retry verified; independent Phase 4 gate clear | Source orders/roles can change; metadata does not prove historical RFM values |
+| READY-006 | Explicit retraining/export/import is the selected design; no saved-model inference or Scheduler/Lambda required | Local batch verification does not establish AWS execution readiness |
+| S-006 | Bounded explicit batch recovery only; lifecycle gap remains open | Later task: pending/failed/stale presentation and lifetime-period copy; never silently use another run's assignments |
+
+Immutable feature snapshots remain unimplemented and require a separately bounded decision. READY-002 and broader TLS/Secrets Manager/bootstrap/image/AWS gates are unchanged. Shoe-data adoption still requires separate reevaluation under READY-010.

@@ -23,30 +23,142 @@ No peak-memory measurement/cloud-instance suitability claim is made; bulk-create
 batching does not bound total importer memory. Measure on the selected cloud instance
 before using it for the deployment import.
 
-## Included descriptive ML: offline RFM K-means
+## Included descriptive ML: explicit batch handoff
 
-ML stays outside the web image. ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. EventBridge Scheduler and Lambda are not selected; local training/loading remain available. Train/evaluate offline here, then load assignments
-into the app table keyed by analytics run and model version:
+Each invocation retrains RFM K-means for one explicitly selected completed
+`AnalyticsRun`, publishes one validated JSON export, then a separate explicit import
+loads it. ML dependencies stay outside the web image. Saved-model inference,
+scheduling, Lambda and a model registry are not implemented.
 
-```powershell
-docker compose run --rm --no-deps --user 0 --volume "${PWD}:/work" --workdir /work web sh -lc "python -m venv /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r analytics/requirements.txt && /tmp/analytics-env/bin/python analytics/segment_customers.py --run-id <RUN_UUID> --output /work/analytics/segments.json --model-version rfm-kmeans-v2"
-docker compose run --rm --volume "${PWD}\analytics:/work/analytics" web python manage.py load_customer_segments --run-id <RUN_UUID> --input /work/analytics/segments.json --model-version rfm-kmeans-v2
+### Prerequisites and source association
+
+Use the checked-out reviewed code as an ordinary user. The following Bash commands
+run from the repository root; on Windows use the corresponding venv `Scripts/python.exe`
+and environment-variable syntax. Keep virtual environments and outputs outside the
+checkout. Use Python 3.13 with the pinned requirements:
+
+```sh
+python3.13 -m venv "$HOME/.venvs/inf2006-ml"
+python3.13 -m venv "$HOME/.venvs/inf2006-web"
+export ML_PY="$HOME/.venvs/inf2006-ml/bin/python"
+export WEB_PY="$HOME/.venvs/inf2006-web/bin/python"
+"$ML_PY" -m pip install -r analytics/requirements.txt
+"$WEB_PY" -m pip install -r src/requirements.txt
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+install -d -m 700 "$HOME/inf2006-ml-output"
 ```
 
-`segment_customers.py` reads lifetime completed orders strictly before the run cutoff, computes RFM,
-scales raw recency/log1p frequency/log1p monetary, chooses k by silhouette on k=2..4,
-checks stability by comparing each seed's labels against the published-label seed
-(ARI mean/std), and writes JSON rows plus cluster profiles. The score uses a fixed
-sample of at most 5,000 customers; fitting uses all customers. Segment names describe
-relative recency/order-count/spend profile means, without churn or loyalty claims.
-The dashboard shows a segment panel only when assignments exist
-for the selected run.
+Configure `POSTGRES_DB`, `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER` and
+`POSTGRES_PASSWORD` through protected environment/role-based credential delivery.
+Never place a secret database URL in arguments; the batch trainer accepts no URL
+argument. Use the approved read-only database role for training and the non-superuser
+application role for import, both against the intended database. The loader also
+needs normal Django settings (`DJANGO_ENV`, `DJANGO_SECRET_KEY`, allowed hosts).
+For local PostgreSQL explicitly set `POSTGRES_SSLMODE=disable`; production uses
+`POSTGRES_SSLMODE=verify-full` and the approved `POSTGRES_SSLROOTCERT` CA path.
+Production runtime/TLS enforcement remains a separate readiness gate.
 
-Segment exports cover completed-order owners in the run namespace before its cutoff, excluding staff, superusers and `store_operator` members. Ordinary local shoppers need no imported profile. The loader requires matching run/model metadata and the complete current eligible cohort; regenerate when eligibility has changed. Invalid files preserve prior assignments, and same-version reruns replace atomically. `--model-version` confirms the file version rather than changing it. See [import safety contract](../docs/ANALYTICS.md#segment-import-safety-contract).
+Provision a nonsecret UUID `ML_SOURCE_ID` once for the intended deployment/database
+association and keep it in that environment's protected operational configuration.
+Configure the expected value **independently** on the training and import endpoints;
+do not copy it from an arbitrary export to make an import pass. A newly cloned or
+recreated database gets a new association UUID. The export checks that UUID plus
+PostgreSQL's actual database name and the selected run's namespace, cutoff, inventory
+version and summary UUID at import. Namespace equality alone establishes no source
+association. This is operator-declared traceability, not authentication: a clone with
+identical run IDs, database name and mistakenly reused configuration cannot be
+reliably distinguished. Use authorised database connections and custody of exports.
+No credentials, hostnames or connection URLs enter the export.
 
-Results are descriptive on synthetic data and may reflect generator structure instead
-of real customer behavior. Treat this panel as descriptive operational guidance, not a
-predictive model.
+### Select, train, inspect, import and verify
+
+Migrate and populate the intended database with the existing application workflow
+first. Use `refresh_analytics` with its explicit namespace/cutoff/inventory version
+(see the reproduction below), or choose an existing completed run. List candidate
+runs and deliberately select a UUID; there is no latest-run or newest-file default:
+
+```sh
+set -eu
+"$WEB_PY" src/manage.py shell -c 'from reporting.models import AnalyticsRun; print(list(AnalyticsRun.objects.filter(status="completed").order_by("cutoff").values("id", "cutoff", "inventory__namespace", "inventory__version", "summary_version")))'
+export RUN_ID='<the selected completed run UUID>'
+export BATCH_FILE="$HOME/inf2006-ml-output/$RUN_ID.json"
+"$ML_PY" analytics/segment_customers.py --run-id "$RUN_ID" --output "$BATCH_FILE"
+"$ML_PY" -c 'import json,os; p=json.load(open(os.environ["BATCH_FILE"])); print(json.dumps({k:v for k,v in p.items() if k not in ("rows", "segment_profiles")}, indent=2))'
+"$WEB_PY" src/manage.py load_customer_segments --run-id "$RUN_ID" --input "$BATCH_FILE"
+"$WEB_PY" src/manage.py shell -c 'import json,os; from reporting.models import CustomerSegment; p=json.load(open(os.environ["BATCH_FILE"])); q=CustomerSegment.objects.filter(run_id=os.environ["RUN_ID"], model_version=p["model_version"]); print({"run_id":os.environ["RUN_ID"], "model_version":p["model_version"], "expected":len(p["rows"]), "stored":q.count()}); assert q.count()==len(p["rows"])'
+```
+
+Run this sequence in a fail-fast shell (`set -eu` above); stop after any failed
+stage. In PowerShell check `$LASTEXITCODE` after each native Python command and
+throw on nonzero. A failed training request can leave an older valid file at that
+path: do not continue into import automatically. The inspection command displays
+metadata only; the producer and loader perform contract/checksum validation.
+
+For separate endpoints, transfer that exact completed file using the approved secure
+transfer mechanism and set `BATCH_FILE` to its explicit destination. Load credentials
+for each role from the appropriate protected environment before its command; never
+reuse training credentials with elevated permissions merely to make import work.
+Keep the completed export and command receipt in the authorised output location.
+Do not commit customer assignment exports. The loader prints run, model version and
+batch ID; inspect those against the selected file and operator record.
+
+The trainer derives namespace and cutoff from the completed run. It uses lifetime
+completed-order RFM, raw recency/log1p frequency/log1p monetary, valid-silhouette k=2..4
+selection (ties favour smaller k), deterministic seed/profile labels, and seed ARI.
+Fitting uses the complete cohort; scoring samples at most 5,000 customers. Existing
+`--preprocessing`, `--min-k`, `--max-k` and `--seed` options remain explicit and enter
+configuration identity; batch candidate bounds stay within 2..4. `--model-version`
+on either command is an optional equality assertion, never an arbitrary label.
+
+The completed envelope records feature/preprocessing schema, selection/seeds,
+selected k, Python/dependency versions and SHA-256 hashes of the producer, shared
+contract and pinned analytics requirements. `model_version` hashes that training
+configuration/provenance; it identifies a recipe, not a saved fitted model.
+`batch_id` hashes the complete meaningful payload (including assignments, profiles,
+source/run and training metadata), excluding only `generated_at` and `batch_id`
+itself. Canonical JSON sorts object keys, ignores formatting, normalizes equivalent
+JSON numbers and retains array order. Same meaningful output has the same batch ID;
+changed features/results have a different batch ID even under the same recipe.
+These hashes detect accidental mismatch, not authenticity or correct original RFM.
+
+### Retry and recovery
+
+Training or validation failure returns nonzero before publication. The trainer
+writes a temporary sibling, flushes/fsyncs it, and uses atomic replacement only after
+shared validation; an interrupted write or failed replacement leaves the old export.
+A leftover `.rfm-*.tmp` after abrupt process termination is incomplete and must never
+be imported. Rerun training with the same explicit run/output after correcting the
+reported configuration/source/training problem. No feasible clustering candidate
+means no completed new export; do not relabel an old file to the new run.
+
+If import fails or its acknowledgement is uncertain, keep the valid completed file
+and retry **only import**:
+
+```sh
+"$WEB_PY" src/manage.py load_customer_segments --run-id "$RUN_ID" --input "$BATCH_FILE"
+```
+
+Reusing a retained older completed export after a failed training attempt is a
+deliberate recovery decision, not success of that training attempt. Inspect its run,
+source, version and batch ID before taking this retry path.
+
+A valid same-run/model import replaces the full set atomically under a run lock;
+replay creates no duplicates, and different valid output for the same recipe can
+replace it. Invalid input leaves existing assignments intact. If the current
+eligible customer cohort changed, regenerate for that selected run and import the
+new completed file. Do not edit IDs, run/version metadata or checksum to bypass
+rejection. Legacy pre-envelope exports are rejected; regenerate them. Existing
+stored assignments remain until an explicitly valid replacement or run deletion.
+
+The source is mutable: exact current eligible-ID coverage is rechecked at import,
+but submitted RFM values are not independently recomputed or proven historical.
+Same-ID feature drift can remain undetected. No immutable source/feature snapshot
+or persistent batch registry is added. Save the export for provenance; the existing
+table retains run and model version only. Post-load source/role changes do not update
+assignments automatically. A new analytics refresh has no assignments until its own
+explicit train/import; old segments are never silently attached to it. Pending,
+failed/stale lifecycle UX and clearer lifetime-period frontend copy remain deferred.
+Results describe synthetic history and do not predict loyalty, churn or real demand.
 
 ## ML quality evaluation
 
@@ -60,14 +172,15 @@ Use an isolated PostgreSQL database and a separate environment with both pinned
 `src/requirements.txt` and `analytics/requirements.txt`. Supply database credentials
 through environment variables; never embed them in commands. Set `PYTHONPATH` to
 `src;tests` on Windows or `src:tests` on Linux, and use `DJANGO_ENV=local` plus the
-normal Django secret/allowed-host configuration. Migrate, then reproduce:
+normal Django secret/allowed-host configuration. Configure the independently assigned
+`ML_SOURCE_ID` as above before export/import. Migrate, then reproduce:
 
 ```sh
 python src/manage.py import_dataset --source data/raw --namespace synthetic/revision-a/demo/v1
 python src/manage.py refresh_analytics --as-of 2026-01-02 --namespace synthetic/revision-a/demo/v1 --inventory-version import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f
 python analytics/evaluate_segments.py --run-id <NEW_RUN_UUID> --source data/raw --output evidence/ml-quality-evaluation.json
-python analytics/segment_customers.py --run-id <NEW_RUN_UUID> --output <TEMP_ASSIGNMENTS_JSON> --model-version rfm-kmeans-v2
-python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEMP_ASSIGNMENTS_JSON> --model-version rfm-kmeans-v2
+python analytics/segment_customers.py --run-id <NEW_RUN_UUID> --output <TEMP_ASSIGNMENTS_JSON>
+python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEMP_ASSIGNMENTS_JSON>
 ```
 
 Set `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS` and `MKL_NUM_THREADS` to 1 for this

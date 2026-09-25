@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal
+from datetime import datetime, timezone
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -8,13 +9,37 @@ from django.core.management.base import CommandError
 
 from analytics_helpers import add_order, at, make_inventory, make_products, make_run
 from reporting.models import CustomerSegment
+from reporting.segment_contract import (FORMAT, FEATURE_SCHEMA, batch_id, model_version,
+                                       run_binding, source_binding)
 
 pytestmark = pytest.mark.django_db
 
 
-def payload(run_id, model_version, rows):
-    return {"run_id": str(run_id), "model_version": model_version, "rows": rows,
-            "k_clusters": rows[0]["k_clusters"], "silhouette_score": rows[0]["silhouette_score"]}
+@pytest.fixture(autouse=True)
+def source_environment(monkeypatch):
+    monkeypatch.setenv("ML_SOURCE_ID", "11111111-1111-1111-1111-111111111111")
+
+
+def payload(run, rows):
+    from django.db import connection
+    training = {
+        "algorithm": "sklearn-kmeans", "feature_schema": FEATURE_SCHEMA,
+        "preprocessing": "log_frequency", "min_k": 2, "max_k": 4, "seed": 42,
+        "stability_seeds": [42, 99, 123, 777], "n_init": "auto",
+        "selection": "highest-valid-silhouette-smaller-k-tie", "silhouette_sample_limit": 5000,
+        "provenance": {"python": "test-runtime", "dependencies": {name: "test-version" for name in
+                        ("numpy", "pandas", "scikit-learn", "scipy", "psycopg", "joblib", "threadpoolctl")},
+                       "code_sha256": {path: "0" * 64 for path in (
+                           "analytics/segment_customers.py", "analytics/requirements.txt", "src/reporting/segment_contract.py")}},
+    }
+    data = {"run_id": str(run.pk), "model_version": model_version(training), "rows": rows,
+            "k_clusters": rows[0]["k_clusters"], "silhouette_score": rows[0]["silhouette_score"],
+            "format": FORMAT, "status": "completed", "training": training,
+            "source": source_binding(connection), "generated_at": datetime.now(timezone.utc).isoformat(),
+            "run": run_binding({"run_id": run.pk, "cutoff": run.cutoff, "namespace": run.inventory.namespace,
+                                "inventory_version": run.inventory.version, "summary_version": run.summary_version})}
+    data["batch_id"] = batch_id(data)
+    return data
 
 
 @pytest.fixture
@@ -26,7 +51,7 @@ def snapshot(tmp_path):
     row = {"customer_id": user.pk, "cluster_id": 0, "segment_label": "core",
            "recency_days": 1, "frequency_orders": 1, "monetary_total": "10.00",
            "k_clusters": 2, "silhouette_score": None}
-    data = payload(run.pk, "test-model", [row])
+    data = payload(run, [row])
     path = tmp_path / "snapshot.json"
     def load(data=data, **kwargs):
         path.write_text(json.dumps(data), encoding="utf-8")
@@ -96,6 +121,36 @@ def test_model_option_asserts_payload_identity(snapshot):
         load(model_version="different-model")
 
 
+@pytest.mark.parametrize("change", ["legacy", "source", "run", "version", "checksum"])
+def test_batch_provenance_or_integrity_rejection_preserves_assignments(snapshot, change):
+    run, _, _, data, load = snapshot
+    before = list(CustomerSegment.objects.filter(run=run).values())
+    if change == "legacy":
+        del data["status"]
+    elif change == "source":
+        data["source"]["source_id"] = "22222222-2222-2222-2222-222222222222"
+        data["batch_id"] = batch_id(data)  # Integrity alone cannot establish source association.
+    elif change == "run":
+        data["run"]["cutoff"] = "2024-03-09T00:00:00+00:00"
+        data["batch_id"] = batch_id(data)
+    elif change == "version":
+        data["model_version"] = "arbitrary-label"
+        data["batch_id"] = batch_id(data)
+    else:
+        data["rows"][0]["monetary_total"] = "11.00"
+    with pytest.raises(CommandError, match="completed batch"):
+        load()
+    assert list(CustomerSegment.objects.filter(run=run).values()) == before
+
+
+def test_source_configuration_is_required_at_import(snapshot, monkeypatch):
+    run, _, _, _, load = snapshot
+    monkeypatch.delenv("ML_SOURCE_ID")
+    with pytest.raises(CommandError, match="completed batch"):
+        load()
+    assert CustomerSegment.objects.filter(run=run).count() == 1
+
+
 def test_rejects_incomplete_customer_snapshot(snapshot):
     _, _, products, _, load = snapshot
     other = get_user_model().objects.create_user(username="omitted")
@@ -114,17 +169,22 @@ def test_malformed_input_is_sanitised(tmp_path, content):
 
 def test_replay_replacement_and_versions_are_independent(snapshot):
     run, _, _, data, load = snapshot
-    load(model_version="test-model")
+    first_version = data["model_version"]
+    load(model_version=first_version)
     assert CustomerSegment.objects.filter(run=run).count() == 1
-    data["model_version"] = "other-model"
+    data["training"]["seed"] = 99
+    data["model_version"] = model_version(data["training"])
+    data["batch_id"] = batch_id(data)
     load()
-    other = CustomerSegment.objects.get(run=run, model_version="other-model")
-    data["model_version"] = "test-model"
+    other = CustomerSegment.objects.get(run=run, model_version=data["model_version"])
+    data["training"]["seed"] = 42
+    data["model_version"] = first_version
     data["rows"][0].update(cluster_id=1, monetary_total="70.00")
     data["silhouette_score"] = data["rows"][0]["silhouette_score"] = "-0.25"
+    data["batch_id"] = batch_id(data)
     load()
     assert CustomerSegment.objects.filter(run=run).count() == 2
-    replacement = CustomerSegment.objects.get(run=run, model_version="test-model")
+    replacement = CustomerSegment.objects.get(run=run, model_version=first_version)
     assert (replacement.cluster_id, replacement.monetary_total, replacement.silhouette_score) == (
         1, Decimal("70.00"), Decimal("-0.25"))
     other.refresh_from_db()
@@ -195,6 +255,7 @@ def test_concurrent_loaders_replace_one_complete_set(snapshot, tmp_path):
     for name, value in (("first", "20.00"), ("second", "30.00")):
         for row in data["rows"]:
             row["monetary_total"] = value
+        data["batch_id"] = batch_id(data)
         path = tmp_path / (name + ".json")
         path.write_text(json.dumps(data), encoding="utf-8")
         paths.append(path)

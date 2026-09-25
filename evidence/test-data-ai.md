@@ -237,3 +237,168 @@ The same aggregate-evaluation command above was rerun after this correction to
 refresh code/diff identity; the bounded k=2..4 metrics and selection were unchanged.
 The earlier pinned-container results precede this boundary-only correction; its
 independent re-review status is owned by the review log.
+
+
+## ML explicit batch handoff - 25 September 2026
+
+Objective: verify explicit completed-run training, validated atomic file publication,
+source-bound import and retry without retraining. This is a representative synthetic
+fixture, not reevaluation of the accepted raw dataset or AWS evidence. Baseline
+`d934859`; Phase 3 historical evidence above remains unchanged.
+
+Task-only PostgreSQL 17 used project `inf2006-phase4-20260925`, loopback port 57705,
+`phase4_ml` database, tmpfs storage and no named volume. The pre-existing stopped
+`inf2006-ml-loader-db-1` was untouched. Task configuration and exports are under
+`$env:TEMP/inf2006-phase4-20260925`; credentials are omitted. The source association
+UUID was `a61f7944-0a1e-459d-95bc-df05fc8c1bb3`. Roles were separate:
+`phase4_reader` had CONNECT, schema USAGE and table SELECT; non-superuser
+`phase4_writer` additionally had INSERT/DELETE on `reporting_customersegment`,
+UPDATE on `reporting_analyticsrun` for the run lock, and USAGE on the segment ID
+sequence. The bootstrap owner was used only for fixture/migrations/tests.
+
+Host commands (Python 3.12.10 project venv; source task env privately):
+
+```powershell
+. "$env:TEMP/inf2006-phase4-20260925/env.ps1"
+$env:PYTHONPATH="$PWD/src;$PWD/tests"
+docker compose -p inf2006-phase4-20260925 -f "$env:TEMP/inf2006-phase4-20260925/compose.yaml" up -d --wait db
+.venv/Scripts/python src/manage.py migrate --noinput
+.venv/Scripts/python -m pytest -q -c src/pytest.ini -p no:cacheprovider analytics/tests/test_segment_customers.py analytics/tests/test_segment_loader_integration.py analytics/tests/test_verify_refresh.py tests/test_customer_segments_command.py
+.venv/Scripts/python src/manage.py check
+.venv/Scripts/python src/manage.py makemigrations --check --dry-run
+```
+
+Final host result: **69 passed in 21.60s**, system check 0 issues, no migration drift.
+The initial run omitted the test helper path and failed collection; the next found a
+float/Decimal canonical-digest mismatch (68 passed, 1 failed). Central numeric
+normalization fixed it; the existing real producer/import integration covers it.
+
+The following compact fixture recipe retains the helper calls actually executed
+across setup steps, consolidated for reproduction in a fresh isolated migrated DB.
+Use `DJANGO_SETTINGS_MODULE=config.settings`, call `django.setup()` first, and keep
+`PYTHONPATH=src;tests` (Windows) or `src:tests` (Linux):
+
+```python
+from datetime import date, timedelta
+from django.contrib.auth import get_user_model
+from django.core.management import call_command
+from analytics_helpers import make_products, make_inventory, add_order, NS
+from reporting.models import AnalyticsRun
+products = make_products()
+inventory = make_inventory(products)
+for i in range(18):
+    user = get_user_model().objects.create_user(username=f"phase4-synthetic-{i}")
+    for j in range(1 + i % 6):
+        add_order(user, f"phase4-{i}-{j}", [(products["alpha"], 1, str(10 + i * 15))],
+                  inventory.cutoff - timedelta(days=1 + (i * 7) % 90 + j))
+call_command("refresh_analytics", as_of=date(2024, 3, 8), namespace=NS,
+             inventory_version=inventory.version)
+run = AnalyticsRun.objects.get(inventory=inventory, status="completed")
+print(run.pk)
+```
+
+Setup-only failed attempts passed a string instead of `date` to `call_command`, then
+a UTC calendar date instead of the intended Singapore date, and attempted to demote
+PostgreSQL's bootstrap superuser (PostgreSQL refuses this). The explicit date above
+and separate scoped roles corrected setup; existing task fixture rows were reused.
+No application source workaround or shared database reset was used.
+
+Actual completed run: `a3bf439d-addd-431a-a5fe-13336cdf52f3`; namespace
+`synthetic/revision-a/historical/v1`; cutoff `2024-03-07T16:00:00+00:00`;
+18 eligible customers, 63 orders/lines, 53 daily summary rows. Explicit CLI commands:
+
+```powershell
+$taskRun='a3bf439d-addd-431a-a5fe-13336cdf52f3'
+$taskBatch="$env:TEMP/inf2006-phase4-20260925/batch.json"
+. "$env:TEMP/inf2006-phase4-20260925/reader.ps1"
+.venv/Scripts/python analytics/segment_customers.py --run-id $taskRun --output $taskBatch
+if ($LASTEXITCODE -ne 0) { throw 'Training failed' }
+. "$env:TEMP/inf2006-phase4-20260925/writer.ps1"
+.venv/Scripts/python src/manage.py load_customer_segments --run-id $taskRun --input $taskBatch
+if ($LASTEXITCODE -ne 0) { throw 'Import failed' }
+```
+
+Both exited 0. Selected k=2, silhouette 0.3452, seed ARI mean 0.7560/std 0.3451.
+These small-fixture metrics establish execution only, not model quality.
+Recipe version `rfm-v3-20fa169a9c83f602a22c902138bd1ea175cbcc1ff061416a8918a6c4c03ebc99`;
+batch ID `ff25e94aff05691685a869bfc8846f3cc338624e3dc1b7a607ecf517bb5f44d1`.
+Raw completed-file SHA-256
+`907a996559a37d697afcc7eae1f435c8505eac0269fb9dc4ae8ee3ec8a2fa10a`.
+The raw-file hash includes formatting/time and differs deliberately from batch ID.
+
+Recovery commands actually run after the initial import:
+
+```powershell
+$priorHash=(Get-FileHash -LiteralPath $taskBatch -Algorithm SHA256).Hash
+. "$env:TEMP/inf2006-phase4-20260925/reader.ps1"
+.venv/Scripts/python analytics/segment_customers.py --run-id $taskRun --output $taskBatch --model-version arbitrary-version
+if ($LASTEXITCODE -ne 1) { throw 'Expected training assertion failure' }
+if ((Get-FileHash -LiteralPath $taskBatch -Algorithm SHA256).Hash -ne $priorHash) { throw 'Prior export changed' }
+. "$env:TEMP/inf2006-phase4-20260925/writer.ps1"
+$env:ML_SOURCE_ID='22222222-2222-2222-2222-222222222222'
+.venv/Scripts/python src/manage.py load_customer_segments --run-id $taskRun --input $taskBatch
+if ($LASTEXITCODE -ne 1) { throw 'Expected source refusal' }
+$env:ML_SOURCE_ID='a61f7944-0a1e-459d-95bc-df05fc8c1bb3'
+.venv/Scripts/python src/manage.py load_customer_segments --run-id $taskRun --input $taskBatch
+if ($LASTEXITCODE -ne 0) { throw 'Retry failed' }
+if ((Get-FileHash -LiteralPath $taskBatch -Algorithm SHA256).Hash -ne $priorHash) { throw 'Retry export changed' }
+```
+
+Expected failures returned sanitized generic diagnostics. Retry succeeded without
+training; the file hash stayed unchanged throughout. ORM verification compared all
+18 stored rows (ordered by customer ID) against `validate_rows` output and found exact
+equality; the loader role's `pg_roles.rolsuper` was false. Existing focused tests
+also verify rollback on database write failure, competing loaders, post-lock cohort
+checks and previous-file retention on publication failure. No customer exports are
+retained in Git.
+
+Pinned Python 3.13 CI-equivalent checks use the exact image/dependency pins below,
+an ordinary container UID, read-only checkout and task-only PostgreSQL. This is
+local CI-equivalent execution, not a hosted Actions run:
+
+```powershell
+docker run --rm --user 1000:1000 --mount "type=bind,source=$PWD,target=/work,readonly" --workdir /work -e HOME=/tmp -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1 python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e sh -c 'python -m venv /tmp/ml && /tmp/ml/bin/pip install -q -r analytics/requirements.txt pytest==9.1.1 iniconfig==2.3.0 packaging==26.3 pluggy==1.6.0 Pygments==2.21.0 && /tmp/ml/bin/python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py'
+docker run --rm --user 1000:1000 --network inf2006-phase4-20260925_default --env-file "$env:TEMP/inf2006-phase4-20260925/env.list" --mount "type=bind,source=$PWD,target=/work,readonly" --workdir /work -e HOME=/tmp -e PYTHONPATH=/work/src:/work/tests -e POSTGRES_HOST=db -e POSTGRES_PORT=5432 python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e sh -c 'python -m venv /tmp/check && /tmp/check/bin/pip install -q -r src/requirements.txt -r analytics/requirements.txt && /tmp/check/bin/python -m pytest -q -c src/pytest.ini -p no:cacheprovider analytics/tests/test_segment_loader_integration.py analytics/tests/test_verify_refresh.py tests/test_customer_segments_command.py'
+```
+
+Pinned results: **16 pure ML passed in 10.35s** without Django; **53 PostgreSQL /
+verifier / strict-loader passed in 14.56s**. Both containers exited 0. Full suite, hosted CI, production image
+build, browser, AWS and accepted full-dataset reevaluation are unrun for this phase.
+Independent review and resource cleanup are recorded in the coordinator review log.
+
+
+### Phase 4 review remediation MLH-002
+
+The independent reviewer identified the unused optional database URL branch in
+`segment_customers.connect`. It was removed; all callers already use environment
+configuration. No connection-policy change or other implementation cleanup was made.
+After this code-provenance change, the same host focused command above passed
+**69 tests in 24.53s**. Pinned checks were not repeated for this removal of an unused
+branch; their earlier results remain separately recorded.
+
+The representative CLI sequence was rerun with the same run and scoped roles,
+writing a separate completed output so the earlier artifact could also be retried:
+
+```powershell
+. "$env:TEMP/inf2006-phase4-20260925/env.ps1"
+$env:PYTHONPATH="$PWD/src;$PWD/tests"
+$taskRun=Get-Content "$env:TEMP/inf2006-phase4-20260925/run-id.txt"
+. "$env:TEMP/inf2006-phase4-20260925/reader.ps1"
+.venv/Scripts/python analytics/segment_customers.py --run-id $taskRun --output "$env:TEMP/inf2006-phase4-20260925/batch-round2.json"
+if ($LASTEXITCODE -ne 0) { throw 'Round2 training failed' }
+. "$env:TEMP/inf2006-phase4-20260925/writer.ps1"
+.venv/Scripts/python src/manage.py load_customer_segments --run-id $taskRun --input "$env:TEMP/inf2006-phase4-20260925/batch-round2.json"
+if ($LASTEXITCODE -ne 0) { throw 'Round2 import failed' }
+.venv/Scripts/python src/manage.py load_customer_segments --run-id $taskRun --input "$env:TEMP/inf2006-phase4-20260925/batch.json"
+if ($LASTEXITCODE -ne 0) { throw 'Prior completed export retry failed' }
+```
+
+All commands exited 0; exact ordered ORM rows matched `validate_rows` for both
+versions (18 assignments each). The new recipe identity is
+`rfm-v3-16e61fd380746e428142177bdf724c8afe10eba28b25cb14f69c9944d3f9bbf7`,
+batch ID `2dcd94e7426d17bf4eb19e6896ead6b06d3538ce1e43cf101345df2de589e606`,
+and raw-file SHA-256
+`990b876f2071347241c128902b7e659e9138555aa25b7a5a616b36e5a056eea8`.
+The metrics and assignments were unchanged. The prior export retained its original
+raw-file hash and remained retryable without matching the current producer recipe.
+This verifies provenance separation and recovery, not additional model evaluation.

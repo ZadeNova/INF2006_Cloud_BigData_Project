@@ -127,8 +127,65 @@ def test_no_valid_candidate_preserves_previous_output(tmp_path, monkeypatch):
     output.write_text("previous valid output")
     frame = pd.DataFrame({"customer_id": [1, 2, 3], "recency_days": [1] * 3,
                           "frequency_orders": [1] * 3, "monetary_total": [10] * 3})
-    monkeypatch.setattr(segment_customers, "connect", lambda url: nullcontext(None))
+    monkeypatch.setattr(segment_customers, "connect", lambda: nullcontext(None))
+    monkeypatch.setattr(segment_customers, "source_binding", lambda connection: {})
     monkeypatch.setattr(segment_customers, "fetch_run", lambda *args: {"namespace": "test", "cutoff": None})
     monkeypatch.setattr(segment_customers, "fetch_rfm", lambda *args: frame)
     assert segment_customers.main(["--run-id", "00000000-0000-0000-0000-000000000001", "--output", str(output)]) == 1
     assert output.read_text() == "previous valid output"
+
+
+def test_batch_id_and_model_version_have_distinct_scopes():
+    from copy import deepcopy
+    from datetime import datetime, timezone
+    run = {"run_id": "00000000-0000-0000-0000-000000000001", "namespace": "test",
+           "cutoff": datetime(2026, 1, 2, tzinfo=timezone.utc), "inventory_version": "inventory",
+           "summary_version": "00000000-0000-0000-0000-000000000002"}
+    training = segment_customers.training_config()
+    version = segment_customers.model_version(training)
+    frame = pd.DataFrame({"customer_id": [1, 2, 3], "recency_days": [1, 3, 20],
+                          "frequency_orders": [5, 4, 1], "monetary_total": [90, 80, 10],
+                          "cluster_id": [0, 0, 1], "segment_label": ["recent", "recent", "older"]})
+    data = segment_customers.build_output(frame, run["run_id"], version, 2, 0.5, 0.8, 0.1)
+    segment_customers.complete_export(data, run, {"source_id": "test", "database": "test"}, training)
+    original = data["batch_id"]
+    data["generated_at"] = "2026-09-25T12:00:00+00:00"
+    assert segment_customers.batch_id(data) == original
+    data["rows"][0]["cluster_id"] = 1
+    assert segment_customers.batch_id(data) != original
+    assert segment_customers.model_version(training) == version
+    changed = deepcopy(training)
+    changed["seed"] = 99
+    assert segment_customers.model_version(changed) != version
+
+
+def test_atomic_publication_failure_retains_previous_export(tmp_path, monkeypatch):
+    output = tmp_path / "batch.json"
+    output.write_text("previous valid output")
+    def fail(source, destination):
+        assert source.parent == destination.parent
+        raise OSError("private filesystem details")
+    monkeypatch.setattr(segment_customers.os, "replace", fail)
+    with pytest.raises(OSError):
+        segment_customers.publish_output(output, {"complete": True})
+    assert output.read_text() == "previous valid output"
+    assert list(tmp_path.iterdir()) == [output]
+
+
+def test_main_validates_export_before_publication_and_sanitizes_failures(tmp_path, monkeypatch, capsys):
+    from contextlib import nullcontext
+    from datetime import datetime, timezone
+    output = tmp_path / "batch.json"
+    output.write_text("previous valid output")
+    run = {"run_id": "00000000-0000-0000-0000-000000000001", "namespace": "test",
+           "cutoff": datetime(2026, 1, 2, tzinfo=timezone.utc), "inventory_version": "inventory",
+           "summary_version": "00000000-0000-0000-0000-000000000002"}
+    monkeypatch.setattr(segment_customers, "connect", lambda: nullcontext(None))
+    monkeypatch.setattr(segment_customers, "source_binding", lambda connection: {})
+    monkeypatch.setattr(segment_customers, "fetch_run", lambda *args: run)
+    monkeypatch.setattr(segment_customers, "fetch_rfm", lambda *args: None)
+    monkeypatch.setattr(segment_customers, "fit_segments", lambda *args, **kw: (None, 2, 0.5, 0.8, 0.1))
+    monkeypatch.setattr(segment_customers, "build_output", lambda *args: {"run_id": run["run_id"], "model_version": "private-invalid-result"})
+    assert segment_customers.main(["--run-id", run["run_id"], "--output", str(output)]) == 1
+    assert output.read_text() == "previous valid output"
+    assert "private" not in capsys.readouterr().err

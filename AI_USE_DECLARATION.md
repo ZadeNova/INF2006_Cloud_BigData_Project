@@ -22,3 +22,7 @@ No external application template or another course's implementation was copied. 
 ## ML quality and reproducible evaluation (25 September 2026)
 
 OpenAI Codex coordinated Phase 3 on `erfan/analytics`, with explicitly assigned `gpt-6-astra` / `low` implementation and a separate `gpt-6-astra` / `medium` read-only review gate. Assistance covers offline segmentation, focused tests, analytics CI, aggregate evaluation and supporting documentation. The coordinator owns Git, tracker and review records. Actual verification, review rounds and limitations are recorded in [ml-quality-evaluation](docs/reviews/ml-quality-evaluation.md); assignment of a reviewer alone is not a completed review. Source data remains the attributed synthetic Analytics Engineering release; no teammate-owned dataset was replaced or repriced. These are agent contributions, not claimed human test execution.
+
+## ML batch handoff and recovery (25 September 2026)
+
+OpenAI Codex coordinates Phase 4 on `erfan/analytics`, with explicitly assigned `gpt-6-astra` / `low` implementation and separate fresh-context `gpt-6-astra` / `medium` read-only review. Assistance covers explicit batch provenance, export/import recovery, focused checks and operational documentation. The coordinator owns Git, tracker and review records; subagents do not stage, commit or push. Actual review status, executed checks and limitations are recorded in [ml-batch-handoff](docs/reviews/ml-batch-handoff.md). These are agent contributions, not claimed human test execution; source dataset attribution remains unchanged.

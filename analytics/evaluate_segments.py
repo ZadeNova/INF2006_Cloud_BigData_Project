@@ -95,7 +95,7 @@ def evaluate(connection, run_id, source):
                    "stability": "ARI against published labels for seeds 99,123,777 on the same full cohort",
                    "naming": "Relative cluster-profile medians: recent/older, more/fewer orders, higher/lower spend; stable profile rank prefix ensures unique labels. Equality uses recent/fewer/lower."},
         "experiments": experiments,
-        "selection": {"preprocessing": "log_frequency", "model_version": "rfm-kmeans-v2",
+        "selection": {"preprocessing": "log_frequency", "policy": "phase3-log-frequency",
                       "k": experiments[1]["best_k"],
                       "rationale": "Accepted-revision comparison supports the single log-frequency change: higher sampled separation, similar strong seed stability, substantial groups and the same interpretable relative profile ordering. Choose highest valid silhouette within this preprocessing; ties prefer lower k. This is descriptive geometry, not predictive performance. Reassess this policy for another revision."},
         "identity": {"git_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),

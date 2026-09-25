@@ -21,7 +21,8 @@ spec.loader.exec_module(segment_customers)
 
 
 @pytest.mark.django_db
-def test_rfm_sql_eligibility_and_export_import_agree(tmp_path):
+def test_rfm_sql_eligibility_and_export_import_agree(tmp_path, monkeypatch):
+    monkeypatch.setenv("ML_SOURCE_ID", "11111111-1111-1111-1111-111111111111")
     run = make_run(make_inventory(make_products()), [])
     users = {name: get_user_model().objects.create_user(username=name) for name in (
         "local", "imported", "repeat", "staff", "superuser", "operator",
@@ -62,10 +63,13 @@ def test_rfm_sql_eligibility_and_export_import_agree(tmp_path):
     assert not CustomerProfile.objects.filter(user=users["local"]).exists()
     fitted, k, score, stability_mean, stability_std = segment_customers.fit_segments(
         frame, min_k=2, max_k=2, stability_seeds=())
-    data = segment_customers.build_output(fitted, run.pk, "producer-v1", k, score,
+    training = segment_customers.training_config()
+    version = segment_customers.model_version(training)
+    data = segment_customers.build_output(fitted, run.pk, version, k, score,
                                          stability_mean, stability_std)
+    segment_customers.complete_export(data, metadata, segment_customers.source_binding(connection), training)
     path = tmp_path / "export.json"
     path.write_text(json.dumps(data), encoding="utf-8")
-    call_command("load_customer_segments", input=path, run_id=str(run.pk), model_version="producer-v1")
+    call_command("load_customer_segments", input=path, run_id=str(run.pk), model_version=version)
     assert list(CustomerSegment.objects.filter(run=run).order_by("customer_id").values_list(
         "customer_id", flat=True)) == expected
