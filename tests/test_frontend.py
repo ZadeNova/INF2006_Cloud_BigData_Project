@@ -8,7 +8,7 @@ def test_foundation_home_renders_live_shell_and_representative_page():
     response = Client().get(reverse("foundation-preview"))
 
     assert response.status_code == 200
-    assert "Northstar Market" in response.content.decode()
+    assert "42Factors" in response.content.decode()
     assert "Presentation sample" in response.content.decode()
     assert 'aria-invalid="true"' in response.content.decode()
     assert "Enter a valid email address" in response.content.decode()

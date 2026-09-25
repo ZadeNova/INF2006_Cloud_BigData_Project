@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Northstar Market storefront">
+    <meta name="description" content="42Factors storefront">
     <meta name="color-scheme" content="light dark">
-    <title>{% block title %}Northstar Market{% endblock %}</title>
+    <title>{% block title %}42Factors{% endblock %}</title>
     {# Applied before first paint so a stored choice does not flash the other theme. #}
     <script>
         (function () {
@@ -24,6 +24,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@700&text=67&display=block" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/site.css' %}">
     {% block head %}{% endblock %}
 </head>
@@ -37,9 +38,9 @@
 
     <header class="site-header">
         <div class="site-header__inner">
-            <a class="brand" href="{% url 'catalogue:product_list' %}" aria-label="Northstar Market home">
-                <span class="brand__mark" aria-hidden="true">{% include "_icon.html" with name="star" only %}</span>
-                <span class="brand__name">Northstar <span>Market</span></span>
+            <a class="brand" href="{% url 'catalogue:product_list' %}" aria-label="42Factors home">
+                <span class="brand__mark" aria-hidden="true">67</span>
+                <span class="brand__name">42Factors</span>
             </a>
 
             <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
@@ -59,7 +60,7 @@
                 <a class="nav-pill nav-pill--quiet" href="{% url 'catalogue:manage_list' %}"{% if request.resolver_match.view_name == 'catalogue:manage_list' %} aria-current="page"{% endif %}>Manage products</a>
                 {% endif %}
                 {% if perms.reporting.view_analytics %}
-                <a class="button button--compact" href="{% url 'reporting:dashboard' %}">Analytics</a>
+                <a class="nav-pill" href="{% url 'reporting:dashboard' %}"{% if request.resolver_match.namespace == 'reporting' %} aria-current="page"{% endif %}>Analytics</a>
                 {% endif %}
                 {% if user.is_authenticated %}
                 {% with cart_count=user.cart.items.count %}
@@ -103,7 +104,7 @@
     <footer class="site-footer">
         <div class="site-footer__inner site-footer__inner--columns">
             <div>
-                <p class="site-footer__brand">Northstar Market</p>
+                <p class="site-footer__brand">42Factors</p>
                 <p class="site-footer__copy">A calm foundation for a useful storefront.</p>
                 <p class="site-footer__meta">Payments are simulated. No card is ever charged.</p>
             </div>

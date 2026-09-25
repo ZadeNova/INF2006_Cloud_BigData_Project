@@ -307,27 +307,37 @@ textarea:disabled {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
-    gap: 0.8rem;
+    gap: 1.2rem;
     color: var(--color-text-primary);
     font-weight: 700;
     line-height: 1;
     text-decoration: none;
 }
 
+/* The wordmark's capitals are 85% of the mark height: Archivo Black's cap height
+   is 0.71em, so the name is set at about 0.85 x the mark height / 0.69 (measured, after trim), and text-box
+   trims the line box to the capitals so the two centre on each other exactly.
+   The mark is "67" in Pixelify Sans, loaded as a two-glyph subset. */
 .brand__mark {
     display: grid;
-    width: 3.6rem;
-    height: 3.6rem;
+    width: 4rem;
+    height: 4rem;
     place-items: center;
     border-radius: 0;
     background: var(--color-primary);
     color: var(--on-brand);
-    font-size: 1.8rem;
+    font-family: "Pixelify Sans", var(--font-mono);
+    font-size: 2.8rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0;
 }
 
 .brand__name {
-    font-size: 1.7rem;
+    font-size: 4.95rem;
+    line-height: 1;
     letter-spacing: -0.03em;
+    text-box: trim-both cap alphabetic;
 }
 
 .brand__name span {
@@ -2286,6 +2296,7 @@ html.no-htmx .stepper-submit {
     align-items: center;
     gap: 0.8rem;
     min-height: 4rem;
+    white-space: nowrap;
     border: var(--border-structural) solid transparent;
     border-radius: var(--pill-radius);
     padding: 0.8rem 1.4rem;
@@ -2601,6 +2612,25 @@ html.no-htmx .stepper-submit {
     }
 }
 
+/* Between phone and wide desktop the wordmark, nav and the operator's header
+   actions do not fit one row, so the actions take a second row. */
+@media (min-width: 768px) and (max-width: 1279px) {
+    :root {
+        --anchor-offset: 12rem;
+    }
+
+    .site-header__inner {
+        flex-wrap: wrap;
+        row-gap: 1.2rem;
+        padding-block: 1.2rem;
+    }
+
+    .site-header__meta {
+        flex: 1 1 100%;
+        justify-content: flex-end;
+    }
+}
+
 @media (max-width: 767px) {
     .site-header__inner {
         flex-wrap: wrap;
@@ -2700,13 +2730,15 @@ html.no-htmx .stepper-submit {
         flex-wrap: wrap;
     }
 
+    /* Sized so the mark, the name and the menu button share one row at 360px. */
     .brand__mark {
-        width: 3.2rem;
-        height: 3.2rem;
+        width: 2.4rem;
+        height: 2.4rem;
+        font-size: 1.7rem;
     }
 
     .brand__name {
-        font-size: 1.5rem;
+        font-size: 3rem;
     }
 
     .hero {
