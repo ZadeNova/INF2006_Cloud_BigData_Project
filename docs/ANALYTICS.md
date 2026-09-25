@@ -91,9 +91,18 @@ Included by the 25 September scope decision; evaluate whether the dataset has su
 
 - Train and evaluate offline in `analytics/` with its own requirements; the web image has no ML dependency.
 - Features per customer, as of the run cutoff and using only completed orders before it: recency (days since last order), frequency (order count) and monetary value (sum of order totals). Scale the features, transform skewed monetary values, fit K-means with a fixed random seed and choose k by silhouette over a small range.
+- Segmentation eligibility: at least one completed order in the run inventory namespace strictly before its cutoff. Exclude staff, superusers and members of `store_operator`; an ordinary locally registered customer does not need a `CustomerProfile`. This describes past purchasing, not a minimum history sufficient for prediction.
 - Evaluate cluster sizes and profiles (mean RFM and share of sales per cluster), silhouette and stability across seeds or resamples. Do not report classification accuracy without true labels. State that synthetic customers may reflect the generator's structure rather than real behaviour.
 - Offline training writes JSON via `analytics/segment_customers.py`; Django command `load_customer_segments` loads
   assignments into one dedicated table keyed by model version and analytics run. Removal means deleting that module and table.
 - The dashboard shows a segment panel (sizes, share of sales, mean RFM) only when assignments exist for the run. It tells the operator which customer groups drive sales; it does not change any deterministic metric or replenishment flag, and it is secondary to the sales-driven inventory planning.
 
 Use the simplest algorithm that can be justified for the store; more complex models are not planned.
+
+### Segment import safety contract
+
+The export must be a JSON object with explicit matching `run_id`, nonempty `model_version`, top-level `k_clusters` and `silhouette_score`, and a nonempty `rows` assignment array. Duplicate JSON keys are rejected. `silhouette_score` must be present at both levels: use JSON `null` when undefined, otherwise a value in -1..1 with at most four decimal places (negative scores are valid). Each customer occurs once; row metadata must agree with the top level, cluster IDs must be below k, and numeric values must be finite and fit their database fields. Integers must be JSON integers, excluding booleans and numeric strings; money supports at most two decimal places. Cluster labels must agree within each cluster, but not every cluster needs an assignment. Extraction is ordered by customer ID. A supplied `--model-version` asserts the file identity; it must not silently relabel a different model.
+
+The loader requires exactly the currently eligible customer set for that completed run. If source eligibility changes between export and loading, regenerate the export. This checks current source records at import time, not an immutable historical feature snapshot. Matching IDs does not prove submitted RFM values match the original feature computation or establish model quality. Immutable feature-snapshot and model-artifact identity are deferred to the training/inference phase. Staff/group or source changes after loading are not automatically reflected until the next export/load.
+
+Same-run/model loading replaces its assignments atomically, retaining the existing rerun contract: replay cannot duplicate assignments, and a different valid payload with the same identity replaces the prior set. Lock the analytics run while rechecking its completed status, eligibility and replacing rows so concurrent loaders cannot interleave partial publications. Invalid input leaves the prior assignments unchanged. Distinct model versions remain separate.

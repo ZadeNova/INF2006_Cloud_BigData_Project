@@ -41,6 +41,8 @@ recency, frequency and monetary together (`high_value`, `core`, `at_risk`) rathe
 than spend alone. The dashboard shows a segment panel only when assignments exist
 for the selected run.
 
+Segment exports cover completed-order owners in the run namespace before its cutoff, excluding staff, superusers and `store_operator` members. Ordinary local shoppers need no imported profile. The loader requires matching run/model metadata and the complete current eligible cohort; regenerate when eligibility has changed. Invalid files preserve prior assignments, and same-version reruns replace atomically. `--model-version` confirms the file version rather than changing it. See [import safety contract](../docs/ANALYTICS.md#segment-import-safety-contract).
+
 Results are descriptive on synthetic data and may reflect generator structure instead
 of real customer behavior. Treat this panel as descriptive operational guidance, not a
 predictive model.
@@ -154,7 +156,7 @@ A successful comparison exits 0 and prints a JSON summary without customer field
 For historical imports always pass the importer-reported namespace, cutoff and
 inventory version to refresh. Do not run snapshot_inventory to backdate live stock.
 Run IDs in the evidence identify a removed disposable database; reproduce import
-and refresh to obtain new IDs. Seven tests live in `analytics/tests/` (four for this verifier, three for the segmentation script),
+and refresh to obtain new IDs. Tests live in `analytics/tests/` for this verifier, the segmentation script and the SQL/export/import contract,
 outside ordinary web tests because pandas is intentionally absent from the web image.
 The evidence gives the combined 410-test invocation using the built `/app` settings.
 

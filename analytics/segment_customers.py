@@ -52,10 +52,18 @@ def fetch_rfm(connection, namespace, cutoff):
                    COUNT(*) AS frequency_orders,
                    SUM(o.total) AS monetary_total
             FROM orders_order o
-            WHERE o.namespace = %s
+            JOIN auth_user u ON u.id = o.owner_id
+            WHERE NOT u.is_staff AND NOT u.is_superuser
+              AND NOT EXISTS (
+                  SELECT 1 FROM auth_user_groups ug
+                  JOIN auth_group g ON g.id = ug.group_id
+                  WHERE ug.user_id = u.id AND g.name = 'store_operator'
+              )
+              AND o.namespace = %s
               AND o.status = 'completed'
               AND o.placed_at < %s
             GROUP BY o.owner_id
+            ORDER BY o.owner_id
         """, [namespace, cutoff])
         rows = cursor.fetchall()
     if not rows:
