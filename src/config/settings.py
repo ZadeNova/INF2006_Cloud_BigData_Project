@@ -91,7 +91,11 @@ SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SECURE = not LOCAL
 CSRF_COOKIE_SECURE = not LOCAL
 SECURE_SSL_REDIRECT = not LOCAL
-SECURE_HSTS_SECONDS = 0 if LOCAL else 31536000
+# Short by default: a browser that has seen HSTS refuses HTTP and certificate-warning bypasses for this long.
+HSTS_SECONDS = os.environ.get("DJANGO_HSTS_SECONDS", "3600")
+if not (HSTS_SECONDS.isascii() and HSTS_SECONDS.isdigit()):
+    raise ImproperlyConfigured("DJANGO_HSTS_SECONDS must be a non-negative whole number")
+SECURE_HSTS_SECONDS = 0 if LOCAL else int(HSTS_SECONDS)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = False
 SECURE_HSTS_PRELOAD = False
 # Enable only behind a proxy that strips/replaces the forwarded header.

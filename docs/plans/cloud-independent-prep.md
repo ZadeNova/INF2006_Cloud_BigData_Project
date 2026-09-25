@@ -97,7 +97,9 @@ Decisions the infrastructure contract leaves open, to settle after B4:
 - ALB health check Host handling: default probes may use target IPs, so `ALLOWED_HOSTS` handling must be resolved (the `/health/` endpoint validates allowed hosts today).
 - Expired-session cleanup (`clearsessions`) needs a trigger; see the analytics scheduler decision, which is deferred until the refresh command exists.
 - Dataset delivery: files synced from private S3 to a local directory before `import_dataset` (the import command reads local paths only).
-- **Database TLS.** Outside local mode Django connects with `sslmode=verify-full` and requires `POSTGRES_SSLROOTCERT`, and the image contains no RDS certificate bundle, so a deployed instance would fail to start. Bake the AWS RDS global bundle into the image at build time (pinned URL and SHA-256), not a download at boot, so every instance is identical.
+- **Database TLS. Done 25 September 2026 ([deploy-readiness.md](deploy-readiness.md)):** the AWS RDS global bundle is vendored at `src/certs/` (source and SHA-256 recorded) and the image sets `POSTGRES_SSLROOTCERT=/app/certs/rds-global-bundle.pem`.
+- **HSTS. Done 25 September 2026:** `DJANGO_HSTS_SECONDS` (default 3600 outside local mode, was a fixed year), so the self-signed HTTPS fallback stays usable and a short-lived domain is not pinned for a year.
+- **Application role on RDS. Done 25 September 2026:** `src/tools/db_bootstrap.py` creates the non-superuser application role and its database once with the master credentials (`BOOTSTRAP_USER`/`BOOTSTRAP_PASSWORD`, never given to web containers); safe to rerun.
 - **Behind the ALB the app needs:** `DJANGO_TRUST_PROXY=true` (otherwise Django sees plain HTTP and redirects forever), `DJANGO_ENV` not `local`, one shared `DJANGO_SECRET_KEY`, `DJANGO_CSRF_TRUSTED_ORIGINS=https://<hostname>`, and `DJANGO_ALLOWED_HOSTS` containing the hostname and the instance's own private IP (the launch script reads it from instance metadata, so Django stays free of AWS calls) for the ALB health probe.
 
 ## B7: Console build and runbook (first pass)

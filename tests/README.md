@@ -11,7 +11,7 @@ The image copies `src/` at build time and only `tests/` is mounted, so run `dock
 
 | Module | Covers |
 |---|---|
-| `test_settings.py`, `test_schema.py` | Configuration failure cases, production cookie/TLS defaults, non-superuser database role; schema constraints and triggers |
+| `test_settings.py`, `test_schema.py` | Configuration failure cases, production cookie/TLS/HSTS defaults, the image's RDS certificate bundle, non-superuser database role; schema constraints and triggers |
 | `test_health.py`, `test_db_unavailable.py`, `test_request_logging.py` | Liveness, the database-unavailable 503, JSON request logs and secret redaction |
 | `test_accounts.py`, `test_catalogue.py` | Registration, login, logout, safe redirects; catalogue, operator toggle, `seed_demo` |
 | `test_cart.py`, `test_orders.py` | Cart rules and HTMX contract; checkout, idempotency, history, and real-thread concurrency tests |

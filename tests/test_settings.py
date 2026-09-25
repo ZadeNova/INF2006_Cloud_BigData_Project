@@ -1,5 +1,6 @@
 """Configuration failures must be visible before serving requests."""
 import os
+import ssl
 import subprocess
 import sys
 
@@ -13,6 +14,7 @@ from django.conf import settings
     ({"DJANGO_ENV": "staging"}, "DJANGO_ENV"),
     ({"DJANGO_DEBUG": "yes"}, "true or false"),
     ({"DJANGO_ENV": "production", "DJANGO_DEBUG": "true"}, "DEBUG is forbidden"),
+    ({"DJANGO_HSTS_SECONDS": "-1"}, "DJANGO_HSTS_SECONDS"),
 ])
 def test_invalid_configuration_fails(changes, message):
     result = subprocess.run([sys.executable, "-c", "import config.settings"],
@@ -25,6 +27,7 @@ def test_production_configuration():
 assert not s.DEBUG
 assert s.SESSION_COOKIE_SECURE and s.CSRF_COOKIE_SECURE
 assert s.SECURE_SSL_REDIRECT
+assert s.SECURE_HSTS_SECONDS == 3600
 assert s.DATABASES['default']['OPTIONS']['sslmode'] == 'verify-full'
 assert not hasattr(s, 'SECURE_PROXY_SSL_HEADER')
 """
@@ -33,6 +36,10 @@ assert not hasattr(s, 'SECURE_PROXY_SSL_HEADER')
         "DJANGO_TRUST_PROXY": "false", "POSTGRES_SSLROOTCERT": "/certs/test-ca.pem"},
         capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+def test_image_carries_a_loadable_rds_certificate_bundle():
+    # The Dockerfile's default path, which production verify-full TLS reads.
+    ssl.create_default_context(cafile=os.environ["POSTGRES_SSLROOTCERT"])
 
 def test_shared_session_configuration():
     assert settings.SESSION_ENGINE == "django.contrib.sessions.backends.db"
