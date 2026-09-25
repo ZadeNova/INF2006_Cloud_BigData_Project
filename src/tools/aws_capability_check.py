@@ -3,8 +3,8 @@
 
 Run it with lab credentials configured (``aws configure`` or the lab's exported
 AWS_* variables). It calls only list/describe APIs and EC2 ``--dry-run`` checks,
-so it creates nothing and costs nothing, and it writes a Markdown record of what
-the account allows. Account numbers are redacted. It needs only the AWS CLI and
+so it creates no resources, and it writes a Markdown record of the calls
+that succeeded. Read access is not deployment permission. Account numbers are redacted. It needs only the AWS CLI and
 the standard library.
 
     python3 src/tools/aws_capability_check.py --region us-east-1 --output evidence/aws-capability-record.md
@@ -67,7 +67,7 @@ def _identity(data, ctx):
 
 
 def _ami(data, ctx):
-    ctx["ami"] = data["Parameter"]["Value"]
+    ctx["ami"] = max(data["Images"], key=lambda image: image["CreationDate"])["ImageId"]
     return "found"
 
 
@@ -83,8 +83,10 @@ PROBES = [
      lambda c: ["ec2", "describe-instance-type-offerings", "--location-type", "region", "--filters",
                 "Name=instance-type,Values=t3.micro,t3.small,t3.medium"],
      lambda d, c: names(d["InstanceTypeOfferings"], "InstanceType")),
-    ("Compute", "Amazon Linux 2023 AMI lookup (SSM parameter)",
-     lambda c: ["ssm", "get-parameter", "--name", "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"], _ami),
+    ("Compute", "Amazon Linux 2023 AMI lookup (EC2 images)",
+     lambda c: ["ec2", "describe-images", "--owners", "amazon", "--filters",
+                "Name=name,Values=al2023-ami-2023.*-kernel-*-x86_64",
+                "Name=state,Values=available", "Name=architecture,Values=x86_64"], _ami),
     ("Compute", "launch an instance (dry run)",
      lambda c: ["ec2", "run-instances", "--image-id", c["ami"], "--instance-type", "t3.micro", "--dry-run"] if "ami" in c else None,
      lambda d, c: "permitted"),
@@ -113,8 +115,14 @@ PROBES = [
      lambda d, c: f"{len(d['HostedZones'])} existing"),
     ("Registry", "ECR repositories (list)", lambda c: ["ecr", "describe-repositories"],
      lambda d, c: f"{len(d['repositories'])} existing"),
-    ("Management", "SSM managed instances (list)", lambda c: ["ssm", "describe-instance-information"],
-     lambda d, c: f"{len(d['InstanceInformationList'])} managed"),
+    ("Audit", "CloudTrail trails (list)", lambda c: ["cloudtrail", "list-trails"],
+     lambda d, c: f"{len(d['Trails'])} existing"),
+    ("Protection", "regional WAF web ACLs (list)", lambda c: ["wafv2", "list-web-acls", "--scope", "REGIONAL"],
+     lambda d, c: f"{len(d['WebACLs'])} existing"),
+    ("Scheduling", "EventBridge Scheduler schedules (list)", lambda c: ["scheduler", "list-schedules"],
+     lambda d, c: f"{len(d['Schedules'])} existing"),
+    ("Inference", "Lambda functions (list)", lambda c: ["lambda", "list-functions"],
+     lambda d, c: f"{len(d['Functions'])} existing"),
     ("Monitoring", "CloudWatch log groups (list)", lambda c: ["logs", "describe-log-groups", "--limit", "5"],
      lambda d, c: f"{len(d['logGroups'])} shown"),
     ("Monitoring", "CloudWatch alarms (list)", lambda c: ["cloudwatch", "describe-alarms", "--max-items", "5"],
@@ -171,16 +179,17 @@ def render(results, region, when):
         "## How to read this",
         "",
         "- **allowed** means the call succeeded (or the EC2 dry run said it would have). **denied** means the lab's policy refused it. **error** is anything else, so read the detail.",
-        "- Listing a service proves its API is reachable, **not** that creating it is permitted. Creation of the ALB, Auto Scaling group, RDS instance, S3 bucket, IAM role and ACM certificate is only proved by a Terraform plan and apply in stages 2 and 3 of the setup order.",
+        "- Listing a service proves its API is reachable, **not** that creating it is permitted. A Terraform plan also does not prove creation permission. Verify actual authorised console creation, then Terraform reproduction, and deployed behaviour; dry runs cover only the request tested.",
         "- Remaining balance is not available from the API. Read it from the lab page and record it here: `USD ____` on `____`.",
-        "- Instance profiles and role names above are the ones Terraform must reference instead of creating, if role creation is denied.",
+        "- Role names are discovery only: record the intended EC2 instance profile, Lambda execution role and Scheduler invocation role. Verify trust policies, least-privilege resource access and iam:PassRole for the deploying principal; listing roles proves none of these. Reference permitted lab roles where required.",
         "",
         "## Decisions this feeds",
         "",
-        "- **HTTPS:** ACM plus Route 53 allowed means a trusted certificate on a domain the team controls may be possible. Otherwise see the options in `docs/plans/cloud-independent-prep.md` (B4).",
-        "- **Image source:** ECR allowed means push the image there; otherwise build it on the instance or load it from S3.",
-        "- **Secrets:** Secrets Manager denied means the database password and `DJANGO_SECRET_KEY` come from the launch configuration instead; record that limitation.",
-        "- **Management access:** SSM allowed means no SSH is needed, which is the recommended arrangement.",
+        "- **HTTPS:** certificate listing is not issuance/import permission or hostname ownership. A test certificate needs permitted import, a matching hostname and explicit client trust; it is not a guaranteed fallback. See `docs/plans/cloud-independent-prep.md` (B4).",
+        "- **Image source:** ECR is selected. Verify repository creation, image push and instance pull permissions separately; list success does not prove them. Resolve denied access before deployment.",
+        "- **Secrets:** Secrets Manager is selected for database credentials and the shared `DJANGO_SECRET_KEY`, retrieved through least-privilege runtime roles. Unavailable secret storage or retrieval is a deployment blocker; never put plaintext secrets in user data or launch templates. List success does not prove retrieval permission.",
+        "- **Management access:** Systems Manager (SSM) is not selected. Agree a secure lab-supported administration method with the infrastructure owner.",
+        "- **Integration:** record ECR, SNS, CloudTrail, WAF, Scheduler and Lambda creation/configuration and role checks separately. Offline training exists; saved-model inference and scheduled Lambda integration are not implemented. Actual notifications, audit events, WAF enforcement and scheduled inference need deployed verification.",
         "",
     ]
     return "\n".join(lines)

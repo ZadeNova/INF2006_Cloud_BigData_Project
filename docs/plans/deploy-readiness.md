@@ -1,6 +1,6 @@
 # Deploy readiness (B6 app-side items 1 to 3)
 
-Status (25 September 2026): planned, then implemented on `erfan/analytics`. Backend-owned; needs the review gate.
+Status (25 September 2026): code present at `e58e3a1` on `erfan/analytics`; author-reported checks below were not rerun in Phase 0. Backend-owned; independent review gate remains pending. RDS CA packaging, configurable HSTS and bootstrap are partial implementation, not AWS readiness. Review bootstrap TLS overrides, inherited privileges, database ownership and redaction before deployment. Secrets Manager remains the selected credential path; no plaintext launch-template/user-data fallback.
 
 ## Why
 
@@ -8,7 +8,7 @@ The production settings already fail closed, but three things stop the image fro
 
 ## 1. RDS certificate bundle in the image
 
-Outside local mode Django connects with `sslmode=verify-full` and requires `POSTGRES_SSLROOTCERT`. The image holds no RDS CA bundle, so a deployed instance cannot connect.
+Outside local mode Django connects with `sslmode=verify-full` and requires `POSTGRES_SSLROOTCERT`. The original gap was the missing RDS CA bundle; the baseline now packages it. Actual RDS connectivity is still unverified.
 
 - Vendor the AWS RDS global bundle at `src/certs/rds-global-bundle.pem` (public CA certificates, not a secret), with a `README.md` recording its source URL, download date and SHA-256, the same way `static/vendor/htmx/` is recorded. Vendored rather than downloaded at build, so builds are reproducible and need no network.
 - The Dockerfile sets `ENV POSTGRES_SSLROOTCERT=/app/certs/rds-global-bundle.pem`, so a deployment does not have to pass the path. Local mode ignores it (`sslmode=disable`).
@@ -16,7 +16,7 @@ Outside local mode Django connects with `sslmode=verify-full` and requires `POST
 
 ## 2. Configurable HSTS
 
-HSTS is fixed at one year outside local mode. A browser that has seen it refuses plain HTTP for a year and removes the "proceed anyway" option on certificate warnings, which would make the self-signed fallback (HTTPS option B) unusable, and would pin a year of HTTPS on a domain bought for two weeks.
+The original HSTS setting was one year; the baseline now makes it configurable as described below. This bounds policy lifetime, but does not establish certificate trust. Any test certificate needs permitted import, hostname matching and explicit client trust; no guaranteed self-signed fallback exists.
 
 - `DJANGO_HSTS_SECONDS`, a non-negative integer. Default outside local mode: `3600`; local stays `0`. Invalid values fail at startup, like the other settings.
 - Tests: add one invalid value to `test_invalid_configuration_fails`; assert the production default in `test_production_configuration`.

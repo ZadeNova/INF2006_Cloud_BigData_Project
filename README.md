@@ -32,11 +32,11 @@ Implemented locally (not yet deployed):
 - Owner-only order confirmation and history.
 - Operator-only sales and inventory dashboard at `/analytics/` with reporting dates, freshness and interpretable replenishment flags.
 - A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
-- Optional customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
+- Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
 
-Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, and load tests.
+Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, saved-model inference/scheduled Lambda integration, and load tests.
 
-Payments are simulated; no real payment-card data is collected. Analytics is required; customer-segmentation ML is optional. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
+Payments are simulated; no real payment-card data is collected. Analytics is required; descriptive customer-segmentation ML is included. ElastiCache is conditional on a justified, affordable implementation. CloudFront, NoSQL, real payment integration and marketplace expansion are outside the baseline.
 
 ## Analytics and data
 
@@ -55,8 +55,8 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 | Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
 | Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
 | Analytics | Django management commands/SQL; pandas where useful |
-| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, ECR, private S3, CloudWatch, SNS |
-| Access and secrets | Lab-provided IAM instance profile, Secrets Manager, ACM certificate, Systems Manager (no SSH) |
+| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, EventBridge Scheduler, Lambda (planned) |
+| Access and secrets | IAM roles and selected Secrets Manager; unavailable access blocks deployment |
 | Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
 
 ```text
@@ -150,8 +150,8 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 - AWS: a read-only probe (25 September 2026) found every planned service reachable in the lab, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
 - Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Functional and security evidence files record no run yet, although the automated tests exist; a recorded live walkthrough of the redesigned storefront is also outstanding.
 - The redesign and the dashboard re-theme (24 September 2026) are not independently reviewed and have no recorded browser walkthrough yet. See [storefront redesign](docs/plans/storefront-redesign.md).
-- The imported dataset has weak weekly variation and 32–40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
+- The imported dataset has weak weekly variation and 32â€“40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 
-After INF2006 submission, preserve the exact ZIP and tag the commit. INF2003 will extend that baseline with local Docker databases, substantial NoSQL functionality and database benchmarking, removing AWS dependencies and optional ML. That expansion is outside the current development scope.
+After INF2006 submission, preserve the exact ZIP and tag the commit. INF2003 will extend that baseline with local Docker databases, substantial NoSQL functionality and database benchmarking, removing AWS dependencies and isolated ML. That expansion is outside the current development scope.

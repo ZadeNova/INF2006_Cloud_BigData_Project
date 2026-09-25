@@ -4,7 +4,7 @@
 **Team:** Five members  
 **Deadline:** Sunday, 11 October 2026, 11:59 PM, Singapore time  
 **Budget:** User-reported AWS student accounts accessed through Canvas, USD 40 credits per member  
-**Decision:** Analytics is required. Customer-segmentation ML is optional.  
+**Decision:** Analytics is required. Descriptive customer-segmentation ML is included.
 **Data:** Ecommerce Sales Dataset (Analytics Engineering) is the selected source, chosen 22 September 2026 after Hugging Face access to LaelaZ/synthetic-ecommerce was never granted; generate missing application fields separately.  
 **Progression:** The submitted INF2006 application becomes the foundation for INF2003, which expands its database functionality locally.
 
@@ -50,10 +50,10 @@ The user problem is twofold: customers need reliable order placement, and a smal
 | Web serving | Gunicorn + WhiteNoise with versioned static assets packaged in the image | Same production static-file configuration across replaceable application instances |
 | Packaging | Docker; Docker Compose locally | Same application runs with local PostgreSQL and RDS |
 | Analytics | Django management commands and SQL, with pandas where useful | Reproducible transformations without a separate platform |
-| Optional ML | scikit-learn | Small offline-trained model; no dedicated inference infrastructure |
+| ML | scikit-learn | Offline training; intended scheduled Lambda inference, isolated from the web image |
 | Infrastructure | Terraform | Reviewable, repeatable provisioning and teardown |
 | Cloud | EC2, ALB, Auto Scaling Group, RDS, S3, CloudWatch | Deployment, routing, elasticity, database/object storage and operations |
-| Secrets/access | IAM instance role and Secrets Manager where permitted | Avoid credentials in code and limit access |
+| Secrets/access | IAM runtime roles and Secrets Manager (selected; unavailable access blocks deployment) | Avoid credentials in code and limit access |
 | Testing | pytest/pytest-django and Locust | Correctness, security, analytics and controlled load tests |
 
 Pin supported dependency and image versions during week one. Do not change frameworks after the core workflow is underway. Student-account permissions for AWS services are an early verification task, not an assumed entitlement.
@@ -195,19 +195,19 @@ Verify known sales totals, historical prices after a price change, cancelled-ord
 
 The selected dataset has deliberately simplified synthetic relationships; it does not establish real market behaviour, price elasticity or seasonality. Explain that sales are not necessarily unmet demand; stockouts suppress sales, short histories are unstable, and recent sales and fixed lead times do not guarantee future conditions. Demonstrate operational usefulness in the simulated scenario without claiming validated commercial demand prediction.
 
-## 6. Optional ML: customer segmentation
+## 6. Included ML: descriptive customer segmentation
 
-Only start after required analytics, checkout and AWS smoke deployment work, and only if it will not displace evidence preparation.
+Included by the 25 September scope decision. Preserve required analytics, checkout and evidence work. Offline training and assignment loading exist; saved-model inference and scheduled Lambda integration are not implemented.
 
 - Calculate recency, completed-order frequency and spending at a fixed cutoff.
 - Scale features and fit a small K-means model offline.
 - Compare a few cluster counts, silhouette scores, cluster sizes/profiles and stability across seeds.
 - Exclude customers without adequate purchase history or label them separately.
 - Interpret groups after inspecting their profiles; cluster IDs do not inherently mean loyal or at-risk customers.
-- Show summaries on the operator page. Store the model/version or batch results; no separate inference service is required.
+- Show summaries on the operator page. Retain a versioned offline-trained model and label mapping for intended scheduled Lambda inference. Keep local training/loading available; no dedicated model server.
 - Document that the selected synthetic dataset cannot establish real customer behaviour. Check whether repeat purchasing and variation are sufficient before attempting clustering. Do not report classification accuracy without true class labels.
 
-The complete submission must meet the required analytics criterion even if ML is omitted.
+The deterministic analytics criterion remains independently required; ML must not alter its formulas or become a checkout dependency.
 
 ## 7. AWS architecture and budget constraints
 
@@ -221,6 +221,8 @@ S3 remains required for dataset/export object storage. Block public access, rest
 
 CloudFront is excluded from the current implementation. Discuss it as an alternative for edge caching and reducing static-origin traffic; its omission reflects this workload, budget and deadline, not a claim that CDNs require geographically distributed users. An ElastiCache product-data cache remains a candidate, subject to explicit scope selection, lab support and measured value; it is not required for session continuity.
 
+Retain the existing infrastructure and add ECR for the image route, SNS notifications, CloudTrail auditing, regional WAF protection, EventBridge Scheduler and Lambda for intended scheduled ML inference. Systems Manager is not selected. Verify each service, role and cost in the actual lab; these are selected requirements, not deployed controls.
+
 CloudWatch receives sanitised application and infrastructure metrics/logs. The application obtains configuration through permitted secure mechanisms. Sessions and carts use PostgreSQL rather than instance-local state. New instances must run the same image, dependencies and shared Django signing configuration.
 
 | Component | Required behaviour |
@@ -232,7 +234,7 @@ CloudWatch receives sanitised application and infrastructure metrics/logs. The a
 | Scaling | Target tracking using `ALBRequestCountPerTarget`, calibrated from a one-instance benchmark; record warmup and scale-in behaviour |
 | S3 | Private dataset/export bucket; documented object versions/checksums, restricted IAM access and retention |
 | CloudWatch | Instance count, latency, request errors, application outcomes and one actionable alert/query |
-| IAM/secrets | Instance profile rather than embedded AWS keys; restricted secret access where the lab permits |
+| IAM/secrets | Instance profile rather than embedded AWS keys; Secrets Manager for database credentials and shared Django signing key; least-privilege runtime retrieval |
 | Terraform | Deployment and teardown instructions; lab-provided roles referenced rather than recreated where necessary |
 
 To avoid a continuously billed NAT gateway, the budget baseline may place EC2 in public subnets with application ingress allowed only from the ALB security group. RDS remains private. Public IPs do not imply open application ports. Compare this with private application subnets plus NAT/endpoints in the report and document the trade-off. Do not permit broad SSH access; use a lab-supported management method.
@@ -262,7 +264,7 @@ Required continuity test: log in, add cart items, prove requests reach different
 
 ### Week-one account and HTTPS checkpoint
 
-Confirm permitted region, EC2 types, ASG capacity, RDS, ALB, S3, bucket policies, CloudWatch, Terraform credentials, instance profiles, secret access and certificate capabilities in the actual Canvas lab. Do not assume IAM role creation, Secrets Manager or ACM operations are available. Record restrictions and agree a supported alternative with the instructor if necessary; never claim a control was implemented when it was not.
+Confirm permitted region, EC2 types, ASG capacity, RDS, ALB, S3, bucket policies, CloudWatch, Terraform credentials, instance profiles, secret access and certificate capabilities in the actual Canvas lab. Do not assume IAM role creation, Secrets Manager or ACM operations are available. Secrets Manager is selected; unavailable secret storage/retrieval blocks deployment and must be resolved with the instructor, never by plaintext user data or launch-template secrets. Record other restrictions and agree supported resolutions; never claim a control was implemented when it was not.
 
 For trusted browser HTTPS at ALB, confirm access to a certificate for a hostname the team/institution controls and the ability to validate or import it. The AWS-generated ALB hostname alone does not solve certificate ownership. If no trusted hostname is available, resolve the supported demonstration arrangement in week one; a private test certificate requires explicit client trust and a documented limitation. Do not silently downgrade credential handling to public HTTP.
 
@@ -334,7 +336,7 @@ The phases below are completion gates, not five additional weeks. Members work i
 | 4. Reproduction and submission assembly | 2-8 October | Fix defects; rehearse clean local setup; complete report, manifest, evidence links, attribution and contributions | A different teammate reproduces the application and analytics and locates evidence for each assessment claim |
 | 5. Final verification and handover | 9-11 October | Check ZIP, secrets and required paths; preserve evidence; submit; archive exact submission and tag its commit | Submit by 11 October at 23:59 Singapore time; preserve the baseline for later INF2003 expansion |
 
-ElastiCache remains conditional, not a prerequisite for completing these phases. Optional ML must not delay required analytics or testing. Evidence is collected during each phase. INF2003 implementation begins after INF2006 submission, with its separate proposal work reserved before the 4 October deadline.
+ElastiCache remains conditional, not a prerequisite for completing these phases. Included descriptive ML must preserve required analytics and testing. Evidence is collected during each phase. INF2003 implementation begins after INF2006 submission, with its separate proposal work reserved before the 4 October deadline.
 
 ### Weekly milestone detail
 
@@ -346,11 +348,11 @@ ElastiCache remains conditional, not a prerequisite for completing these phases.
 | 2-8 October | Feature freeze; resolve defects; reproduce from clean setup; finish report, declarations and manifest | Another teammate can run local instructions and locate every claim's evidence |
 | 9-11 October | Submission preflight and contingency buffer | Verified ZIP submitted by 11 October, 11:59 PM |
 
-Optional ML is dropped if required work is behind schedule. No new features after 1 October. INF2003's progress report is due 4 October at 11:30 PM, so reserve time for its database expansion plan without adding those features here.
+Any removal of included ML requires an explicit scope decision if required work falls behind. No new features after 1 October. INF2003's progress report is due 4 October at 11:30 PM, so reserve time for its database expansion plan without adding those features here.
 
 ## 11. Five-person ownership plan
 
-The team remains five members. Two primary developers (the user and one teammate) lead application, data/analytics, infrastructure and technical testing. The other three lead report writing, test execution, evidence organisation and submission administration. The technical scope and optional/conditional feature status remain unchanged.
+The team remains five members. Two primary developers (the user and one teammate) lead application, data/analytics, infrastructure and technical testing. The other three lead report writing, test execution, evidence organisation and submission administration. The technical scope follows the included-ML decision; ElastiCache remains conditional.
 
 | Role | Primary ownership | Required collaboration |
 |---|---|---|
@@ -433,7 +435,7 @@ After submission, save the exact INF2006 ZIP and tag the commit, for example `in
 
 - Keep Django, templates/design reference, ecommerce entities, validated dataset mappings/import tooling, checkout correctness, supplemental seeds and useful analytics.
 - Replace RDS with PostgreSQL in Docker, serve assets locally, read datasets/exports from local storage and remove AWS-specific operational integrations, including S3 dependencies.
-- Remove the optional ML function for the local INF2003 scope without breaking checkout or retained analytics.
+- Remove the isolated ML function for the local INF2003 scope without breaking checkout or retained analytics.
 - Add MongoDB through a separate data-access module and expand appropriate document-oriented workflows.
 - Extend SQL and NoSQL modelling, CRUD, constraints, aggregation, indexes and controlled benchmarks. Add documented synthetic reviews, richer attributes or other missing entities as required; the INF2006 dataset is a foundation, not a ceiling on the schema.
 - Define substantial database work for both stores. Avoid two authoritative copies of orders unless consistency management is an intentional, tested feature. A separate NoSQL order implementation can instead support equivalent-operation comparisons.
@@ -452,7 +454,7 @@ These are planning risks, not confirmed implementation failures. Owners refer to
 |---|---|---|---|
 | AWS lab permissions or insufficient credits | Deployment blocked or resources lost before evidence capture | Verify actual service/role permissions and remaining balance in Phase 1; budget against one integration account; develop locally and tear down paid resources after evidence sessions | Developers, with evidence/admin support: account capability record, cost estimate and deployment smoke test |
 | HTTPS hostname/certificate unresolved | Secure browser authentication cannot be demonstrated as planned | Resolve supported hostname, certificate and validation arrangement in Phase 1; document any instructor-supported test limitations | Developers: working HTTPS and secure-cookie verification |
-| Four-week scope creep | Incomplete required workflow or submission | Freeze core functionality; omit optional ML first; add ElastiCache only if affordable and testable; no new features after 1 October | All owners: phase gates and feature-freeze review |
+| Four-week scope creep | Incomplete required workflow or submission | Freeze core functionality; revisit included ML only by explicit scope decision; add ElastiCache only if affordable and testable; no new features after 1 October | All owners: phase gates and feature-freeze review |
 | Synthetic dataset provenance or integrity fails validation | Unreliable analytics or unsuitable source data | Record source revision, licence and checksums; validate IDs, relationships, monetary values and chronology; use a documented fully synthetic generator if the source fails acceptance | Developers, with evidence lead: data acceptance and reconciliation output |
 | Historical sales and stock dates do not align | Misleading stock-coverage and replenishment flags | Pair sales windows with dated generated inventory snapshots; document any uniform date shift; separate historical, live-demo and load fixtures | Developers: fixed-date analytics tests and freshness labels |
 | Concurrent checkout or retry errors | Overselling, partial writes or duplicate orders | Use database transactions, row locks or conditional updates, constraints and user-scoped idempotency; obtain final stock/prices from RDS | Developers, with evidence lead: concurrent, sold-out and interrupted-checkout tests |

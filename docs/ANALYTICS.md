@@ -1,6 +1,6 @@
 # Analytics contract
 
-Required feature: explainable sales/inventory planning. ML optional, never a dependency. See [data pipeline](DATA_PIPELINE.md) for provenance/dates and [schema](SCHEMA.md) for persistence. Stock and lead times are generated (the source dataset has none) and sealed as an inventory snapshot; see the data pipeline for the acceptance status of the dataset.
+Required feature: explainable sales/inventory planning. Descriptive customer-segmentation ML is included, never a dependency of deterministic analytics or checkout. See [data pipeline](DATA_PIPELINE.md) for provenance/dates and [schema](SCHEMA.md) for persistence. Stock and lead times are generated (the source dataset has none) and sealed as an inventory snapshot; see the data pipeline for the acceptance status of the dataset.
 
 ## Definitions
 
@@ -85,9 +85,9 @@ Never hardcode 365, 366 or 30 in logic. Derive spans, day counts and comparison 
 
 Synthetic patterns do not prove commercial demand, seasonality or behaviour. Stockouts hide unmet demand; seven-day rates and fixed lead times simplify reality. A product with no sales cannot be told apart from a product not yet listed. This informs a simulated stock review, not a validated forecast.
 
-## Optional ML: RFM customer segmentation (K-means)
+## Included descriptive ML: RFM customer segmentation (K-means)
 
-Begins only after the required work passes and the dataset profile shows customers with enough order history to segment; omit it if the result is not meaningful. It is additive and removable:
+Included by the 25 September scope decision; evaluate whether the dataset has sufficient signal and report limitations. It remains additive and removable. Offline training/loading exist; intended saved-model inference through EventBridge Scheduler and Lambda is not implemented. Keep the local path and isolate cloud integration from deterministic analytics:
 
 - Train and evaluate offline in `analytics/` with its own requirements; the web image has no ML dependency.
 - Features per customer, as of the run cutoff and using only completed orders before it: recency (days since last order), frequency (order count) and monetary value (sum of order totals). Scale the features, transform skewed monetary values, fit K-means with a fixed random seed and choose k by silhouette over a small range.

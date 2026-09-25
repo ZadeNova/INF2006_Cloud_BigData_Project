@@ -51,27 +51,25 @@ Wanted for the operational evidence: at least one custom application metric (for
 Mostly the user's and teammate's actions; this is the tracker's open Phase 1 infrastructure item. Follow stage 1 of the [setup order](../AWS_INFRASTRUCTURE.md#setup-order-and-verification). Produce a short written capability record covering:
 
 - Account, region, and actual remaining balance. Credits are separate, not pooled. Budget rule: USD 30 planning cap of the integration account's initial USD 40, USD 10 reserved.
-- Which services and roles are actually permitted: EC2, ALB, Auto Scaling, RDS, S3, CloudWatch, IAM (roles and instance profiles), ACM, Secrets Manager. The scope warns some of IAM, ACM and Secrets Manager may be unavailable.
+- Which services and roles are actually permitted: EC2, ALB, Auto Scaling, RDS, S3, CloudWatch, IAM (roles and instance profiles), ACM, Secrets Manager, ECR, SNS, CloudTrail, WAF, EventBridge Scheduler and Lambda. Record EC2 instance, Lambda execution and Scheduler invocation roles, trust/resource policies and deployer PassRole permissions. List access proves none of these permissions.
 - Instance types, quotas, and the RDS engine version available.
 - HTTPS arrangement: a hostname and certificate path. The generated ALB hostname is not a team-owned certificate. This blocks exposing login traffic.
 - Terraform: version and provider pins, and a single state owner per environment (two developers share infrastructure). Local versus remote state, custody, backup; state and secret-bearing plans are never committed.
 
-Decision needed: where does the container image come from (a registry the lab allows, or built on the instance)? Record it here because it changes B6.
+Selected image route: ECR. Verify creation/push/pull permissions; resolve denied access before deployment. Secrets Manager is selected for credentials and the shared signing key; unavailable storage/retrieval blocks deployment. No plaintext user-data/launch-template fallback. Systems Manager is not selected; agree a secure administration method with the infrastructure owner.
 
-**Result (25 September 2026, `us-east-1`, AWS Academy Learner Lab, principal `assumed-role/voclabs`):** allowed: availability zones (6), VPC create and instance launch dry runs, t3.micro/small/medium, the Amazon Linux 2023 AMI, and listing ALB, Auto Scaling, RDS, S3, Secrets Manager, ACM, Route 53, ECR, SSM, CloudWatch, SNS and Budgets. Denied: the vCPU quota lookup. Instance profiles: `LabInstanceProfile` (and EMR ones); roles: `LabRole` and lab-generated ones, so role creation is assumed denied and roles are referenced, not created. RDS default engine 18.3; the build pins 17.x. Still to record: the balance from the lab page, and whether creating a secret, a budget and an EventBridge schedule with `LabRole` actually works (tested during the build). Before the record is saved to `evidence/`, replace the lab-generated role names with `<lab-generated>`. Image route: ECR. HTTPS: option A, the user is buying a domain.
-
-**Tool** (step-by-step guide: [AWS_CAPABILITY_CHECK.md](../AWS_CAPABILITY_CHECK.md)): `python3 src/tools/aws_capability_check.py --region <lab region> --output evidence/aws-capability-record.md` writes most of this record in about a minute. It is read-only (list/describe calls and EC2 dry runs), so it creates nothing and costs nothing; it redacts account numbers and does not know the remaining balance, which is read from the lab page. Listing a service does not prove that creating it is permitted; that is proved by the Terraform plan and apply in stages 2 and 3.
+**Tool** (step-by-step guide: [AWS_CAPABILITY_CHECK.md](../AWS_CAPABILITY_CHECK.md)): `python3 src/tools/aws_capability_check.py --region <lab region> --output evidence/aws-capability-record.md` writes most of this record in about a minute. It is read-only (list/describe calls and EC2 dry runs), so it creates no resources; it redacts account numbers and does not know the remaining balance, which is read from the lab page. Listing a service does not prove that creating it is permitted; a Terraform plan does not prove it either. Verify authorised console creation, then Terraform reproduction and actual deployed behaviour.
 
 **HTTPS options**, in order of preference. Terraform is written once with a `certificate_arn` input, so A and B differ only in where the ARN comes from:
 
 | Option | Needs | Trade-off |
 |---|---|---|
 | A. Trusted ACM certificate on a domain the team controls, DNS-validated | ACM, plus DNS records you can create (Route 53 or the institution) | Best: real trust and no browser warnings. Blocked if ACM or DNS is unavailable |
-| B. Self-signed certificate imported into ACM, attached to the ALB HTTPS listener | ACM import allowed | Needs no domain and credentials are still encrypted, but browsers warn and testers must accept the certificate. The scope allows this with a documented limitation |
+| B. Self-signed certificate imported into ACM, attached to the ALB HTTPS listener | ACM import allowed, a matching hostname and explicit client trust | A limited test arrangement requiring lab/instructor agreement and documented client setup; not a guaranteed fallback |
 | C. CloudFront's default `*.cloudfront.net` certificate in front of the ALB | CloudFront allowed | CloudFront is excluded by the scope, so this is a scope change; the CloudFront-to-ALB leg would be plain HTTP unless the ALB also has a certificate. Not recommended for credentials |
 | D. HTTP only | | Not allowed by the scope for credential traffic, and the app has no setting for it (outside local mode it redirects to HTTPS and sets secure cookies) |
 
-Ask the instructor for A now; plan for B as the guaranteed fallback.
+Confirm A with the instructor. B requires permission, hostname matching and explicit trust; if neither works, HTTPS remains blocked. HSTS configuration does not establish certificate trust.
 
 ## B5: Terraform build
 
@@ -81,7 +79,7 @@ Location: `src/terraform/`. Build in small reviewable steps that follow the setu
 
 1. Provider, version pins, variables, `.gitignore` for state and plan files.
 2. Network: VPC, subnets in two permitted Availability Zones, security groups (public ALB to app only; app to private RDS on 5432).
-3. Persistent services: private Single-AZ RDS PostgreSQL, private S3 with public access blocked, permitted secret storage.
+3. Persistent services: private Single-AZ RDS PostgreSQL, private S3 with public access blocked, selected Secrets Manager storage and role retrieval.
 4. ALB (HTTPS listener once B4 settles it), launch template, ASG (minimum 1, test maximum 2, stickiness off), target group health check on `/health/`.
 5. Target tracking on `ALBRequestCountPerTarget`, numeric target fixed before the final comparison.
 
@@ -100,7 +98,7 @@ Decisions the infrastructure contract leaves open, to settle after B4:
 - Expired-session cleanup (`clearsessions`) needs a trigger; see the analytics scheduler decision, which is deferred until the refresh command exists.
 - Dataset delivery: files synced from private S3 to a local directory before `import_dataset` (the import command reads local paths only).
 - **Database TLS. Done 25 September 2026 ([deploy-readiness.md](deploy-readiness.md)):** the AWS RDS global bundle is vendored at `src/certs/` (source and SHA-256 recorded) and the image sets `POSTGRES_SSLROOTCERT=/app/certs/rds-global-bundle.pem`.
-- **HSTS. Done 25 September 2026:** `DJANGO_HSTS_SECONDS` (default 3600 outside local mode, was a fixed year), so the self-signed HTTPS fallback stays usable and a short-lived domain is not pinned for a year.
+- **HSTS. Done 25 September 2026:** `DJANGO_HSTS_SECONDS` (default 3600 outside local mode, was a fixed year), to bound the policy lifetime; this does not make an untrusted or mismatched test certificate acceptable.
 - **Application role on RDS. Done 25 September 2026:** `src/tools/db_bootstrap.py` creates the non-superuser application role and its database once with the master credentials (`BOOTSTRAP_USER`/`BOOTSTRAP_PASSWORD`, never given to web containers); safe to rerun.
 - **Behind the ALB the app needs:** `DJANGO_TRUST_PROXY=true` (otherwise Django sees plain HTTP and redirects forever), `DJANGO_ENV` not `local`, one shared `DJANGO_SECRET_KEY`, `DJANGO_CSRF_TRUSTED_ORIGINS=https://<hostname>`, and `DJANGO_ALLOWED_HOSTS` containing the hostname and the instance's own private IP (the launch script reads it from instance metadata, so Django stays free of AWS calls) for the ALB health probe.
 
@@ -115,12 +113,14 @@ The console-first build was replaced by Terraform first (B5). What carries over:
 | VPC | Two AZs; public subnets for the ALB and app (no NAT cost); private subnets for RDS |
 | Security groups | ALB accepts 443 from the internet; app accepts 8000 from the ALB group only; RDS accepts 5432 from the app group only |
 | ALB | HTTPS listener; the HTTP listener only redirects; health check `/health/`; stickiness off |
-| EC2 and Auto Scaling | Launch template with IMDSv2 required, encrypted EBS and SSM instead of SSH; min 1, max 2; target tracking on `ALBRequestCountPerTarget` |
+| EC2 and Auto Scaling | Launch template with IMDSv2 required, encrypted EBS and an agreed secure administration method (SSM not selected); min 1, max 2; target tracking on `ALBRequestCountPerTarget` |
 | RDS | PostgreSQL, single-AZ (state the limitation), private, encrypted, TLS forced, short backup retention |
-| S3 | One bucket; public access blocked, versioning, encryption, a deny-non-TLS bucket policy; CORS `GET`/`HEAD` from the application origin for `.glb` models |
-| Secrets Manager | `DJANGO_SECRET_KEY` and the application database password (value set outside Terraform); RDS manages its own master password |
-| IAM | `LabInstanceProfile` referenced, not created; no access keys on instances |
-| CloudWatch | Log group with short retention, a metric filter on `status >= 500` with an alarm to SNS email, a dashboard |
+| S3 | Public access blocked, versioning, encryption, a deny-non-TLS bucket policy |
+| IAM | An instance profile; no access keys on instances |
+| CloudWatch / SNS | Sanitised logs with short retention, a metric filter/alarm, dashboard and verified notification |
+| ECR / Secrets Manager | Verified image push/pull and role-based secret retrieval; no secrets in user data |
+| CloudTrail / WAF | Verify recorded management events and scoped login protection through ALB |
+| Scheduler / Lambda | Intended saved-model inference, isolated from web image; packaging/integration not yet implemented. Verify invocation/execution roles and actual scheduled publication |
 
 **Cost rules:** because Terraform can recreate the stack in minutes, prefer `terraform destroy` over leaving it idle for a day. For shorter gaps: set the Auto Scaling group's desired capacity to 0; stop RDS (AWS restarts a stopped instance after 7 days); the ALB cannot be stopped, only deleted, and costs roughly USD 0.5 a day (estimate; verify current prices). Recalculate the remaining balance at the start and end of each session.
 

@@ -32,8 +32,8 @@ def fake_runner(calls, deny=()):
             return 254, "", DENIED
         if args[:2] == ["sts", "get-caller-identity"]:
             return 0, json.dumps({"Account": "123456789012", "Arn": "arn:aws:sts::123456789012:assumed-role/voclabs/someone@example.com"}), ""
-        if args[:2] == ["ssm", "get-parameter"]:
-            return 0, json.dumps({"Parameter": {"Value": "ami-0abc"}}), ""
+        if args[:2] == ["ec2", "describe-images"]:
+            return 0, json.dumps({"Images": [{"ImageId": "ami-0old", "CreationDate": "2025-01-01"}, {"ImageId": "ami-0abc", "CreationDate": "2026-01-01"}]}), ""
         if "--dry-run" in args:
             return 254, "", DRY_RUN_OK
         return 254, "", "An error occurred (ValidationError) when calling Something: not summarised in this test"
@@ -61,7 +61,7 @@ def test_a_denied_service_is_reported_not_hidden():
 
 def test_the_launch_dry_run_is_skipped_when_the_ami_cannot_be_found():
     calls = []
-    results, _ = probe.run_probes(fake_runner(calls, deny=("ssm",)))
+    results, _ = probe.run_probes(fake_runner(calls, deny=("ec2",)))
     assert not any(call[:2] == ["ec2", "run-instances"] for call in calls)
     assert next(o for _, c, o, _ in results if c == "launch an instance (dry run)") == "skipped"
 
@@ -125,3 +125,15 @@ def test_a_call_that_times_out_is_recorded_and_the_run_continues(monkeypatch):
     timed_out = [(outcome, detail) for area, _, outcome, detail in results if area == "IAM"]
     assert len(timed_out) == 2
     assert all(outcome == "error" and "Timed out after 45 seconds" in detail for outcome, detail in timed_out)
+
+
+def test_selected_service_coverage_and_safe_generated_advice():
+    calls = []
+    results, _ = probe.run_probes(fake_runner(calls))
+    assert {"ecr", "sns", "cloudtrail", "wafv2", "scheduler", "lambda", "secretsmanager", "iam"} <= {call[0] for call in calls}
+    assert not any(call[0] == "ssm" for call in calls)
+    assert ["wafv2", "list-web-acls", "--scope", "REGIONAL"] in calls
+    record = probe.render(results, "us-east-1", probe.datetime.datetime(2026, 9, 25))
+    for required in ("deployment blocker", "never put plaintext secrets", "plan also does not prove", "not a guaranteed fallback", "ECR is selected", "Lambda execution role", "Scheduler invocation role", "iam:PassRole"):
+        assert required in record
+    assert "come from the launch configuration" not in record

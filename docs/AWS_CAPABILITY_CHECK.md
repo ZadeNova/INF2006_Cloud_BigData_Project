@@ -1,10 +1,10 @@
 # How to use the AWS capability check
 
-The capability check is a small script, `src/tools/aws_capability_check.py`, that asks your AWS lab account what it is allowed to do and writes the answer as a Markdown file. It is item B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). Run it **once, before the console build**, because the answers decide your HTTPS option, where the container image comes from, and how secrets are handled.
+The capability check is a small script, `src/tools/aws_capability_check.py`, that records read API and EC2 dry-run outcomes from your AWS lab account and writes the answer as a Markdown file. It is item B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). Run it **once, before the console build**, to identify deployment blockers. ECR and Secrets Manager are already selected; listing them does not prove push/pull or secret retrieval permission.
 
-**It is safe.** It only lists and describes things. For "could I create a VPC?" and "could I launch an instance?" it uses the AWS `--dry-run` option, which asks AWS whether the call *would* work and creates nothing. It costs nothing and can be run as often as you like. A test (`test_no_probe_can_change_anything`) fails if anyone adds a call that could create, change or delete something.
+**It is safe.** It only lists and describes things. For "could I create a VPC?" and "could I launch an instance?" it uses the AWS `--dry-run` option, which asks AWS whether the call *would* work and creates nothing. It provisions no resources; check current API pricing and lab limits when running it. A test (`test_no_probe_can_change_anything`) fails if anyone adds a call that could create, change or delete something.
 
-**It does not tell you:** your remaining balance (read it from the lab page), the price of anything, or whether you can *create* an ALB, Auto Scaling group, RDS database, S3 bucket, IAM role or certificate. Those are only proved when you build them in the console (stage 1 to 3 of the runbook).
+**It does not tell you:** your remaining balance (read it from the lab page), the price of anything, or whether you can *create* an ALB, Auto Scaling group, RDS database, S3 bucket, IAM role or certificate. A Terraform plan does not prove creation permission either. Verify authorised console creation, then Terraform reproduction, and actual behaviour.
 
 ## What you need
 
@@ -109,17 +109,20 @@ What each area tells you, and the decision it feeds:
 | Area | Look for | Decision |
 |---|---|---|
 | Identity | account and principal shown | Confirms you are in the intended account. Only the last 4 digits and the role are printed. |
-| Network | 2 or more availability zones; create a VPC (dry run) allowed | The two-AZ design is possible; you can build your own VPC. |
+| Network | 2 or more availability zones; create a VPC (dry run) allowed | Zone discovery and the specific VPC dry run only; subnet/routing and deployment still need verification. |
 | Compute | instance types offered, launch dry run allowed, vCPU quota | Which instance size to use, and the maximum of 2 in the Auto Scaling group. |
 | Load balancing, Scaling | ALB and Auto Scaling lists allowed | Whether the ALB and Auto Scaling group are reachable. |
 | Database | RDS list allowed; default PostgreSQL engine version | The engine version to choose for RDS. |
-| Storage | S3 list allowed | Whether the data bucket is possible. |
-| IAM | instance profiles and roles: allowed, and their names | If you cannot create roles, use the existing instance profile and record it as an external dependency. |
-| Secrets | Secrets Manager allowed or denied | Denied means the database password and `DJANGO_SECRET_KEY` come from the launch configuration instead; record that limitation. |
-| HTTPS | ACM and Route 53 allowed or denied | ACM and Route 53 both allowed suggests a trusted certificate (option A). Otherwise plan the self-signed fallback (option B). See B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). |
-| Registry | ECR allowed or denied | Allowed: push the image to ECR. Denied: save the image to S3 and load it on the instance. |
-| Management | SSM managed instances allowed | Allowed: no SSH is needed. |
-| Monitoring, Cost | CloudWatch, SNS, Budgets allowed | Whether the alarm, dashboard and cost tracking are possible. |
+| Storage | S3 list allowed | Bucket discovery only; creation and object access still need verification. |
+| IAM | instance profiles and roles: allowed, and their names | Record EC2 instance profile, Lambda execution and Scheduler invocation roles. Verify trust/resource policies and deployer iam:PassRole; list access proves none of these. Reference permitted lab roles where required. |
+| Secrets | Secrets Manager allowed or denied | Secrets Manager is selected for database credentials/shared `DJANGO_SECRET_KEY`. Unavailable storage/retrieval blocks deployment; never use plaintext user data or launch-template secrets. Verify retrieval through least-privilege runtime roles. |
+| HTTPS | ACM and Route 53 allowed or denied | Listing does not prove issuance/import permission or hostname ownership. Test option B needs permitted import, a matching hostname and explicit client trust; it is not guaranteed. See B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md). |
+| Registry | ECR allowed or denied | ECR is selected. Separately verify creation, push and instance pull access; resolve denied access before deployment. |
+| Audit, Protection | CloudTrail trails and regional WAF web ACLs | Discovery only; verify audit events and ALB rule enforcement after deployment. |
+| Scheduling, Inference | Scheduler schedules and Lambda functions | Discovery only; verify roles, invocation and successful publication. Saved-model inference/Lambda integration is not implemented. |
+| Monitoring, Cost | CloudWatch, SNS, Budgets allowed | Discovery only; verify alarm delivery, SNS notification and cost controls separately. |
+
+Systems Manager is not selected; the AMI lookup uses EC2 image discovery. Agree a secure administration method with the infrastructure owner. The generated record includes role checks to complete manually; it does not inspect trust policies or simulate role permissions. No secret values are retrieved.
 
 ## Step 6: Add the balance and review the file before committing
 

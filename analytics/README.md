@@ -23,9 +23,9 @@ No peak-memory measurement/cloud-instance suitability claim is made; bulk-create
 batching does not bound total importer memory. Measure on the selected cloud instance
 before using it for the deployment import.
 
-## Optional ML: offline RFM K-means
+## Included descriptive ML: offline RFM K-means
 
-ML stays outside the web image. Train/evaluate offline here, then load assignments
+ML stays outside the web image. Saved-model inference and the intended EventBridge Scheduler/Lambda integration are not implemented; local training/loading remain available. Train/evaluate offline here, then load assignments
 into the app table keyed by analytics run and model version:
 
 ```powershell
@@ -42,7 +42,7 @@ than spend alone. The dashboard shows a segment panel only when assignments exis
 for the selected run.
 
 Results are descriptive on synthetic data and may reflect generator structure instead
-of real customer behavior. Treat this panel as optional operational guidance, not a
+of real customer behavior. Treat this panel as descriptive operational guidance, not a
 predictive model.
 
 ## Executed verification, 22 September 2026

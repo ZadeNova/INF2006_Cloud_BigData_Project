@@ -10,8 +10,9 @@ Status: planned, not deployed. Read [scope](../PROJECT_SCOPE_INF2006.md) for bud
 - Private Single-AZ RDS PostgreSQL, inbound only from application security group. State its availability limitation.
 - Private S3 for checked inputs/optional exports; block public access and restrict object permissions. Retain local input mode.
 - CloudWatch sanitised logs/metrics with short retention.
-- IAM instance roles and Secrets Manager where permitted; no baked-in access keys.
-- Decided 25 September 2026 (details in [aws-terraform.md](plans/aws-terraform.md)): RDS pinned to PostgreSQL 17.x (the lab default is 18.3); Secrets Manager for `DJANGO_SECRET_KEY` and the application database password, with the RDS master password managed by RDS; one S3 bucket with `data/`, `exports/`, `media/images/` and `media/models/` (`.glb`) prefixes, served through pre-signed URLs, with a CORS rule for the application origin; ECR for the image; CloudTrail event history (default) for audit; EventBridge Scheduler plus SSM Run Command for scheduled jobs if the lab accepts `LabRole`, otherwise cron on one instance.
+- IAM runtime roles and Secrets Manager for database credentials/shared Django signing key; unavailable storage or retrieval blocks deployment. No baked-in access keys or plaintext user-data/launch-template secrets.
+- ECR is the selected image route. SNS, CloudTrail, regional WAF, EventBridge Scheduler and Lambda are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. Systems Manager is not selected.
+- Offline ML training exists; versioned saved-model inference and scheduled Lambda integration remain unimplemented. Preserve local training/loading and keep ML libraries outside the web image.
 
 Initial/minimum ASG capacity one, default test maximum two. Have two healthy targets before failure demonstration. Additional capacity requires quota/cost checks. Budget baseline: EC2 public subnets with application ingress restricted to ALB to avoid mandatory NAT cost; RDS private. Restrict management access separately through permitted facilities.
 
@@ -35,7 +36,7 @@ Explicitly handle cache read/write connection failures and timeouts; fall back t
 
 Monitor latency/errors, target health, DB pressure and analytics freshness. Capture dated outputs and interpretation for an operational query/alert. Start with a USD 30 planning cap against the integration account's initial USD 40, reserve USD 10, and recalculate actual remaining funds.
 
-Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs and secrets. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
+Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs, secrets, ECR, SNS, CloudTrail, WAF, Scheduler and Lambda. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
 
 ## Setup order and verification
 
@@ -45,7 +46,7 @@ Use dependency order and small reviewable changes, not an unexamined full deploy
 |---|---|
 | 1. Access and bootstrap | Verify account/region/permissions and HTTPS path; configure provider, variables, version pins and state handling. Ignore state files and secret-bearing plans from the start. |
 | 2. Network and runtime access | Create VPC/subnets/security groups and permitted instance-role/logging setup. Check actual SG references: public ALB to app only, app to private RDS on 5432. Use port 80 only for redirect or a non-sensitive placeholder probe, never login traffic. |
-| 3. Persistent services/configuration | Create private Single-AZ RDS, private S3 and permitted secret storage/access. Establish a bounded backup/retention policy and costs. Verify allowed connectivity from the intended app role/SG and denied anonymous S3 access; one successful DB connection does not prove isolation. |
+| 3. Persistent services/configuration | Create private Single-AZ RDS, private S3 and Secrets Manager storage/access. Establish a bounded backup/retention policy and costs. Verify allowed connectivity from the intended app role/SG and denied anonymous S3 access; one successful DB connection does not prove isolation. |
 | 4. Minimal app smoke deployment | Deploy ALB/ASG with a minimal app image, health checks and logs; prove application-to-RDS connectivity during Phase 1. A static placeholder can isolate routing problems but is not the final smoke acceptance test. |
 | 5. Real workflow | Roll out the app with coordinated migrations, tested HTTPS, secure session settings and S3 import; verify permissions, shared sessions and app behaviour. HTTPS must be ready before exposing authentication or credentials. |
 | 6. Scaling/recovery evidence | Measure the fixed-capacity baseline then autoscaling, failure and monitoring outcomes. Keep cost and permission limits visible. |
