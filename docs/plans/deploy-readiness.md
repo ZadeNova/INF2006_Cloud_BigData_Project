@@ -33,6 +33,12 @@ Locally `docker/10-local-role.sh` creates a non-superuser role that owns the app
 - No `CREATEDB` on RDS: pytest never runs against it.
 - Tests: none in the pytest suite. The web container deliberately has no bootstrap credentials and its role cannot create roles, so an in-suite test would need a second privileged connection. Verified instead against a disposable local PostgreSQL 17 as a non-superuser `CREATEROLE CREATEDB` role that imitates the RDS master: first run creates, second run is a no-op that updates the password, the app role can connect and is not a superuser.
 
+## Self-review follow-ups (after `7c5a10c`)
+
+- **SR-1:** a database that already exists but is owned by another role (the RDS console's "Initial database name" creates it owned by the master) made migrations fail with `permission denied for schema public`, while the tool reported success. Fix: transfer ownership to the application role with `ALTER DATABASE ... OWNER TO`; on PostgreSQL 15+ the `public` schema follows the database owner. Runbook note: leave "Initial database name" blank.
+- **SR-2:** an existing role was only refused if it was a superuser, and only after its password was changed. Fix: check its attributes first and refuse any of superuser, create-role, create-database, replication or bypass-RLS before changing anything.
+- Verified the same way as item 3: a disposable PostgreSQL 17 with a non-superuser master, including a master-owned database that the app role then migrates, and a pre-existing over-privileged role that is refused with its password unchanged.
+
 ## Out of scope
 
 Terraform, the launch script, migrations on AWS, the production environment template, S3 import, `clearsessions`. These follow in the Terraform plan.
