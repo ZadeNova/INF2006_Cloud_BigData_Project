@@ -1,0 +1,27 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-7e2f506c725c Creating 
+ Container inf2006-foundation-web-run-7e2f506c725c Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 5 items
+
+tests/test_security_negative.py::test_checkout_ignores_forged_price_owner_total_and_status_fields PASSED [ 20%]
+tests/test_security_negative.py::test_cart_add_ignores_forged_owner_cart_and_price_fields PASSED [ 40%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[0] PASSED [ 60%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[abc] PASSED [ 80%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[] PASSED [100%]
+
+============================== 5 passed in 1.00s ===============================
+pytest_exit=0

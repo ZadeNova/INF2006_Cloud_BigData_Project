@@ -1,0 +1,23 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-453f351a8fcf Creating 
+ Container inf2006-foundation-web-run-453f351a8fcf Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 1 item
+
+tests/test_analytics_dashboard.py::test_rendered_dashboard_escapes_product_names_and_shows_status_labels PASSED [100%]
+
+============================== 1 passed in 0.99s ===============================
+pytest_exit=0

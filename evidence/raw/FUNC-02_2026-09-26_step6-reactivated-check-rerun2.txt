@@ -1,0 +1,21 @@
+﻿# FUNC-02 step 6 reactivation check
+# Date: 2026-09-26
+# Source commit: ee334cf
+== database state
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-a3adcc68f7f5 Creating 
+ Container inf2006-foundation-web-run-a3adcc68f7f5 Created 
+matching_rows 1
+display_name Adidas Runner "Core Black" 路 US 9.5 active True
+active_total 200
+== public catalogue state
+public_page_has_core_black_us_9_5=False
+public_page_us_9_5_occurrences=0

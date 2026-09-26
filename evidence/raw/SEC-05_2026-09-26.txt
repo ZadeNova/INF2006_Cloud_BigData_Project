@@ -1,0 +1,2 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 

@@ -1,0 +1,76 @@
+# FUNC-02 merge-quarantine demo setup
+# Date: 2026-09-26
+# Source commit: ee334cf
+# The host Python launcher was unavailable, so the generator was run in the existing project web image instead.
+
+docker run --rm --user 0 -e HOME=/tmp -v "${PWD}:/work" -w /work python:3.13-slim-bookworm python analytics/build_shoe_dataset.py
+docker compose run --rm web python manage.py import_dataset --source /app/data/derived/shoes --namespace synthetic/shoes/revision-a/demo/v1
+docker compose run --rm web python manage.py seed_demo --no-products
+docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-02
+
+# Actual setup commands and output follow.
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-924a5c6bbef3 Creating 
+ Container inf2006-foundation-web-run-924a5c6bbef3 Created 
+python: can't open file '/app/analytics/build_shoe_dataset.py': [Errno 2] No such file or directory
+System.Management.Automation.RemoteException
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-518e9b8548d4 Creating 
+ Container inf2006-foundation-web-run-518e9b8548d4 Created 
+customers: read=20000 valid=20000 rejected=0
+products: read=200 valid=200 rejected=0
+orders: read=100000 valid=100000 rejected=0
+order_items: read=237537 valid=237537 rejected=0
+cutoff=2026-01-02T00:00:00+08:00 offset_days=0 inventory=import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8
+users: created=20000 unchanged=0
+customer_profiles: created=20000 unchanged=0
+shoe_models: created=20 unchanged=0
+products: created=200 unchanged=0
+orders: created=100000 unchanged=0
+order_items: created=237537 unchanged=0
+inventory_versions: created=1 unchanged=0
+inventory_snapshots: created=200 unchanged=0
+cancelled: orders=2976 source_total=5269426.23 net_lines=4877923.53 application_lines=5035593.21
+completed: orders=89114 source_total=162473698.29 net_lines=150403823.29 application_lines=155404646.85
+refunded: orders=7910 source_total=14208137.53 net_lines=13152415.83 application_lines=13599180.11
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-ef50067a41d4 Creating 
+ Container inf2006-foundation-web-run-ef50067a41d4 Created 
+Created 0 demo product(s); 0 already existed.
+Created demo-operator account with a fresh password.
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-c0dfa5fdc1a4 Creating 
+ Container inf2006-foundation-web-run-c0dfa5fdc1a4 Created 
+Run 9525f59f-5cbe-4e92-a127-5923ffc1f530 completed: 41345 daily rows from 71079 order lines, business dates 2025-01-01 to 2026-01-01, cutoff 2026-01-01T16:00:00+00:00, pruned 0 old run(s), 1.7s.

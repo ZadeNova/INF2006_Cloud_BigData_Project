@@ -1,0 +1,117 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-migrate-1 Recreate 
+ Container inf2006-foundation-migrate-1 Recreated 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-e7eea93a8392 Creating 
+ Container inf2006-foundation-web-run-e7eea93a8392 Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 93 items
+
+tests/test_accounts.py::test_anonymous_visitors_can_open_the_auth_pages[accounts:register-accounts/register.html] PASSED [  1%]
+tests/test_accounts.py::test_anonymous_visitors_can_open_the_auth_pages[accounts:login-registration/login.html] PASSED [  2%]
+tests/test_accounts.py::test_registration_creates_user_with_usable_password_and_no_profile PASSED [  3%]
+tests/test_accounts.py::test_registration_rejects_duplicate_username PASSED [  4%]
+tests/test_accounts.py::test_registration_enforces_the_password_validators PASSED [  5%]
+tests/test_accounts.py::test_authenticated_user_is_redirected_away_from_register PASSED [  6%]
+tests/test_accounts.py::test_login_success_authenticates_and_redirects PASSED [  7%]
+tests/test_accounts.py::test_login_failure_rerenders_with_non_field_error PASSED [  8%]
+tests/test_accounts.py::test_login_honours_safe_next_redirect PASSED     [  9%]
+tests/test_accounts.py::test_login_ignores_unsafe_next_redirect PASSED   [ 10%]
+tests/test_accounts.py::test_authenticated_user_is_redirected_away_from_login PASSED [ 11%]
+tests/test_accounts.py::test_logout_clears_session_and_redirects_to_the_shop PASSED [ 12%]
+tests/test_accounts.py::test_logout_deletes_the_session_server_side_not_just_in_the_browser PASSED [ 13%]
+tests/test_accounts.py::test_logout_without_csrf_token_is_rejected PASSED [ 15%]
+tests/test_accounts.py::test_logout_with_csrf_token_succeeds PASSED      [ 16%]
+tests/test_catalogue.py::test_product_list_is_public PASSED              [ 17%]
+tests/test_catalogue.py::test_product_list_shows_one_card_per_shoe_with_its_active_sizes PASSED [ 18%]
+tests/test_catalogue.py::test_product_list_disables_sold_out_sizes PASSED [ 19%]
+tests/test_catalogue.py::test_chosen_size_is_added_to_the_cart PASSED    [ 20%]
+tests/test_catalogue.py::test_product_list_excludes_other_namespaces PASSED [ 21%]
+tests/test_catalogue.py::test_product_list_paginates_at_twelve_per_page PASSED [ 22%]
+tests/test_catalogue.py::test_product_list_rejects_invalid_page PASSED   [ 23%]
+tests/test_catalogue.py::test_product_list_labels_stock_as_indicative PASSED [ 24%]
+tests/test_catalogue.py::test_manage_list_forbidden_for_non_operators PASSED [ 25%]
+tests/test_catalogue.py::test_toggle_forbidden_for_non_operators PASSED  [ 26%]
+tests/test_catalogue.py::test_manage_list_shows_all_products_including_inactive PASSED [ 27%]
+tests/test_catalogue.py::test_toggle_requires_post PASSED                [ 29%]
+tests/test_catalogue.py::test_operator_can_deactivate_and_reactivate_a_product PASSED [ 30%]
+tests/test_catalogue.py::test_toggle_rejects_invalid_active_value PASSED [ 31%]
+tests/test_catalogue.py::test_toggle_is_idempotent_under_double_submit[deactivate] PASSED [ 32%]
+tests/test_catalogue.py::test_toggle_is_idempotent_under_double_submit[activate] PASSED [ 33%]
+tests/test_catalogue.py::test_seed_demo_refuses_to_promote_an_existing_customer PASSED [ 34%]
+tests/test_catalogue.py::test_seed_demo_requires_password_outside_local PASSED [ 35%]
+tests/test_catalogue.py::test_seed_demo_allows_fallback_password_in_local PASSED [ 36%]
+tests/test_catalogue.py::test_seed_demo_creates_every_shoe_in_every_size_and_deactivates_retired_demo_products PASSED [ 37%]
+tests/test_cart.py::test_add_creates_a_new_cart_item PASSED              [ 38%]
+tests/test_cart.py::test_add_increments_an_existing_cart_item PASSED     [ 39%]
+tests/test_cart.py::test_add_rejects_when_exceeding_999_without_mutation PASSED [ 40%]
+tests/test_cart.py::test_add_rejects_when_exceeding_current_stock_without_mutation PASSED [ 41%]
+tests/test_cart.py::test_add_rejects_inactive_product PASSED             [ 43%]
+tests/test_cart.py::test_add_rejects_product_outside_demo_namespace PASSED [ 44%]
+tests/test_cart.py::test_update_replaces_quantity_within_bounds PASSED   [ 45%]
+tests/test_cart.py::test_update_rejects_when_exceeding_current_stock PASSED [ 46%]
+tests/test_cart.py::test_update_rejects_quantity_change_on_an_inactive_product PASSED [ 47%]
+tests/test_cart.py::test_update_on_foreign_item_returns_404_and_does_not_mutate PASSED [ 48%]
+tests/test_cart.py::test_update_on_missing_item_returns_404 PASSED       [ 49%]
+tests/test_cart.py::test_update_returns_404_if_the_item_disappears_after_the_view_looked_it_up PASSED [ 50%]
+tests/test_cart.py::test_delete_removes_an_item PASSED                   [ 51%]
+tests/test_cart.py::test_delete_does_not_touch_a_foreign_cart_item PASSED [ 52%]
+tests/test_cart.py::test_delete_on_already_gone_item_is_idempotent_success PASSED [ 53%]
+tests/test_cart.py::test_htmx_mutation_response_renders_cart_content_fragment PASSED [ 54%]
+tests/test_cart.py::test_non_htmx_success_redirects_to_cart_detail PASSED [ 55%]
+tests/test_cart.py::test_subtotal_sums_line_totals_exactly_and_skips_unavailable_items PASSED [ 56%]
+tests/test_cart.py::test_get_on_post_only_routes_returns_405[cart:add-args0] PASSED [ 58%]
+tests/test_cart.py::test_get_on_post_only_routes_returns_405[cart:update-args1] PASSED [ 59%]
+tests/test_cart.py::test_get_on_post_only_routes_returns_405[cart:delete-args2] PASSED [ 60%]
+tests/test_cart.py::test_users_only_see_their_own_cart PASSED            [ 61%]
+tests/test_orders.py::test_successful_checkout_creates_order_decrements_stock_clears_cart PASSED [ 62%]
+tests/test_orders.py::test_unit_price_captured_is_live_price_not_cart_time_price PASSED [ 63%]
+tests/test_orders.py::test_order_total_sums_several_lines_exactly_without_rounding_drift PASSED [ 64%]
+tests/test_orders.py::test_get_checkout_with_empty_cart_redirects_to_cart PASSED [ 65%]
+tests/test_orders.py::test_inactive_product_blocks_whole_order_no_mutation PASSED [ 66%]
+tests/test_orders.py::test_review_page_total_leaves_out_a_deactivated_product_like_the_cart_does PASSED [ 67%]
+tests/test_orders.py::test_insufficient_stock_blocks_order_with_409_no_mutation PASSED [ 68%]
+tests/test_orders.py::test_replay_after_cart_already_cleared_returns_original_order PASSED [ 69%]
+tests/test_orders.py::test_replay_with_an_identical_readded_cart_returns_original_order_and_leaves_the_cart_alone PASSED [ 70%]
+tests/test_orders.py::test_same_key_with_a_different_review_conflicts_even_when_the_cart_is_empty PASSED [ 72%]
+tests/test_orders.py::test_post_with_a_different_review_and_an_existing_key_rerenders_at_409 PASSED [ 73%]
+tests/test_orders.py::test_integrity_error_safety_net_compares_the_winners_fingerprint[same-True] PASSED [ 74%]
+tests/test_orders.py::test_integrity_error_safety_net_compares_the_winners_fingerprint[different-False] PASSED [ 75%]
+tests/test_orders.py::test_item_added_after_review_blocks_the_order_until_it_is_reviewed_again PASSED [ 76%]
+tests/test_orders.py::test_a_second_tab_does_not_change_what_the_first_tab_buys PASSED [ 77%]
+tests/test_orders.py::test_quantity_changed_after_review_blocks_the_order PASSED [ 78%]
+tests/test_orders.py::test_removing_an_item_after_review_blocks_the_order_and_a_rereview_succeeds PASSED [ 79%]
+tests/test_orders.py::test_a_replaced_cart_reports_changed_not_empty PASSED [ 80%]
+tests/test_orders.py::test_an_emptied_cart_after_review_is_reported_as_empty PASSED [ 81%]
+tests/test_orders.py::test_a_forged_but_well_formed_review_is_rejected_as_changed PASSED [ 82%]
+tests/test_orders.py::test_a_missing_or_malformed_review_redirects_without_ordering[] PASSED [ 83%]
+tests/test_orders.py::test_a_missing_or_malformed_review_redirects_without_ordering[not-hex] PASSED [ 84%]
+tests/test_orders.py::test_order_detail_returns_404_for_foreign_order_200_for_owner PASSED [ 86%]
+tests/test_orders.py::test_two_sequential_checkouts_both_succeed PASSED  [ 87%]
+tests/test_orders.py::test_order_list_requires_login PASSED              [ 88%]
+tests/test_orders.py::test_order_list_shows_only_the_owners_orders_most_recent_first PASSED [ 89%]
+tests/test_orders.py::test_order_list_item_count_is_distinct_line_items_not_total_quantity PASSED [ 90%]
+tests/test_orders.py::test_order_list_pagination_boundary PASSED         [ 91%]
+tests/test_orders.py::test_order_list_empty_state PASSED                 [ 92%]
+tests/test_cart.py::test_add_waits_for_a_concurrent_update_and_increments_on_top_of_it PASSED [ 93%]
+tests/test_cart.py::test_a_first_add_racing_a_concurrent_insert_becomes_an_increment PASSED [ 94%]
+tests/test_cart.py::test_update_waits_for_a_concurrent_removal_and_then_reports_the_item_gone PASSED [ 95%]
+tests/test_orders.py::test_concurrent_checkouts_same_idempotency_key_create_exactly_one_order PASSED [ 96%]
+tests/test_orders.py::test_checkout_waits_for_a_concurrent_cart_change_and_then_rejects_the_stale_review PASSED [ 97%]
+tests/test_orders.py::test_concurrent_same_key_with_a_valid_and_an_invalid_review_never_orders_for_the_invalid_one PASSED [ 98%]
+tests/test_orders.py::test_concurrent_checkouts_different_users_racing_last_unit_of_stock PASSED [100%]
+
+============================= 93 passed in 17.64s ==============================
+pytest_exit=0

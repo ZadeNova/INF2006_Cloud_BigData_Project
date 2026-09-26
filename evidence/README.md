@@ -1,19 +1,59 @@
 # evidence/
 
-Named, dated evidence artefacts cited by `project_manifest.yaml` and `report.pdf`.
+Named, dated evidence artefacts cited by `project_manifest.yaml` and `report.pdf`. FUNC-01 and FUNC-02 have now been run on the `hermann-evidence` branch at the `origin/erfan/merge-quarantine` source. AWS and the remaining cases are still pending.
 
-Rules (Section 9 of the brief):
-- Prefer text/config exports over screenshots; use screenshots only when no text export is possible.
-- Redact account IDs, public IPs, tokens and other sensitive values.
-- No credentials, production data, or personal data.
+Last covered commit: `ee334cf`
 
-## Required files (referenced by the manifest — do not rename)
-- `architecture.png` — TODO: add the architecture diagram (users, components, cloud services, trust boundaries, data stores, observability, data flows).
-- `test-functional.md` — functional workflow test
-- `test-security.md` — security control test
-- `test-data-ai.md` — data/AI validation test
-- `test-resilience.md` — scalability/resilience/recovery test
-- `monitoring.md` — monitoring/operational evidence
-- `threat-control-map.md` — threats mapped to controls
+## Index
 
-Each test file should record: objective, setup, command/steps, expected result, actual result, date, artefact path.
+| Case | Title | File | Environment | Status | Date |
+|---|---|---|---|---|---|
+| FUNC-01 | Automated workflow suite: accounts, catalogue, cart, checkout and order history | [test-functional.md](test-functional.md) | Local Docker | PASS | 2026-09-26 |
+| FUNC-02 | Manual browser walkthrough: register, browse, cart, checkout, order history, operator toggle and dashboard | [test-functional.md](test-functional.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-01 | T1 broken access control / IDOR on orders and cart items | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-02 | T2 privilege escalation to operator functions | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-03 | T3 cross-site request forgery (CSRF) | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-04 | T4 price, owner and quantity tampering | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-05 | T5 duplicate checkout and overselling under concurrency | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-06 | T6 stored cross-site scripting (XSS) | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-07 | T7 weak passwords; partial control because there is no throttling or MFA | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-08 | T8 secrets and personal data kept out of logs | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED | — |
+| SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | PLANNED | — |
+| SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
+| THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | NOT RUN YET | — |
+| DATA-01 | Analytics refresh reconciled against an independent pandas check | [test-data-ai.md](test-data-ai.md) | Local Docker | PASS (existing prior record; not rerun here) | 2026-09-22 |
+| DATA-02 | ML customer-segmentation evaluation | [test-data-ai.md](test-data-ai.md) | Local Docker | PLANNED | — |
+| RES-01 | Database outage returns a clean 503 while the health check stays up | [test-resilience.md](test-resilience.md) | Local Docker | NOT RUN YET | — |
+| RES-02 | Live local database outage and recovery | [test-resilience.md](test-resilience.md) | Local Docker | NOT RUN YET | — |
+| RES-03 | Cloud scaling or recovery mechanism | [test-resilience.md](test-resilience.md) | AWS | PLANNED | — |
+| MON-01 | Local structured JSON request logs: export and status/path summary | [monitoring.md](monitoring.md) | Local Docker | NOT RUN YET | — |
+| MON-02 | CloudWatch Logs Insights query and 5xx alarm test | [monitoring.md](monitoring.md) | AWS | PLANNED | — |
+
+## Other required artefacts
+
+| File | Contents | Status |
+|---|---|---|
+| `architecture.png` | Architecture diagram showing users, application components, cloud services, trust boundaries, data stores, observability and data flows | TODO (report lead) |
+| [raw/](raw/) | Raw command output named `<CASE-ID>_<YYYY-MM-DD>.<ext>`; screenshots, if needed, named `<CASE-ID>_<YYYY-MM-DD>_<n>.png` | Contains current FUNC-01/FUNC-02 output |
+
+## Status words
+
+- `PASS`: the command or step ran and matched the expected result written before it ran.
+- `FAIL`: it ran and did not match; keep the failure, explain it and add a later rerun after a fix.
+- `NOT RUN YET`: not run in a recorded session, or it could not run.
+- `PLANNED`: depends on work not available yet, such as the AWS deployment.
+
+## Evidence rules
+
+- Every actual result comes from a command run in the recorded session and saved unchanged in `raw/`, except for cut lines marked `…` and redactions marked `<REDACTED>`.
+- Write the expected result before running the command and do not change it after seeing the output.
+- Dates come from `date +%F`; commit hashes come from `git rev-parse --short HEAD`.
+- Re-runs add a new dated row; earlier results remain.
+- Manual steps record only what the human reports.
+- Use `Local Docker` and `AWS` explicitly; local checks do not prove hosted behavior.
+- Prefer text/config exports to screenshots. Screenshots are supplements and need captions and written descriptions.
+- Redact account IDs, public IPs, tokens, credentials, private URLs and personal data. Do not include production data or secrets.
+- Do not run `aws` or `terraform` commands from the evidence-writer workflow.
+- The evidence writer does not write `Verified by`; the human reviewer adds it.
+- The evidence writer does not fix application code. A failing command is recorded as `FAIL` and reported to the code owner.

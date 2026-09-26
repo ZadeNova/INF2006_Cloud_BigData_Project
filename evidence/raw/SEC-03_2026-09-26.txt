@@ -1,0 +1,27 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-e6c082d301f4 Creating 
+ Container inf2006-foundation-web-run-e6c082d301f4 Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 6 items
+
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_add] PASSED [ 16%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_update] PASSED [ 33%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_delete] PASSED [ 50%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[toggle_active] PASSED [ 66%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[checkout] PASSED [ 83%]
+tests/test_accounts.py::test_logout_without_csrf_token_is_rejected PASSED [100%]
+
+============================== 6 passed in 1.12s ===============================

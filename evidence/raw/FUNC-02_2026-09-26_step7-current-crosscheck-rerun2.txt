@@ -1,0 +1,59 @@
+﻿# FUNC-02 step 7 current merge-quarantine cross-check rerun
+# Date: 2026-09-26
+# Source commit: ee334cf
+== database-derived figures
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-ad168a35f0a0 Creating 
+ Container inf2006-foundation-web-run-ad168a35f0a0 Created 
+run_id 9525f59f-5cbe-4e92-a127-5923ffc1f530
+summary_version 4ad3626c-dc52-4b38-be1e-7e712ea5ac47
+summary_short_id 4ad3626c
+cutoff 2026-01-01T16:00:00+00:00
+finished_at 2026-09-26T07:26:12.046113+00:00
+30d_units 7899
+30d_sales 4205903.16
+01jan_units 89
+01jan_sales 43078.98
+category_totals
+Luxury 1293 2910489.99
+Trail 1352 363461.84
+Basketball 1259 306858.16
+Running 1382 262702.48
+Lifestyle 1279 214810.31
+Classics 1334 147580.38
+size_totals
+7.0 246 146655.00
+7.5 484 237820.38
+8.0 786 389302.18
+8.5 1028 510381.68
+9.0 1131 586928.01
+9.5 1160 607920.62
+10.0 1044 596009.19
+10.5 883 486785.34
+11.0 624 383711.86
+11.5 513 260388.90
+top_shoes
+Air Jordan 1 Low Dior Luxury 652 1947897.18
+New Balance 574 Classic Lifestyle 589 81832.43
+Converse Chuck High Classics 583 55314.84
+Nike Air Max 90 Running 543 108173.34
+Salomon XT-6 Trail 540 143340.88
+Air Jordan 1 High Basketball 536 133480.26
+Salomon XT-6 "Black" Trail 498 133866.37
+Classic Brown Sneaker Classics 458 54436.63
+New Balance 997 Lifestyle 446 97565.06
+RTFKT Creator One Luxury 413 599722.55
+coverage_flagged 80
+coverage_unavailable 9
+coverage_insufficient_history 0
+== recent analytics requests
+{"ts":"2026-09-26T07:43:42.237+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"77a5a2bb356a4236967c8a898ac41c3c","method":"GET","path":"/analytics/","status":200,"duration_ms":107.1,"user_id":20001}
+{"ts":"2026-09-26T07:46:04.803+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"1bdc97680ff84f82bd348486c9560e3a","method":"GET","path":"/analytics/","status":200,"duration_ms":110.5,"user_id":20001}

@@ -1,0 +1,13 @@
+# FUNC-02 merge-quarantine host generator attempt
+# Date: 2026-09-26
+== py -3 --version
+No suitable Python runtime found
+Pass --list (-0) to see all detected environments on your machine
+or set environment variable PYLAUNCHER_ALLOW_INSTALL to use winget
+or open the Microsoft Store to the requested version.
+== py -3 analytics/build_shoe_dataset.py
+No suitable Python runtime found
+Pass --list (-0) to see all detected environments on your machine
+or set environment variable PYLAUNCHER_ALLOW_INSTALL to use winget
+or open the Microsoft Store to the requested version.
+generator_exit=103

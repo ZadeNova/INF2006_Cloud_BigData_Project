@@ -1,0 +1,19 @@
+﻿# FUNC-02 step 8 customer analytics access check
+# Date: 2026-09-26
+# Source commit: ee334cf
+== recent authentication and analytics requests
+{"ts":"2026-09-26T07:32:23.685+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"b7b85e27baa7467b8aa6ed1d0a89bd27","method":"GET","path":"/login/","status":200,"duration_ms":9.8,"user_id":null}
+{"ts":"2026-09-26T07:32:26.555+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"98c4b6a42ed042e7b5874217eb3c9b59","method":"POST","path":"/login/","status":302,"duration_ms":300.98,"user_id":null}
+{"ts":"2026-09-26T07:33:02.530+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"1d33874d32e34432a5f3a6ddd3772535","method":"GET","path":"/login/","status":302,"duration_ms":28.36,"user_id":20002}
+{"ts":"2026-09-26T07:34:15.874+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"cc88c274fd3a42b2b70ec1518fc56c04","method":"POST","path":"/logout/","status":302,"duration_ms":37.82,"user_id":null}
+{"ts":"2026-09-26T07:34:18.862+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"27b3fa07d99d47f6af32b7a909ba53d4","method":"GET","path":"/login/","status":200,"duration_ms":9.1,"user_id":null}
+{"ts":"2026-09-26T07:34:20.468+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"0a69d4f83c454878a8ab1a8be01c72ba","method":"POST","path":"/login/","status":302,"duration_ms":265.86,"user_id":null}
+{"ts":"2026-09-26T07:41:14.945+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"51803341681149798479be14ae9a5b50","method":"POST","path":"/logout/","status":302,"duration_ms":47.19,"user_id":null}
+{"ts":"2026-09-26T07:41:16.539+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"7d0d5a3ab78c4d22b1739cfb0623eef0","method":"GET","path":"/login/","status":200,"duration_ms":44.03,"user_id":null}
+{"ts":"2026-09-26T07:41:19.286+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"b342027f0f9f410abef3103d18cddae3","method":"POST","path":"/login/","status":302,"duration_ms":268.28,"user_id":null}
+{"ts":"2026-09-26T07:43:42.237+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"77a5a2bb356a4236967c8a898ac41c3c","method":"GET","path":"/analytics/","status":200,"duration_ms":107.1,"user_id":20001}
+{"ts":"2026-09-26T07:46:04.803+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"1bdc97680ff84f82bd348486c9560e3a","method":"GET","path":"/analytics/","status":200,"duration_ms":110.5,"user_id":20001}
+{"ts":"2026-09-26T07:52:13.131+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"af3e9fa46e0840f1a9afaa4cd274d7ca","method":"POST","path":"/logout/","status":302,"duration_ms":22.0,"user_id":null}
+{"ts":"2026-09-26T07:52:14.975+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"1cfb560f21b241e9984f30b30c59945e","method":"GET","path":"/login/","status":200,"duration_ms":6.56,"user_id":null}
+{"ts":"2026-09-26T07:52:19.573+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"7aa49779637e406e959b10b3e866ff0b","method":"POST","path":"/login/","status":302,"duration_ms":251.07,"user_id":null}
+{"ts":"2026-09-26T07:52:24.502+00:00","level":"INFO","logger":"northstar.request","message":"request","request_id":"77d77091791b459ca51fcdef47794c16","method":"GET","path":"/analytics/","status":403,"duration_ms":12.43,"user_id":20002}

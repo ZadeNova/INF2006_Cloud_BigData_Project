@@ -1,0 +1,25 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-12395225119a Creating 
+ Container inf2006-foundation-web-run-12395225119a Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 4 items
+
+tests/test_orders.py::test_order_detail_returns_404_for_foreign_order_200_for_owner PASSED [ 25%]
+tests/test_orders.py::test_order_list_shows_only_the_owners_orders_most_recent_first PASSED [ 50%]
+tests/test_cart.py::test_update_on_foreign_item_returns_404_and_does_not_mutate PASSED [ 75%]
+tests/test_cart.py::test_delete_does_not_touch_a_foreign_cart_item PASSED [100%]
+
+============================== 4 passed in 1.44s ===============================

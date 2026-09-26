@@ -1,0 +1,25 @@
+ Container inf2006-foundation-db-1 Running 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Starting 
+ Container inf2006-foundation-migrate-1 Started 
+ Container inf2006-foundation-migrate-1 Waiting 
+ Container inf2006-foundation-db-1 Waiting 
+ Container inf2006-foundation-db-1 Healthy 
+ Container inf2006-foundation-migrate-1 Exited 
+ Container inf2006-foundation-web-run-7fb8fb111137 Creating 
+ Container inf2006-foundation-web-run-7fb8fb111137 Created 
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 3 items
+
+tests/test_request_logging.py::test_a_login_post_logs_neither_the_password_nor_the_cookie PASSED [ 33%]
+tests/test_request_logging.py::test_query_strings_are_not_logged PASSED  [ 66%]
+tests/test_request_logging.py::test_a_rejected_referer_is_not_echoed_into_the_security_log PASSED [100%]
+
+============================== 3 passed in 1.35s ===============================
+pytest_exit=0
