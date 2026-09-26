@@ -240,6 +240,46 @@ def test_htmx_mutation_response_renders_cart_content_fragment():
     assert 'id="cart-content"' in response.content.decode()
 
 
+def test_add_from_the_shop_returns_to_that_page_with_a_message():
+    product = make_product("p1")
+    client = logged_in_client()
+    back = reverse("catalogue:product_list") + "?page=2"
+
+    response = client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1, "next": back})
+
+    assert response.status_code == 302
+    assert response.url == back
+    page = client.get(back, follow=True).content.decode()
+    assert f"{product.display_name} added to your cart." in page
+    assert 'href="{}">View cart</a>'.format(reverse("cart:detail")) in page
+    assert CartItem.objects.filter(product=product, quantity=1).exists()
+
+
+def test_add_error_from_the_shop_returns_to_that_page_with_the_error():
+    product = make_product("p1", stock=1)
+    client = logged_in_client()
+    back = reverse("catalogue:product_list")
+
+    response = client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 5, "next": back})
+
+    assert response.url == back
+    page = client.get(back).content.decode()
+    assert "message--error" in page
+    assert "added to your cart" not in page
+    assert not CartItem.objects.filter(product=product).exists()
+
+
+@pytest.mark.parametrize("target", ["https://evil.example/products/", "//evil.example/products/",
+                                    "/products/manage/", "/orders/"])
+def test_add_ignores_a_next_outside_the_shop(target):
+    product = make_product("p1")
+    client = logged_in_client()
+
+    response = client.post(reverse("cart:add"), {"product_id": product.pk, "quantity": 1, "next": target})
+
+    assert response.url == reverse("cart:detail")
+
+
 def test_non_htmx_success_redirects_to_cart_detail():
     product = make_product("p1")
     client = logged_in_client()

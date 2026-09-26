@@ -63,6 +63,35 @@ def test_product_list_is_public():
     assert response.templates[0].name == "catalogue/product_list.html"
 
 
+def test_product_card_links_to_product_detail_page():
+    shoe = make_shoe("s1")
+
+    response = Client().get(reverse("catalogue:product_list"))
+
+    assert reverse("catalogue:product_detail", args=[shoe.pk]) in response.content.decode()
+
+
+def test_product_detail_shows_size_dropdown_and_add_to_cart():
+    shoe = make_shoe("s1", sizes=("8", "9"))
+    client = Client()
+    client.force_login(get_user_model().objects.create_user(username="customer-detail"))
+
+    response = client.get(reverse("catalogue:product_detail", args=[shoe.pk]))
+
+    body = response.content.decode()
+    assert response.status_code == 200
+    assert '<select class="size-select" id="size-{}'.format(shoe.pk) in body
+    assert "Add to cart" in body
+
+
+def test_product_detail_404_when_shoe_has_no_active_size():
+    shoe = make_shoe("s1", sizes=("9",), active=False)
+
+    response = Client().get(reverse("catalogue:product_detail", args=[shoe.pk]))
+
+    assert response.status_code == 404
+
+
 def test_product_list_shows_one_card_per_shoe_with_its_active_sizes():
     shoe = make_shoe("s1", sizes=("9.5", "8", "10"))
     Product.objects.filter(external_id="s1-10").update(active=False)
@@ -175,6 +204,127 @@ def test_manage_list_shows_all_products_including_inactive():
 
     external_ids = {p.external_id for p in response.context["products"]}
     assert external_ids == {"active", "inactive"}
+
+
+def test_manage_list_filters_products_by_status_and_category_and_query():
+    nike_active = make_product("nike-active", active=True)
+    nike_active.name = "Nike Runner"
+    nike_active.category = "Running"
+    nike_active.save(update_fields=["name", "category"])
+
+    nike_inactive = make_product("nike-inactive", active=False)
+    nike_inactive.name = "Nike Street"
+    nike_inactive.category = "Running"
+    nike_inactive.save(update_fields=["name", "category"])
+
+    adidas = make_product("adidas-active", active=True)
+    adidas.name = "Adidas Court"
+    adidas.category = "Lifestyle"
+    adidas.save(update_fields=["name", "category"])
+
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.get(reverse("catalogue:manage_list"), {
+        "status": "inactive",
+        "category": "Running",
+        "q": "Nike",
+    })
+
+    external_ids = {p.external_id for p in response.context["products"]}
+    assert external_ids == {"nike-inactive"}
+
+
+def make_filter_products():
+    for index in range(14):
+        make_product(f"run-{index:02d}", active=index % 2 == 0)
+    Product.objects.filter(external_id__startswith="run-").update(category="Running")
+    court = make_product("court-1")
+    Product.objects.filter(pk=court.pk).update(name="Court Classic", category="Lifestyle")
+
+
+def test_manage_list_chips_and_pager_keep_the_other_filters():
+    make_filter_products()
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.get(reverse("catalogue:manage_list"), {"q": "Product", "category": "Running"})
+    body = response.content.decode()
+
+    chips = {chip["label"]: chip for chip in response.context["status_chips"]}
+    assert chips["Inactive"]["query"] == "q=Product&category=Running&status=inactive"
+    assert chips["All"]["selected"] is True
+    assert response.context["paginator"].count == 14
+    assert 'href="?q=Product&amp;category=Running&amp;page=2"' in body
+    assert "14 products match" in body
+
+
+def test_manage_list_unknown_filter_values_fall_back_to_all():
+    make_filter_products()
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.get(reverse("catalogue:manage_list"), {"status": "deleted", "category": "Nope"})
+
+    assert response.context["filters"] == {"q": "", "category": "all", "status": "all"}
+    assert response.context["paginator"].count == 15
+
+
+def test_manage_list_shows_empty_state_when_nothing_matches():
+    make_filter_products()
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.get(reverse("catalogue:manage_list"), {"q": "no such shoe"})
+
+    assert "No products match these filters." in response.content.decode()
+
+
+def test_manage_list_clamps_a_page_beyond_the_filtered_result():
+    make_filter_products()
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.get(reverse("catalogue:manage_list"), {"status": "inactive", "page": "9"})
+
+    assert response.status_code == 200
+    assert response.context["page_obj"].number == 1
+
+
+def test_toggle_returns_to_the_filtered_manage_page():
+    product = make_product("p1")
+    client = Client()
+    client.force_login(make_operator())
+    back = reverse("catalogue:manage_list") + "?status=active&page=2"
+
+    response = client.post(reverse("catalogue:product_toggle_active", args=[product.pk]),
+                           {"active": "false", "next": back})
+
+    assert response.status_code == 302
+    assert response["Location"] == back
+
+
+@pytest.mark.parametrize("target", ["https://evil.example/products/manage/", "//evil.example/", "/cart/"])
+def test_toggle_ignores_a_next_outside_the_manage_list(target):
+    product = make_product("p1")
+    client = Client()
+    client.force_login(make_operator())
+
+    response = client.post(reverse("catalogue:product_toggle_active", args=[product.pk]),
+                           {"active": "false", "next": target})
+
+    assert response["Location"] == reverse("catalogue:manage_list")
+
+
+def test_product_detail_for_anonymous_user_offers_login_back_to_the_page():
+    shoe = make_shoe("s1")
+
+    response = Client().get(reverse("catalogue:product_detail", args=[shoe.pk]))
+
+    body = response.content.decode()
+    detail = reverse("catalogue:product_detail", args=[shoe.pk])
+    assert reverse("accounts:login") + "?next=" + detail in body
+    assert "Add to cart" not in body
 
 
 def test_toggle_requires_post():

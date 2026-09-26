@@ -1,15 +1,17 @@
 {% load static %}
 <article class="surface-card product-card">
-    <div class="tile tile--{{ shoe.category|slugify }}{% if shoe.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
-        {% if shoe.model_asset %}
-        <model-viewer class="tile__model" src="{% static shoe.model_asset %}" alt="3D model of {{ shoe.name }}" loading="lazy" auto-rotate auto-rotate-delay="0" rotation-per-second="20deg" field-of-view="13deg" min-field-of-view="10deg" camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" environment-image="neutral"></model-viewer>
-        {% else %}
-        {% include "catalogue/_category_glyph.html" with category=shoe.category extra="tile__glyph" only %}
-        {% endif %}
-    </div>
+    <a href="{% url 'catalogue:product_detail' shoe.pk %}" aria-label="View {{ shoe.name }} details">
+        <div class="tile tile--{{ shoe.category|slugify }}{% if shoe.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
+            {% if shoe.model_asset %}
+            <model-viewer class="tile__model" src="{% static shoe.model_asset %}" alt="3D model of {{ shoe.name }}" loading="lazy" auto-rotate auto-rotate-delay="0" rotation-per-second="20deg" field-of-view="13deg" min-field-of-view="10deg" camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" environment-image="neutral"></model-viewer>
+            {% else %}
+            {% include "catalogue/_category_glyph.html" with category=shoe.category extra="tile__glyph" only %}
+            {% endif %}
+        </div>
+    </a>
     <div class="product-card__body">
         <span class="product-card__category">{{ shoe.category }}</span>
-        <h3 class="product-card__name">{{ shoe.name }}</h3>
+        <h3 class="product-card__name"><a href="{% url 'catalogue:product_detail' shoe.pk %}">{{ shoe.name }}</a></h3>
         {% if shoe.stock_status == "out-of-stock" %}
         <span class="stock stock--out-of-stock">{% include "_icon.html" with name="prohibit" size="sm" only %} Out of stock</span>
         {% elif shoe.stock_status == "low-stock" %}
@@ -23,6 +25,7 @@
             <button type="button" class="button button--block button--disabled" disabled>Sold out</button>
             {% elif user.is_authenticated %}
             <form method="post" action="{% url 'cart:add' %}">
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 {% csrf_token %}
                 <label class="size-field__label" for="size-{{ shoe.pk }}">Size</label>
                 <span class="size-field">

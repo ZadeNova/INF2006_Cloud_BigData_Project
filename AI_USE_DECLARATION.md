@@ -37,3 +37,20 @@ OpenAI Codex coordinates Phase 5 on `erfan/analytics`, with explicitly assigned 
 ## Local integration and ML display (25–26 September 2026)
 
 OpenAI Codex coordinates Phase 6 on `erfan/analytics`, with explicit `gpt-6-astra` / `low` backend implementation and isolated verification, `gpt-5.6-luna` / `max` frontend implementation/visual verification, and a separate fresh-context `gpt-6-astra` / `medium` read-only review gate. Assistance covers truthful ML display, coherent segment reads, local integration checks and release/handoff documentation. Coordinator owns Git, evidence and review records. [Phase 6 review](docs/reviews/ml-local-release-readiness.md) records actual checks, reviewer outcome and limitations; assignments alone are not completed checks. No human team execution, hosted CI or AWS deployment is inferred from agent-run local tests.
+
+## ML evaluation fixes and storefront polish (26 September 2026)
+
+| Tool/source | Where used | Purpose | Verification performed | Licence/attribution |
+|---|---|---|---|---|
+| Claude Code (Claude Opus 5.5) | `analytics/evaluate_holdout.py`, `analytics/segment_customers.py`, `src/reporting/segment_contract.py`, `src/catalogue/`, `src/cart/views.py`, related templates, CSS, tests, `evidence/` DATA-01/DATA-02 records and `docs/plans/` | Implementation and verification assistance on tasks chosen and approved by the team | Plans written before each change; full test suite, focused ML/loader suites, disposable-database reruns of import, refresh, independent pandas check, training, import and dashboard, and headless-browser screenshots, as recorded in `evidence/test-data-ai.md` and the plans; independent review pending | AI-assisted work |
+| Gemini (Google) | Dashboard description (reported by Hermann) | Structuring the wording of the dashboard description | Reviewed by the teammate who used it; exact location to be confirmed by that teammate | AI-assisted wording |
+
+Scope and decisions came from the team. Syahfariz chose which review findings to act on
+(M-02 hold-out check, M-05 subsample stability, M-03 feature fix; M-04 kept as a documented
+limitation), set the adoption criteria for the new recipe before it was run, approved each plan
+and decided what is committed. Hermann asked for Add to cart to keep customers on the page. The
+manage-products filter and product detail page started from an uncommitted first draft already in
+the working tree; Claude Code finished them (filter chips, filtered paging and return, detail
+layout, stay-on-page cart message) and wrote the tests. Claude Code ran the recorded checks; they
+are not claimed as human test execution. The M-02 finding that segments do not predict later
+purchases on this synthetic data is reported as measured, not tuned.

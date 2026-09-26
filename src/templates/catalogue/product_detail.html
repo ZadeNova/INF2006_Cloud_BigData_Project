@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ shoe.name }} — 42Factors{% endblock %}
+{% block content %}
+<div class="page">
+    <a class="product-detail__back" href="{% url 'catalogue:product_list' %}">{% include "_icon.html" with name="caret-left" size="sm" only %} Back to products</a>
+
+    <article class="surface-card product-detail">
+        <div class="product-detail__media tile tile--{{ shoe.category|slugify }}{% if shoe.stock_status == 'out-of-stock' %} tile--muted{% endif %}">
+            {% if shoe.model_asset %}
+            <model-viewer class="tile__model" src="{% static shoe.model_asset %}" alt="3D model of {{ shoe.name }}" auto-rotate auto-rotate-delay="0" rotation-per-second="20deg" field-of-view="13deg" min-field-of-view="10deg" camera-controls disable-zoom interaction-prompt="none" shadow-intensity="1" environment-image="neutral"></model-viewer>
+            {% else %}
+            {% include "catalogue/_category_glyph.html" with category=shoe.category extra="tile__glyph" only %}
+            {% endif %}
+        </div>
+
+        <div class="product-detail__info">
+            <p class="eyebrow"><span class="eyebrow__line" aria-hidden="true"></span> {{ shoe.category }}</p>
+            <h1 class="product-detail__name">{{ shoe.name }}</h1>
+            <p class="product-detail__price{% if shoe.stock_status == 'out-of-stock' %} product-card__price--muted{% endif %}">{{ shoe.display_price }}</p>
+            {% if shoe.stock_status == "out-of-stock" %}
+            <span class="stock stock--out-of-stock">{% include "_icon.html" with name="prohibit" size="sm" only %} Out of stock</span>
+            {% elif shoe.stock_status == "low-stock" %}
+            <span class="stock stock--low-stock">{% include "_icon.html" with name="warning" size="sm" only %} {{ shoe.sizes_in_stock }} of {{ shoe.sizes|length }} sizes in stock · some low</span>
+            {% else %}
+            <span class="stock stock--in-stock">{% include "_icon.html" with name="check" size="sm" only %} In stock · all {{ shoe.sizes|length }} sizes</span>
+            {% endif %}
+
+            <div class="product-detail__action">
+                {% if shoe.stock_status == "out-of-stock" %}
+                <button type="button" class="button button--block button--disabled" disabled>Sold out</button>
+                {% elif user.is_authenticated %}
+                <form method="post" action="{% url 'cart:add' %}">
+                    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                    {% csrf_token %}
+                    <label class="size-field__label" for="size-{{ shoe.pk }}">Size (US)</label>
+                    <span class="size-field">
+                        <select class="size-select" id="size-{{ shoe.pk }}" name="product_id" required>
+                            <option value="" selected disabled>Choose a size</option>
+                            {% for sku in shoe.sizes %}
+                            <option value="{{ sku.pk }}"{% if sku.stock_status == "out-of-stock" %} disabled{% endif %}>{{ sku.size_label }}{% if sku.stock_status == "out-of-stock" %} · sold out{% elif sku.stock_status == "low-stock" %} · only {{ sku.stock }} left{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </span>
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="button button--block button--dark">
+                        {% include "_icon.html" with name="cart" size="sm" only %}
+                        Add to cart
+                        <span class="visually-hidden">: {{ shoe.name }}</span>
+                    </button>
+                </form>
+                {% else %}
+                <a class="button button--block button--outline-neutral" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">Log in to add<span class="visually-hidden"> {{ shoe.name }}</span></a>
+                {% endif %}
+                <p class="product-detail__note">Stock is indicative and checked again at checkout.</p>
+            </div>
+        </div>
+    </article>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.1.0/dist/model-viewer.min.js"></script>
+{% endblock %}

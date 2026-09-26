@@ -93,7 +93,7 @@
             {% for message in messages %}
             <div class="message message--{{ message.level_tag }}" role="{% if message.level_tag == 'error' %}alert{% else %}status{% endif %}">
                 <span class="message__icon" aria-hidden="true">{% if message.level_tag == 'error' %}!{% else %}✓{% endif %}</span>
-                <div><p>{{ message }}</p></div>
+                <div><p>{{ message }}{% if "cart-added" in message.extra_tags %} <a class="message__link" href="{% url 'cart:detail' %}">View cart</a>{% endif %}</p></div>
             </div>
             {% endfor %}
         </div>

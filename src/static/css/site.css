@@ -612,6 +612,14 @@ textarea:disabled {
     padding: var(--space-5) 0 0;
 }
 
+.message__link {
+    margin-left: var(--space-2);
+    color: var(--color-text-primary);
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.3rem;
+}
+
 .message--error {
     margin-bottom: var(--space-5);
     border-color: color-mix(in srgb, var(--color-error) 35%, transparent);
@@ -2216,6 +2224,127 @@ html.no-htmx .stepper-submit {
 .optable__row form {
     justify-self: start;
     margin: 0;
+}
+
+/* Manage-products filter bar: search field plus DESIGN.md filter chips (the
+   analytics .range-nav/.chip pattern), stacked in one card above the table. */
+.manage-filters {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+    padding: var(--space-4);
+}
+
+.manage-filters__search {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.manage-filters__field {
+    flex: 1 1 24rem;
+    max-width: 40rem;
+}
+
+.manage-filters__field input {
+    min-height: 4.4rem;
+}
+
+.manage-filters .button {
+    min-height: 4.4rem;
+}
+
+.optable__empty {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-5) var(--space-4);
+}
+
+.optable__empty p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 1.5rem;
+}
+
+/* Product detail: large media left, purchase panel right; stacks on phones. */
+.product-detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: var(--space-4);
+    color: var(--color-text-primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.product-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    overflow: hidden;
+}
+
+.product-detail .product-detail__media {
+    height: auto;
+    min-height: 44rem;
+    border-right: var(--border-structural) solid var(--color-border-subtle);
+}
+
+.product-detail__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-5);
+}
+
+.product-detail__name {
+    margin: 0;
+    font-size: clamp(2.8rem, 3.2vw, 4rem);
+    line-height: 1.1;
+}
+
+.product-detail__price {
+    margin: var(--space-1) 0;
+    color: var(--color-text-primary);
+    font-size: 3.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.product-detail__action {
+    max-width: 40rem;
+    margin-top: var(--space-4);
+}
+
+.product-detail__note {
+    margin: var(--space-2) 0 0;
+    color: var(--color-text-secondary);
+    font-size: 1.2rem;
+}
+
+@media (max-width: 767px) {
+    .product-detail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .product-detail .product-detail__media {
+        min-height: 28rem;
+        border-right: 0;
+        border-bottom: var(--border-structural) solid var(--color-border-subtle);
+    }
+
+    .product-detail__info {
+        padding: var(--space-4);
+    }
+
+    .product-detail__action {
+        max-width: none;
+    }
 }
 
 /* --- pagination ------------------------------------------------------- */

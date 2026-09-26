@@ -8,8 +8,37 @@
             <h1 class="page__title">Manage products</h1>
             <p class="page__lead">Activate or deactivate a product. Prices, stock and catalogue entries are seeded or imported, not edited here.</p>
         </div>
-        <p class="page__meta">{{ paginator.count }} product{{ paginator.count|pluralize }}</p>
+        <p class="page__meta">{{ paginator.count }} product{{ paginator.count|pluralize }}{% if filtered %} match{{ paginator.count|pluralize:"es," }}{% endif %}</p>
     </div>
+
+    <section class="surface-card manage-filters" aria-label="Filter products">
+        <form method="get" class="manage-filters__search" role="search">
+            {% if filters.category != "all" %}<input type="hidden" name="category" value="{{ filters.category }}">{% endif %}
+            {% if filters.status != "all" %}<input type="hidden" name="status" value="{{ filters.status }}">{% endif %}
+            <div class="form-field manage-filters__field">
+                <label for="manage-q">Search by name</label>
+                <input id="manage-q" type="search" name="q" value="{{ filters.q }}" placeholder="e.g. Runner">
+            </div>
+            <button type="submit" class="button button--compact button--dark">Search</button>
+            {% if filtered %}<a class="button button--compact button--outline-neutral" href="{% url 'catalogue:manage_list' %}">Clear filters</a>{% endif %}
+        </form>
+        <nav class="range-nav" aria-label="Filter by status">
+            <span class="range-nav__label">Status</span>
+            <div class="range-nav__links">
+                {% for chip in status_chips %}
+                <a class="chip{% if chip.selected %} chip--on{% endif %}" href="?{{ chip.query }}"{% if chip.selected %} aria-current="true"{% endif %}>{{ chip.label }}</a>
+                {% endfor %}
+            </div>
+        </nav>
+        <nav class="range-nav" aria-label="Filter by category">
+            <span class="range-nav__label">Category</span>
+            <div class="range-nav__links">
+                {% for chip in category_chips %}
+                <a class="chip{% if chip.selected %} chip--on{% endif %}" href="?{{ chip.query }}"{% if chip.selected %} aria-current="true"{% endif %}>{{ chip.label }}</a>
+                {% endfor %}
+            </div>
+        </nav>
+    </section>
 
     <div class="surface-card optable">
         <div class="optable__row optable__row--head">
@@ -35,10 +64,16 @@
             </span>
             <form method="post" action="{% url 'catalogue:product_toggle_active' product.pk %}">
                 {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
                 <button type="submit" name="active" value="{% if product.active %}false{% else %}true{% endif %}" class="button button--compact {% if product.active %}button--outline-neutral{% else %}button--dark{% endif %}">
                     {% if product.active %}Deactivate{% else %}Activate{% endif %}<span class="visually-hidden"> {{ product.name }}</span>
                 </button>
             </form>
+        </div>
+        {% empty %}
+        <div class="optable__empty">
+            <p>No products match these filters.</p>
+            <a class="button button--compact button--outline-neutral" href="{% url 'catalogue:manage_list' %}">Clear filters</a>
         </div>
         {% endfor %}
     </div>
@@ -46,13 +81,13 @@
     {% if is_paginated %}
     <nav class="pager" aria-label="Product pages">
         {% if page_obj.has_previous %}
-        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.previous_page_number }}">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
+        <a class="button button--compact button--outline-neutral" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</a>
         {% else %}
         <span class="button button--compact button--disabled" aria-disabled="true">{% include "_icon.html" with name="caret-left" size="sm" only %} Previous</span>
         {% endif %}
         <p class="pager__status">Page <strong>{{ page_obj.number }}</strong> of {{ paginator.num_pages }}</p>
         {% if page_obj.has_next %}
-        <a class="button button--compact button--outline-neutral" href="?page={{ page_obj.next_page_number }}">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
+        <a class="button button--compact button--outline-neutral" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</a>
         {% else %}
         <span class="button button--compact button--disabled" aria-disabled="true">Next {% include "_icon.html" with name="caret-right" size="sm" only %}</span>
         {% endif %}
