@@ -116,8 +116,15 @@ def feature_matrix(frame, preprocessing="baseline"):
     features = frame[["recency_days", "frequency_orders", "monetary_total"]].to_numpy(dtype=float, copy=True)
     if not np.isfinite(features).all() or (features < 0).any():
         raise ValueError("RFM features must be finite and nonnegative")
+    if preprocessing == "log_rfm_aov":
+        # Average order value instead of total spend, so purchase volume is not counted twice;
+        # every eligible customer has at least one order.
+        if (features[:, 1] < 1).any():
+            raise ValueError("Average order value needs at least one order per customer")
+        features[:, 2] = features[:, 2] / features[:, 1]
+        features[:, 0] = np.log1p(features[:, 0])
     features[:, 2] = np.log1p(features[:, 2])
-    if preprocessing == "log_frequency":
+    if preprocessing in ("log_frequency", "log_rfm_aov"):
         features[:, 1] = np.log1p(features[:, 1])
     elif preprocessing != "baseline":
         raise ValueError("Unknown preprocessing")
@@ -162,7 +169,7 @@ def fit_candidates(scaled, min_k=2, max_k=4, random_seed=42):
 
 
 def fit_segments(frame, min_k=2, max_k=4, random_seed=42, stability_seeds=(42, 99, 123, 777),
-                 preprocessing="log_frequency"):
+                 preprocessing="log_rfm_aov"):
     frame = frame.sort_values("customer_id", kind="stable").copy()
     scaled = feature_matrix(frame, preprocessing)
     candidates, fitted = fit_candidates(scaled, min_k, max_k, random_seed)
@@ -231,7 +238,7 @@ def build_output(frame, run_id, model_version, k_clusters, silhouette, stability
     }
 
 
-def training_config(preprocessing="log_frequency", min_k=2, max_k=4, seed=42):
+def training_config(preprocessing="log_rfm_aov", min_k=2, max_k=4, seed=42):
     if not 2 <= min_k <= max_k <= 4 or not 0 <= seed <= 4294967295:
         raise ValueError("Invalid batch training configuration")
     code_paths = ("analytics/segment_customers.py", "analytics/requirements.txt", "src/reporting/segment_contract.py")
@@ -280,7 +287,7 @@ def main(argv=None):
     parser.add_argument("--model-version", help="Assert the derived configuration version; never relabel")
     parser.add_argument("--min-k", default=2, type=int)
     parser.add_argument("--max-k", default=4, type=int)
-    parser.add_argument("--preprocessing", choices=("baseline", "log_frequency"), default="log_frequency")
+    parser.add_argument("--preprocessing", choices=("baseline", "log_frequency", "log_rfm_aov"), default="log_rfm_aov")
     parser.add_argument("--seed", default=42, type=int)
     args = parser.parse_args(argv)
     try:

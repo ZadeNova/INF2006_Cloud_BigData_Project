@@ -1,0 +1,29 @@
+# DATA-02 dashboard-namespace pipeline: import (above counts identical), refresh, verify, train, load
+# Date: 2026-09-26  Source commit: 2698b05; namespace synthetic/shoes/revision-a/demo/v1 (settings.DEMO_NAMESPACE)
+Run 0084a8ae-0189-4a2c-8b6d-a1debc53712d completed: 41345 daily rows from 71079 order lines, business dates 2025-01-01 to 2026-01-01, cutoff 2026-01-01T16:00:00+00:00, pruned 0 old run(s), 1.7s.
+exit=0
+Exported coverage for run 0084a8ae-0189-4a2c-8b6d-a1debc53712d: 200 products
+  "expected_daily_rows": 41345,
+  "persisted_daily_rows": 41345,
+  "daily_row_mismatches": 0,
+  "units_mismatches": 0,
+  "sales_amount_mismatches": 0,
+  "coverage_flag_mismatches": 0,
+  "maximum_absolute_monetary_difference": "0.00",
+  "result": "PASS"
+verify exit=0
+{
+  "result": "PASS",
+  "run_id": "0084a8ae-0189-4a2c-8b6d-a1debc53712d",
+  "model_version": "rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03",
+  "batch_id": "d4756769f1d00e07801a8efe6f90e955f16ba25035d2d64ac4ac475156e69294",
+  "customers": 19766,
+  "k_clusters": 2,
+  "silhouette_score": 0.4118,
+  "stability_ari_mean": 0.992,
+  "stability_ari_std": 0.0076,
+  "output": "/tmp/ml/segments-demo.json"
+}
+train exit=0
+Loaded 19766 customer segment rows for run 0084a8ae-0189-4a2c-8b6d-a1debc53712d; model_version=rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03; batch_id=d4756769f1d00e07801a8efe6f90e955f16ba25035d2d64ac4ac475156e69294.
+load exit=0

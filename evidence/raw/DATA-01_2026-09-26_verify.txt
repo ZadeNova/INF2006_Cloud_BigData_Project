@@ -1,0 +1,30 @@
+# DATA-01 independent pandas verification of run a31587aa-83e1-458d-971c-ed1bc04730ea
+# Date: 2026-09-26  Source commit: 2698b05
+# export_coverage.py --run-id a31587aa-83e1-458d-971c-ed1bc04730ea --output /tmp/coverage.json
+Exported coverage for run a31587aa-83e1-458d-971c-ed1bc04730ea: 200 products
+exit=0
+# verify_refresh.py --run-id a31587aa-83e1-458d-971c-ed1bc04730ea --coverage-target /tmp/coverage.json
+{
+  "run_id": "a31587aa-83e1-458d-971c-ed1bc04730ea",
+  "summary_version": "f67d177b-6b83-41d3-8e75-5dfe87b75494",
+  "inventory_id": 1,
+  "namespace": "synthetic/shoes/data-check/v1",
+  "inventory_version": "import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8",
+  "window_start": "2024-12-31 16:00:00+00:00",
+  "cutoff": "2026-01-01 16:00:00+00:00",
+  "latest_complete_date": "2026-01-01",
+  "raw_completed_orders": 29898,
+  "raw_completed_lines": 71079,
+  "expected_daily_rows": 41345,
+  "persisted_daily_rows": 41345,
+  "daily_row_mismatches": 0,
+  "units_mismatches": 0,
+  "sales_amount_mismatches": 0,
+  "coverage_flag_mismatches": 0,
+  "insufficient_history_products": 0,
+  "no_recent_sales_products": 9,
+  "flagged_products": 80,
+  "maximum_absolute_monetary_difference": "0.00",
+  "result": "PASS"
+}
+exit=0

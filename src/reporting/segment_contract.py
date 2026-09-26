@@ -153,7 +153,7 @@ def validate_batch(payload, expected_run, expected_source):
         training = payload["training"]
         if training["feature_schema"] != FEATURE_SCHEMA or training["algorithm"] != "sklearn-kmeans":
             raise ValueError
-        if training["preprocessing"] not in {"baseline", "log_frequency"}:
+        if training["preprocessing"] not in {"baseline", "log_frequency", "log_rfm_aov"}:
             raise ValueError
         if training["selection"] != "highest-valid-silhouette-smaller-k-tie" or training["n_init"] != "auto":
             raise ValueError

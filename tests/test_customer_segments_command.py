@@ -20,11 +20,11 @@ def source_environment(monkeypatch):
     monkeypatch.setenv("ML_SOURCE_ID", "11111111-1111-1111-1111-111111111111")
 
 
-def payload(run, rows):
+def payload(run, rows, preprocessing="log_frequency"):
     from django.db import connection
     training = {
         "algorithm": "sklearn-kmeans", "feature_schema": FEATURE_SCHEMA,
-        "preprocessing": "log_frequency", "min_k": 2, "max_k": 4, "seed": 42,
+        "preprocessing": preprocessing, "min_k": 2, "max_k": 4, "seed": 42,
         "stability_seeds": [42, 99, 123, 777], "n_init": "auto",
         "selection": "highest-valid-silhouette-smaller-k-tie", "silhouette_sample_limit": 5000,
         "provenance": {"python": "test-runtime", "dependencies": {name: "test-version" for name in
@@ -119,6 +119,15 @@ def test_model_option_asserts_payload_identity(snapshot):
     _, _, _, _, load = snapshot
     with pytest.raises(CommandError, match="metadata"):
         load(model_version="different-model")
+
+
+def test_average_order_value_recipe_loads_and_unknown_recipe_is_rejected(snapshot):
+    run, _, _, data, load = snapshot
+    aov = payload(run, data["rows"], preprocessing="log_rfm_aov")
+    load(aov)
+    assert set(CustomerSegment.objects.filter(run=run).values_list("model_version", flat=True)) >= {aov["model_version"]}
+    with pytest.raises(CommandError, match="completed batch"):
+        load(payload(run, data["rows"], preprocessing="made_up"))
 
 
 @pytest.mark.parametrize("change", ["legacy", "source", "run", "version", "checksum"])

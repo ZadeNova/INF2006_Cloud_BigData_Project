@@ -1,0 +1,15 @@
+# DATA-02 strict import of the completed export and stored-count check
+# Date: 2026-09-26  Source commit: 2698b05
+# manage.py load_customer_segments --run-id a31587aa-83e1-458d-971c-ed1bc04730ea --input /tmp/ml/segments.json
+Loaded 19766 customer segment rows for run a31587aa-83e1-458d-971c-ed1bc04730ea; model_version=rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03; batch_id=9cc521b3b16ee8b8ac6a82c5887354449d6398f8f3c05bc98b2f6fca495a2954.
+exit=0
+# Replay of the same file (expect no duplicates)
+Loaded 19766 customer segment rows for run a31587aa-83e1-458d-971c-ed1bc04730ea; model_version=rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03; batch_id=9cc521b3b16ee8b8ac6a82c5887354449d6398f8f3c05bc98b2f6fca495a2954.
+exit=0
+# ORM count check
+17 objects imported automatically (use -v 2 for details).
+
+{'expected': 19766, 'stored': 19766, 'all_rows_for_run': 19766}
+[{'segment_label': '1_recent_more_orders_higher_spend', 'n': 13657}, {'segment_label': '2_older_fewer_orders_lower_spend', 'n': 6109}]
+PASS
+exit=0

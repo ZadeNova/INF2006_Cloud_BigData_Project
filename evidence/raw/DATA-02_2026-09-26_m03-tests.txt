@@ -1,0 +1,10 @@
+# DATA-02 M-03 change: test suites (pinned Python 3.13 container for pure tests; rebuilt app image + analytics venv for DB tests)
+# Date: 2026-09-26  Source commit: 2698b05 plus uncommitted M-02/M-03 changes
+# 1) pure: test_segment_customers.py test_evaluate_holdout.py (python:3.13-slim-bookworm pinned, no Django)
+22 passed in 5.16s
+# 2) DB: loader integration, verifier, startup credentials, load_customer_segments command
+.........................................................                [100%]
+57 passed in 7.89s
+# 3) Rerun after switching the default to log_rfm_aov
+22 passed in 3.18s (pure)
+57 passed in 6.98s (DB)

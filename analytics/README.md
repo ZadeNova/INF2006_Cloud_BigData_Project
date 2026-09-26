@@ -104,7 +104,8 @@ Do not commit customer assignment exports. The loader prints run, model version 
 batch ID; inspect those against the selected file and operator record.
 
 The trainer derives namespace and cutoff from the completed run. It uses lifetime
-completed-order RFM, raw recency/log1p frequency/log1p monetary, valid-silhouette k=2..4
+completed-order RFM as model inputs log1p recency, log1p frequency and log1p average order
+value (default `log_rfm_aov` since 26 September 2026, review M-03), valid-silhouette k=2..4
 selection (ties favour smaller k), deterministic seed/profile labels, and seed ARI.
 Fitting uses the complete cohort; scoring samples at most 5,000 customers. Existing
 `--preprocessing`, `--min-k`, `--max-k` and `--seed` options remain explicit and enter
@@ -185,12 +186,35 @@ python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEM
 ```
 
 Set `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS` and `MKL_NUM_THREADS` to 1 for this
-reproduction. `--preprocessing baseline` retains raw frequency; default
-`log_frequency` adds only log1p frequency, preserving lifetime RFM semantics. Both
-retain log1p monetary. The measured comparison supports v2: k=2 has higher sampled
-separation, similarly strong seed ARI and substantial interpretable groups. k is
-still selected, not forced. Seed stability does not establish resampling robustness;
-no resampling or predictive experiment was needed for this bounded descriptive claim.
+reproduction. `--preprocessing baseline` retains raw frequency; `log_frequency` adds only
+log1p frequency. Both keep raw recency and log1p total spend. On the raw revision the
+comparison below supported `log_frequency` over the baseline. The default is now
+`log_rfm_aov`: log1p recency, log1p frequency and log1p average order value (total spend
+divided by orders), so purchase volume is not counted twice (review M-03). On the shoe
+dataset it cut frequency/value correlation from 0.68 to 0.16 and passed criteria fixed in
+advance; see [evidence/test-data-ai.md](../evidence/test-data-ai.md#feature-fix-m-03). Stored
+rows and dashboard profiles still show lifetime recency, orders and spend. k is still
+selected, not forced. Seed stability does not establish resampling robustness;
+the hold-out evaluation below adds that check.
+
+### Hold-out and subsample evaluation
+
+`evaluate_holdout.py` answers review findings M-02 and M-05 without changing the published
+recipe (it reuses the trainer's functions). For a completed run with cutoff T it segments
+customers using only orders before T − 90 days, then reports each segment's repurchase rate,
+lift and spend in [T − 90 days, T). It also refits k=2..4 on 20 random 80% subsamples and reports
+mean/minimum ARI against the published labels. Output is aggregate JSON with no customer rows.
+Same environment and credentials as above:
+
+```sh
+python analytics/evaluate_holdout.py --run-id <RUN_UUID> --output evidence/ml-holdout-evaluation.json
+```
+
+Options: `--holdout-days` (1..365, default 90), `--repeats` (1..200, default 20) and
+`--preprocessing` (default `log_rfm_aov`), which also reports each recipe's input skew and
+correlation. Pure tests:
+`analytics/tests/test_evaluate_holdout.py`. The 26 September shoe-dataset result is in
+[evidence/test-data-ai.md](../evidence/test-data-ai.md#hold-out-and-subsample-evaluation-m-02-m-05).
 
 Pure ML tests must run in an environment with analytics dependencies and pinned
 pytest, without Django. PostgreSQL-dependent tests need application dependencies,

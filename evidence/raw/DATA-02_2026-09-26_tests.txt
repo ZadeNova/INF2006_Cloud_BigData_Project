@@ -1,0 +1,8 @@
+# DATA-02 ML and analytics test suites (pinned Python 3.13 app image + analytics venv)
+# Date: 2026-09-26  Source commit: 2698b05
+# 1) pytest -c /dev/null analytics/tests/test_segment_customers.py
+................                                                         [100%]
+16 passed in 3.14s
+# 2) pytest -c /app/pytest.ini loader integration, verifier, startup credentials, load_customer_segments command
+........................................................                 [100%]
+56 passed in 6.66s

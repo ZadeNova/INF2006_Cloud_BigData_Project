@@ -56,7 +56,7 @@ jobs:
           docker run --rm --mount "type=bind,source=$PWD,target=/work,readonly"
           --workdir /work -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1
           python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e
-          sh -c 'pip install -q -r analytics/requirements.txt pytest==9.1.1 iniconfig==2.3.0 packaging==26.3 pluggy==1.6.0 Pygments==2.21.0 && python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py'
+          sh -c 'pip install -q -r analytics/requirements.txt pytest==9.1.1 iniconfig==2.3.0 packaging==26.3 pluggy==1.6.0 Pygments==2.21.0 && python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py analytics/tests/test_evaluate_holdout.py'
       - name: Initialize disposable local configuration
         run: >-
           docker run --rm --user "$(id -u):$(id -g)"

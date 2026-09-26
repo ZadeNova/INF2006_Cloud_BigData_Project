@@ -23,7 +23,10 @@ Last covered commit: `ee334cf`
 | SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | NOT RUN YET | — |
 | DATA-01 | Analytics refresh reconciled against an independent pandas check | [test-data-ai.md](test-data-ai.md) | Local Docker | PASS (existing prior record; not rerun here) | 2026-09-22 |
-| DATA-02 | ML customer-segmentation evaluation | [test-data-ai.md](test-data-ai.md) | Local Docker | PLANNED | — |
+| DATA-01 | Rerun on the derived shoe dataset the application now imports | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |
+| DATA-02 | ML customer segmentation on the shoe dataset: tests, training, strict import and operator dashboard | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |
+| DATA-02 | ML hold-out (90-day time split) and 80% subsample stability evaluation; segments show no predictive difference on this synthetic data | [test-data-ai.md](test-data-ai.md#hold-out-and-subsample-evaluation-m-02-m-05) | Local Docker | PASS (evaluation ran; result recorded as measured) | 2026-09-26 |
+| DATA-02 | ML feature fix (review M-03): `log_rfm_aov` recipe compared, adopted as default, retrained, imported and shown on the dashboard | [test-data-ai.md](test-data-ai.md#feature-fix-m-03) | Local Docker | PASS | 2026-09-26 |
 | RES-01 | Database outage returns a clean 503 while the health check stays up | [test-resilience.md](test-resilience.md) | Local Docker | NOT RUN YET | — |
 | RES-02 | Live local database outage and recovery | [test-resilience.md](test-resilience.md) | Local Docker | NOT RUN YET | — |
 | RES-03 | Cloud scaling or recovery mechanism | [test-resilience.md](test-resilience.md) | AWS | PLANNED | — |
@@ -35,7 +38,7 @@ Last covered commit: `ee334cf`
 | File | Contents | Status |
 |---|---|---|
 | `architecture.png` | Architecture diagram showing users, application components, cloud services, trust boundaries, data stores, observability and data flows | TODO (report lead) |
-| [raw/](raw/) | Raw command output named `<CASE-ID>_<YYYY-MM-DD>.<ext>`; screenshots, if needed, named `<CASE-ID>_<YYYY-MM-DD>_<n>.png` | Contains current FUNC-01/FUNC-02 output |
+| [raw/](raw/) | Raw command output named `<CASE-ID>_<YYYY-MM-DD>.<ext>`; screenshots, if needed, named `<CASE-ID>_<YYYY-MM-DD>_<n>.png` | Contains current FUNC-01/FUNC-02 and DATA-01/DATA-02 output |
 
 ## Status words
 

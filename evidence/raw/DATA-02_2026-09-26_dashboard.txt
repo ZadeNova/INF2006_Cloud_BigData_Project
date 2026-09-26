@@ -1,0 +1,41 @@
+# DATA-02 operator /analytics/ over real HTTP (Gunicorn, APP_PORT 8010, disposable project inf2006-data-check)
+# Date: 2026-09-26  Source commit: 2698b05; task-only operator with reporting.view_analytics; CSRF login 302, GET /analytics/ 200
+# Run id 0084a8ae-0189-4a2c-8b6d-a1debc53712d present in page: yes
+# Text of the Customer segments section:
+Descriptive ML
+Customer segments
+Assignments are loaded for analytics run
+0084a8ae-0189-4a2c-8b6d-a1debc53712d
+, with data through the cutoff
+02 Jan 2026, 00:00 SGT
+. They support operator targeting and do not change sales or replenishment metrics.
+Lifetime completed-order history is measured strictly before this run's cutoff, independently of the dashboard range and comparison filters.
+View segmentation recipe version
+Recipe version
+rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03
+Total segmented customers
+19,766
+K=2 clusters
+Segment sales value
+S$155,404,646.85
+Silhouette 0.4118
+Customer segment summary
+Segment
+Customers
+Share of segment sales
+Mean recency (days)
+Mean frequency
+Mean monetary
+1_recent_more_orders_higher_spend
+13,657
+87.6%
+149.85
+5.43
+S$9,971.10
+2_older_fewer_orders_lower_spend
+6,109
+12.4%
+415.38
+2.44
+S$3,147.70
+… [balanced customer sample table cut: customer references are assignment data and stay out of Git. Page showed 50 sampled customers across 5 pages.]

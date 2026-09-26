@@ -1,0 +1,276 @@
+{
+  "result": "evaluated",
+  "purpose": "Review findings M-02 (hold-out), M-03 (feature handling) and M-05 (subsample stability) on the shoe dataset",
+  "selected_preprocessing": "log_rfm_aov",
+  "selection_criteria": {
+    "fixed_before_running": "docs/plans/ml-feature-tenure-fix.md",
+    "all_k_candidates_valid": true,
+    "subsample_ari_min_at_selected_k": ">= 0.90",
+    "smallest_segment_share_percent": ">= 5",
+    "log_rfm_aov": {
+      "candidates_valid": "3/3",
+      "subsample_ari_min_at_selected_k": 0.9545,
+      "smallest_segment_share_percent": 42.6,
+      "passed": true
+    },
+    "note": "Silhouette is not compared across recipes because each uses a different feature space."
+  },
+  "recipes": {
+    "log_frequency": {
+      "result": "evaluated",
+      "run_id": "dfaf0076-c239-49b4-8c39-71d136fb4e1f",
+      "namespace": "synthetic/shoes/revision-a/demo/v1",
+      "cutoff": "2026-01-01T16:00:00+00:00",
+      "inventory_version": "import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8",
+      "recipe": {
+        "preprocessing": "log_frequency",
+        "k_range": [
+          2,
+          4
+        ],
+        "seed": 42,
+        "model_inputs": "recency, log1p frequency, log1p total spend",
+        "selection": "highest-valid-silhouette-smaller-k-tie",
+        "note": "Same functions as analytics/segment_customers.py; evaluation does not change any published file."
+      },
+      "features": {
+        "skew": {
+          "recency": 1.411,
+          "frequency": -0.417,
+          "value": -0.988
+        },
+        "correlation": {
+          "recency_frequency": -0.462,
+          "recency_value": -0.319,
+          "frequency_value": 0.677
+        }
+      },
+      "full_cohort": {
+        "k_clusters": 2,
+        "silhouette": 0.4118,
+        "candidates_valid": 3,
+        "candidates": 3,
+        "smallest_segment_share_percent": 30.9,
+        "segment_sizes": {
+          "1_recent_more_orders_higher_spend": 13657,
+          "2_older_fewer_orders_lower_spend": 6109
+        }
+      },
+      "time_split": {
+        "split_at": "2025-10-03T16:00:00+00:00",
+        "window_end": "2026-01-01T16:00:00+00:00",
+        "holdout_days": 90,
+        "k_clusters": 2,
+        "silhouette": 0.411,
+        "segmented_customers": 19663,
+        "overall_repurchase_rate": 0.3066,
+        "overall_mean_window_spend": 637.37,
+        "customers_first_ordering_in_window_not_scored": 103,
+        "segments": [
+          {
+            "segment_label": "1_recent_more_orders_higher_spend",
+            "customers": 13409,
+            "repurchase_rate": 0.307,
+            "repurchase_lift": 1.001,
+            "mean_window_orders": 0.363,
+            "mean_window_spend": 637.3,
+            "window_spend_share_percent": 68.2
+          },
+          {
+            "segment_label": "2_older_fewer_orders_lower_spend",
+            "customers": 6254,
+            "repurchase_rate": 0.3057,
+            "repurchase_lift": 0.997,
+            "mean_window_orders": 0.369,
+            "mean_window_spend": 637.51,
+            "window_spend_share_percent": 31.8
+          }
+        ]
+      },
+      "subsample_stability": {
+        "customers": 19766,
+        "published_seed": 42,
+        "candidates": [
+          {
+            "k": 2,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.9888,
+            "ari_min": 0.9705,
+            "ari_std": 0.0081
+          },
+          {
+            "k": 3,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.9723,
+            "ari_min": 0.94,
+            "ari_std": 0.0154
+          },
+          {
+            "k": 4,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.5684,
+            "ari_min": 0.4041,
+            "ari_std": 0.2237
+          }
+        ]
+      },
+      "identity": {
+        "python": "3.13.15",
+        "dependencies": {
+          "numpy": "2.3.3",
+          "pandas": "2.3.2",
+          "scikit-learn": "1.7.2",
+          "scipy": "1.16.2",
+          "psycopg": "3.3.5"
+        }
+      },
+      "limitations": [
+        "Synthetic order history: repurchase differences describe the generator, not real customers",
+        "Descriptive association between segment and later orders, not a trained predictor or causal effect",
+        "Lifetime features favour long-tenure customers (review M-04)",
+        "Raw recency and total spend kept (review M-03)",
+        "Current database cohort, not an immutable historical snapshot"
+      ]
+    },
+    "log_rfm_aov": {
+      "result": "evaluated",
+      "run_id": "dfaf0076-c239-49b4-8c39-71d136fb4e1f",
+      "namespace": "synthetic/shoes/revision-a/demo/v1",
+      "cutoff": "2026-01-01T16:00:00+00:00",
+      "inventory_version": "import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8",
+      "recipe": {
+        "preprocessing": "log_rfm_aov",
+        "k_range": [
+          2,
+          4
+        ],
+        "seed": 42,
+        "model_inputs": "log1p recency, log1p frequency, log1p average order value",
+        "selection": "highest-valid-silhouette-smaller-k-tie",
+        "note": "Same functions as analytics/segment_customers.py; evaluation does not change any published file."
+      },
+      "features": {
+        "skew": {
+          "recency": -0.901,
+          "frequency": -0.417,
+          "value": -0.439
+        },
+        "correlation": {
+          "recency_frequency": -0.359,
+          "recency_value": -0.058,
+          "frequency_value": 0.16
+        }
+      },
+      "full_cohort": {
+        "k_clusters": 2,
+        "silhouette": 0.2743,
+        "candidates_valid": 3,
+        "candidates": 3,
+        "smallest_segment_share_percent": 42.6,
+        "segment_sizes": {
+          "1_recent_more_orders_higher_spend": 11338,
+          "2_older_fewer_orders_lower_spend": 8428
+        }
+      },
+      "time_split": {
+        "split_at": "2025-10-03T16:00:00+00:00",
+        "window_end": "2026-01-01T16:00:00+00:00",
+        "holdout_days": 90,
+        "k_clusters": 4,
+        "silhouette": 0.2782,
+        "segmented_customers": 19663,
+        "overall_repurchase_rate": 0.3066,
+        "overall_mean_window_spend": 637.37,
+        "customers_first_ordering_in_window_not_scored": 103,
+        "segments": [
+          {
+            "segment_label": "1_recent_more_orders_higher_spend",
+            "customers": 3628,
+            "repurchase_rate": 0.2999,
+            "repurchase_lift": 0.978,
+            "mean_window_orders": 0.357,
+            "mean_window_spend": 620.09,
+            "window_spend_share_percent": 18.0
+          },
+          {
+            "segment_label": "2_recent_more_orders_higher_spend",
+            "customers": 7167,
+            "repurchase_rate": 0.306,
+            "repurchase_lift": 0.998,
+            "mean_window_orders": 0.362,
+            "mean_window_spend": 650.79,
+            "window_spend_share_percent": 37.2
+          },
+          {
+            "segment_label": "3_older_fewer_orders_lower_spend",
+            "customers": 4229,
+            "repurchase_rate": 0.3098,
+            "repurchase_lift": 1.01,
+            "mean_window_orders": 0.37,
+            "mean_window_spend": 649.64,
+            "window_spend_share_percent": 21.9
+          },
+          {
+            "segment_label": "4_older_fewer_orders_lower_spend",
+            "customers": 4639,
+            "repurchase_rate": 0.3098,
+            "repurchase_lift": 1.01,
+            "mean_window_orders": 0.371,
+            "mean_window_spend": 618.94,
+            "window_spend_share_percent": 22.9
+          }
+        ]
+      },
+      "subsample_stability": {
+        "customers": 19766,
+        "published_seed": 42,
+        "candidates": [
+          {
+            "k": 2,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.9759,
+            "ari_min": 0.9545,
+            "ari_std": 0.0126
+          },
+          {
+            "k": 3,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.946,
+            "ari_min": 0.8879,
+            "ari_std": 0.0339
+          },
+          {
+            "k": 4,
+            "repeats": 20,
+            "fraction": 0.8,
+            "ari_mean": 0.9751,
+            "ari_min": 0.9506,
+            "ari_std": 0.0121
+          }
+        ]
+      },
+      "identity": {
+        "python": "3.13.15",
+        "dependencies": {
+          "numpy": "2.3.3",
+          "pandas": "2.3.2",
+          "scikit-learn": "1.7.2",
+          "scipy": "1.16.2",
+          "psycopg": "3.3.5"
+        }
+      },
+      "limitations": [
+        "Synthetic order history: repurchase differences describe the generator, not real customers",
+        "Descriptive association between segment and later orders, not a trained predictor or causal effect",
+        "Lifetime features favour long-tenure customers (review M-04)",
+        "Log recency and average order value address review M-03",
+        "Current database cohort, not an immutable historical snapshot"
+      ]
+    }
+  }
+}

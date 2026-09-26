@@ -1,0 +1,77 @@
+# DATA-02 hold-out (M-02) and subsample stability (M-05) evaluation on shoe run b96fbfa2-5c89-433f-91aa-77e3cb7d4c01
+# Date: 2026-09-26  Source commit: 2698b05 plus uncommitted analytics/evaluate_holdout.py
+# evaluate_holdout.py --run-id b96fbfa2-5c89-433f-91aa-77e3cb7d4c01 --output /tmp/ml-holdout-evaluation.json
+{
+  "result": "PASS",
+  "output": "/tmp/ml-holdout-evaluation.json",
+  "time_split": {
+    "split_at": "2025-10-03T16:00:00+00:00",
+    "k_clusters": 2,
+    "overall_repurchase_rate": 0.3066,
+    "segments": [
+      {
+        "segment_label": "1_recent_more_orders_higher_spend",
+        "customers": 13409,
+        "repurchase_rate": 0.307,
+        "repurchase_lift": 1.001,
+        "mean_window_orders": 0.363,
+        "mean_window_spend": 637.3,
+        "window_spend_share_percent": 68.2
+      },
+      {
+        "segment_label": "2_older_fewer_orders_lower_spend",
+        "customers": 6254,
+        "repurchase_rate": 0.3057,
+        "repurchase_lift": 0.997,
+        "mean_window_orders": 0.369,
+        "mean_window_spend": 637.51,
+        "window_spend_share_percent": 31.8
+      }
+    ]
+  },
+  "subsample_stability": [
+    {
+      "k": 2,
+      "repeats": 20,
+      "fraction": 0.8,
+      "ari_mean": 0.9888,
+      "ari_min": 0.9705,
+      "ari_std": 0.0081
+    },
+    {
+      "k": 3,
+      "repeats": 20,
+      "fraction": 0.8,
+      "ari_mean": 0.9723,
+      "ari_min": 0.94,
+      "ari_std": 0.0154
+    },
+    {
+      "k": 4,
+      "repeats": 20,
+      "fraction": 0.8,
+      "ari_mean": 0.5684,
+      "ari_min": 0.4041,
+      "ari_std": 0.2237
+    }
+  ]
+}
+
+real	0m6.587s
+user	0m0.030s
+sys	0m0.045s
+exit=0
+
+# Sanity check (ad hoc, same container): repurchase in [split, cutoff) by raw recency and frequency quartile at the split
+customers 19663 outcome rows 6131 matched 6028
+recency_days
+(-0.001, 69.0]     0.305
+(69.0, 166.0]      0.294
+(166.0, 330.0]     0.310
+(330.0, 1005.0]    0.317
+frequency_orders
+(0.999, 4916.5]       0.300
+(4916.5, 9832.0]      0.308
+(9832.0, 14747.5]     0.314
+(14747.5, 19663.0]    0.305
+corr freq vs window orders -0.0  recency vs window orders 0.01

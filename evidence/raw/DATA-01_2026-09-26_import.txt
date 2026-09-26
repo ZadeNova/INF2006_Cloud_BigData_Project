@@ -1,0 +1,20 @@
+# DATA-01 shoe dataset import (replay after first import)
+# Date: 2026-09-26  Source commit: 2698b05 (uncommitted catalogue changes in tree do not touch analytics)
+# Command: import_dataset --source /app/data/derived/shoes --namespace synthetic/shoes/data-check/v1
+… (Docker Compose container status lines cut)
+customers: read=20000 valid=20000 rejected=0
+products: read=200 valid=200 rejected=0
+orders: read=100000 valid=100000 rejected=0
+order_items: read=237537 valid=237537 rejected=0
+cutoff=2026-01-02T00:00:00+08:00 offset_days=0 inventory=import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8
+users: created=0 unchanged=20000
+customer_profiles: created=0 unchanged=20000
+shoe_models: created=0 unchanged=20
+products: created=0 unchanged=200
+orders: created=0 unchanged=100000
+order_items: created=0 unchanged=237537
+inventory_versions: created=0 unchanged=1
+inventory_snapshots: created=0 unchanged=200
+cancelled: orders=2976 source_total=5269426.23 net_lines=4877923.53 application_lines=5035593.21
+completed: orders=89114 source_total=162473698.29 net_lines=150403823.29 application_lines=155404646.85
+refunded: orders=7910 source_total=14208137.53 net_lines=13152415.83 application_lines=13599180.11

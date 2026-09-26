@@ -1,0 +1,42 @@
+# DATA-02 M-03 adopted recipe: operator /analytics/ over real HTTP (disposable project inf2006-ml-m03, port 8010)
+# Date: 2026-09-26; task-only operator with reporting.view_analytics; CSRF login 302, GET /analytics/ 200
+# Run dfaf0076-c239-49b4-8c39-71d136fb4e1f present in page: yes
+# Text of the Customer segments section:
+aria-labelledby="segments-title">
+Descriptive ML
+Customer segments
+Assignments are loaded for analytics run
+dfaf0076-c239-49b4-8c39-71d136fb4e1f
+, with data through the cutoff
+02 Jan 2026, 00:00 SGT
+. They support operator targeting and do not change sales or replenishment metrics.
+Lifetime completed-order history is measured strictly before this run's cutoff, independently of the dashboard range and comparison filters.
+View segmentation recipe version
+Recipe version
+rfm-v3-5d6488c2ad0e8d681d4c625088cb08fa825eced3a4894cd4e460d8730448ea87
+Total segmented customers
+19,766
+K=2 clusters
+Segment sales value
+S$155,404,646.85
+Silhouette 0.2743
+Customer segment summary
+Segment
+Customers
+Share of segment sales
+Mean recency (days)
+Mean frequency
+Mean monetary
+1_recent_more_orders_higher_spend
+11,338
+77.5%
+121.24
+5.73
+S$10,625.49
+2_older_fewer_orders_lower_spend
+8,428
+22.5%
+380.81
+2.87
+S$4,144.86
+… [balanced customer sample table cut: customer references are assignment data and stay out of Git]

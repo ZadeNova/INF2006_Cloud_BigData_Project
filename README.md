@@ -32,7 +32,7 @@ Implemented locally (not yet deployed):
 - Owner-only order confirmation and history.
 - Operator-only sales and inventory dashboard at `/analytics/` with reporting dates, freshness and interpretable replenishment flags.
 - A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
-- Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data, its evaluation metrics are not yet recorded in `evidence/`, and it has not been through the independent review gate.
+- Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data. Its evaluation is recorded in [evidence/test-data-ai.md](evidence/test-data-ai.md): separation and seed stability, 80% subsample stability, and a 90-day hold-out check showing the segments do not predict later repurchase on this synthetic data.
 
 Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, optional saved-model inference, and load tests. ML uses an explicitly triggered batch workflow; Lambda is not selected; EventBridge Scheduler is an optional side quest after the evidence runs.
 

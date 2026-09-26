@@ -430,3 +430,193 @@ Pinned read-only-role training produced 19,766 assignments, k=2, silhouette 0.43
 A nonexistent explicit training run failed without changing the valid export. The first import failed safely on output-file ownership; correcting ownership of that exact private file allowed retry without retraining. An altered source envelope with recomputed digest was rejected after assignments existed; all 19,766 persisted rows retained canonical digest `190c02aebccd6b4212715050eeabc4b4f17a6af53cb6d8efabe2e9e22823b60b`. Replaying the original exact file succeeded with the same digest.
 
 Pinned pure ML: 16 passes; Django-dependent analytics/strict loader: 54 passes; standalone startup-credential checks: 2 passes. These overlap application tests and are not summed as unique cases. Hosted CI, load and actual S3/RDS/AWS execution remain unverified. The earlier evaluation remains historical quality evidence supported by unchanged data identity, not a newly rerun experiment.
+
+
+## Shoe dataset rerun — 26 September 2026
+
+Cases DATA-01 (rerun) and DATA-02. Plan and pass criteria were written before execution in
+[docs/plans/data-ml-evidence-rerun.md](../docs/plans/data-ml-evidence-rerun.md). Source commit
+`2698b05` (`erfan/merge-quarantine`); uncommitted catalogue-page edits in the working tree touch no
+analytics, import or ML code. Agent-executed (Claude Code) on the user's machine, not teammate
+execution. Raw output: `raw/DATA-01_2026-09-26_*.txt` and `raw/DATA-02_2026-09-26_*.txt`.
+
+Why rerun: since the quarantine merge (`0442665`) the application imports `data/derived/shoes/`,
+which recomputes line prices. Every earlier analytics/ML record above used `data/raw/`, so ML
+monetary features and per-product analytics had not been checked on the data the site now uses.
+
+Setup: `python analytics/build_shoe_dataset.py` (host Python 3.13.0) regenerated the derived
+files; all five matched the committed `data/derived/shoes/checksums.txt`. Disposable Compose
+project `inf2006-data-check` (own PostgreSQL 17 volume, app on port 8010); the everyday
+`inf2006-foundation` database was not touched. A runner container from the same pinned Python
+3.13.15 application image held a throwaway venv with `analytics/requirements.txt` (pandas 2.3.2,
+scikit-learn 1.7.2) and a task-only `ML_SOURCE_ID`; thread counts pinned to 1.
+
+### DATA-01 — PASS
+
+Import of namespace `synthetic/shoes/data-check/v1`: 20,000 customers, 200 products (20 shoe
+models), 100,000 orders, 237,537 lines, zero rejects; replay created nothing. Inventory
+`import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8`, cutoff
+`2026-01-02T00:00:00+08:00`. Refresh run `a31587aa-83e1-458d-971c-ed1bc04730ea` wrote 41,345
+daily rows from 71,079 completed lines (business dates 2025-01-01 to 2026-01-01) in 1.1s.
+
+| Independent pandas check (`verify_refresh.py`) | Actual |
+|---|---|
+| Expected / persisted daily rows | 41,345 / 41,345 |
+| Daily-row / units / sales-amount / coverage-flag mismatches | 0 / 0 / 0 / 0 |
+| Maximum absolute monetary difference | 0.00 |
+| No-recent-sales / flagged products | 9 / 80 of 200 |
+| Result | PASS, exit 0 |
+
+### DATA-02 — PASS
+
+Tests: pure ML `analytics/tests/test_segment_customers.py` **16 passed**; loader integration,
+verifier, startup credentials and `load_customer_segments` command **56 passed** (run against the
+disposable database, both in the runner container).
+
+Training on run `a31587aa…` (lifetime completed-order RFM before the cutoff, log1p frequency and
+monetary, k chosen by silhouette over 2..4) exited 0:
+
+| Result | Actual |
+|---|---|
+| Eligible customers segmented | 19,766 |
+| Selected k | 2 |
+| Sampled silhouette | 0.4118 |
+| Seed ARI mean / std (seeds 99, 123, 777 vs 42) | 0.992 / 0.0076 |
+| Recipe version | `rfm-v3-46605961b7d28863e1458b9f3a147c1d3eeeb2de7d2b694f6ba0147a80b6bd03` |
+| Batch ID | `9cc521b3b16ee8b8ac6a82c5887354449d6398f8f3c05bc98b2f6fca495a2954` |
+| `1_recent_more_orders_higher_spend` | 13,657 customers, 87.6% of sales, recency 149.85 d, 5.43 orders, S$9,971.10 |
+| `2_older_fewer_orders_lower_spend` | 6,109 customers, 12.4% of sales, recency 415.38 d, 2.44 orders, S$3,147.70 |
+
+Segment sales sum to S$155,404,646.85, equal to the importer's completed application-line total.
+Strict import exited 0 with 19,766 rows; replaying the same file exited 0 without duplicates; an
+ORM check found stored = exported = 19,766.
+
+Dashboard: `/analytics/` reads only `settings.DEMO_NAMESPACE`, so the same import, refresh,
+verification, training and load were repeated in `synthetic/shoes/revision-a/demo/v1` in the same
+database. Run `0084a8ae-0189-4a2c-8b6d-a1debc53712d` again gave 41,345 rows with zero mismatches,
+and training gave the identical recipe, k, silhouette and ARI (batch ID differs only because the
+run differs). A task-only operator with `reporting.view_analytics` logged in over real HTTP
+(CSRF login 302); `GET /analytics/` returned 200 and the "Customer segments" section showed that
+run, the recipe version, 19,766 customers, K=2, silhouette 0.4118 and both segment profiles. The
+customer sample table is cut from the saved output.
+
+Compared with the raw-dataset evaluation above (k=2, silhouette 0.4347, ARI 0.984, similar group
+sizes and recency/frequency), the shoe remap changes monetary values but not the selected
+structure.
+
+### Limitations
+
+Local Docker only; no AWS, S3 or hosted CI. Training and import both used the Compose application
+role, not separate read-only and writer roles. `evaluate_segments.py` was not run because it
+accepts only the raw revision's checksums, so the six-candidate comparison table above was not
+regenerated for shoes. The HTTP check reads rendered HTML; no visual browser review. Metrics
+describe synthetic history, not churn, loyalty or real demand. Customer exports were kept inside
+the disposable container and removed with it; nothing customer-level is in Git. Cleanup removed
+the `inf2006-data-check` containers, network and volume; label listings were empty afterwards.
+
+### Hold-out and subsample evaluation (M-02, M-05)
+
+Answers findings M-02 and M-05 of [the Opus 5.5 review](../docs/latest-opus5.5-review.md) with
+the new `analytics/evaluate_holdout.py` ([plan](../docs/plans/ml-holdout-evaluation.md)); the
+published recipe and its version are unchanged. Fresh disposable project `inf2006-ml-holdout`,
+same shoe import (zero rejects) and refresh run `b96fbfa2-5c89-433f-91aa-77e3cb7d4c01` (41,345
+daily rows). Aggregate artifact: [ml-holdout-evaluation.json](ml-holdout-evaluation.json); raw
+output: `raw/DATA-02_2026-09-26_holdout.txt`. Pure tests (pinned Python 3.13 container, no
+Django): `test_segment_customers.py` plus `test_evaluate_holdout.py`, **19 passed**.
+
+**Time split (M-02).** Segments were fitted with the published recipe on orders before
+2025-10-04 00:00 SGT (cutoff − 90 days): 19,663 customers, k=2, silhouette 0.411. Outcomes are
+completed orders from then to the cutoff; 103 customers who first ordered inside the window are
+not scored.
+
+| Segment at split | Customers | Repurchased in next 90 days | Lift | Mean orders | Mean spend | Share of window spend |
+|---|---:|---:|---:|---:|---:|---:|
+| `1_recent_more_orders_higher_spend` | 13,409 | 30.70% | 1.001 | 0.363 | S$637.30 | 68.2% |
+| `2_older_fewer_orders_lower_spend` | 6,254 | 30.57% | 0.997 | 0.369 | S$637.51 | 31.8% |
+| All segmented customers | 19,663 | 30.66% | — | — | — | — |
+
+Result: **the segments do not predict later purchasing on this dataset.** Repurchase rate and
+spend per customer are the same in both groups; the spend-share difference only reflects group
+size. An ad hoc check in the same container confirmed this is the data, not the join: 6,028
+matched repurchasers plus 103 new customers equal the 6,131 outcome rows, repurchase stays
+between 29.4% and 31.7% across recency and frequency quartiles, and the correlation of past
+frequency or recency with window orders is 0.00 and 0.01. The synthetic generator draws future
+orders independently of past behaviour, so no RFM model could predict them here. The segments
+remain valid descriptions of past behaviour (who bought recently, often and a lot), which is how
+the dashboard presents them; they must not be used as a churn or targeting predictor on this data.
+
+**Subsample stability (M-05).** 20 refits on random 80% subsamples of the 19,766-customer cohort,
+ARI against the published seed-42 labels on the same customers:
+
+| k | ARI mean | ARI minimum | ARI std |
+|---:|---:|---:|---:|
+| 2 (selected) | 0.9888 | 0.9705 | 0.0081 |
+| 3 | 0.9723 | 0.9400 | 0.0154 |
+| 4 | 0.5684 | 0.4041 | 0.2237 |
+
+The selected k=2 is robust to resampling; k=4 is not, which the earlier seed-only check did not
+show and which supports keeping k within 2..3.
+
+At this point M-03 (raw recency, total spend) and M-04 (lifetime window, tenure) were unchanged;
+M-03 was fixed afterwards (next section), M-04 remains a limitation. The artifact was then
+regenerated from run `dfaf0076-…` for both recipes; its `log_frequency` figures equal those above. Cleanup removed the `inf2006-ml-holdout`
+containers, network and volume; label listings were empty afterwards.
+
+### Feature fix (M-03)
+
+Answers finding M-03 ([plan](../docs/plans/ml-feature-tenure-fix.md), criteria fixed before
+running). New recipe `log_rfm_aov`: standardized log1p recency, log1p frequency and log1p average
+order value (total spend ÷ orders) instead of raw recency and total spend. Stored rows and the
+dashboard still show lifetime recency, orders and spend. The import contract
+(`src/reporting/segment_contract.py`) accepts the new value; earlier exports still load. M-04
+(tenure) is not changed and stays a limitation.
+
+Fresh disposable project `inf2006-ml-m03` with the rebuilt application image; same shoe import
+(zero rejects) and refresh run `dfaf0076-c239-49b4-8c39-71d136fb4e1f` (41,345 daily rows). Tests
+(`raw/DATA-02_2026-09-26_m03-tests.txt`): pure ML **22 passed** in the pinned Python 3.13 container
+without Django; loader integration, verifier, startup credentials and loader command **57 passed**,
+including a new test that the loader accepts `log_rfm_aov` and rejects an unknown recipe; both
+suites passed again after the default switch. Both recipes were evaluated identically with
+`evaluate_holdout.py --preprocessing …` (`raw/DATA-02_2026-09-26_m03-comparison.txt`;
+[ml-holdout-evaluation.json](ml-holdout-evaluation.json) now holds both results and the criteria).
+
+| Measure (model inputs, full cohort of 19,766) | `log_frequency` (previous) | `log_rfm_aov` (adopted) |
+|---|---:|---:|
+| Recency input skew | 1.411 | −0.901 |
+| Value input skew (total spend vs average order value) | −0.988 | −0.439 |
+| Frequency–value correlation | 0.677 | 0.160 |
+| Recency–frequency correlation | −0.462 | −0.359 |
+| Valid candidates k=2..4 | 3/3 | 3/3 |
+| Selected k | 2 | 2 |
+| 80% subsample ARI mean / min at k=2 | 0.989 / 0.971 | 0.976 / 0.955 |
+| Subsample ARI min at k=3 / k=4 | 0.940 / 0.404 | 0.888 / 0.951 |
+| Smallest segment | 30.9% | 42.6% |
+| Sampled silhouette (not comparable across recipes) | 0.412 | 0.274 |
+| Hold-out repurchase lift range across segments | 0.997–1.001 (k=2) | 0.978–1.010 (k=4 at the split) |
+
+Criteria: all candidates valid, subsample ARI minimum 0.955 ≥ 0.90, smallest segment 42.6% ≥ 5%,
+so `log_rfm_aov` became the default. The overlap that made purchase volume count twice drops from
+0.68 to 0.16 correlation, and recency is no longer the most skewed input. Lower silhouette is
+expected: the inputs no longer contain two near-duplicate volume signals that are easy to
+separate. At the hold-out split the recipe selected k=4; repurchase still did not differ by
+segment (29.99%–30.98% against 30.66% overall), consistent with the finding above that this
+synthetic data has no predictive signal. At k=4 two segments share the description
+`recent_more_orders_higher_spend`; the rank prefix keeps labels unique, and the published k=2
+labels are distinct.
+
+Adopted recipe on the full cohort (`raw/DATA-02_2026-09-26_m03-train-load.txt`): recipe
+`rfm-v3-5d6488c2ad0e8d681d4c625088cb08fa825eced3a4894cd4e460d8730448ea87`, batch
+`0cd1f561ceba1c78e08142f31598c108109716963b28425d59e995788262d980`, k=2, silhouette 0.2743, seed
+ARI 0.9976 / 0.0029.
+
+| Segment | Customers | Share of sales | Mean recency (days) | Mean orders | Mean lifetime spend |
+|---|---:|---:|---:|---:|---:|
+| `1_recent_more_orders_higher_spend` | 11,338 | 77.5% | 121.24 | 5.73 | S$10,625.49 |
+| `2_older_fewer_orders_lower_spend` | 8,428 | 22.5% | 380.81 | 2.87 | S$4,144.86 |
+
+Strict import stored 19,766 rows (= export). A task-only operator logged in over real HTTP and
+`GET /analytics/` returned 200 showing that run, the new recipe version, 19,766 customers, K=2,
+silhouette 0.2743 and both segments (`raw/DATA-02_2026-09-26_m03-dashboard.txt`, customer sample
+cut). The earlier DATA-02 records today describe the previous `log_frequency` recipe and remain as
+history. Cleanup removed the `inf2006-ml-m03` containers, network and volume; label listings were
+empty afterwards.

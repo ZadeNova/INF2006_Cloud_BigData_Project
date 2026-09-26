@@ -189,3 +189,21 @@ def test_main_validates_export_before_publication_and_sanitizes_failures(tmp_pat
     assert segment_customers.main(["--run-id", run["run_id"], "--output", str(output)]) == 1
     assert output.read_text() == "previous valid output"
     assert "private" not in capsys.readouterr().err
+
+
+def test_log_rfm_aov_uses_log_recency_and_average_order_value():
+    frame = pd.DataFrame({"recency_days": [0, 9, 99], "frequency_orders": [1, 4, 2],
+                          "monetary_total": [100.0, 400.0, 50.0]})
+    expected = np.column_stack([np.log1p([0, 9, 99]), np.log1p([1, 4, 2]), np.log1p([100.0, 100.0, 25.0])])
+
+    scaled = segment_customers.feature_matrix(frame, "log_rfm_aov")
+
+    np.testing.assert_allclose(scaled, StandardScaler().fit_transform(expected))
+    # Equal average order value gives equal value features even when total spend differs fourfold.
+    assert scaled[0, 2] == pytest.approx(scaled[1, 2])
+
+
+def test_log_rfm_aov_rejects_customers_without_orders():
+    frame = pd.DataFrame({"recency_days": [1, 2], "frequency_orders": [0, 3], "monetary_total": [0.0, 30.0]})
+    with pytest.raises(ValueError):
+        segment_customers.feature_matrix(frame, "log_rfm_aov")
