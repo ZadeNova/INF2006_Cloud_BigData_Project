@@ -117,7 +117,7 @@ The delivered application must run locally without paid AWS access for marking. 
 | [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
 | [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
 
-Backend implementation uses Astra Low and independent Astra Medium diff review. Low fixes logged findings; a repeated unresolved issue after its fix attempt stops the task for user-controlled Medium escalation. Frontend work uses Luna Max. Detailed assignment and targeted-reading rules are in AGENTS.md.
+Backend implementation uses Astra Low and an independent diff review by Astra Medium or a fresh-session Claude Opus 5.5 ([review gate](docs/DEVELOPMENT.md#backend-review-gate)). Low fixes logged findings; a repeated unresolved issue after its fix attempt stops the task for user-controlled escalation. Frontend work uses Luna Max. Detailed assignment and targeted-reading rules are in AGENTS.md.
 
 ## Testing and submission evidence
 

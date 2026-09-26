@@ -87,7 +87,7 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
 3. **Justify the choice from the workload, then reject the alternatives against it.** Written
    25 September 2026 as report-ready material for §3; see
    [Service-model justification](#service-model-justification-report-3-material) below. The rule:
-   every reason must be a property of **Northstar's workload**, never of the project's
+   every reason must be a property of **42Factors' workload**, never of the project's
    circumstances. "The lab budget is small" or "the deadline is close" explains why *we* chose,
    not why the *shop* needs it, and other groups will have made different choices (some use
    Elastic Beanstalk) under the same circumstances. Cost is argued as the shop's operating cost,
@@ -111,7 +111,7 @@ Structure: state the decision drivers first, each traced to the story, then test
 against them. The choice then follows from the requirements instead of being defended after the
 fact.
 
-**Decision drivers.** Northstar is a small online shoe shop in Singapore run by one store operator.
+**Decision drivers.** 42Factors is a small online shoe shop in Singapore run by one store operator.
 
 | Driver | Traced to |
 |---|---|
@@ -138,7 +138,7 @@ adapter (Mangum or Zappa) in front of API Gateway: more components for a worse f
 a reasonable fit for the batch refresh alone; it is not used because the refresh already runs
 inside the application image under a database lock.
 
-**EKS: rejected on D5.** Kubernetes solves scheduling many services across a fleet; Northstar has
+**EKS: rejected on D5.** Kubernetes solves scheduling many services across a fleet; 42Factors has
 one deployable. The control plane is a fixed hourly charge before any request is served (verify
 and cite the current price from the AWS pricing page, with its date), plus manifests, an ingress
 controller and node groups. That is a disproportionate operating cost for a small shop, not a
@@ -162,7 +162,7 @@ defaults."* Never disparage Beanstalk: other groups use it, and it is a sound pl
 
 **ECS on Fargate: the honest near-miss, rejected narrowly on D5.** It meets D1 to D4 about as well
 as EC2: bounded tasks, stateless containers, explicit security groups. An orchestrator's value is
-placing many kinds of containers, and Northstar runs exactly one, so ECS adds clusters, task
+placing many kinds of containers, and 42Factors runs exactly one, so ECS adds clusters, task
 definitions and services with nothing to orchestrate yet. Because the application is already
 containerised, moving to ECS is a deployment change, not a rewrite. Present it as the evolution
 path: *"If the shop adds a second service, such as a separated analytics or image-processing

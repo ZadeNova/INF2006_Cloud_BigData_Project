@@ -21,7 +21,7 @@ Last covered commit: `ee334cf`
 | SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
-| THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | NOT RUN YET | — |
+| THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | Map filled: T1–T8 rest on SEC-01..08 PASS; other local rows NOT RUN YET as security cases; cloud rows PLANNED | 2026-09-27 |
 | DATA-01 | Analytics refresh reconciled against an independent pandas check | [test-data-ai.md](test-data-ai.md) | Local Docker | PASS (existing prior record; not rerun here) | 2026-09-22 |
 | DATA-01 | Rerun on the derived shoe dataset the application now imports | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |
 | DATA-02 | ML customer segmentation on the shoe dataset: tests, training, strict import and operator dashboard | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |

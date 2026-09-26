@@ -1,6 +1,6 @@
 # Threat-control map: research and plan
 
-Status (25 September 2026): research done, map drafted here; `evidence/threat-control-map.md` not yet filled. Purpose: the brief requires "validation against a named threat" and a threat-control mapping (Security, 15 marks: "threats mapped to controls; least privilege; secure secrets, access and validation"). Threats are taken from recognised ecommerce sources, then each is mapped to Northstar's control, where it is implemented, and its evidence. Constraint from the user: infrastructure security work must be **high return for low effort**, because the deadline is close.
+Status (25 September 2026): research done, map drafted here. Update 27 September 2026: [evidence/threat-control-map.md](../../evidence/threat-control-map.md) is filled from this draft, updated for the WAF login rule, vendored model-viewer and the 42Factors name; the row statuses there are authoritative. Purpose: the brief requires "validation against a named threat" and a threat-control mapping (Security, 15 marks: "threats mapped to controls; least privilege; secure secrets, access and validation"). Threats are taken from recognised ecommerce sources, then each is mapped to Northstar's control, where it is implemented, and its evidence. Constraint from the user: infrastructure security work must be **high return for low effort**, because the deadline is close.
 
 ## Sources (verified 25 September 2026)
 
