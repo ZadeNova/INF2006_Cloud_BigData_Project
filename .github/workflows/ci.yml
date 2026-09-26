@@ -74,7 +74,7 @@ jobs:
           docker compose run --rm --no-deps --user 0
           --volume "$PWD:/work:ro" -e PYTHONPATH=/app:/app/tests
           -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 -e OPENBLAS_NUM_THREADS=1
-          web sh -c 'python -m venv --system-site-packages /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r /work/analytics/requirements.txt && /tmp/analytics-env/bin/python -m pytest -q -c /app/pytest.ini -p no:cacheprovider /work/analytics/tests/test_segment_loader_integration.py /work/analytics/tests/test_verify_refresh.py /work/analytics/tests/test_startup_credentials.py /app/tests/test_customer_segments_command.py'
+          web sh -c 'python -m venv --system-site-packages /tmp/analytics-env && /tmp/analytics-env/bin/pip install -q -r /work/analytics/requirements.txt && /tmp/analytics-env/bin/python -m pytest -q -c /app/pytest.ini -p no:cacheprovider /work/analytics/tests/test_segment_loader_integration.py /work/analytics/tests/test_verify_refresh.py /work/analytics/tests/test_startup_credentials.py /work/analytics/tests/test_build_shoe_dataset.py /app/tests/test_customer_segments_command.py'
       - name: Remove disposable analytics CI database and containers
         if: always()
         run: docker compose down --volumes --remove-orphans
