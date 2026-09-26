@@ -1,6 +1,6 @@
 # Testing and evidence contract
 
-Status: the pytest suite exists and runs in CI (layout in [tests/README.md](../tests/README.md); 392 passed in a local Docker run on 25 September 2026 after the [test trim](reviews/test-trim.md) on `f72a872`, to be re-run and recorded); Locust load tests do not exist yet; evidence templates are not results. Use pytest/pytest-django and Locust. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
+Status: the pytest suite exists and runs in CI (layout and the latest recorded full-suite result in [tests/README.md](../tests/README.md)); Locust load tests do not exist yet; evidence templates are not results. Use pytest/pytest-django and Locust. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
 
 | Area | Required behaviour/evidence |
 |---|---|

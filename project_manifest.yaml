@@ -30,15 +30,16 @@ data_ai:
   evaluation: "evidence/test-data-ai.md: independent deterministic refresh verification and executed ML checks; evidence/ml-quality-evaluation.json: accepted raw revision aggregate comparison, lifetime eligibility, source/code identity, k=2..4 profiles/separation/seed stability. Selected descriptive recipe (rfm-v3-<sha256>, exact value per training run in evidence/test-data-ai.md) uses log_rfm_aov inputs (log recency, log frequency, log average order value; review M-03), k=2 on the shoe cohort; no predictive claim. evidence/ml-holdout-evaluation.json: shoe-dataset comparison of log_frequency and log_rfm_aov with input skew/correlation, 80% subsample ARI for k=2..4 and a 90-day time-split check (segments show no repurchase difference on this synthetic data). ML quality review status: docs/reviews/ml-quality-evaluation.md."
   reproducible_command: "python analytics/verify_refresh.py --run-id <UUID> --coverage-target coverage.json; first export with analytics/export_coverage.py (full setup in evidence/test-data-ai.md)"
   source_version: "Analytics Engineering Ecommerce Sales & Returns v1.0.0; downloaded 2026-09-22; data/raw/checksums.txt"
-  verified_scratch_namespace: "synthetic/shoes/revision-a/demo/v1"
+  derived_dataset: "data/derived/shoes/, rebuilt from unchanged data/raw/ by analytics/build_shoe_dataset.py; data/derived/shoes/checksums.txt"
+  verified_scratch_namespace: "synthetic/shoes/data-check/v1"
   verified_seed: 42
   verified_shift_offset_days: 0
   verified_inventory_cutoff: "2026-01-02T00:00:00+08:00"
-  verified_inventory_version: "import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f"
+  verified_inventory_version: "import-v1-3e9692771fda3d5bf9ad09840c3dc403866948527925e7e639f81b0aa3c025e8"
 
 security:
   threat_control_map: "evidence/threat-control-map.md"
-  secrets_handling: ""
+  secrets_handling: "Local: src/tools/init_env.py generates random secrets into the git-ignored src/.env without printing them. Production: the database credentials and Django signing key are read from AWS Secrets Manager at startup using role credentials only, with no plaintext or static-credential fallback (src/config/secrets.py; docs/AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary). Not yet verified on AWS."
 
 run:
   prerequisites:
@@ -69,4 +70,4 @@ local_release:
   aws_integration: "unverified; docs/AWS_INFRASTRUCTURE.md joint integration checklist"
   load: "unrun; supported workload not yet implemented"
   submission_gap: "evidence/architecture.png remains absent; original project/team placeholders still require human completion"
-  status: "Local implementation and independent review clear on 2026-09-26; hosted/deployed/submission gates remain open"
+  status: "Phase 6 local implementation and independent review clear on 2026-09-26; later changes (shoe catalogue from merge 0442665 onward) await their logged independent review; hosted/deployed/submission gates remain open"

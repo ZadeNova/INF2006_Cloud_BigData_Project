@@ -2,7 +2,7 @@
 
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-**Status (24 September 2026):** The application runs locally in Docker. Registration/login, catalogue, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh and the operator dashboard are implemented and were independently reviewed as recorded in [docs/reviews/](docs/reviews/). The storefront was redesigned after that (VoiceBox look, dark mode) and the dashboard was re-themed to match; those changes have had no independent review or documented browser walkthrough yet. **Nothing is deployed to AWS**: there is no Terraform, no load test and no scaling, recovery or monitoring evidence, and most submission evidence files are still templates. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+**Status (27 September 2026):** The application runs locally in Docker as 42Factors, a small online shoe shop. Registration/login, the shoe catalogue with sizes, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh, the operator dashboard and the descriptive customer segmentation are implemented; earlier work was independently reviewed as recorded in [docs/reviews/](docs/reviews/), and the latest changes (shoe catalogue onward) are awaiting their logged independent review. Local functional, security and data/AI evidence was recorded on 26 September 2026, including a human browser walkthrough of the redesigned storefront; see [evidence/](evidence/README.md). **Nothing is deployed to AWS**: there is no Terraform, no load test and no scaling, recovery or monitoring evidence. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
 
 **Module:** INF2006 Cloud Computing & Big Data
 
@@ -27,11 +27,11 @@ To be completed by the team. Keep final details consistent with the manifest and
 Implemented locally (not yet deployed):
 
 - Registration, login/logout and shared database-backed sessions.
-- Product catalogue and persistent shopping cart.
+- Shoe catalogue: 20 shoe models, each sold in 10 US sizes (7 to 11.5) with its own stock, with 3D previews and a product detail page; persistent shopping cart.
 - Simulated checkout with server-side prices, transactional stock updates and duplicate-request protection.
 - Owner-only order confirmation and history.
 - Operator-only sales and inventory dashboard at `/analytics/` with reporting dates, freshness and interpretable replenishment flags.
-- A narrow operator addition beyond the brief: activate or deactivate a product at `/products/manage/`.
+- A narrow operator addition beyond the brief: search, filter and activate or deactivate individual sizes at `/products/manage/`.
 - Included descriptive customer segmentation (RFM K-means): trained offline by `analytics/segment_customers.py`, loaded per analytics run by `load_customer_segments`, shown as a panel on the dashboard when a run has assignments. It is descriptive only on synthetic data. Its evaluation is recorded in [evidence/test-data-ai.md](evidence/test-data-ai.md): separation and seed stability, 80% subsample stability, and a 90-day hold-out check showing the segments do not predict later repurchase on this synthetic data.
 
 Not implemented: AWS deployment, S3 import, the scheduler for the analytics refresh, optional saved-model inference, and load tests. ML uses an explicitly triggered batch workflow; Lambda is not selected; EventBridge Scheduler is an optional side quest after the evidence runs.
@@ -42,7 +42,7 @@ Payments are simulated; no real payment-card data is collected. Analytics is req
 
 The required analytics reports daily/category sales, top-selling products, previous-seven-complete-day average sales, estimated stock coverage and replenishment flags. Calculations use completed orders and historical line prices, with independently checked fixtures and documented limitations.
 
-Selected historical source: the [Ecommerce Sales Dataset from Analytics Engineering](https://www.analyticsengineering.com/datasets/ecommerce-sales) (customers, products, orders and order items; CC BY 4.0). Switched 22 September 2026 from the original selection, LaelaZ/synthetic-ecommerce on Hugging Face, after its gated access was never granted. Downloaded, checksummed and committed under `data/raw/`; row counts confirmed exact against the publisher's data dictionary. Integrity profiling (`analytics/profile_dataset.py`, output in [data/PROFILE.md](data/PROFILE.md)) passed with zero rejected rows, the import (`import_dataset`) and the analytics refresh ran on the full data, and an independent pandas recomputation (`analytics/verify_refresh.py`) found zero mismatches; see [evidence/test-data-ai.md](evidence/test-data-ai.md). The patterns in this dataset are weak, so results are descriptive only. Only synthetic data is permitted by this project's chosen data policy; the publisher states this dataset is fully synthetic.
+Selected historical source: the [Ecommerce Sales Dataset from Analytics Engineering](https://www.analyticsengineering.com/datasets/ecommerce-sales) (customers, products, orders and order items; CC BY 4.0). Switched 22 September 2026 from the original selection, LaelaZ/synthetic-ecommerce on Hugging Face, after its gated access was never granted. Downloaded, checksummed and committed under `data/raw/`; row counts confirmed exact against the publisher's data dictionary. Integrity profiling (`analytics/profile_dataset.py`, output in [data/PROFILE.md](data/PROFILE.md)) passed with zero rejected rows, the import (`import_dataset`) and the analytics refresh ran on the full data, and an independent pandas recomputation (`analytics/verify_refresh.py`) found zero mismatches; see [evidence/test-data-ai.md](evidence/test-data-ai.md). The application imports a derived shoe dataset built from the unchanged raw files by `analytics/build_shoe_dataset.py` (same customers, orders and lines, re-pointed to 200 shoe products); the import, refresh and pandas recomputation were rerun on it with zero mismatches. The patterns in this dataset are weak, so results are descriptive only. Only synthetic data is permitted by this project's chosen data policy; the publisher states this dataset is fully synthetic.
 
 Generate missing stock snapshots, lead times and demo account/cart fixtures separately. Preserve source identities, document date alignment and prevent reimports from overwriting live state. See the [data pipeline contract](docs/DATA_PIPELINE.md), [data documentation](data/README.md) and [analytics contract](docs/ANALYTICS.md).
 
@@ -121,7 +121,7 @@ Backend implementation uses Astra Low and independent Astra Medium diff review. 
 
 ## Testing and submission evidence
 
-The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL (392 passed in a local Docker run on 25 September 2026 after the test trim on `f72a872`; re-run and record before citing). Data verification is in [analytics](analytics/README.md) and [evidence/test-data-ai.md](evidence/test-data-ai.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring. The other files in [evidence](evidence/README.md) are templates, not completed test evidence.
+The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL; the latest recorded full-suite result is kept in [tests/README.md](tests/README.md). Local functional, security and data/AI evidence is recorded in [evidence/](evidence/README.md), with data verification also in [analytics](analytics/README.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring; [test-resilience.md](evidence/test-resilience.md) and [monitoring.md](evidence/monitoring.md) are still templates.
 
 Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
 
@@ -136,7 +136,7 @@ project_manifest.yaml        Submission metadata and evidence index
 docs/                        Contracts, tracker and review records
 src/                         Django application (infrastructure code not yet written)
 data/                        Raw dataset, profile, provenance and data dictionary
-analytics/                   Dataset profiler, independent refresh verifier and reproduction notes
+analytics/                   Shoe dataset builder, profiler, refresh verifier, ML segmentation and evaluation
 tests/                       Automated pytest suite (real PostgreSQL)
 evidence/                    Dated results (data/analytics done) and templates (the rest)
 TEAM_CONTRIBUTIONS.md         Contribution record
@@ -148,9 +148,9 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 ## Current limitations and continuation
 
 - AWS: a teammate-reported read-only probe (25 September 2026) reached the probed lab APIs, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
-- Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Functional and security evidence files record no run yet, although the automated tests exist; a recorded live walkthrough of the redesigned storefront is also outstanding.
-- The redesign and the dashboard re-theme (24 September 2026) are not independently reviewed and have no recorded browser walkthrough yet. See [storefront redesign](docs/plans/storefront-redesign.md).
-- The imported dataset has weak weekly variation and 32–40% of products without recent sales, so dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
+- Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Local functional and security evidence is recorded; resilience and monitoring evidence are not.
+- The storefront redesign and dashboard re-theme have a recorded human browser walkthrough (FUNC-02) but no independent code review. See [storefront redesign](docs/plans/storefront-redesign.md).
+- The source dataset has little weekly pattern, and the shoe mapping, sizes and prices are synthetic choices; in the shoe run 9 of 200 products had no recent sales. Dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.
 

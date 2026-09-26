@@ -164,8 +164,10 @@ Results describe synthetic history and do not predict loyalty, churn or real dem
 
 ## ML quality evaluation
 
-The accepted raw v1.0.0 revision was evaluated on 25 September 2026; the shoe remap
-remains a plan and needs evaluation after validated adoption. The versionable
+The application's baseline is the derived shoe dataset. It was trained, loaded and evaluated
+on 26 September 2026 ([shoe rerun](../evidence/test-data-ai.md#shoe-dataset-rerun--26-september-2026),
+[M-03 feature fix](../evidence/test-data-ai.md#feature-fix-m-03), [hold-out](#hold-out-and-subsample-evaluation)).
+The accepted raw v1.0.0 revision was evaluated earlier, on 25 September 2026; its versionable
 [aggregate artifact](../evidence/ml-quality-evaluation.json) contains no customer
 assignments. [Executed checks and commands](../evidence/test-data-ai.md#ml-quality-evaluation-25-september-2026)
 record actual environments and limitations. The production image remains free of ML packages.
@@ -175,14 +177,28 @@ Use an isolated PostgreSQL database and a separate environment with both pinned
 through environment variables; never embed them in commands. Set `PYTHONPATH` to
 `src;tests` on Windows or `src:tests` on Linux, and use `DJANGO_ENV=local` plus the
 normal Django secret/allowed-host configuration. Configure the independently assigned
-`ML_SOURCE_ID` as above before export/import. Migrate, then reproduce:
+`ML_SOURCE_ID` as above before export/import. Migrate, then reproduce the shoe baseline.
+The import goes into `settings.DEMO_NAMESPACE` (`synthetic/shoes/revision-a/demo/v1`), the
+namespace the dashboard reads; `--as-of` matching the import cutoff lets the refresh select
+the importer's sealed inventory without naming it:
+
+```sh
+python analytics/build_shoe_dataset.py
+python src/manage.py import_dataset --source data/derived/shoes --namespace synthetic/shoes/revision-a/demo/v1
+python src/manage.py refresh_analytics --as-of 2026-01-02
+python analytics/segment_customers.py --run-id <NEW_RUN_UUID> --output <TEMP_ASSIGNMENTS_JSON>
+python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEMP_ASSIGNMENTS_JSON>
+python analytics/evaluate_holdout.py --run-id <NEW_RUN_UUID> --output evidence/ml-holdout-evaluation.json
+```
+
+Historical raw-revision evaluation only: `evaluate_segments.py` checks the raw v1.0.0 file
+hashes, so it runs against the original 1,200-product import in its own namespace, not the
+shoe baseline:
 
 ```sh
 python src/manage.py import_dataset --source data/raw --namespace synthetic/revision-a/demo/v1
-python src/manage.py refresh_analytics --as-of 2026-01-02 --namespace synthetic/revision-a/demo/v1 --inventory-version import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f
-python analytics/evaluate_segments.py --run-id <NEW_RUN_UUID> --source data/raw --output evidence/ml-quality-evaluation.json
-python analytics/segment_customers.py --run-id <NEW_RUN_UUID> --output <TEMP_ASSIGNMENTS_JSON>
-python src/manage.py load_customer_segments --run-id <NEW_RUN_UUID> --input <TEMP_ASSIGNMENTS_JSON>
+python src/manage.py refresh_analytics --as-of 2026-01-02 --namespace synthetic/revision-a/demo/v1 --inventory-version <IMPORTER_REPORTED_VERSION>
+python analytics/evaluate_segments.py --run-id <RAW_RUN_UUID> --source data/raw --output evidence/ml-quality-evaluation.json
 ```
 
 Set `OMP_NUM_THREADS`, `OPENBLAS_NUM_THREADS` and `MKL_NUM_THREADS` to 1 for this
