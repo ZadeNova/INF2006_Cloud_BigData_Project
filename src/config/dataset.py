@@ -147,7 +147,9 @@ def validate(source):
         elif row["placed_at"] < customer["source_signup_at"]:
             reject("orders", row["_row"], "order before customer signup")
     for row in parsed["order_items"].values():
-        if row["product_id"] not in parsed["products"]:
+        # A product can be rejected after parsing (the shoe checks above), so check rejects too.
+        product = parsed["products"].get(row["product_id"])
+        if product is None or ("products", product["_row"]) in rejects:
             reject("order_items", row["_row"], "missing/rejected product")
         if row["order_id"] not in parsed["orders"]:
             reject("order_items", row["_row"], "missing/rejected order")

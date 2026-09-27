@@ -1,5 +1,5 @@
-"""Deterministic demo shoe catalogue (every model in every size) and store_operator role; create-only apart
-from deactivating retired demo products, safe to re-run."""
+"""Deterministic demo shoe catalogue (every model in every size) and store_operator role; create-only, safe
+to re-run."""
 import os
 import random
 from decimal import ROUND_HALF_UP, Decimal
@@ -11,11 +11,6 @@ from django.core.management.base import BaseCommand, CommandError
 
 from catalogue.models import Product, ShoeModel
 from catalogue.shoes import SHOES, SIZES, sku
-
-# Earlier demo rows used these prefixes: general goods ("demo-") and one size-less row per sneaker
-# ("sneaker-"). They are deactivated, not deleted, because carts, orders and reporting rows may still
-# reference them.
-RETIRED_EXTERNAL_ID_PREFIXES = ("demo-", "sneaker-")
 
 
 def money(value):
@@ -61,15 +56,6 @@ class Command(BaseCommand):
                 created += was_created
         total = len(shoes) * len(SIZES)
         self.stdout.write(f"Created {created} demo product(s); {total - created} already existed.")
-        retired = 0
-        for prefix in RETIRED_EXTERNAL_ID_PREFIXES:
-            retired += Product.objects.filter(
-                namespace=settings.DEMO_NAMESPACE,
-                external_id__startswith=prefix,
-                active=True,
-            ).update(active=False)
-        if retired:
-            self.stdout.write(f"Deactivated {retired} retired demo product(s).")
 
         group, _ = Group.objects.get_or_create(name="store_operator")
         for app_label, codename in [("catalogue", "toggle_product_active"), ("reporting", "view_analytics")]:

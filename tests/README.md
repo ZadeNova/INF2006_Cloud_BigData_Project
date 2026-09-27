@@ -1,6 +1,6 @@
 # Automated tests
 
-pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. Latest recorded full-suite run: 503 passed and 8 skipped in a local Docker run on 27 September 2026 at `c1ed7c6`. The 8 skips are the opt-in `test_db_bootstrap.py` cases that need an explicit disposable `BOOTSTRAP_TEST_DSN`. This is the only place the count is kept; update it here after a re-run instead of quoting a number elsewhere. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
+pytest with pytest-django against real PostgreSQL (an isolated test database that pytest creates and drops; no SQLite substitute). Tests are mounted read-only at `/app/tests`. Latest recorded full-suite run: 497 passed and 8 skipped in a local Docker run on 27 September 2026 after the shoe-baseline gate fixes and test trim (net −6 from the prior 503: +1 for the G-001 regression, −7 from the redundancy trim; see [shoe-baseline-gate.md](../docs/reviews/shoe-baseline-gate.md)). The 8 skips are the opt-in `test_db_bootstrap.py` cases that need an explicit disposable `BOOTSTRAP_TEST_DSN`. This is the only place the count is kept; update it here after a re-run instead of quoting a number elsewhere. Run from the repository root after the Docker quickstart in [../src/README.md](../src/README.md):
 
 ```powershell
 docker compose run --rm web pytest -q -p no:cacheprovider /app/tests

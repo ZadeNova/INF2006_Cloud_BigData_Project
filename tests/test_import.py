@@ -281,6 +281,18 @@ def test_inconsistent_shoe_sizes_rejected(source, field, value, reason):
     assert not ShoeModel.objects.exists()
 
 
+def test_allow_rejects_drops_orders_that_use_a_rejected_shoe_size(source):
+    sized(source)
+    source[1]["products"][1]["product_name"] = "Other"      # P2 now disagrees with its shoe
+    source[1]["order_items"][1]["product_id"] = "P3"        # O1 no longer uses P2; O2..O5 still do
+    run_import(source, allow_rejects=True)
+    audit = json.loads((source[0].parent / f"{source[0].name}-rejects.json").read_text())
+    assert {row["external_id"] for row in audit["rejects"] if "missing/rejected product" in row["reasons"]} == {
+        f"L{i}b" for i in range(2, 6)}
+    assert list(Order.objects.filter(namespace=NS).values_list("external_id", flat=True)) == ["O1"]
+    assert not Product.objects.filter(external_id="P2").exists()
+
+
 def test_seed_demo_without_products():
     call_command("seed_demo", no_products=True)
     assert not Product.objects.exists()
