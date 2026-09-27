@@ -1,6 +1,8 @@
 # AWS infrastructure in Terraform
 
-Status (25 September 2026): planned, not started. Terraform is not installed on the development machine yet, nothing is written and nothing is applied. Replaces the console-first order in [cloud-independent-prep.md](cloud-independent-prep.md) B7 and the "reproduce afterwards" framing of B5.
+Status (25 September 2026): planned, not started. Terraform is not installed on the development machine yet, nothing is written and nothing is applied.
+
+Update 27 September 2026: still not started. The user decided on **public subnets for the app instances** (below), asked for **domain-purchase instructions** and added a **load-test tool** (Locust). The plan is complete for design and order but not yet buildable: each stage's missing decisions are listed under [Open items per stage](#open-items-per-stage-27-september-2026), and **agents must close or raise a stage's open items before writing or applying that stage**. Replaces the console-first order in [cloud-independent-prep.md](cloud-independent-prep.md) B7 and the "reproduce afterwards" framing of B5.
 
 **How this is built.** The user has no Terraform experience and is learning it while building. Work goes one stage at a time, and **nothing starts until the user says so**. Each stage begins with a guide that explains the Terraform concepts that stage uses (starting from what Terraform is in stage 0), then lists explicit steps; the user runs `plan` and `apply` and approves every change.
 
@@ -27,6 +29,7 @@ Integration note (26 September 2026): Terraform-first sequencing and the teammat
 | Batch operations | Explicitly triggered refresh, train, export, import and maintenance commands (`db_bootstrap`, `migrate`, S3 sync and `import_dataset`, `refresh_analytics`, `clearsessions`), run by hand through Session Manager on one designated instance, following the runbook and the role-separated secrets in the runtime handoff. |
 | Scheduler | **Optional side quest, after stage 5.** EventBridge Scheduler invoking SSM Run Command on a tagged instance, if the lab accepts `LabRole` as the scheduler's role. Until then jobs are triggered by hand, which the scope allows. |
 | WAF | **Selected, narrow.** One regional web ACL on the ALB with one rate-based rule on `POST /login/` (credential stuffing, threat T7), Count mode first, then Block. No managed rule sets. The Locust source is exempted or the limit raised during scaling runs, and that is recorded. Lab permission to be confirmed in stage 1. |
+| Network placement (decided 27 September 2026) | **App instances run in the public subnets with public IPs**, so they reach ECR, Secrets Manager, SSM, S3 and CloudWatch Logs without a NAT gateway or paid interface endpoints. `sg-app` accepts only port 8000 from `sg-alb`; no other inbound rule, no port 22. RDS stays in the private subnets (`sg-db` accepts 5432 from `sg-app` only). A free S3 gateway endpoint is optional. The report states the trade-off: instances have public IPs but no reachable inbound port; production would use private subnets with NAT or endpoints. Record in threat rows T9/T11. |
 | Not built | Lambda, CloudFront, NAT gateway, ElastiCache, EKS, a customer-managed KMS key (AWS-managed keys encrypt at rest), or a separate analytics service. EventBridge Scheduler only as the optional side quest above. |
 
 ## Layout
@@ -122,3 +125,82 @@ Terraform is team infrastructure configuration. Each stage's code is self-review
 ## Diagram
 
 Drawn from this plan's resource list before stage 1, with these names; renamed only if a name changes during the build. Source `evidence/architecture.drawio`, export `evidence/architecture.png`.
+
+## Domain purchase (stage 3 prerequisite, instructions added 27 September 2026)
+
+HTTPS on the ALB needs an ACM certificate, and ACM needs a domain you control. Buy it **before stage 3**; nothing earlier depends on it. Keep DNS at the registrar (not Route 53), so it survives `terraform destroy` and costs nothing extra.
+
+**Where to buy.** Check prices on the day; first-year prices differ from renewal prices.
+
+| Option | Notes |
+|---|---|
+| GitHub Student Developer Pack | Has included a free first-year domain from a partner registrar (for example Namecheap `.me` or name.com). Check the pack's current offer first; it may cost nothing. |
+| Porkbun or Namecheap | Cheap first-year TLDs (for example `.xyz`, `.site`, `.store`, often a few USD). Simple DNS editor with CNAME records. |
+| Cloudflare Registrar | At-cost pricing, but DNS must be on Cloudflare; keep the records **DNS only (grey cloud)**, not proxied, or ACM validation and the ALB certificate break. |
+
+Pick a neutral name (not a real brand). Payment needs a card; decide who pays and record it in the cost section.
+
+**Steps.**
+1. Buy the domain; turn on the registrar's free WHOIS privacy.
+2. Stage 3 (Terraform): request an ACM certificate for `shop.<domain>` with DNS validation. Terraform outputs the validation CNAME name and value.
+3. At the registrar, add that CNAME exactly as given (some registrars append the domain automatically; do not add it twice). Wait for ACM status `Issued` (minutes to an hour).
+4. After the ALB exists, add a CNAME `shop` pointing to the ALB DNS name. Use the subdomain, because the bare domain cannot be a CNAME at most registrars.
+5. Check: `https://shop.<domain>/health/` returns 200 and `http://` redirects to `https://`.
+6. After teardown, delete the `shop` CNAME; the validation CNAME can stay.
+
+**Fallback if the domain is late:** build stages 0 to 2 and the ALB with only an HTTP listener, then add HTTPS when the certificate is issued. Do not claim HTTPS (SEC-10) until it works; a self-signed import is not assumed to be allowed.
+
+## Load testing (added 27 September 2026)
+
+**Tool: Locust** (Python, already named in [TESTING.md](../TESTING.md) and the scope; it handles Django login and CSRF in the same language as the app). k6 is the considered alternative (lower overhead per virtual user, JavaScript scripts); switch only if Locust cannot generate the needed load from one machine, and record the reason.
+
+- **Location:** `tests/load/locustfile.py` plus a README with exact commands; pinned version in its own requirements file, not in the app image.
+- **Workload (fixed before any cloud run, reused for every run):** anonymous browsing (catalogue and detail pages); a logged-in customer adds a size to the cart, views the cart and checks out with its own idempotency key; a small operator share on `/analytics/`. Synthetic accounts created by a setup command, never real data.
+- **Run from outside the app instances:** the laptop (records Singapore to `us-east-1` latency) or a separate small instance; state which, and keep it the same for comparable runs.
+- **Rehearse locally first** against Docker to find a supported load and fix script bugs for free.
+- **Output:** Locust CSV stats and failures saved as `evidence/raw/RES-...` text files, summarised in `evidence/test-resilience.md`.
+
+## Open items per stage (27 September 2026)
+
+Missing decisions or artefacts. An agent working on a stage must resolve these (or ask the user) before writing or applying it, and tick them off here.
+
+**Stage 0: tooling**
+- [ ] Update the status line once Terraform is installed and `validate` passes.
+
+**Stage 1: network, S3, ECR, secrets, logs, SNS**
+- [x] Instance placement without NAT: public subnets (decided above).
+- [ ] Confirm each secret's exact field list against the runtime handoff in [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary) (web runtime, migration, bootstrap, trainer) before creating the secrets.
+- [ ] Write the image build, tag (git SHA) and push commands for ECR.
+- [ ] Run the lab checks (secret retrieval with `LabInstanceProfile`, Session Manager, WAF, budget) and record the results.
+- [ ] Write the reference IAM policies; then update threat rows T8/T9 in `evidence/threat-control-map.md` to "Partial, lab constraint", citing them.
+- [ ] Draw `evidence/architecture.drawio` / `.png` with the `inf2006-*` names (the brief requires it; this plan says before stage 1).
+
+**Stage 2: RDS**
+- [ ] Parameter group: `rds.force_ssl = 1` (the "TLS forced" decision).
+- [ ] Where `db_bootstrap` runs: no instance exists until stage 3, so either a temporary instance in stage 2 or move bootstrap to the first stage 3 instance.
+- [ ] Backup retention and `skip_final_snapshot` on destroy (decide; affects teardown speed and any backup/recovery claim).
+
+**Stage 3: HTTPS, ALB, launch template, ASG**
+- [ ] Domain bought and DNS access confirmed (instructions above), or the HTTP-first fallback chosen.
+- [ ] Application change first, through the review gate: configurable `GUNICORN_WORKERS` (currently hard-coded to 2 in the Dockerfile).
+- [ ] Turn the boot script steps into `user_data.sh.tftpl`: Docker install, ECR login, image **digest**, environment variables, `awslogs` log driver, probe host from IMDSv2.
+- [ ] Target-group health check values (path, interval, healthy/unhealthy thresholds, deregistration delay); they set the recovery times measured in stage 5.
+
+**Stage 4: scaling, alarms, WAF**
+- [ ] Target-tracking value (ALB requests per target) and cooldowns, chosen from the local Locust rehearsal.
+- [ ] Alarm thresholds and periods (ALB 5xx, unhealthy hosts).
+- [ ] One saved CloudWatch Logs Insights query and its exported result (the Operations "alert/query" evidence, MON-02).
+- [ ] WAF rate limit value and how the Locust source is exempted during scaling runs.
+
+**Stage 5: evidence runs**
+- [ ] Locust workload written and rehearsed locally (section above).
+- [ ] Success thresholds fixed before running (for example p95 latency and error rate at N users; time back to two healthy targets).
+- [ ] Map each run to its evidence ID and file (RES-03 in `test-resilience.md`, MON-02 in `monitoring.md`, SEC-09..11 in `test-security.md`).
+- [ ] Run the local RES-01/RES-02 and MON-01 cases as a safety net (no AWS needed).
+
+**Stage 6: teardown**
+- [ ] Pre-destroy export checklist: Terraform plan/outputs, redacted `describe` outputs, alarm history, CloudTrail events, Locust results, session costs.
+
+**Across all stages**
+- [ ] Session budget: number of cloud sessions, total estimated cost against the lab balance, and what to cut if it runs low.
+- [ ] Dates for each stage between now and the 11 October deadline (the scope's Phase 3 window ends 1 October).
