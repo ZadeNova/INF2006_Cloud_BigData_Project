@@ -10,7 +10,7 @@
 
 ## 1. Purpose and intended outcome
 
-Build a small ecommerce application where a customer can register, browse products, manage a cart, complete a simulated checkout, and view their orders. A store operator can use a protected analytics page to identify sales trends and products requiring replenishment attention.
+Build 42Factors, a small online shoe shop, where a customer can register, browse products, manage a cart, complete a simulated checkout, and view their orders. A store operator can use a protected analytics page to identify sales trends and products requiring replenishment attention.
 
 The project demonstrates a secure, working AWS deployment with persistent data, reproducible analytics, measured scaling and recovery, and traceable evidence. It targets strong performance across the assessment rubric; no feature list can guarantee an A or A+.
 
@@ -68,7 +68,7 @@ Use `DESIGN.md` at the repository root as the visual reference. **Changed 23 Sep
 ### Customer workflow
 
 1. Register and authenticate using Django's session-based authentication.
-2. Browse a seeded product list with names, categories, prices and indicative stock.
+2. Browse shoe models with names, categories, prices and indicative stock, and choose a size. Each product is one shoe model in one US size (a SKU) with its own price and stock; operators activate or deactivate individual sizes.
 3. Add, update or remove cart items.
 4. Submit checkout with a request identifier.
 5. Receive a saved order confirmation and access personal order history.
@@ -106,7 +106,8 @@ The operator dashboard answers: **What sold, which products are running low, and
 | Output | Method | Operator use |
 |---|---|---|
 | Daily sales and category performance | Sum units and historical line-item amounts from completed orders | Understand sales trends |
-| Top-selling products | Rank by completed units sold over a selected period | Identify high-demand items |
+| Top-selling shoe models | Rank shoe models by completed units over a selected period, all sizes of a model together | Identify high-demand items |
+| Sales by size | Units and sales per shoe size over the selected period | See which sizes to restock |
 | Recent average daily sales | Completed units over the previous 7 complete business dates divided by 7 | Explain the sales rate |
 | Estimated stock coverage | Stock at the reporting cutoff (sealed inventory snapshot) divided by average daily sales | Estimate days remaining under unchanged sales behaviour |
 | Replenishment flag | Coverage less than or equal to configured lead time | Prioritise a stock check |
@@ -157,7 +158,7 @@ Dataset selection is a planning decision; downloading, inspecting and validating
 
 ### Mapping into the application
 
-Design the application schema around its workflow and map the dataset into it; do not copy a flat source schema or treat external IDs as globally unique application IDs.
+The application imports a derived shoe dataset (`data/derived/shoes/`), built reproducibly from the unchanged `data/raw/` files by `analytics/build_shoe_dataset.py`; it keeps every customer, order and line and re-points the 1,200 source products to 20 shoe models in 10 sizes (200 products). Design the application schema around its workflow and map the dataset into it; do not copy a flat source schema or treat external IDs as globally unique application IDs.
 
 | Dataset information | Application mapping / treatment |
 |---|---|

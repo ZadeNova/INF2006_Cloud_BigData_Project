@@ -71,7 +71,7 @@ The same standard applies to tests. Cover each rule once, at the layer the rule 
 ## Shared rules
 
 - Locked baseline: Django templates/HTMX, PostgreSQL, Docker and scoped AWS services. Do not add a SPA, DRF, JWT, Celery, NoSQL or payment gateway without a scope decision.
-- Analytics required; ML optional. Synthetic data and simulated payments only. Imported customers have unusable passwords by default.
+- Analytics required; descriptive ML included (additive and removable; scope section 6). Synthetic data and simulated payments only. Imported customers have unusable passwords by default.
 - Derive prices/owner on server; use transactional stock updates and user-scoped idempotency. Enforce order ownership and operator permissions.
 - Sessions/carts persist in shared PostgreSQL. No sticky sessions or authoritative instance-local state.
 - S3 required; CloudFront excluded; ElastiCache conditional and disposable, never authoritative for checkout.
