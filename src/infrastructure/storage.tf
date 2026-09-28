@@ -1,17 +1,29 @@
 # ---------- S3: one private bucket ----------
 # Prefixes: data/ (dataset), exports/ (analytics), media/images/, media/models/ (.glb).
-# Bucket names are global across all AWS accounts, so AWS appends a unique suffix to the prefix.
+#
+# Lab constraint (29 September 2026): the Learner Lab's service control policy denies
+# s3:GetBucketObjectLockConfiguration, which the aws_s3_bucket resource calls on every read, so
+# Terraform cannot manage the bucket itself. The bucket is created once with the CLI (command in
+# docs/plans/aws-terraform-stage-1.md) and looked up here; every security setting on it below is
+# still a Terraform resource. Teardown deletes the bucket with the CLI after `terraform destroy`.
 
-resource "aws_s3_bucket" "main" {
-  bucket_prefix = "${local.name_prefix}-data-"
-  force_destroy = true # lets `terraform destroy` empty a versioned bucket; evidence is exported before teardown
+data "aws_s3_bucket" "main" {
+  bucket = var.s3_bucket_name
+}
 
-  tags = { Name = "${local.name_prefix}-data" }
+# The first apply created the bucket as a resource before the read failed. Forget that resource
+# without deleting the bucket, which is kept and looked up above.
+removed {
+  from = aws_s3_bucket.main
+
+  lifecycle {
+    destroy = false
+  }
 }
 
 # Refuse every form of public access, whatever any later policy or ACL says.
 resource "aws_s3_bucket_public_access_block" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   block_public_acls       = true
   ignore_public_acls      = true
@@ -21,7 +33,7 @@ resource "aws_s3_bucket_public_access_block" "main" {
 
 # ACLs off: access is decided only by IAM and the bucket policy.
 resource "aws_s3_bucket_ownership_controls" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   rule {
     object_ownership = "BucketOwnerEnforced"
@@ -30,7 +42,7 @@ resource "aws_s3_bucket_ownership_controls" "main" {
 
 # Keep previous versions, so an overwritten or deleted dataset file can be recovered.
 resource "aws_s3_bucket_versioning" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   versioning_configuration {
     status = "Enabled"
@@ -39,7 +51,7 @@ resource "aws_s3_bucket_versioning" "main" {
 
 # Encryption at rest with S3-managed keys (no customer-managed KMS key; see the plan's "Not built").
 resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   rule {
     apply_server_side_encryption_by_default {
@@ -50,7 +62,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
 
 # Cost control: old versions expire after 7 days; unfinished uploads are cleaned up after 1 day.
 resource "aws_s3_bucket_lifecycle_configuration" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   rule {
     id     = "expire-old-versions"
@@ -73,8 +85,8 @@ data "aws_iam_policy_document" "bucket_tls_only" {
     effect  = "Deny"
     actions = ["s3:*"]
     resources = [
-      aws_s3_bucket.main.arn,
-      "${aws_s3_bucket.main.arn}/*",
+      data.aws_s3_bucket.main.arn,
+      "${data.aws_s3_bucket.main.arn}/*",
     ]
 
     principals {
@@ -91,7 +103,7 @@ data "aws_iam_policy_document" "bucket_tls_only" {
 }
 
 resource "aws_s3_bucket_policy" "main" {
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
   policy = data.aws_iam_policy_document.bucket_tls_only.json
 
   # S3 rejects simultaneous changes to one bucket's settings; apply the policy after public access is blocked.
@@ -102,7 +114,7 @@ resource "aws_s3_bucket_policy" "main" {
 # Only the shop's own HTTPS origin, read-only. Created once var.app_hostname is set.
 resource "aws_s3_bucket_cors_configuration" "main" {
   count  = var.app_hostname == null ? 0 : 1
-  bucket = aws_s3_bucket.main.id
+  bucket = data.aws_s3_bucket.main.id
 
   cors_rule {
     allowed_methods = ["GET", "HEAD"]

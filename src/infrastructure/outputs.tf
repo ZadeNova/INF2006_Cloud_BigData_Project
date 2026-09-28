@@ -27,12 +27,12 @@ output "security_group_ids" {
 
 output "s3_bucket_name" {
   description = "The bucket's actual name (prefix plus AWS's random suffix), for the CLI push/import commands."
-  value       = aws_s3_bucket.main.id
+  value       = data.aws_s3_bucket.main.id
 }
 
 output "s3_bucket_arn" {
   description = "For writing IAM reference policies and the CORS/media test commands."
-  value       = aws_s3_bucket.main.arn
+  value       = data.aws_s3_bucket.main.arn
 }
 
 output "ecr_repository_url" {

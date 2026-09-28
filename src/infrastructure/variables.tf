@@ -20,3 +20,8 @@ variable "alarm_email" {
   description = "Address subscribed to the SNS alarm topic. AWS emails a subscription-confirmation link once this is applied; the subscription stays pending until it's clicked."
   type        = string
 }
+
+variable "s3_bucket_name" {
+  description = "Name of the S3 bucket created with the CLI (the lab denies a read the aws_s3_bucket resource needs). Must start with the name prefix, e.g. inf2006-grp21-data-<suffix>."
+  type        = string
+}
