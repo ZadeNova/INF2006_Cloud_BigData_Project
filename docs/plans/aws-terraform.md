@@ -39,7 +39,7 @@ Integration note (26 September 2026): Terraform-first sequencing and the teammat
 
 ```
 versions.tf        provider and Terraform version pins
-providers.tf       aws provider, default_tags Project=inf2006 Env=evidence ManagedBy=terraform
+providers.tf       aws provider, locals.name_prefix = "inf2006-grp21", default_tags Project={name_prefix} Env=evidence ManagedBy=terraform
 variables.tf       region, domain, certificate ARN, alarm email, instance type, scaling target, flags
 data.tf            AZs, explicitly selected AL2023 AMI, LabInstanceProfile, LabRole
 network.tf         VPC 10.0.0.0/16, 2 public + 2 private subnets, IGW, route tables
@@ -55,13 +55,13 @@ waf.tf             regional WAF association and scoped rules, subject to permiss
 outputs.tf         ALB DNS name, ECR URL, bucket name, RDS endpoint
 ```
 
-Names follow `inf2006-<component>` (`inf2006-alb`, `inf2006-db`, `inf2006-app-asg`), and the diagram uses the same names.
+Names follow `inf2006-grp21-<component>` (`inf2006-grp21-alb`, `inf2006-grp21-db`, `inf2006-grp21-app-asg`), and the diagram uses the same names. The group number is a single `local.name_prefix` in `providers.tf`, not retyped per resource.
 
 **State.** Local state, never committed (`.gitignore` gains `*.tfstate*`, `*.tfplan`, `.terraform.lock.hcl` is committed). The scope forbids submitting state with secrets, and the design above keeps secret values out of it anyway. A remote S3 backend is not worth it for one applier and a two-week stack.
 
 **One apply device (revised 28 September 2026, replaces moving state between devices).** The user's Fedora laptop is the only device that runs `plan`, `apply` and `destroy`, holds `terraform.tfstate` and has lab credentials exported. The user's other devices only write code (plus `fmt` and `validate` after `terraform init -backend=false`, which needs no AWS credentials). Code moves through git; state never leaves the laptop. Rules:
 1. Apply only committed code: `git pull`, a clean working tree, `plan -out`, then `apply`. Record the commit SHA in the runbook entry.
-2. After every apply, copy the state to a dated backup (`terraform.tfstate.<YYYY-MM-DD>.bak`) in a private location off the laptop, never git. If the state is lost, the `Project=inf2006` tags are the fallback for finding and deleting resources by hand.
+2. After every apply, copy the state to a dated backup (`terraform.tfstate.<YYYY-MM-DD>.bak`) in a private location off the laptop, never git. If the state is lost, the `Project=inf2006-grp21` tags are the fallback for finding and deleting resources by hand.
 3. Commit `.terraform.lock.hcl` so every device resolves the same provider versions.
 4. If the laptop is unavailable, no other device applies. A groupmate's fallback account starts a fresh stack from the code (see above).
 
@@ -91,7 +91,7 @@ Each stage: `fmt`, `validate`, `plan` saved to a file, the plan read aloud (crea
 | 4 | Target tracking, max 2, alarms, WAF | Alarm email received; scoped WAF rules verified; explicit batch run verified | verify selected services against current pricing |
 | 5 | Evidence runs: baseline, autoscaling, session continuity, batch failure/retry recovery | Evidence files per the scope | same |
 | Optional | EventBridge Scheduler plus SSM Run Command for `refresh_analytics` and `clearsessions` | A scheduled run appears in the analytics run list | small |
-| 6 | `terraform destroy` | Nothing tagged `Project=inf2006` remains; final balance recorded | none |
+| 6 | `terraform destroy` | Nothing tagged `Project=inf2006-grp21` remains; final balance recorded | none |
 
 Costs are rough on-demand estimates; check them against the AWS pricing pages and the lab balance after each stage. Destroy between working sessions if the stack will sit idle for a day.
 
@@ -109,12 +109,12 @@ Costs are rough on-demand estimates; check them against the AWS pricing pages an
 
 | File | Production role for | Allows (scoped to named resources, no `*` actions) |
 |---|---|---|
-| `web-runtime.json` | Web instances in the Auto Scaling group | `secretsmanager:GetSecretValue` on the **web runtime secret only**; `ecr:GetAuthorizationToken` plus pull actions on the `inf2006-app` repository; `s3:GetObject` on `media/*` (for pre-signed URLs); `logs:CreateLogStream`/`PutLogEvents` on the app log group; the AWS-managed `AmazonSSMManagedInstanceCore` for Session Manager |
+| `web-runtime.json` | Web instances in the Auto Scaling group | `secretsmanager:GetSecretValue` on the **web runtime secret only**; `ecr:GetAuthorizationToken` plus pull actions on the `inf2006-grp21-app` repository; `s3:GetObject` on `media/*` (for pre-signed URLs); `logs:CreateLogStream`/`PutLogEvents` on the app log group; the AWS-managed `AmazonSSMManagedInstanceCore` for Session Manager |
 | `migration.json` | The one-off migration run | `GetSecretValue` on the **migration secret only**; ECR pull; logs. No S3 |
 | `bootstrap.json` | The one-off `db_bootstrap` run | `GetSecretValue` on the **bootstrap secret only**; ECR pull; logs. Nothing else |
 | `maintenance.json` | One-off Django commands: `import_dataset`, `refresh_analytics`, `load_customer_segments`, `clearsessions` | `GetSecretValue` on the **web runtime secret** (these are Django management commands, per the runtime handoff); `s3:GetObject` on `data/*` and `exports/*`; logs |
 | `batch-trainer.json` | Standalone training and the refresh verifier | `GetSecretValue` on the **trainer/verifier secret only** (no Django signing key); `s3:GetObject` on `data/*`; `s3:GetObject`/`PutObject` on `exports/*`; logs |
-| `scheduler.json` (optional side quest) | EventBridge Scheduler's execution role | `ssm:SendCommand` limited to the `AWS-RunShellScript` document and instances tagged `Project=inf2006` |
+| `scheduler.json` (optional side quest) | EventBridge Scheduler's execution role | `ssm:SendCommand` limited to the `AWS-RunShellScript` document and instances tagged `Project=inf2006-grp21` |
 
 Each file also carries its trust policy (who may assume the role: `ec2.amazonaws.com`, or `scheduler.amazonaws.com` for the scheduler). Secret and bucket ARNs are written with placeholders (`<account>`, `<region>`), which also satisfies the redaction rule.
 
@@ -178,9 +178,9 @@ Missing decisions or artefacts. An agent working on a stage must resolve these (
 - [x] Instance placement without NAT: public subnets (decided above).
 - [ ] Confirm each secret's exact field list against the runtime handoff in [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary) (web runtime, migration, bootstrap, trainer) before creating the secrets.
 - [ ] Write the image build, tag (git SHA) and push commands for ECR.
-- [ ] Run the lab checks (secret retrieval with `LabInstanceProfile`, Session Manager, WAF, budget) and record the results.
+- [x] Run the lab checks (secret retrieval with `LabInstanceProfile`, Session Manager, WAF, budget) and record the results (29 September 2026: all allowed, see `evidence/aws-capability-record.md`).
 - [ ] Write the reference IAM policies; then update threat rows T8/T9 in `evidence/threat-control-map.md` to "Partial, lab constraint", citing them.
-- [ ] Draw `evidence/architecture.drawio` / `.png` with the `inf2006-*` names (the brief requires it; this plan says before stage 1).
+- [ ] Draw `evidence/architecture.drawio` / `.png` with the `inf2006-grp21-*` names (the brief requires it; this plan says before stage 1).
 
 **Stage 2: RDS**
 - [ ] Parameter group: `rds.force_ssl = 1` (the "TLS forced" decision).

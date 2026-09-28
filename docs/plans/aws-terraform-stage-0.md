@@ -63,12 +63,17 @@ terraform {
 `src/infrastructure/providers.tf`, which sets up the AWS provider:
 
 ```hcl
+locals {
+  # Every resource name and tag is built from this, so the group number changes in one place.
+  name_prefix = "inf2006-grp21"
+}
+
 provider "aws" {
   region = var.region
 
   default_tags {
     tags = {
-      Project   = "inf2006"
+      Project   = local.name_prefix
       Env       = "evidence"
       ManagedBy = "terraform"
     }
@@ -76,7 +81,7 @@ provider "aws" {
 }
 ```
 
-`default_tags` puts these tags on every resource that supports tags. They're how you find everything at teardown, and how you'd find it if the state were ever lost.
+`default_tags` puts these tags on every resource that supports tags. They're how you find everything at teardown, and how you'd find it if the state were ever lost. `local.name_prefix` (added when the team added its group number to every resource name) is a **local value**: computed once from a literal here, then reused everywhere instead of retyping `"inf2006-grp21"` in every file.
 
 `src/infrastructure/variables.tf` (it grows in later stages):
 
