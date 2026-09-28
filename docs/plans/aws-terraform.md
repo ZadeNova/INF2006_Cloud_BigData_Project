@@ -1,6 +1,6 @@
 # AWS infrastructure in Terraform
 
-Status (25 September 2026): planned, not started. Terraform is not installed on the development machine yet, nothing is written and nothing is applied.
+Status (28 September 2026): stage 0 done. Terraform is installed on the apply laptop, `src/infrastructure/` holds `versions.tf`, `providers.tf`, `variables.tf` and the provider lock; no resources are defined and nothing is applied.
 
 Update 27 September 2026: still not started. The user decided on **public subnets for the app instances** (below), asked for **domain-purchase instructions** and added a **load-test tool** (Locust). The plan is complete for design and order but not yet buildable: each stage's missing decisions are listed under [Open items per stage](#open-items-per-stage-27-september-2026), and **agents must close or raise a stage's open items before writing or applying that stage**. Replaces the console-first order in [cloud-independent-prep.md](cloud-independent-prep.md) B7 and the "reproduce afterwards" framing of B5.
 
@@ -59,7 +59,11 @@ Names follow `inf2006-<component>` (`inf2006-alb`, `inf2006-db`, `inf2006-app-as
 
 **State.** Local state, never committed (`.gitignore` gains `*.tfstate*`, `*.tfplan`, `.terraform.lock.hcl` is committed). The scope forbids submitting state with secrets, and the design above keeps secret values out of it anyway. A remote S3 backend is not worth it for one applier and a two-week stack.
 
-**Multi-device state (decided 28 September 2026).** The user applies from several of their own devices (primary: Linux Fedora laptop). The single `terraform.tfstate` file moves between them by direct private transfer (for example Obsidian sync or sending the file to themselves) — never through git, and never edited from two devices at once. Practical rules: finish and fully sync/send the file before switching devices; treat it as one object in circulation, not a copy left behind on the old device; keep a dated backup (`terraform.tfstate.<YYYY-MM-DD>.bak`) before overwriting the working copy, so a bad sync or corrupted transfer is recoverable.
+**One apply device (revised 28 September 2026, replaces moving state between devices).** The user's Fedora laptop is the only device that runs `plan`, `apply` and `destroy`, holds `terraform.tfstate` and has lab credentials exported. The user's other devices only write code (plus `fmt` and `validate` after `terraform init -backend=false`, which needs no AWS credentials). Code moves through git; state never leaves the laptop. Rules:
+1. Apply only committed code: `git pull`, a clean working tree, `plan -out`, then `apply`. Record the commit SHA in the runbook entry.
+2. After every apply, copy the state to a dated backup (`terraform.tfstate.<YYYY-MM-DD>.bak`) in a private location off the laptop, never git. If the state is lost, the `Project=inf2006` tags are the fallback for finding and deleting resources by hand.
+3. Commit `.terraform.lock.hcl` so every device resolves the same provider versions.
+4. If the laptop is unavailable, no other device applies. A groupmate's fallback account starts a fresh stack from the code (see above).
 
 **Credentials.** The Learner Lab issues temporary credentials (from "AWS Details") that expire with the session. Export them before each `plan` or `apply`; an expired token mid-apply leaves a partial apply that the next run completes.
 
@@ -167,8 +171,8 @@ Pick a neutral name (not a real brand). Payment needs a card; decide who pays an
 
 Missing decisions or artefacts. An agent working on a stage must resolve these (or ask the user) before writing or applying it, and tick them off here.
 
-**Stage 0: tooling**
-- [ ] Update the status line once Terraform is installed and `validate` passes.
+**Stage 0: tooling** (guide: [aws-terraform-stage-0.md](aws-terraform-stage-0.md))
+- [x] Update the status line once Terraform is installed and `validate` passes (28 September 2026: Terraform 1.16.4, AWS provider 6.66.0 locked, `fmt` and `validate` pass; lock records `linux_amd64`, `windows_amd64`, `darwin_arm64` and `darwin_amd64` for the team's Fedora, Mint, Windows 11 and Mac devices).
 
 **Stage 1: network, S3, ECR, secrets, logs, SNS**
 - [x] Instance placement without NAT: public subnets (decided above).
