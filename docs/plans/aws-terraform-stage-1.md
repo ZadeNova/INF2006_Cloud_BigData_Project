@@ -13,7 +13,7 @@ Part of [aws-terraform.md](aws-terraform.md). Built step by step: each step adds
 | 5 | `monitoring.tf` | Log group (7 days), SNS topic and email subscription | written |
 | 6 | `outputs.tf` | Values later stages and commands need | written |
 | 7 | Lab checks | Recorded in `evidence/aws-capability-record.md` | done (29 September 2026): SSM, secret create/retrieve/delete, WAF, Budgets all allowed under `LabInstanceProfile`, tested from a throwaway EC2 instance, terminated afterward |
-| 8 | `plan`, review, `apply`, acceptance | Push the image; set secret values from the CLI | review gate closed (29 September 2026, `8f2e89b`, no blocking findings; [log](../reviews/aws-terraform.md#stage-1-network-security-groups-storage-secrets-monitoring)); applied 29 September 2026 after the S3 fix below, acceptance passed ([runbook](../../evidence/aws-build-runbook.md)); image push and secret values pending |
+| 8 | `plan`, review, `apply`, acceptance | Push the image; set secret values from the CLI | review gate closed (29 September 2026, `8f2e89b`, no blocking findings; [log](../reviews/aws-terraform.md#stage-1-network-security-groups-storage-secrets-monitoring)); applied 29 September 2026 after the S3 fix below, acceptance passed; image `c19d547` pushed and non-database secret fields set (29 September 2026). **Stage 1 complete** ([runbook](../../evidence/aws-build-runbook.md)) |
 
 ## Decisions for this stage
 

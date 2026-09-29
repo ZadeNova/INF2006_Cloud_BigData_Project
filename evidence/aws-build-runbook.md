@@ -35,7 +35,16 @@ The `aws_s3_bucket` resource makes this call on every read, so no later plan cou
 | SNS email subscription confirmed | `aws sns list-subscriptions-by-topic` | a subscription ARN, not `PendingConfirmation` | Pass, after confirming. The confirmation email was delivered to **Gmail spam**; the sender was marked not-spam so stage 4 alarm emails arrive |
 | No drift after apply | `terraform plan` | no changes | Pass (the stage 1b plan refreshed all 32 existing resources with no changes) |
 
-**Not yet done in stage 1:** push the image to ECR (step 8.5) and set the secret values that do not depend on RDS (step 8.6).
+### Image and secret values (step 8.5 and 8.6)
+
+| Step | Command | Result |
+|---|---|---|
+| Build and push the image | `docker build -t <ecr-url>:<git-sha> -f ../Dockerfile ..`, then `docker push` after `aws ecr get-login-password \| docker login` | Pushed `inf2006-grp21-app:c19d547` (the commit it was built from), digest `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481`. The repository's tags are immutable, so this tag always means this image |
+| Set the non-database secret fields | `put-secret-value` per secret; passwords and `DJANGO_SECRET_KEY` generated with Python's `secrets` module and passed through shell variables, never typed or printed | Pass. Keys present (checked with `jq 'keys'`, which prints no values): `web` = `DJANGO_SECRET_KEY`, `POSTGRES_USER`, `POSTGRES_PASSWORD`; `migration` and `trainer` = `POSTGRES_USER`, `POSTGRES_PASSWORD`; `bootstrap` = `MIGRATION_USER`, `MIGRATION_PASSWORD` |
+
+Database logins chosen: `inf2006_web` (runtime), `inf2006_migration` (schema owner), `inf2006_trainer` (read-only). They do not exist in a database yet; `db_bootstrap` creates them in stage 2 with these passwords. **Do not regenerate these values after bootstrap**: the database would keep the old passwords. Stage 2 reads each secret back and adds `POSTGRES_HOST` and `POSTGRES_DB`, plus `BOOTSTRAP_USER`/`BOOTSTRAP_PASSWORD` copied from the secret RDS creates for its master login.
+
+**Stage 1 complete.**
 
 ### Cost
 
