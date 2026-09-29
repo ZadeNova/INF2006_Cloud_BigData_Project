@@ -11,7 +11,7 @@ variable "availability_zones" {
 }
 
 variable "app_hostname" {
-  description = "Public HTTPS hostname of the shop (for example shop.example.xyz). Null until the domain exists; S3 CORS is only created once it is set."
+  description = "Public HTTPS hostname of the shop (for example shop.example.xyz); used for the certificate, DJANGO_ALLOWED_HOSTS and the CSRF trusted origin."
   type        = string
   default     = null
 }

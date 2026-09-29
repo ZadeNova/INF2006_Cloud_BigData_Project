@@ -8,7 +8,7 @@ Part of [aws-terraform.md](aws-terraform.md). Built step by step: each step adds
 |---|---|---|---|
 | 1 | `variables.tf` (AZs), `network.tf` | VPC, internet gateway, 2 public + 2 private subnets in 2 AZs, route tables | written |
 | 2 | `security_groups.tf` | `sg-alb`, `sg-app`, `sg-db`; the VPC's default security group emptied | written |
-| 3 | `storage.tf` | S3 bucket (Block Public Access, versioning, SSE-S3, TLS-only policy, CORS); ECR repository | written |
+| 3 | `storage.tf` | S3 bucket (Block Public Access, versioning, SSE-S3, TLS-only policy); ECR repository. The CORS rule was removed before it was ever created (see the stage 2 plan) | written |
 | 4 | `secrets.tf` | Four empty secrets (below) | written |
 | 5 | `monitoring.tf` | Log group (7 days), SNS topic and email subscription | written |
 | 6 | `outputs.tf` | Values later stages and commands need | written |
@@ -33,7 +33,7 @@ Part of [aws-terraform.md](aws-terraform.md). Built step by step: each step adds
 
 ## S3 bucket: created with the CLI (lab constraint, 29 September 2026)
 
-The first apply created 32 of 39 resources, then failed reading the new bucket back: the Learner Lab's service control policy denies `s3:GetBucketObjectLockConfiguration`, which the `aws_s3_bucket` resource calls on every read. A probe of 16 bucket read calls showed this is the **only** denied one. So the bucket itself is created once with the CLI and looked up with `data "aws_s3_bucket"`; its public access block, ownership controls, versioning, encryption, lifecycle rule, TLS-only policy and CORS remain Terraform resources. A `removed` block (with `destroy = false`) makes Terraform forget the bucket resource from the failed apply without deleting the bucket.
+The first apply created 32 of 39 resources, then failed reading the new bucket back: the Learner Lab's service control policy denies `s3:GetBucketObjectLockConfiguration`, which the `aws_s3_bucket` resource calls on every read. A probe of 16 bucket read calls showed this is the **only** denied one. So the bucket itself is created once with the CLI and looked up with `data "aws_s3_bucket"`; its public access block, ownership controls, versioning, encryption, lifecycle rule and TLS-only policy remain Terraform resources. A `removed` block (with `destroy = false`) makes Terraform forget the bucket resource from the failed apply without deleting the bucket.
 
 On a fresh account (for example a groupmate's fallback), before the first apply:
 

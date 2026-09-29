@@ -1,5 +1,6 @@
 # ---------- S3: one private bucket ----------
-# Prefixes: data/ (dataset), exports/ (analytics), media/images/, media/models/ (.glb).
+# Prefixes: data/ (dataset), exports/ (analytics). No CORS: the .glb models and product images are
+# static files in the app image, served by WhiteNoise with hashed, cache-forever URLs, not from S3.
 #
 # Lab constraint (29 September 2026): the Learner Lab's service control policy denies
 # s3:GetBucketObjectLockConfiguration, which the aws_s3_bucket resource calls on every read, so
@@ -108,20 +109,6 @@ resource "aws_s3_bucket_policy" "main" {
 
   # S3 rejects simultaneous changes to one bucket's settings; apply the policy after public access is blocked.
   depends_on = [aws_s3_bucket_public_access_block.main]
-}
-
-# The 3D viewer fetches .glb models from JavaScript, which needs CORS; <img> tags do not.
-# Only the shop's own HTTPS origin, read-only. Created once var.app_hostname is set.
-resource "aws_s3_bucket_cors_configuration" "main" {
-  count  = var.app_hostname == null ? 0 : 1
-  bucket = data.aws_s3_bucket.main.id
-
-  cors_rule {
-    allowed_methods = ["GET", "HEAD"]
-    allowed_origins = ["https://${var.app_hostname}"]
-    allowed_headers = ["*"]
-    max_age_seconds = 3600
-  }
 }
 
 # ---------- ECR: the app image registry ----------

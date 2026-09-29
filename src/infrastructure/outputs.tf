@@ -31,7 +31,7 @@ output "s3_bucket_name" {
 }
 
 output "s3_bucket_arn" {
-  description = "For writing IAM reference policies and the CORS/media test commands."
+  description = "For writing IAM reference policies and the S3 access tests."
   value       = data.aws_s3_bucket.main.arn
 }
 
