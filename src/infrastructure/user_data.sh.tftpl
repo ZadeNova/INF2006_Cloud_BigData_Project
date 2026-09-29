@@ -1,0 +1,89 @@
+#!/bin/bash
+# User data: runs once, as root, on each instance's first boot (cloud-init). Output goes to
+# /var/log/cloud-init-output.log; read it over Session Manager if an instance never gets healthy.
+#
+# Terraform fills in the template values before AWS receives this script. Everything
+# here is visible to anyone who can read the launch template, so it holds no secret values. Only
+# secret names; the app fetches its own secret at startup with the instance role.
+set -euo pipefail
+
+# Up to 3 tries, 10 s apart, for boot-time hiccups (package mirrors, metadata, ECR). Stops the script with a
+# clear message in the cloud-init log if all three fail.
+retry() {
+  for attempt in 1 2 3; do
+    "$@" && return 0
+    [ "$attempt" -lt 3 ] && sleep 10
+  done
+  echo "user data: failed after 3 attempts: $*" >&2
+  return 1
+}
+
+# ---- 1. Docker ----
+retry dnf install -y docker
+systemctl enable --now docker
+
+# ---- 2. Who am I? (IMDSv2: get a short-lived token, then ask with it) ----
+# -f makes curl fail on an HTTP error instead of returning the error page as if it were the answer.
+TOKEN=$(retry curl -fsS -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 300")
+imds() { retry curl -fsS -H "X-aws-ec2-metadata-token: $TOKEN" "http://169.254.169.254/latest/meta-data/$1"; }
+PRIVATE_IP=$(imds local-ipv4)
+INSTANCE_ID=$(imds instance-id)
+
+# ---- 3 and 4. Log in to ECR with the instance role and pull the image by digest ----
+ecr_pull() {
+  aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_registry}" \
+    && docker pull "${image_ref}"
+}
+retry ecr_pull
+
+# ---- Non-secret settings shared by the web container and the one-off jobs ----
+install -d -m 0755 /etc/inf2006
+cat > /etc/inf2006/app.env <<EOF
+DJANGO_ENV=production
+AWS_REGION=${region}
+APP_RELEASE_ID=${release_id}
+DJANGO_ALLOWED_HOSTS=${app_hostname}
+DJANGO_CSRF_TRUSTED_ORIGINS=https://${app_hostname}
+DJANGO_HEALTH_PROBE_HOST=$PRIVATE_IP:8000
+DJANGO_TRUST_PROXY=${trust_proxy}
+DJANGO_HSTS_SECONDS=3600
+EOF
+chmod 0644 /etc/inf2006/app.env
+
+# ---- 5. The web container ----
+# --restart unless-stopped: Docker restarts it after a crash (with growing delays) and after a reboot.
+# Until the database is bootstrapped and migrated, it fails at startup and restarts; that is expected.
+docker run -d --name web --restart unless-stopped -p 8000:8000 \
+  --env-file /etc/inf2006/app.env \
+  -e AWS_SECRET_ID="${secret_prefix}/web" \
+  --log-driver awslogs \
+  --log-opt awslogs-region="${region}" \
+  --log-opt awslogs-group="${log_group}" \
+  --log-opt awslogs-stream="web-$INSTANCE_ID" \
+  "${image_ref}"
+
+# ---- 6. Helper for the one-off jobs, run by hand over Session Manager ----
+#   sudo app-job bootstrap python tools/db_bootstrap.py
+#   sudo app-job migration python manage.py migrate --noinput
+#   sudo app-job web python manage.py check_database
+# Each run is a throwaway container holding only that job's secret name.
+cat > /usr/local/bin/app-job <<EOF
+#!/bin/bash
+set -euo pipefail
+job="\$${1:-}"; [ \$# -gt 0 ] && shift
+case "\$job" in
+  web|migration|bootstrap) ;;
+  *) echo "usage: app-job web|migration|bootstrap <command...>" >&2; exit 2 ;;
+esac
+exec docker run --rm \\
+  --env-file /etc/inf2006/app.env \\
+  -e AWS_SECRET_ID="${secret_prefix}/\$job" \\
+  --log-driver awslogs \\
+  --log-opt awslogs-region="${region}" \\
+  --log-opt awslogs-group="${log_group}" \\
+  --log-opt awslogs-stream="job-\$job-$INSTANCE_ID-\$(date -u +%Y%m%dT%H%M%SZ)" \\
+  "${image_ref}" "\$@"
+EOF
+chmod 0755 /usr/local/bin/app-job
+
+echo "user data finished: web container started from ${image_ref}"

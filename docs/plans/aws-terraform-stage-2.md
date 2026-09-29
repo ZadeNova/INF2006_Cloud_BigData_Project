@@ -17,7 +17,7 @@ With no ALB yet, the web container may restart until the database is ready. That
 | 3 | `user_data.sh.tftpl` | Boot script: install Docker, log in to ECR, read the private IP from IMDSv2, run the web image by digest with the `awslogs` driver |
 | 4 | `compute.tf` | Launch template (IMDSv2 required, encrypted EBS, public IP, `sg-app`), ASG min = max = desired = 1 |
 | 5 | `outputs.tf` | RDS endpoint, the RDS-managed master secret ARN, ASG name |
-| 6 | `sql/trainer_role.sql` (under `src/infrastructure/`) | The two-step trainer login (see A1) |
+| 6 | `sql/trainer_role_create.sql`, `sql/trainer_role_grant.sql` (under `src/infrastructure/`) | The two-step trainer login (see A1): part 1 as the master, part 2 as the migration owner |
 | 7 | Review gate, then plan, apply, the one-off jobs and acceptance | |
 
 ## RDS settings
@@ -68,6 +68,24 @@ From `config/settings.py` and `config/secrets.py`. None of these is secret; the 
 2. `docker run --rm -e AWS_SECRET_ID=inf2006-grp21/bootstrap -e AWS_REGION=us-east-1 <image> python tools/db_bootstrap.py`
 3. `docker run --rm -e AWS_SECRET_ID=inf2006-grp21/migration ... <image> python manage.py migrate --noinput`
 4. Trainer login: part 1 as the master, part 2 as the migration owner (`sql/trainer_role.sql`).
+   The app image has no `psql` and `src/infrastructure/` is not in the image, so the two files in
+   `src/infrastructure/sql/` go through the bucket. From the laptop:
+   `aws s3 cp src/infrastructure/sql/ s3://<bucket>/ops/sql/ --recursive`. Then, on the instance:
+   ```bash
+   sudo dnf install -y postgresql17 jq
+   sudo docker run --rm --entrypoint cat <image_ref> /app/certs/rds-global-bundle.pem > /tmp/rds-ca.pem   # the vetted CA bundle
+   aws s3 cp s3://<bucket>/ops/sql/ /tmp/sql/ --recursive
+   s() { aws secretsmanager get-secret-value --secret-id "inf2006-grp21/$1" --query SecretString --output text; }
+   T=$(s trainer); B=$(s bootstrap); M=$(s migration)
+   HOST=$(jq -r .POSTGRES_HOST <<<"$T"); DB=$(jq -r .POSTGRES_DB <<<"$T")
+   export TRAINER_USER=$(jq -r .POSTGRES_USER <<<"$T") TRAINER_PASSWORD=$(jq -r .POSTGRES_PASSWORD <<<"$T") APP_DB=$DB
+   PGPASSWORD=$(jq -r .BOOTSTRAP_PASSWORD <<<"$B") psql "host=$HOST dbname=postgres user=$(jq -r .BOOTSTRAP_USER <<<"$B") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_create.sql
+   PGPASSWORD=$(jq -r .POSTGRES_PASSWORD <<<"$M") psql "host=$HOST dbname=$DB user=$(jq -r .POSTGRES_USER <<<"$M") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_grant.sql
+   unset T B M TRAINER_PASSWORD
+   ```
+   Verified against a disposable PostgreSQL 17 imitating RDS (29 September 2026): part 1 creates the
+   login with every privilege flag false and is idempotent; part 2 leaves `trainer_can_write = 0`; the
+   trainer can read existing and later-created tables; `INSERT` and `CREATE TABLE` are refused.
 5. Restart the web container; `python manage.py check_database` with the `web` secret.
 6. Dataset import (`import_dataset` from S3) is **stage 3**, once the app is reachable and can be checked end to end.
 

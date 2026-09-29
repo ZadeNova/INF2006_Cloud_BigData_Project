@@ -25,3 +25,20 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket created with the CLI (the lab denies a read the aws_s3_bucket resource needs). Must start with the name prefix, e.g. inf2006-grp21-data-<suffix>."
   type        = string
 }
+
+variable "db_instance_class" {
+  description = "RDS instance class. db.t4g.micro is the smallest current burstable class; use db.t3.micro if the lab refuses it."
+  type        = string
+  default     = "db.t4g.micro"
+}
+
+variable "image_tag" {
+  description = "Git-SHA tag of the app image in ECR to deploy (for example c19d547). Terraform resolves it to the immutable digest."
+  type        = string
+}
+
+variable "instance_type" {
+  description = "App instance type. t3.small: 2 vCPU, 2 GiB, enough for Gunicorn with 2 workers."
+  type        = string
+  default     = "t3.small"
+}

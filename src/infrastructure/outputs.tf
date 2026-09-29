@@ -54,3 +54,30 @@ output "sns_topic_arn" {
   description = "Alarm topic, wired to CloudWatch alarms in stage 4."
   value       = aws_sns_topic.alarms.arn
 }
+
+# ---- Stage 2 ----
+
+output "db_host" {
+  description = "RDS endpoint hostname: the POSTGRES_HOST value added to the web, migration, trainer and bootstrap secrets."
+  value       = aws_db_instance.main.address
+}
+
+output "db_engine_version" {
+  description = "The actual PostgreSQL version RDS chose within major 17, for the runbook."
+  value       = aws_db_instance.main.engine_version_actual
+}
+
+output "db_master_secret_arn" {
+  description = "The secret RDS created for the master login. Copy its username/password into the bootstrap secret right before each db_bootstrap run (it rotates every 7 days)."
+  value       = aws_db_instance.main.master_user_secret[0].secret_arn
+}
+
+output "asg_name" {
+  description = "Auto Scaling group name, to find its instance for Session Manager."
+  value       = aws_autoscaling_group.app.name
+}
+
+output "image_digest" {
+  description = "The exact image the instances run (from var.image_tag)."
+  value       = data.aws_ecr_image.app.image_digest
+}
