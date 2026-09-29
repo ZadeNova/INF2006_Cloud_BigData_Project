@@ -14,6 +14,13 @@ resource "aws_launch_template" "app" {
   instance_type          = var.instance_type
   update_default_version = true
 
+  # t3 from a launch template defaults to "unlimited" credits, billed extra under sustained load. Standard
+  # keeps the cost fixed; under a long load test the instance slows to its baseline, and scaling out is
+  # the intended response (state this in the scaling results).
+  credit_specification {
+    cpu_credits = "standard"
+  }
+
   iam_instance_profile {
     arn = data.aws_iam_instance_profile.lab.arn
   }

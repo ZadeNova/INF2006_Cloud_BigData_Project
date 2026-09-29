@@ -123,20 +123,48 @@ resource "aws_ecr_repository" "app" {
   }
 }
 
-# Keep the 10 newest images; older ones are deleted automatically.
+# Images deployed are tagged release-<git-sha> (an extra tag on the same image; tags stay immutable) and
+# terraform.tfvars points image_tag at it. ECR checks rules in priority order, and an image matching a
+# higher-priority rule's tag filter cannot be expired by a lower one. So the deployed image and the 4
+# releases before it (rollback targets) are never deleted by count or age.
 resource "aws_ecr_lifecycle_policy" "app" {
   repository = aws_ecr_repository.app.name
 
   policy = jsonencode({
-    rules = [{
-      rulePriority = 1
-      description  = "Keep the last 10 images"
-      selection = {
-        tagStatus   = "any"
-        countType   = "imageCountMoreThan"
-        countNumber = 10
-      }
-      action = { type = "expire" }
-    }]
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Keep the 5 newest releases"
+        selection = {
+          tagStatus     = "tagged"
+          tagPrefixList = ["release-"]
+          countType     = "imageCountMoreThan"
+          countNumber   = 5
+        }
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 2
+        description  = "Delete untagged images after 1 day"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 1
+        }
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 3
+        description  = "Delete non-release builds after 30 days"
+        selection = {
+          tagStatus   = "any"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 30
+        }
+        action = { type = "expire" }
+      },
+    ]
   })
 }

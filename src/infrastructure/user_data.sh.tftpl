@@ -50,22 +50,11 @@ DJANGO_HSTS_SECONDS=3600
 EOF
 chmod 0644 /etc/inf2006/app.env
 
-# ---- 5. The web container ----
-# --restart unless-stopped: Docker restarts it after a crash (with growing delays) and after a reboot.
-# Until the database is bootstrapped and migrated, it fails at startup and restarts; that is expected.
-docker run -d --name web --restart unless-stopped -p 8000:8000 \
-  --env-file /etc/inf2006/app.env \
-  -e AWS_SECRET_ID="${secret_prefix}/web" \
-  --log-driver awslogs \
-  --log-opt awslogs-region="${region}" \
-  --log-opt awslogs-group="${log_group}" \
-  --log-opt awslogs-stream="web-$INSTANCE_ID" \
-  "${image_ref}"
-
-# ---- 6. Helper for the one-off jobs, run by hand over Session Manager ----
-#   sudo app-job bootstrap python tools/db_bootstrap.py
-#   sudo app-job migration python manage.py migrate --noinput
-#   sudo app-job web python manage.py check_database
+# ---- 5. Helper for the one-off jobs, run by hand over Session Manager ----
+# Written before the web container starts, so it exists even if starting the web container fails.
+#   sudo /usr/local/bin/app-job bootstrap python tools/db_bootstrap.py
+#   sudo /usr/local/bin/app-job migration python manage.py migrate --noinput
+#   sudo /usr/local/bin/app-job web python manage.py check_database
 # Each run is a throwaway container holding only that job's secret name.
 cat > /usr/local/bin/app-job <<EOF
 #!/bin/bash
@@ -85,5 +74,23 @@ exec docker run --rm \\
   "${image_ref}" "\$@"
 EOF
 chmod 0755 /usr/local/bin/app-job
+
+# ---- 6. The web container ----
+# --restart unless-stopped: Docker restarts it after a crash (with growing delays) and after a reboot.
+# Until the database is bootstrapped and migrated, it fails at startup and restarts; that is expected.
+# A failed start (for example creating the log stream) can leave a stopped container named "web" behind;
+# remove it before each attempt so the retry does not fail on the name.
+start_web() {
+  docker rm -f web >/dev/null 2>&1 || true
+  docker run -d --name web --restart unless-stopped -p 8000:8000 \
+  --env-file /etc/inf2006/app.env \
+  -e AWS_SECRET_ID="${secret_prefix}/web" \
+  --log-driver awslogs \
+  --log-opt awslogs-region="${region}" \
+  --log-opt awslogs-group="${log_group}" \
+  --log-opt awslogs-stream="web-$INSTANCE_ID" \
+    "${image_ref}"
+}
+retry start_web
 
 echo "user data finished: web container started from ${image_ref}"

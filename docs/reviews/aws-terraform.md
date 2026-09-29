@@ -46,3 +46,27 @@ Change (uncommitted at the time of this entry; committed with this log): `aws_s3
 Not re-sent through the gate: the change swaps how the bucket is referenced and leaves every reviewed security setting identical. Its plan was checked by hand in the build session (6 to add, 0 to change, 0 to destroy, the bucket "will no longer be managed… but will not be destroyed", all 32 existing resources refreshed with no drift) and applied. Logged as a same-session exception.
 
 Acceptance after the apply: subnets in `us-east-1a` and `us-east-1b`; anonymous request to the bucket returned 403; SNS email subscription pending confirmation at the time of the check.
+
+## Stage 2: RDS and the first app instance
+
+Date: 29 September 2026.
+Snapshot: `erfan/aws` at `67dc066` (diff `f634a9c..67dc066`).
+Reviewer: fresh-session Claude Opus 5.5 (high effort), the independent review gate named in the plan.
+Evidence: static read of the diff against `config/secrets.py`, `config/settings.py`, `tools/db_bootstrap.py` and `AWS_INFRASTRUCTURE.md`; the user data rendered with `terraform console` and checked with `bash -n`, including the generated `app-job` helper. No AWS calls.
+
+**Result: gate passed. No Critical or High findings; nothing blocks the first apply.** Checked and correct: RDS private, encrypted, TLS forced, no initial database, clean teardown, export log group created first; user data holds only secret names and works with AL2023 defaults; IMDSv2 with hop limit 2; encrypted root volume; public IP with `sg-app` only; tags reach instances and volumes; each job's secret matches the field set `load_environment` requires; job order bootstrap, migrate, trainer part 1, part 2.
+
+### Findings
+
+| ID | Severity | Finding | Disposition |
+|---|---|---|---|
+| M1 | Medium | `sql/trainer_role_grant.sql` granted `SELECT` on all tables plus default privileges, exposing `django_session` (session takeover) and `auth_user.password` to the trainer login | **Fixed.** Grants only the 9 tables the trainer and verifier read (confirmed from `analytics/segment_customers.py` and `verify_refresh.py`) plus `auth_user (id, is_staff, is_superuser)`; no default privileges. Re-tested on PostgreSQL 17: the real segment query runs; `django_session`, `auth_user.password`, `SELECT *` on `auth_user`, an ungranted table and `INSERT` are refused |
+| L1 | Low | The plan's job commands used raw `docker run` without `--env-file` (migrate would fail on settings); stale file names and status | **Fixed.** Commands use the `app-job` helper; names and status updated |
+| L2 | Low | `jq -r` prints `null` for a missing key | **Fixed.** `jq -e` inside `set -e` blocks (`jq -e` alone still prints `null`, found while testing the fix); the laptop steps print field lists and `match`/`DIFFER` checks. Merge and check commands tested against the app's own field sets |
+| L3 | Low | A failing `CREATE/ALTER ROLE … PASSWORD` statement is logged in full and exported to CloudWatch | **Accepted.** The scripts check before creating; `db_bootstrap` has the same exposure; error-statement logging is kept for the outage demo. Acceptance step: search the RDS log group for `PASSWORD` after the jobs, rotate if found |
+| L4 | Low | The copied master password stays in the bootstrap secret; trainer part 1 reused it | **Fixed.** Part 1 reads the RDS-managed secret directly; `BOOTSTRAP_USER/PASSWORD` are set to `replace-before-bootstrap` except for the bootstrap run itself, so a stray run fails safely |
+| L5 | Low | A failed web container start stopped user data before the `app-job` helper was written | **Fixed.** The helper is written first; the web start is retried, removing a leftover `web` container between attempts |
+| L6 | Low | t3 launch-template instances default to unlimited CPU credits | **Fixed.** `credit_specification { cpu_credits = "standard" }`; the throttling behaviour under long load tests is to be stated in the scaling results |
+| L7 | Low | `sudo app-job` may not be on `sudo`'s path | **Fixed.** Full path `/usr/local/bin/app-job` in the plan and the user data comments |
+| L8 | Low | The count-only ECR lifecycle rule (keep 10) could delete the deployed image | **Fixed.** Deployed images get an added `release-<sha>` tag and `image_tag` points at it; the lifecycle policy keeps the 5 newest releases at the highest priority (lower rules cannot expire them), deletes untagged images after 1 day and other builds after 30 days |
+| Note | Info | `trust_proxy` is baked into the launch template; switching it needs an instance refresh or requests loop on redirect | Added to the stage 3 open items |

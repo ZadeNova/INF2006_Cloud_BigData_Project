@@ -1,6 +1,6 @@
 # Stage 2 plan: RDS, and the first app instance for one-off jobs
 
-Part of [aws-terraform.md](aws-terraform.md). Status (29 September 2026): **planned, not started.** Same routine as stage 1: each step adds one file, is explained, and passes `fmt` and `validate`; the review gate reads the code before the first apply; nothing is applied until the last step.
+Part of [aws-terraform.md](aws-terraform.md). Status (29 September 2026): **code written and committed (`67dc066`), review gate passed with no blocking findings, review fixes applied; not yet planned or applied.** Same routine as stage 1: each step adds one file, is explained, and passes `fmt` and `validate`; the review gate reads the code before the first apply; nothing is applied until the last step.
 
 ## Scope change from the main plan
 
@@ -54,47 +54,93 @@ From `config/settings.py` and `config/secrets.py`. None of these is secret; the 
 
 ## Fixes from the stage 1 review, done in this stage
 
-- **A1: trainer login.** Nothing creates `inf2006_trainer`. The migration owner cannot create logins (bootstrap makes it `NOCREATEROLE`), so `sql/trainer_role.sql` has two parts: as the master, `CREATE ROLE inf2006_trainer LOGIN` with no other rights; as the migration owner, `GRANT CONNECT`, schema `USAGE`, `SELECT` on all tables and matching default privileges. Security test: an `INSERT` as the trainer fails with `permission denied`.
+- **A1: trainer login.** Nothing creates `inf2006_trainer`. The migration owner cannot create logins (bootstrap makes it `NOCREATEROLE`), so there are two files: `sql/trainer_role_create.sql` (as the master: `CREATE ROLE inf2006_trainer LOGIN` with no other rights) and `sql/trainer_role_grant.sql` (as the migration owner). **Revised after the stage 2 review (M1):** part 2 grants `SELECT` on only the 9 tables the trainer and verifier read, plus `id`, `is_staff`, `is_superuser` of `auth_user`, and no default privileges. `django_session` (whose keys would allow session takeover) and password hashes stay unreadable. Security tests: `INSERT`, `django_session` and `auth_user.password` are all refused.
 - **A3: secret fields.** The secret loader requires **exactly** each entrypoint's fields and refuses extra ones (`config/secrets.py`):
   - `bootstrap` needs `POSTGRES_DB/HOST/USER/PASSWORD` + `MIGRATION_USER/PASSWORD` + `BOOTSTRAP_USER/PASSWORD`. Its `POSTGRES_USER/PASSWORD` must equal `web`'s; its `MIGRATION_*` must equal `migration`'s.
   - **A3b (found while planning):** `migrate` is a Django command, so it loads the full app field set. The `migration` secret therefore also needs **`DJANGO_SECRET_KEY`**, copied from `web`. Without it, `migrate` fails at startup.
   - `web` and `migration` need `POSTGRES_DB/HOST` added; `trainer` needs `POSTGRES_DB/HOST` added and nothing else.
   - All updates read the current secret back and add fields; **no password is regenerated** (the runbook warning from stage 1). A `jq` check prints only `match`/`differ` for each duplicated value before bootstrap runs.
-- **A4: rotating master password.** RDS rotates its managed master secret every 7 days. Copy `username`/`password` from it into `BOOTSTRAP_USER/PASSWORD` **immediately before each bootstrap run**, never ahead of time.
+- **A4: rotating master password.** RDS rotates its managed master secret every 7 days. Copy `username`/`password` from it into `BOOTSTRAP_USER/PASSWORD` **immediately before each bootstrap run**, and set both back to a `replace-…` placeholder straight after (review L4): the secret loader refuses placeholders, so a stray bootstrap run fails safely. The trainer SQL reads the RDS secret directly and never uses the copy.
 
-## One-off job order (over Session Manager, on the ASG instance)
+## One-off job order
 
-1. Complete the secrets (A3, A4) and run the match check.
-2. `docker run --rm -e AWS_SECRET_ID=inf2006-grp21/bootstrap -e AWS_REGION=us-east-1 <image> python tools/db_bootstrap.py`
-3. `docker run --rm -e AWS_SECRET_ID=inf2006-grp21/migration ... <image> python manage.py migrate --noinput`
-4. Trainer login: part 1 as the master, part 2 as the migration owner (`sql/trainer_role.sql`).
-   The app image has no `psql` and `src/infrastructure/` is not in the image, so the two files in
-   `src/infrastructure/sql/` go through the bucket. From the laptop:
-   `aws s3 cp src/infrastructure/sql/ s3://<bucket>/ops/sql/ --recursive`. Then, on the instance:
-   ```bash
-   sudo dnf install -y postgresql17 jq
-   sudo docker run --rm --entrypoint cat <image_ref> /app/certs/rds-global-bundle.pem > /tmp/rds-ca.pem   # the vetted CA bundle
-   aws s3 cp s3://<bucket>/ops/sql/ /tmp/sql/ --recursive
-   s() { aws secretsmanager get-secret-value --secret-id "inf2006-grp21/$1" --query SecretString --output text; }
-   T=$(s trainer); B=$(s bootstrap); M=$(s migration)
-   HOST=$(jq -r .POSTGRES_HOST <<<"$T"); DB=$(jq -r .POSTGRES_DB <<<"$T")
-   export TRAINER_USER=$(jq -r .POSTGRES_USER <<<"$T") TRAINER_PASSWORD=$(jq -r .POSTGRES_PASSWORD <<<"$T") APP_DB=$DB
-   PGPASSWORD=$(jq -r .BOOTSTRAP_PASSWORD <<<"$B") psql "host=$HOST dbname=postgres user=$(jq -r .BOOTSTRAP_USER <<<"$B") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_create.sql
-   PGPASSWORD=$(jq -r .POSTGRES_PASSWORD <<<"$M") psql "host=$HOST dbname=$DB user=$(jq -r .POSTGRES_USER <<<"$M") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_grant.sql
-   unset T B M TRAINER_PASSWORD
-   ```
-   Verified against a disposable PostgreSQL 17 imitating RDS (29 September 2026): part 1 creates the
-   login with every privilege flag false and is idempotent; part 2 leaves `trainer_can_write = 0`; the
-   trainer can read existing and later-created tables; `INSERT` and `CREATE TABLE` are refused.
-5. Restart the web container; `python manage.py check_database` with the `web` secret.
-6. Dataset import (`import_dataset` from S3) is **stage 3**, once the app is reachable and can be checked end to end.
+Values from the review: `jq -e` everywhere, inside `set -e` blocks, so a missing key stops the commands instead of becoming the text `null` (L2; `jq -e` alone still prints `null`, it only sets the exit code). On the laptop, the field-list and `match` checks catch the same mistake; the helper is called by its full path, because `sudo`'s path may not include `/usr/local/bin` (L7). Secret values pass between commands through environment variables (`$ENV` in `jq`), never as command-line arguments. The application database is named `inf2006`.
+
+**0. Mark the image as a release (before the plan; review L8).** From `src/infrastructure/` on the laptop. `terraform.tfvars` then says `image_tag = "release-<sha>"`:
+```bash
+SHA=c19d547
+MANIFEST=$(aws ecr batch-get-image --repository-name inf2006-grp21-app --image-ids imageTag=$SHA --query 'images[0].imageManifest' --output text)
+aws ecr put-image --repository-name inf2006-grp21-app --image-tag "release-$SHA" --image-manifest "$MANIFEST" >/dev/null && echo "tagged release-$SHA"
+```
+
+**1. Complete the secrets (laptop, after apply).**
+```bash
+s()   { aws secretsmanager get-secret-value --secret-id "inf2006-grp21/$1" --query SecretString --output text; }
+put() { aws secretsmanager put-secret-value --secret-id "inf2006-grp21/$1" --secret-string "$2" >/dev/null && echo "$1 updated"; }
+export HOST=$(terraform output -raw db_host) DBNAME=inf2006
+export W=$(s web) M=$(s migration) T=$(s trainer) B=$(s bootstrap)
+put web       "$(jq -ecn '($ENV.W|fromjson) + {POSTGRES_HOST: $ENV.HOST, POSTGRES_DB: $ENV.DBNAME}')"
+put migration "$(jq -ecn '($ENV.M|fromjson) + {POSTGRES_HOST: $ENV.HOST, POSTGRES_DB: $ENV.DBNAME, DJANGO_SECRET_KEY: ($ENV.W|fromjson|.DJANGO_SECRET_KEY)}')"
+put trainer   "$(jq -ecn '($ENV.T|fromjson) + {POSTGRES_HOST: $ENV.HOST, POSTGRES_DB: $ENV.DBNAME}')"
+put bootstrap "$(jq -ecn '($ENV.B|fromjson) + {POSTGRES_HOST: $ENV.HOST, POSTGRES_DB: $ENV.DBNAME,
+  POSTGRES_USER: ($ENV.W|fromjson|.POSTGRES_USER), POSTGRES_PASSWORD: ($ENV.W|fromjson|.POSTGRES_PASSWORD),
+  BOOTSTRAP_USER: "replace-before-bootstrap", BOOTSTRAP_PASSWORD: "replace-before-bootstrap"}')"
+# Check: prints only match/DIFFER and the key names, never values.
+export W=$(s web) M=$(s migration) T=$(s trainer) B=$(s bootstrap)
+jq -rn '($ENV.W|fromjson) as $w | ($ENV.M|fromjson) as $m | ($ENV.B|fromjson) as $b | ($ENV.T|fromjson) as $t |
+  [["runtime login", $w.POSTGRES_USER == $b.POSTGRES_USER and $w.POSTGRES_PASSWORD == $b.POSTGRES_PASSWORD],
+   ["migration login", $m.POSTGRES_USER == $b.MIGRATION_USER and $m.POSTGRES_PASSWORD == $b.MIGRATION_PASSWORD],
+   ["signing key", $w.DJANGO_SECRET_KEY == $m.DJANGO_SECRET_KEY],
+   ["host and db", ([$w,$m,$t,$b] | map(.POSTGRES_HOST, .POSTGRES_DB) | unique | length) == 2]]
+  | .[] | "\(.[0]): \(if .[1] then "match" else "DIFFER" end)"'
+jq -rn '[$ENV.W, $ENV.M, $ENV.T, $ENV.B] | map(fromjson | keys | join(","))[]'
+unset W M T B
+```
+
+**2. Bootstrap.** Copy the master login in, run, then put the placeholder back straight away.
+```bash
+# laptop
+export B=$(s bootstrap) R=$(aws secretsmanager get-secret-value --secret-id "$(terraform output -raw db_master_secret_arn)" --query SecretString --output text)
+put bootstrap "$(jq -ecn '($ENV.B|fromjson) + {BOOTSTRAP_USER: ($ENV.R|fromjson|.username), BOOTSTRAP_PASSWORD: ($ENV.R|fromjson|.password)}')"; unset R
+# instance (Session Manager)
+sudo /usr/local/bin/app-job bootstrap python tools/db_bootstrap.py
+# laptop, immediately after
+export B=$(s bootstrap)
+put bootstrap "$(jq -ecn '($ENV.B|fromjson) + {BOOTSTRAP_USER: "replace-before-bootstrap", BOOTSTRAP_PASSWORD: "replace-before-bootstrap"}')"; unset B
+```
+
+**3. Migrate (instance).** `sudo /usr/local/bin/app-job migration python manage.py migrate --noinput`
+
+**4. Trainer login (part 1 as the master, part 2 as the migration owner).** The app image has no `psql` and `src/infrastructure/` is not in the image, so the SQL files go through the bucket. Laptop: `aws s3 cp sql/ "s3://$(terraform output -raw s3_bucket_name)/ops/sql/" --recursive`. Instance, with the bucket name and the master secret ARN pasted in (names, not secrets):
+```bash
+( set -euo pipefail   # jq -e still prints "null" for a missing key; its exit code must stop the block
+sudo dnf install -y postgresql17 jq
+sudo docker run --rm --entrypoint cat "$(sudo docker inspect --format '{{.Config.Image}}' web)" /app/certs/rds-global-bundle.pem > /tmp/rds-ca.pem
+aws s3 cp "s3://<bucket>/ops/sql/" /tmp/sql/ --recursive
+s() { aws secretsmanager get-secret-value --secret-id "$1" --query SecretString --output text; }
+T=$(s inf2006-grp21/trainer); M=$(s inf2006-grp21/migration); R=$(s "<db_master_secret_arn>")
+HOST=$(jq -er .POSTGRES_HOST <<<"$T"); DB=$(jq -er .POSTGRES_DB <<<"$T")
+export TRAINER_USER=$(jq -er .POSTGRES_USER <<<"$T") TRAINER_PASSWORD=$(jq -er .POSTGRES_PASSWORD <<<"$T") APP_DB=$DB
+PGPASSWORD=$(jq -er .password <<<"$R") psql "host=$HOST dbname=postgres user=$(jq -er .username <<<"$R") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_create.sql
+PGPASSWORD=$(jq -er .POSTGRES_PASSWORD <<<"$M") psql "host=$HOST dbname=$DB user=$(jq -er .POSTGRES_USER <<<"$M") sslmode=verify-full sslrootcert=/tmp/rds-ca.pem" -f /tmp/sql/trainer_role_grant.sql
+unset T M R TRAINER_PASSWORD
+)
+```
+Verified against a disposable PostgreSQL 17 imitating RDS (29 September 2026): part 1 creates the login with every privilege flag false and is idempotent; after part 2 the trainer's real segment query runs, while `django_session`, `auth_user.password`, `SELECT *` on `auth_user`, an ungranted table and `INSERT` are all refused.
+
+**5. Web.** `sudo docker restart web`, then `sudo /usr/local/bin/app-job web python manage.py check_database`.
+
+**6.** Dataset import (`import_dataset` from S3) is **stage 3**, once the app is reachable and can be checked end to end.
+
+**Accepted risk (review L3).** If a `CREATE/ALTER ROLE … PASSWORD` statement fails, PostgreSQL logs the whole statement, and the log export sends it to `/aws/rds/instance/inf2006-grp21-db/postgresql`. The scripts check before creating, so this is unlikely, and `db_bootstrap` has the same exposure. Error-statement logging stays on for the outage demo. After the jobs, search the RDS log group for `PASSWORD`; if a line appears, rotate that password and record it.
 
 ## Acceptance
 
 - RDS: private, encrypted, engine 17.x, `rds.force_ssl = 1`, backups 7 days (redacted `describe-db-instances`).
 - Instance: registered in SSM, no port 22, IMDSv2 required, container running from the ECR digest, logs arriving in `/inf2006-grp21/app`.
 - Bootstrap, migrate and the trainer SQL succeed. `check_database` passes as the runtime login.
-- Least privilege, tested: the runtime login cannot `CREATE TABLE`; the trainer login cannot `INSERT`.
+- Least privilege, tested: the runtime login cannot `CREATE TABLE`; the trainer login cannot `INSERT` or read `django_session` or `auth_user.password`.
+- RDS log group searched for `PASSWORD` after the jobs (L3).
 - Runbook entry with commits, redacted outputs and the lab balance.
 
 ## Open items (resolve before writing the step they affect)

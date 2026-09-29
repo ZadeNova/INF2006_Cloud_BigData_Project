@@ -33,7 +33,7 @@ variable "db_instance_class" {
 }
 
 variable "image_tag" {
-  description = "Git-SHA tag of the app image in ECR to deploy (for example c19d547). Terraform resolves it to the immutable digest."
+  description = "Release tag of the app image in ECR to deploy (release-<git-sha>, protected from lifecycle expiry). Terraform resolves it to the immutable digest."
   type        = string
 }
 

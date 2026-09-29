@@ -192,6 +192,7 @@ Missing decisions or artefacts. An agent working on a stage must resolve these (
 - [ ] Application change first, through the review gate: configurable `GUNICORN_WORKERS` (currently hard-coded to 2 in the Dockerfile).
 - [ ] Turn the boot script steps into `user_data.sh.tftpl`: Docker install, ECR login, image **digest**, environment variables, `awslogs` log driver, probe host from IMDSv2.
 - [ ] Target-group health check values (path, interval, healthy/unhealthy thresholds, deregistration delay); they set the recovery times measured in stage 5.
+- [ ] `trust_proxy` becomes `"true"` in `compute.tf` (from the stage 2 review). It is baked into the launch template, so running instances keep `false` until an **instance refresh**; behind the ALB, `false` with `SECURE_SSL_REDIRECT` sends every request into a redirect loop. Refresh the ASG as part of the stage 3 apply, and switch the ASG to ELB health checks in the same change.
 
 **Stage 4: scaling, alarms, WAF**
 - [ ] Target-tracking value (ALB requests per target) and cooldowns, chosen from the local Locust rehearsal.
