@@ -2,7 +2,7 @@
 
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
-**Status (27 September 2026):** The application runs locally in Docker as 42Factors, a small online shoe shop. Registration/login, the shoe catalogue with sizes, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh, the operator dashboard and the descriptive customer segmentation are implemented; earlier work was independently reviewed as recorded in [docs/reviews/](docs/reviews/), and the latest changes (shoe catalogue onward) are awaiting their logged independent review. Local functional, security and data/AI evidence was recorded on 26 September 2026, including a human browser walkthrough of the redesigned storefront; see [evidence/](evidence/README.md). **Nothing is deployed to AWS**: there is no Terraform, no load test and no scaling, recovery or monitoring evidence. See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
+**Status (30 September 2026):** The application runs locally in Docker as 42Factors, a small online shoe shop. Registration/login, the shoe catalogue with sizes, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh, the operator dashboard and the descriptive customer segmentation are implemented; earlier work was independently reviewed as recorded in [docs/reviews/](docs/reviews/), and the latest changes (shoe catalogue onward) are awaiting their logged independent review. Local functional, security and data/AI evidence was recorded on 26 September 2026, including a human browser walkthrough of the redesigned storefront; see [evidence/](evidence/README.md). **The application is not deployed to AWS.** The Terraform for the network, storage, secrets and logging (stage 1) is applied to the team's Learner Lab account, and the database and first instance (stage 2) are written and independently reviewed but not yet applied; there is no load test and no scaling, recovery or monitoring evidence ([build record](evidence/aws-build-runbook.md)). See the [implementation tracker](docs/IMPLEMENTATION_PLAN.md) for current progress.
 
 **Module:** INF2006 Cloud Computing & Big Data
 
@@ -74,7 +74,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). The local run is the only supported environment today; no AWS deployment exists yet.
+See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS build is Terraform in `src/infrastructure/` ([plan](docs/plans/aws-terraform.md)); the application itself is not deployed yet.
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -112,7 +112,7 @@ The delivered application must run locally without paid AWS access for marking. 
 | [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |
 | [Schema](docs/SCHEMA.md) / [API](docs/API.md) | Data constraints, checkout semantics and route contracts |
 | [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md) | Provenance, import behaviour, metrics and validation |
-| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) | Component responsibilities, AWS deployment and operations |
+| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [Terraform plan](docs/plans/aws-terraform.md) | Component responsibilities, AWS contract and operations, and the staged Terraform build with its decisions |
 | [Security](docs/SECURITY.md) / [testing](docs/TESTING.md) | Controls, verification and evidence requirements |
 | [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
 | [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
@@ -121,7 +121,7 @@ Backend implementation uses Astra Low and an independent diff review by Astra Me
 
 ## Testing and submission evidence
 
-The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL; the latest recorded full-suite result is kept in [tests/README.md](tests/README.md). Local functional, security and data/AI evidence is recorded in [evidence/](evidence/README.md), with data verification also in [analytics](analytics/README.md). Still planned: scaling, recovery/session continuity, private S3 access and monitoring; [test-resilience.md](evidence/test-resilience.md) and [monitoring.md](evidence/monitoring.md) are still templates.
+The automated suite under [tests/](tests/README.md) covers functional workflows, security controls, concurrent checkout and analytics correctness on real PostgreSQL; the latest recorded full-suite result is kept in [tests/README.md](tests/README.md). Local functional, security and data/AI evidence is recorded in [evidence/](evidence/README.md), with data verification also in [analytics](analytics/README.md). The cloud build is recorded in [aws-build-runbook.md](evidence/aws-build-runbook.md). Still planned: scaling, recovery/session continuity, monitoring and the deployed security checks; [test-resilience.md](evidence/test-resilience.md) and [monitoring.md](evidence/monitoring.md) are still templates.
 
 Keep [project_manifest.yaml](project_manifest.yaml) aligned with delivered functionality and stable evidence paths. Submission requires an 8-12 page report, runnable source, data documentation, repeatable analytics, test evidence, [contributions](TEAM_CONTRIBUTIONS.md) and [AI/source declarations](AI_USE_DECLARATION.md). No credentials, personal data or secret-containing Terraform state belong in the repository or ZIP.
 
@@ -134,7 +134,7 @@ DESIGN.md                    Visual reference
 README.md                    Human/marker entry point
 project_manifest.yaml        Submission metadata and evidence index
 docs/                        Contracts, tracker and review records
-src/                         Django application (infrastructure code not yet written)
+src/                         Django application; Terraform in src/infrastructure/
 data/                        Raw dataset, profile, provenance and data dictionary
 analytics/                   Shoe dataset builder, profiler, refresh verifier, ML segmentation and evaluation
 tests/                       Automated pytest suite (real PostgreSQL)
@@ -147,8 +147,8 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 
 ## Current limitations and continuation
 
-- AWS: a teammate-reported read-only probe (25 September 2026) reached the probed lab APIs, but creating resources, exact costs and HTTPS (a domain is being purchased) remain unverified. The infrastructure will be provisioned with Terraform ([plan](docs/plans/aws-terraform.md)); nothing is deployed.
-- Cloud evidence (deployment, scaling, recovery, monitoring, storage) is not started. Local functional and security evidence is recorded; resilience and monitoring evidence are not.
+- AWS: Terraform stages 0 and 1 are applied in the team's Learner Lab account (29 September 2026): network, security groups, one private S3 bucket, ECR, secrets, logs and an alarm topic; stage 2 (private RDS PostgreSQL 17 and the first app instance) is written and reviewed, not applied. The lab denies creating IAM roles, so instances run as the lab's `LabRole`, and it denies one S3 API call that the standard bucket resource needs, so the bucket is created with the CLI and its settings stay in Terraform. The domain `fourtytwofactors.me` is bought; HTTPS (an ACM certificate) is stage 3. The application is not deployed. Records: [plan](docs/plans/aws-terraform.md), [build runbook](evidence/aws-build-runbook.md), [review log](docs/reviews/aws-terraform.md).
+- Cloud evidence is at its start: the stage 1 build and its acceptance checks (subnets in two AZs, anonymous S3 access denied, alarm subscription confirmed) are recorded in the build runbook. Deployment behaviour, scaling, recovery and monitoring evidence are not yet recorded. Local functional and security evidence is recorded; resilience and monitoring evidence are not.
 - The storefront redesign and dashboard re-theme have a recorded human browser walkthrough (FUNC-02) but no independent code review. See [storefront redesign](docs/plans/storefront-redesign.md).
 - The source dataset has little weekly pattern, and the shoe mapping, sizes and prices are synthetic choices; in the shoe run 9 of 200 products had no recent sales. Dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.

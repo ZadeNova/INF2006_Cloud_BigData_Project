@@ -1,12 +1,12 @@
 # AWS infrastructure in Terraform
 
-Status (28 September 2026): stage 0 done. Terraform is installed on the apply laptop, `src/infrastructure/` holds `versions.tf`, `providers.tf`, `variables.tf` and the provider lock; no resources are defined and nothing is applied.
+Status (30 September 2026): **stages 0 and 1 are applied** to the user's Learner Lab account (38 resources managed; record in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md)). **Stage 2** (RDS and the first app instance) is written, has passed its independent review and is not applied ([stage 2 plan](aws-terraform-stage-2.md)). Stages 3 to 6 are not started. The application is not deployed. Review log: [reviews/aws-terraform.md](../reviews/aws-terraform.md).
 
-Update 27 September 2026: still not started. The user decided on **public subnets for the app instances** (below), asked for **domain-purchase instructions** and added a **load-test tool** (Locust). The plan is complete for design and order but not yet buildable: each stage's missing decisions are listed under [Open items per stage](#open-items-per-stage-27-september-2026), and **agents must close or raise a stage's open items before writing or applying that stage**. Replaces the console-first order in [cloud-independent-prep.md](cloud-independent-prep.md) B7 and the "reproduce afterwards" framing of B5.
+Update 27 September 2026 (historical; the build began on 28 September 2026): The user decided on **public subnets for the app instances** (below), asked for **domain-purchase instructions** and added a **load-test tool** (Locust). The plan is complete for design and order but not yet buildable: each stage's missing decisions are listed under [Open items per stage](#open-items-per-stage-27-september-2026), and **agents must close or raise a stage's open items before writing or applying that stage**. Replaces the console-first order in [cloud-independent-prep.md](cloud-independent-prep.md) B7 and the "reproduce afterwards" framing of B5.
 
 **How this is built.** The user has no Terraform experience and is learning it while building. Work goes one stage at a time, and **nothing starts until the user says so**. Each stage begins with a guide that explains the Terraform concepts that stage uses (starting from what Terraform is in stage 0), then lists explicit steps; the user runs `plan` and `apply` and approves every change.
 
-Integration note (26 September 2026): Terraform-first sequencing and the teammate's lab observations are retained. The current scope and reviewed [runtime handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff) govern service selection and application startup: WAF remains selected; SSM, EventBridge Scheduler and Lambda are not selected. S3 media delivery is proposed work, not implemented by the ML remediation. Lab observations below are teammate-reported, not independently rerun during Git integration.
+Integration note (26 September 2026): Terraform-first sequencing and the teammate's lab observations are retained. The current scope and reviewed [runtime handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff) govern service selection and application startup: WAF remains selected; SSM, EventBridge Scheduler and Lambda are not selected. S3 media delivery was proposed and then dropped (29 September 2026; see the product images row below). Lab observations below are teammate-reported, not independently rerun during Git integration.
 
 **Decisions revised by the user (26 September 2026), superseding the integration note where they differ:** Systems Manager Session Manager is reinstated for administration and one-off jobs; a scheduler is an optional side quest after stage 5; WAF stays, narrowed to one login rate rule; the user is the Terraform owner and the only person who runs `apply`. Details in the table below.
 
@@ -19,11 +19,11 @@ Integration note (26 September 2026): Terraform-first sequencing and the teammat
 | Ownership | **The user writes the Terraform and is the single state owner and the only person who runs `apply`.** The application owner supplies the image and the runtime contract ([handoff](../AWS_INFRASTRUCTURE.md#image-and-infrastructure-owner-handoff)). |
 | Groupmates' accounts (added 28 September 2026) | **Cold backups only, not concurrent capacity.** Each groupmate's own Learner Lab account is a fallback if the user's account runs out of budget mid-project. A fallback account starts a **fresh** `terraform apply` from the same versioned `.tf` code; it does not receive the user's `.tfstate` (a state file is meaningless in a different AWS account — different account ID, no matching resource IDs). No `.tfstate` is ever committed or transferred to a groupmate unless that handoff actually happens, and then only by direct private transfer, never through git. |
 | IAM | **Role, user and policy creation is denied (verified 26 September 2026).** Terraform references `LabInstanceProfile` and `LabRole` through data sources and contains no `aws_iam_*` resources. Every instance and every job therefore runs as `LabRole`, so per-job IAM separation (web, migration, trainer, bootstrap) cannot be enforced at the IAM layer: any instance can read any team secret and the bucket. Least privilege is enforced where the lab allows it: separate database roles (runtime, migration, bootstrap), a separate secret per job so each container is only handed its own, security groups, S3 Block Public Access and TLS-only policy, no access keys anywhere. The intended per-job policies are written as reference JSON under `src/infrastructure/iam-reference/` (not applied) so the report can show the production design. Service roles needed by AWS itself (Auto Scaling's service-linked role, the scheduler's execution role) are checked in stage 1 and stage 'Optional'; RDS Enhanced Monitoring (needs its own role) is not used. |
-| Database | RDS PostgreSQL pinned to **17.x** (the lab default is 18.3; the app, CI and all verification run on 17). Pick the newest 17 minor the lab offers. Single-AZ, private, encrypted, TLS forced. Master password managed by RDS in Secrets Manager (`manage_master_user_password`), so it never enters Terraform state. |
-| Secrets | Terraform creates secret resources without values. Provision exact per-entrypoint schemas outside Terraform; the application startup loader retrieves its own secret using role credentials. Separate runtime, migration, trainer and bootstrap access as specified in the runtime handoff. Web instances must not read the master/bootstrap secret. |
-| Object storage | **One S3 bucket**, prefixes `data/` (dataset) and `exports/` (analytics exports). Block Public Access, versioning, SSE-S3, a deny-non-TLS policy. Browsers never read from S3. |
+| Database | RDS PostgreSQL pinned to **17.x** (the lab default is 18.3; the app, CI and all verification run on 17). Pick the newest 17 minor the lab offers. Single-AZ, private, encrypted, TLS forced. Master password managed by RDS in Secrets Manager (`manage_master_user_password`), so it never enters Terraform state. Stage 2 settings (29 September 2026): `db.t4g.micro` (fallback `db.t3.micro`), 20 GB gp3, no initial database, 7-day automated backups (free at this size; point-in-time restore, to be turned into evidence with a restore test in stage 5), `skip_final_snapshot`, PostgreSQL log exported to a 7-day log group. |
+| Secrets | Terraform creates secret resources without values. Provision exact per-entrypoint schemas outside Terraform; the application startup loader retrieves its own secret using role credentials. Separate runtime, migration, trainer and bootstrap access as specified in the runtime handoff. Web instances must not read the master/bootstrap secret. Applied 29 September 2026 as four empty containers `inf2006-grp21/{web,migration,trainer,bootstrap}` with `recovery_window_in_days = 0`; values are set with the CLI, and generated passwords are never regenerated after `db_bootstrap`. |
+| Object storage | **One S3 bucket**, prefixes `data/` (dataset) and `exports/` (analytics exports). Block Public Access, versioning, SSE-S3, a deny-non-TLS policy. Browsers never read from S3. **The bucket is created with the CLI and looked up as a data source (29 September 2026):** the Learner Lab's service control policy denies `s3:GetBucketObjectLockConfiguration`, which the `aws_s3_bucket` resource calls on every read; a probe of 16 bucket read calls showed it is the only one denied. Its settings stay Terraform resources; `terraform destroy` does not delete the bucket, so stage 6 empties and deletes it with the CLI. |
 | Product images and 3D models (revised 29 September 2026) | **Static files in the app image, not S3; no CORS.** The `.glb` models (16 MB) and product images ship in `src/static/`, and WhiteNoise serves them with hashed file names and cache-forever headers, so each browser downloads a file once. Alternative considered: S3 with pre-signed URLs and a CORS rule. Not selected: for a small, fixed set of assets that change only with a release, it adds a service, per-request URL signing and a CORS policy with no benefit at this scale; the first request for each file still reaches the app instances, which is acceptable here. At catalogue scale, move them to S3 behind CloudFront. The CORS rule written in stage 1 was never created (it depended on `app_hostname`) and was removed before it could be. |
-| Image registry | ECR, immutable tags (git SHA), scan on push, keep the last 10 images. |
+| Image registry | ECR, immutable tags (git SHA), scan on push. A deployed image also gets a `release-<git-sha>` tag (an extra tag on the same image) and `image_tag` points at it. The lifecycle policy keeps the 5 newest releases at the highest priority (a lower rule cannot expire an image matched by a higher one), deletes untagged images after 1 day and other builds after 30 days, so the running image is never deleted by count or age (stage 2 review, L8). |
 | HTTPS | ACM certificate on a team-owned domain with DNS validation at the registrar. Certificate ARN is a variable, so everything else can be applied before the domain exists. A test certificate fallback requires confirmed import permission, hostname matching and explicit client trust; it is not guaranteed. |
 | Audit | CloudTrail **event history** (on by default, 90 days, free). Nothing created; shown on the diagram and cited in the threat-control map. |
 | Administration access | **Systems Manager Session Manager (reinstated 26 September 2026).** Admins and developers open a shell on an instance with no inbound ports, no SSH keys and no bastion; every session is recorded in CloudTrail. Used for debugging (container logs, connectivity) and for one-off jobs. Needs the SSM agent (preinstalled on Amazon Linux 2023) and SSM permissions on `LabInstanceProfile`, to be confirmed in stage 1. No port 22. |
@@ -40,24 +40,26 @@ Integration note (26 September 2026): Terraform-first sequencing and the teammat
 ```
 versions.tf        provider and Terraform version pins
 providers.tf       aws provider, locals.name_prefix = "inf2006-grp21", default_tags Project={name_prefix} Env=evidence ManagedBy=terraform
-variables.tf       region, domain, certificate ARN, alarm email, instance type, scaling target, flags
-data.tf            AZs, explicitly selected AL2023 AMI, LabInstanceProfile, LabRole
+variables.tf       region, AZs, app hostname, alarm email, bucket name, image tag, instance type, DB class (later: certificate, scaling target)
+data.tf            AL2023 AMI (public SSM parameter), LabInstanceProfile, ECR image digest, provider default tags
 network.tf         VPC 10.0.0.0/16, 2 public + 2 private subnets, IGW, route tables
 security_groups.tf sg-alb (443/80 from internet), sg-app (8000 from sg-alb), sg-db (5432 from sg-app)
 storage.tf         S3 bucket (looked up) + settings + TLS policy, ECR repository + lifecycle
 secrets.tf         Secrets Manager secret (value set outside Terraform)
-database.tf        DB subnet group, parameter group, RDS instance
-load_balancer.tf   ALB, target group (/health/), HTTPS listener, HTTP→HTTPS redirect
-compute.tf         launch template (IMDSv2, encrypted EBS), ASG, target-tracking policy
-user_data.sh.tftpl boot script
+database.tf        DB subnet group, parameter group (rds.force_ssl), RDS instance, 7-day PostgreSQL log group   (stage 2)
+load_balancer.tf   ALB, target group (/health/), HTTPS listener, HTTP→HTTPS redirect   (stage 3)
+compute.tf         launch template (IMDSv2 with hop limit 2, encrypted EBS), ASG: one instance in stage 2, ELB health in stage 3, target tracking in stage 4
+user_data.sh.tftpl user data run at first boot (stage 2)
+sql/               trainer login SQL, run once from the instance (stage 2)
+terraform.tfvars.example   template for the git-ignored terraform.tfvars
 monitoring.tf      log group (7-day retention), SNS topic + email, alarms, 5xx metric filter
-waf.tf             regional WAF association and scoped rules, subject to permission and plan review
+waf.tf             regional WAF association and scoped rules, subject to plan review   (stage 4)
 outputs.tf         ALB DNS name, ECR URL, bucket name, RDS endpoint
 ```
 
 Names follow `inf2006-grp21-<component>` (`inf2006-grp21-alb`, `inf2006-grp21-db`, `inf2006-grp21-app-asg`), and the diagram uses the same names. The group number is a single `local.name_prefix` in `providers.tf`, not retyped per resource.
 
-**State.** Local state, never committed (`.gitignore` gains `*.tfstate*`, `*.tfplan`, `.terraform.lock.hcl` is committed). The scope forbids submitting state with secrets, and the design above keeps secret values out of it anyway. A remote S3 backend is not worth it for one applier and a two-week stack.
+**State.** Local state, never committed (`.gitignore` gains `*.tfstate*`, `*.tfplan`, `.terraform.lock.hcl` is committed). The scope forbids submitting state with secrets, and the design above keeps secret values out of it anyway. **Remote state considered and not chosen (30 September 2026).** An S3 backend is the production practice (versioning, locking, no single laptop), but here a committed backend block would make `terraform init` fail for a reviewer or teammate without the team's account, which conflicts with the brief's requirement that the project be runnable without a cloud login, and the state bucket would have to outlive teardown. The custody rules below cover laptop loss; the report states the trade-off. Local state sits in `src/infrastructure/`, so the submission ZIP is built from git (`git archive`), never by copying the folder.
 
 **One apply device (revised 28 September 2026, replaces moving state between devices).** The user's Fedora laptop is the only device that runs `plan`, `apply` and `destroy`, holds `terraform.tfstate` and has lab credentials exported. The user's other devices only write code (plus `fmt` and `validate` after `terraform init -backend=false`, which needs no AWS credentials). Code moves through git; state never leaves the laptop. Rules:
 1. Apply only committed code: `git pull`, a clean working tree, `plan -out`, then `apply`. Record the commit SHA in the runbook entry.
@@ -67,16 +69,19 @@ Names follow `inf2006-grp21-<component>` (`inf2006-grp21-alb`, `inf2006-grp21-db
 
 **Credentials.** The Learner Lab issues temporary credentials (from "AWS Details") that expire with the session. Export them before each `plan` or `apply`; an expired token mid-apply leaves a partial apply that the next run completes.
 
-## Boot script (what every instance does)
+## User data (what every instance does at first boot)
 
-1. Install Docker; log in to ECR with the instance profile.
-2. Pass nonsecret AWS_SECRET_ID/AWS_REGION and required configuration to the container. The existing startup loader retrieves its entrypoint-specific secret. Do not read the RDS master secret or create a second secret loader in user data.
-3. Read the private IP through IMDSv2 and set the exact DJANGO_HEALTH_PROBE_HOST=<private-ip>:8000 exception. Keep ordinary DJANGO_ALLOWED_HOSTS restricted to approved application hostnames; follow the runtime handoff.
-4. Run the approved ECR image digest with DJANGO_TRUST_PROXY=true only behind the documented ALB/network boundary, and send sanitised logs to CloudWatch.
+Implemented in `src/infrastructure/user_data.sh.tftpl` (stage 2; independent review 29 September 2026). The launch template passes it as the instance's user data; cloud-init runs it once, as root. It holds only secret **names**, never values, because anyone who can read the launch template can read it.
 
-Require IMDSv2 and verify the hop limit/role delivery needed by the container. Administration is through Systems Manager Session Manager; no SSH key and no port 22.
+1. Install Docker (with retries). Read the private IP and instance ID through **IMDSv2** (`curl -f`, retried).
+2. Log in to ECR with the instance role and pull the image **by digest** (resolved from `image_tag` by `data.aws_ecr_image`), so every instance runs the same bytes.
+3. Write the non-secret settings to `/etc/inf2006/app.env`: `DJANGO_ENV`, `AWS_REGION`, `APP_RELEASE_ID`, `DJANGO_ALLOWED_HOSTS` and the CSRF origin from `app_hostname`, `DJANGO_HEALTH_PROBE_HOST=<private-ip>:8000`, `DJANGO_TRUST_PROXY`, `DJANGO_HSTS_SECONDS`. The web container gets `AWS_SECRET_ID=inf2006-grp21/web`; the existing startup loader retrieves its own secret with the role. The RDS master secret is never read here.
+4. Write the `/usr/local/bin/app-job` helper **before** starting the web container: `sudo /usr/local/bin/app-job web|migration|bootstrap <command>` runs a throwaway container that holds only that job's secret name.
+5. Start the web container (retried) with `--restart unless-stopped` and the `awslogs` driver into `/inf2006-grp21/app`. Until the database is bootstrapped and migrated it fails at startup and restarts; that is expected in stage 2 (no ALB, so nothing replaces the instance).
 
-One-off operations run by hand through Session Manager on one designated instance, not on every ASG boot: db_bootstrap, coordinated migrate, S3 dataset sync and import_dataset. Use the separate secret schemas and commands in the runtime handoff.
+`DJANGO_TRUST_PROXY` is `false` in stage 2 and becomes `true` in stage 3 behind the ALB; it is baked into the launch template, so running instances keep the old value until an **instance refresh**. The launch template requires IMDSv2 with **hop limit 2** so containers can reach the role credentials. Administration is through Systems Manager Session Manager; no SSH key and no port 22.
+
+One-off operations run by hand through Session Manager on the ASG instance, not on every ASG boot: `db_bootstrap`, coordinated `migrate`, the trainer-login SQL (stage 2), then S3 dataset sync and `import_dataset` (stage 3). Use the separate secret schemas and commands in the [stage 2 plan](aws-terraform-stage-2.md) and the runtime handoff.
 
 ## Stages
 
@@ -86,8 +91,8 @@ Each stage: `fmt`, `validate`, `plan` saved to a file, the plan read aloud (crea
 |---|---|---|---|
 | 0 | Nothing: install Terraform, `init`, provider pins | `terraform version`, `validate` | none |
 | 1 | Network, security groups, S3, ECR, secret, log group, SNS | Subnets in 2 AZs; S3 public access blocked; push the image to ECR | near zero |
-| 2 | RDS | Instance private, encrypted, 17.x; run `db_bootstrap` through Session Manager on a temporary instance or the first app instance | about USD 0.02/hour |
-| 3 | ACM certificate, ALB, launch template, ASG (min 1, max 1 first) | `https://<domain>/health/` returns 200; HTTP redirects; run coordinated migrations and import; the shop loads | about USD 0.05/hour total |
+| 2 | RDS, launch template, ASG (one instance, EC2 health checks) | RDS private, encrypted, 17.x, TLS forced, 7-day backups; the instance registers in Session Manager and runs the image by digest with logs in CloudWatch; `db_bootstrap`, `migrate` and the trainer SQL succeed; the runtime login cannot create tables and the trainer cannot write or read sessions. Plan: [aws-terraform-stage-2.md](aws-terraform-stage-2.md) | about USD 0.045/hour (RDS, t3.small, public IPv4) |
+| 3 | ACM certificate, ALB, target group, listeners; ASG health check to ELB; `trust_proxy` true with an instance refresh | `https://shop.fourtytwofactors.me/health/` returns 200; HTTP redirects; dataset import from S3; the shop loads | about USD 0.10/hour total (adds the ALB and its IPv4 addresses) |
 | 4 | Target tracking, max 2, alarms, WAF | Alarm email received; scoped WAF rules verified; explicit batch run verified | verify selected services against current pricing |
 | 5 | Evidence runs: baseline, autoscaling, session continuity, batch failure/retry recovery | Evidence files per the scope | same |
 | Optional | EventBridge Scheduler plus SSM Run Command for `refresh_analytics` and `clearsessions` | A scheduled run appears in the analytics run list | small |
@@ -98,7 +103,7 @@ Costs are rough on-demand estimates; check them against the AWS pricing pages an
 ## Things this depends on
 
 - **A domain** for stage 3. The user is buying one from an external registrar (cheaper than Route 53, and DNS stays outside the lab account, so it survives teardown). The purchase and DNS steps (buy, add ACM's validation CNAME, point `shop.<domain>` at the ALB) are explained in the stage 3 guide. Buying it before stage 3 is fine; nothing else needs it.
-- **Application changes** before stage 3, backend-owned and through the review gate: configurable Gunicorn workers (`GUNICORN_WORKERS`, currently hardcoded 2 in the Dockerfile), and S3 media storage (`django-storages` with pre-signed URLs, only when the teammate's image fields land).
+- **Application changes** before stage 3, backend-owned and through the review gate: configurable Gunicorn workers (`GUNICORN_WORKERS`, currently hardcoded 2 in the Dockerfile). The S3 media storage change (`django-storages`, pre-signed URLs) was dropped on 29 September 2026: images and models stay static files served by WhiteNoise.
 - **Stage-1 lab checks:** secret creation and retrieval with `LabInstanceProfile`; Session Manager access to an instance; budget and WAF permissions. Record actual results; listing APIs does not establish creation permission.
 
 ## Reference IAM policies (planned 26 September 2026; written in stage 1, never applied)
@@ -134,6 +139,8 @@ Terraform is team infrastructure configuration. Each stage's code is self-review
 Drawn from this plan's resource list before stage 1, with these names; renamed only if a name changes during the build. Source `evidence/architecture.drawio`, export `evidence/architecture.png`.
 
 ## Domain purchase (stage 3 prerequisite, instructions added 27 September 2026)
+
+**Done 29 September 2026:** the team bought `fourtytwofactors.me` from Namecheap through the GitHub Student Developer Pack (first year free), rather than the Porkbun recommendation below; the shop is `shop.fourtytwofactors.me` and DNS stays at Namecheap. The steps below apply unchanged.
 
 HTTPS on the ALB needs an ACM certificate, and ACM needs a domain you control. Buy it **before stage 3**; nothing earlier depends on it. Keep DNS at the registrar (not Route 53), so it survives `terraform destroy` and costs nothing extra.
 
@@ -176,21 +183,21 @@ Missing decisions or artefacts. An agent working on a stage must resolve these (
 
 **Stage 1: network, S3, ECR, secrets, logs, SNS**
 - [x] Instance placement without NAT: public subnets (decided above).
-- [ ] Confirm each secret's exact field list against the runtime handoff in [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary) (web runtime, migration, bootstrap, trainer) before creating the secrets.
-- [ ] Write the image build, tag (git SHA) and push commands for ECR.
+- [x] Confirm each secret's exact field list against the runtime handoff (done; the migration secret also needs `DJANGO_SECRET_KEY`, found in stage 2 planning).
+- [x] Write the image build, tag (git SHA) and push commands for ECR (done 29 September 2026: `inf2006-grp21-app:c19d547` pushed; commands in the runbook).
 - [x] Run the lab checks (secret retrieval with `LabInstanceProfile`, Session Manager, WAF, budget) and record the results (29 September 2026: all allowed, see `evidence/aws-capability-record.md`).
 - [ ] Write the reference IAM policies; then update threat rows T8/T9 in `evidence/threat-control-map.md` to "Partial, lab constraint", citing them.
 - [ ] Draw `evidence/architecture.drawio` / `.png` with the `inf2006-grp21-*` names (the brief requires it; this plan says before stage 1).
 
-**Stage 2: RDS**
-- [ ] Parameter group: `rds.force_ssl = 1` (the "TLS forced" decision).
-- [ ] Where `db_bootstrap` runs: no instance exists until stage 3, so either a temporary instance in stage 2 or move bootstrap to the first stage 3 instance.
-- [ ] Backup retention and `skip_final_snapshot` on destroy (decide; affects teardown speed and any backup/recovery claim).
+**Stage 2: RDS and the first instance** (open items and decisions are in [aws-terraform-stage-2.md](aws-terraform-stage-2.md))
+- [x] Parameter group `rds.force_ssl = 1`; backups 7 days; `skip_final_snapshot` (decided 29 September 2026).
+- [x] Where `db_bootstrap` runs: the ASG instance, moved from stage 3 into stage 2.
+- [ ] Apply, run the one-off jobs and record the acceptance checks in the runbook.
 
 **Stage 3: HTTPS, ALB, launch template, ASG**
-- [ ] Domain bought and DNS access confirmed (instructions above), or the HTTP-first fallback chosen.
+- [x] Domain bought (`fourtytwofactors.me`, Namecheap, GitHub Student Developer Pack, 29 September 2026); DNS stays at Namecheap. In Namecheap's Advanced DNS the **Host** field must not include the domain (enter `_abc123.shop`, not `_abc123.shop.fourtytwofactors.me`), or the certificate stays pending.
 - [ ] Application change first, through the review gate: configurable `GUNICORN_WORKERS` (currently hard-coded to 2 in the Dockerfile).
-- [ ] Turn the boot script steps into `user_data.sh.tftpl`: Docker install, ECR login, image **digest**, environment variables, `awslogs` log driver, probe host from IMDSv2.
+- [x] User data written (`user_data.sh.tftpl`, stage 2): Docker, ECR login, image digest, environment file, `awslogs`, probe host from IMDSv2.
 - [ ] Target-group health check values (path, interval, healthy/unhealthy thresholds, deregistration delay); they set the recovery times measured in stage 5.
 - [ ] `trust_proxy` becomes `"true"` in `compute.tf` (from the stage 2 review). It is baked into the launch template, so running instances keep `false` until an **instance refresh**; behind the ALB, `false` with `SECURE_SSL_REDIRECT` sends every request into a redirect loop. Refresh the ASG as part of the stage 3 apply, and switch the ASG to ELB health checks in the same change.
 
@@ -210,5 +217,6 @@ Missing decisions or artefacts. An agent working on a stage must resolve these (
 - [ ] Pre-destroy export checklist: Terraform plan/outputs, redacted `describe` outputs, alarm history, CloudTrail events, Locust results, session costs.
 
 **Across all stages**
+- [ ] Reproducibility check after each stage: could someone repeat it from the docs alone? Cloud reproduction guide `docs/REPRODUCE_CLOUD.md` and the ZIP-from-git rule are tracked under Phase 4 in the [tracker](../IMPLEMENTATION_PLAN.md).
 - [ ] Session budget: number of cloud sessions, total estimated cost against the lab balance, and what to cut if it runs low.
 - [ ] Dates for each stage between now and the 11 October deadline (the scope's Phase 3 window ends 1 October).

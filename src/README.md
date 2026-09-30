@@ -139,4 +139,4 @@ Build the production image locally with `docker build -t inf2006-runtime-final s
 repository root. The same image serves the web and one-off commands; ML dependencies remain
 in the separate analytics environment. Use the [manual image/TLS verification procedure](../tests/README.md#local-runtime-image-and-tls-verification)
 before handing its immutable identity to the infrastructure owner. An authorised ECR push and
-its registry digest are a separate integration step; a local build does not deploy anything.
+its registry digest are a separate integration step; a local build does not deploy anything. One image (`inf2006-grp21-app:c19d547`) has been pushed to the team's ECR repository, and the digest is recorded in [the build runbook](../evidence/aws-build-runbook.md); deployed images also get a `release-<sha>` tag.

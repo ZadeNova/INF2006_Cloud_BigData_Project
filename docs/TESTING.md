@@ -46,7 +46,7 @@ The dedicated analytics job runs pure ML tests in a pinned Python container with
 
 Every record includes objective, setup/versions, exact commands/steps, inputs/seed, expected/actual result, date, raw artefact links and interpretation. Report failed/unrun checks honestly. Never fabricate metrics.
 
-Preserve required project_manifest.yaml keys/relative paths. Required categories map to evidence/test-functional.md, test-security.md, test-data-ai.md and test-resilience.md; monitoring has a separate entry. Link additional results from these records.
+Build the submission ZIP from git (`git archive`), never by copying folders: `src/infrastructure/` holds a local `terraform.tfstate` and `terraform.tfvars`, which git ignores and the ZIP must not contain; check the ZIP listing for them, and for credentials, before submitting. Preserve required project_manifest.yaml keys/relative paths. Required categories map to evidence/test-functional.md, test-security.md, test-data-ai.md and test-resilience.md; monitoring has a separate entry. Link additional results from these records.
 
 A different teammate reproduces local application and analytics without paid AWS access. Validate manifest paths, required ZIP contents, report headings/page limits, contributions and attribution. Preserve dated cloud proof before teardown. CI runs the suite but is not a required merge gate unless branch protection is configured.
 

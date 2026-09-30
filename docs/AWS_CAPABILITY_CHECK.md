@@ -159,3 +159,7 @@ docker compose run --rm web pytest -q -p no:cacheprovider /app/tests/test_aws_ca
 ## What to do with the result
 
 Share the record with the group. It supplies the gates for the Terraform build ([aws-terraform.md](plans/aws-terraform.md)): the capability record, the HTTPS answer, the balance and cap, and the image route. Keep it under `evidence/` so the report can cite it, after replacing lab-generated role names (long random-looking prefixes) with `<lab-generated>`. The Terraform apply then proves what the probe could only list. The first run, on 25 September 2026, is summarised under B4 in [cloud-independent-prep.md](plans/cloud-independent-prep.md).
+
+## Beyond the read-only probe
+
+The probe lists services; it cannot prove that creating or using them is allowed. On 29 September 2026 the team ran active checks from a throwaway instance (Session Manager, creating and reading a secret with `LabInstanceProfile`, WAF web ACL create and delete, Budgets) and all were allowed. Building the first stage then found one denial the probe could not see: the lab's service control policy denies `s3:GetBucketObjectLockConfiguration`, which the standard Terraform S3 bucket resource reads on every plan ([record](../evidence/aws-build-runbook.md)). Treat every new service as unproven until a real apply succeeds. Keep the generated capability record out of commits until its role names are redacted.

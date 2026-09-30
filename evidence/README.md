@@ -1,6 +1,6 @@
 # evidence/
 
-Named, dated evidence artefacts cited by `project_manifest.yaml` and `report.pdf`. FUNC-01 and FUNC-02 have now been run on the `hermann-evidence` branch at the `origin/erfan/merge-quarantine` source. AWS and the remaining cases are still pending.
+Named, dated evidence artefacts cited by `project_manifest.yaml` and `report.pdf`. FUNC-01 and FUNC-02 have now been run on the `hermann-evidence` branch at the `origin/erfan/merge-quarantine` source. The AWS build started on 28 September 2026: its stage records are in [aws-build-runbook.md](aws-build-runbook.md). The deployed AWS test cases and the remaining local cases are still pending.
 
 Last covered commit: `ee334cf`
 
@@ -18,7 +18,7 @@ Last covered commit: `ee334cf`
 | SEC-06 | T6 stored cross-site scripting (XSS) | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
 | SEC-07 | T7 weak passwords; partial control because there is no throttling or MFA | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
 | SEC-08 | T8 secrets and personal data kept out of logs | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
-| SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED | — |
+| SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED (S3 anonymous request returned 403 on 2026-09-29, recorded in the runbook, not yet a test case; RDS not built) | — |
 | SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | Map filled: T1–T8 rest on SEC-01..08 PASS; other local rows NOT RUN YET as security cases; cloud rows PLANNED | 2026-09-27 |
@@ -37,6 +37,7 @@ Last covered commit: `ee334cf`
 
 | File | Contents | Status |
 |---|---|---|
+| [aws-build-runbook.md](aws-build-runbook.md) | One dated entry per Terraform stage: commits, plans, acceptance checks, problems, lab balance (stage 1 recorded 2026-09-29) | In progress (infrastructure owner) |
 | `architecture.png` | Architecture diagram showing users, application components, cloud services, trust boundaries, data stores, observability and data flows | TODO (report lead) |
 | [raw/](raw/) | Raw command output named `<CASE-ID>_<YYYY-MM-DD>.<ext>`; screenshots, if needed, named `<CASE-ID>_<YYYY-MM-DD>_<n>.png` | Contains current FUNC-01/FUNC-02 and DATA-01/DATA-02 output |
 

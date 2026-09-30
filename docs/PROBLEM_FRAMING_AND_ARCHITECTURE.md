@@ -213,7 +213,7 @@ repo, not generic terms:
 | Trust boundaries | At minimum: the VPC boundary, and the public app subnet vs. the private RDS subnet, as drawn boxes, not implied; label the security-group chain sg-alb → sg-app → sg-db |
 | Data stores | RDS and the one S3 bucket (dataset, exports, images, `.glb` models) as distinct labeled stores |
 | Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected; SNS alert to the team; CloudTrail event history for API audit |
-| Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP 8000, internal), app to RDS (5432, TLS), browser to S3 (pre-signed GET, CORS), S3 to import command to RDS (data pipeline), secrets and image at instance boot |
+| Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP 8000, internal), app to RDS (5432, TLS), browser to app for static images and 3D models (served by WhiteNoise from the image; no browser-to-S3 arrow), S3 to import command to RDS (data pipeline), secrets and image at instance boot |
 
 A review draft following this checklist was drawn on 25 September 2026 (outside the repository);
 the submission copy is still to be drawn in draw.io.
