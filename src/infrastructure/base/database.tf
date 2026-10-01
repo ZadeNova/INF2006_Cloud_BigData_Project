@@ -18,8 +18,9 @@ resource "aws_db_parameter_group" "main" {
   family = "postgres17"
 
   parameter {
-    name  = "rds.force_ssl"
-    value = "1"
+    name         = "rds.force_ssl"
+    value        = "1"
+    apply_method = "pending-reboot" # what RDS stores for this parameter; "immediate" would show a diff on every plan
   }
 
   tags = { Name = "${local.name_prefix}-pg17" }
