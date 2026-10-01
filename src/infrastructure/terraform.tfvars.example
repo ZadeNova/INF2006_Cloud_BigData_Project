@@ -1,5 +1,0 @@
-# Copy to terraform.tfvars (gitignored) and fill in.
-alarm_email    = "you@example.com"
-s3_bucket_name = "inf2006-grp21-data-<suffix>" # created with the CLI, see docs/plans/aws-terraform-stage-1.md
-app_hostname   = "shop.example.xyz"
-image_tag      = "release-<git-sha>" # a release tag already added in ECR (see the stage 2 plan)

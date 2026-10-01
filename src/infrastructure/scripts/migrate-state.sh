@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # One-time state migration: the stage 1 single folder -> base/ (docs/plans/aws-ecs-comparison.md section 5, ADR-002).
+# DONE on 1 October 2026 (runbook). Kept as the record of how it was done; the old folder's .tf files it needs were
+# removed afterwards, so to rerun it, check out commit 308fb28 first.
 #
 #   scripts/migrate-state.sh check      read-only rehearsal on throwaway copies of the state (no AWS calls)
 #   scripts/migrate-state.sh run        back up, destroy the resources that are recreated, move the rest, gate

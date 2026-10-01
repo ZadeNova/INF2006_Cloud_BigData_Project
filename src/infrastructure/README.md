@@ -31,7 +31,7 @@ Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). D
 
 `ec2/` reads `base/` through `terraform_remote_state` (`../base/terraform.tfstate`); `base/` never reads a stack, so a stack can be destroyed without touching the database.
 
-**Do not run Terraform in `src/infrastructure/` itself.** The `.tf` files directly in this folder are the superseded single-folder version from stages 1 and 2; their resources were moved into `base/` on 1 October 2026 (`scripts/migrate-state.sh`, one-time, done). They are kept until a cleanup commit removes them.
+**There is no Terraform directly in `src/infrastructure/`.** The single-folder version from stages 1 and 2 was split into `base/` and `ec2/` on 1 October 2026 (`scripts/migrate-state.sh`, one-time, done) and its files removed afterwards; on the apply laptop the old local state is kept only as a record (`terraform.tfstate.migrated` and dated backups, git-ignored). `scripts/probe-lab-comparison.sh` was written for the old folder and is not used.
 
 ## Rules
 
