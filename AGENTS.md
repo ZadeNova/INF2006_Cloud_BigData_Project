@@ -2,6 +2,18 @@
 
 Shared repository guidance for coding agents. Keep durable constraints here and current tasks in the implementation tracker. Tool-specific entry files should point here rather than maintain competing instructions. Model assignments apply where the tool supports the named models; report a capability mismatch instead of silently substituting.
 
+## Current phase: backend freeze (decided by the user, 1 October 2026)
+
+**The backend is frozen. Remaining work is AWS infrastructure, testing and evidence.** This applies to every agent and overrides any task-level instruction to add or improve backend behaviour. It tightens the scope's "no new features after 1 October" ([scope section 10](PROJECT_SCOPE_INF2006.md#10-delivery-phases-and-four-week-timeline)); the scope still owns the dates.
+
+- **Frozen without exception:** new features, behaviour changes, refactors and cleanups, schema or migration changes, new routes or contract changes, analytics or ML changes, and dependency upgrades. Anything baked into the application image counts as backend, including `src/Dockerfile` and `requirements.txt`.
+- **Open to work:** `src/infrastructure/`, tests, evidence, documentation, load-test tooling, and runbooks. Tests may be added or changed; they must not require changing application behaviour to pass.
+- **Emergency exception.** An emergency is a defect that blocks deployment, breaks a required customer or operator workflow, risks wrong stock, orders or access control, exposes a secret, or invalidates evidence. Before editing any frozen area an agent must **stop, state the defect and the minimal fix, and wait for the user to confirm it is an emergency.** The user decides; an agent never classifies its own change as one. Convenience, tidiness and "while we are here" are not emergencies.
+- **Emergency fixes are minimal:** the smallest change that removes the defect, in its own commit, with a regression test. The mandatory backend review loop below still applies unless the user says otherwise for that fix.
+- **The image is pinned.** Every deployment variant and every performance comparison runs one recorded image digest. A backend fix means a new image and a new digest, so any evidence already collected on the old digest must be rerun or marked superseded. Say so when proposing a fix.
+- **Frontend** is covered by the scope's feature freeze (no new features). This section does not otherwise change its rules; ask before non-trivial frontend edits.
+- INF2003 work stays out of this delivery, as before.
+
 ## Required reading
 
 Before work, consult the current status/next-step entry in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) and only the task-relevant sections of [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md), then select the relevant contracts below. Linked documents are not automatically loaded. Reuse material already read in the current context unless it changed. Inspect relevant existing files and Git status before editing; preserve unrelated changes.

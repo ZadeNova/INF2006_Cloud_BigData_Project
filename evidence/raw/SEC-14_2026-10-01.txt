@@ -1,0 +1,23 @@
+# SEC-14  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_health.py
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 10 items
+
+tests/test_health.py::test_health_is_safe_and_has_no_database_queries PASSED [ 10%]
+tests/test_health.py::test_database_readiness_command PASSED             [ 20%]
+tests/test_health.py::test_pending_migrations_fail_readiness PASSED      [ 30%]
+tests/test_health.py::test_health_survives_database_failure PASSED       [ 40%]
+tests/test_health.py::test_health_rejects_mutations PASSED               [ 50%]
+tests/test_health.py::test_health_validates_host PASSED                  [ 60%]
+tests/test_health.py::test_health_exempt_from_redirect_for_internal_checks PASSED [ 70%]
+tests/test_health.py::test_database_failure_is_sanitized PASSED          [ 80%]
+tests/test_health.py::test_exact_internal_probe_exception_preserves_normal_host_validation PASSED [ 90%]
+tests/test_health.py::test_trusted_proxy_https_avoids_redirect_while_http_redirects PASSED [100%]
+
+============================== 10 passed in 1.26s ==============================
+pytest_exit=0

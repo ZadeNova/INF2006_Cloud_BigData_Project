@@ -7,7 +7,7 @@ Date: 22 September 2026. Coordinator: Codex. Independent reviewer: `/root/final_
 - User request: final implementation/specification review of [PR #2](https://github.com/ZadeNova/INF2006_Cloud_BigData_Project/pull/2), with merge into main authorized only after the review and checks pass.
 - Base: `4795f9f6ab469ebb131ee5a1cf8cfa9e84eaa8e2` (`main`). Round 1 head: `c8d26569896c3df8d8bd50c001b56b8aa9fa59f3` (`erfan/backend`); 36 commits, 110 changed paths. Working tree initially clean.
 - Review covers implemented authentication, catalogue/operator permissions, persistent cart, checkout/order history, analytics refresh/read queries, security handling and associated migrations/tests, plus dataset/documentation additions. Prior feature reviews cleared at `7eea9b7` are reference evidence, not a substitute for this integration review.
-- References: [review brief and feature logs](../plans/astra-review.md), scope sections 4/5/8/9, architecture, API, schema, security, analytics, data pipeline and testing contracts, and associated batch plans. Deferred importer, dashboard, AWS and visual design are not claimed complete.
+- References: [review brief and feature logs](../archive/plans/astra-review.md), scope sections 4/5/8/9, architecture, API, schema, security, analytics, data pipeline and testing contracts, and associated batch plans. Deferred importer, dashboard, AWS and visual design are not claimed complete.
 - This task owns the review log and concise tracker update; any remediation paths and snapshots are recorded below. No unrelated changes existed.
 
 ## Round 1 — changes requested

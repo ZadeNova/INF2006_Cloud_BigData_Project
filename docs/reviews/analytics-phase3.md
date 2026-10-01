@@ -25,7 +25,7 @@ Frozen paths, including new untracked files:
 - `analytics/tests/test_verify_refresh.py` (new)
 - `docs/IMPLEMENTATION_PLAN.md`
 - `docs/SCHEMA.md`
-- `docs/plans/analytics-status.md`
+- `docs/archive/plans/analytics-status.md`
 - `evidence/test-data-ai.md`
 - `project_manifest.yaml`
 

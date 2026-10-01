@@ -74,7 +74,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS build is Terraform in `src/infrastructure/` ([plan](docs/plans/aws-terraform.md)); the application itself is not deployed yet.
+See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS build is Terraform in `src/infrastructure/` ([plan](docs/archive/plans/aws-terraform.md)); the application itself is not deployed yet.
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -112,7 +112,7 @@ The delivered application must run locally without paid AWS access for marking. 
 | [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |
 | [Schema](docs/SCHEMA.md) / [API](docs/API.md) | Data constraints, checkout semantics and route contracts |
 | [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md) | Provenance, import behaviour, metrics and validation |
-| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [Terraform plan](docs/plans/aws-terraform.md) | Component responsibilities, AWS contract and operations, and the staged Terraform build with its decisions |
+| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [Terraform plan](docs/archive/plans/aws-terraform.md) | Component responsibilities, AWS contract and operations, and the staged Terraform build with its decisions |
 | [Security](docs/SECURITY.md) / [testing](docs/TESTING.md) | Controls, verification and evidence requirements |
 | [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
 | [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
@@ -147,9 +147,9 @@ The final `report.pdf` and required implementation/evidence artefacts are delive
 
 ## Current limitations and continuation
 
-- AWS: Terraform stages 0 and 1 are applied in the team's Learner Lab account (29 September 2026): network, security groups, one private S3 bucket, ECR, secrets, logs and an alarm topic; stage 2 (private RDS PostgreSQL 17 and the first app instance) is written and reviewed, not applied. The lab denies creating IAM roles, so instances run as the lab's `LabRole`, and it denies one S3 API call that the standard bucket resource needs, so the bucket is created with the CLI and its settings stay in Terraform. The domain `fourtytwofactors.me` is bought; HTTPS (an ACM certificate) is stage 3. The application is not deployed. Records: [plan](docs/plans/aws-terraform.md), [build runbook](evidence/aws-build-runbook.md), [review log](docs/reviews/aws-terraform.md).
+- AWS: Terraform stages 0 and 1 are applied in the team's Learner Lab account (29 September 2026): network, security groups, one private S3 bucket, ECR, secrets, logs and an alarm topic; stage 2 (private RDS PostgreSQL 17 and the first app instance) is written and reviewed, not applied. The lab denies creating IAM roles, so instances run as the lab's `LabRole`, and it denies one S3 API call that the standard bucket resource needs, so the bucket is created with the CLI and its settings stay in Terraform. The domain `fourtytwofactors.me` is bought; HTTPS (an ACM certificate) is stage 3. The application is not deployed. Records: [plan](docs/archive/plans/aws-terraform.md), [build runbook](evidence/aws-build-runbook.md), [review log](docs/reviews/aws-terraform.md).
 - Cloud evidence is at its start: the stage 1 build and its acceptance checks (subnets in two AZs, anonymous S3 access denied, alarm subscription confirmed) are recorded in the build runbook. Deployment behaviour, scaling, recovery and monitoring evidence are not yet recorded. Local functional and security evidence is recorded; resilience and monitoring evidence are not.
-- The storefront redesign and dashboard re-theme have a recorded human browser walkthrough (FUNC-02) but no independent code review. See [storefront redesign](docs/plans/storefront-redesign.md).
+- The storefront redesign and dashboard re-theme have a recorded human browser walkthrough (FUNC-02) but no independent code review. See [storefront redesign](docs/archive/plans/storefront-redesign.md).
 - The source dataset has little weekly pattern, and the shoe mapping, sizes and prices are synthetic choices; in the shoe run 9 of 200 products had no recent sales. Dashboard figures demonstrate the mechanism, not real demand. See [data/README.md](data/README.md).
 - Synthetic data supports reproducible demonstrations, not validated claims about real customer demand.
 - Scope coverage does not guarantee a grade; assessment depends on verifiable implementation and evidence.

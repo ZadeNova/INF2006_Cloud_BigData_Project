@@ -1,0 +1,22 @@
+# SEC-13  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_secrets.py
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 9 items
+
+tests/test_secrets.py::test_production_retrieves_once_and_overrides_plaintext_credentials PASSED [ 11%]
+tests/test_secrets.py::test_local_never_imports_or_calls_aws PASSED      [ 22%]
+tests/test_secrets.py::test_missing_production_selection_cannot_fall_back_to_plaintext PASSED [ 33%]
+tests/test_secrets.py::test_incomplete_or_wrong_secret_schema_is_refused[payload0] PASSED [ 44%]
+tests/test_secrets.py::test_incomplete_or_wrong_secret_schema_is_refused[payload1] PASSED [ 55%]
+tests/test_secrets.py::test_incomplete_or_wrong_secret_schema_is_refused[payload2] PASSED [ 66%]
+tests/test_secrets.py::test_sdk_error_is_redacted_with_cause_suppressed PASSED [ 77%]
+tests/test_secrets.py::test_static_sdk_credentials_are_rejected PASSED   [ 88%]
+tests/test_secrets.py::test_bootstrap_loads_its_privileged_schema_before_connection PASSED [100%]
+
+============================== 9 passed in 0.41s ===============================
+pytest_exit=0

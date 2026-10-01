@@ -1,6 +1,6 @@
 # Batch 6b — analytics refresh and read queries
 
-Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Second of the analytics sub-batches; follows [batch-06a-data-import.md](batch-06a-data-import.md). Contract: [ANALYTICS.md](../ANALYTICS.md) is authoritative for formulas, ranges, compare, retention and calendar rules; this file only says how they get built. Related: [SCHEMA.md](../SCHEMA.md), [INF2003_BASELINE.md](../INF2003_BASELINE.md).
+Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Second of the analytics sub-batches; follows [batch-06a-data-import.md](../archive/plans/batch-06a-data-import.md). Contract: [ANALYTICS.md](../ANALYTICS.md) is authoritative for formulas, ranges, compare, retention and calendar rules; this file only says how they get built. Related: [SCHEMA.md](../SCHEMA.md), [INF2003_BASELINE.md](../INF2003_BASELINE.md).
 
 ## Context
 
@@ -71,7 +71,7 @@ A plain pandas script (own `analytics/requirements.txt`, no Django import) that 
 
 `docker compose up --build -d --wait`; `python manage.py migrate` (applies 0003); with 6a's data imported, run `snapshot_inventory` if needed, `refresh_analytics --as-of <date>` twice, and `analytics/verify_refresh.py` (expect zero mismatches); `docker compose run --rm web pytest -q tests/test_analytics_ranges.py tests/test_analytics_refresh.py` then the full suite; `manage.py check`; `makemigrations --check --dry-run` (no model changes). Record real commands and results in `analytics/README.md` and `evidence/test-data-ai.md`; update `docs/SCHEMA.md` (the view), `docs/ANALYTICS.md` (as-of semantics, sparse storage), `docs/IMPLEMENTATION_PLAN.md`. Claude self-review (labelled), fix approved findings, then the mandatory independent backend review gate before marking complete. Commit only when asked; the user pushes.
 
-## Outline of 6c (superseded: see [batch-06c-dashboard.md](batch-06c-dashboard.md) for the detailed plan)
+## Outline of 6c (superseded: see [batch-06c-dashboard.md](../archive/plans/batch-06c-dashboard.md) for the detailed plan)
 
 `reporting` app gains `urls.py` mounted at `analytics/`, `views.py` and templates `reporting/dashboard.html` and `reporting/_panel.html`, per [API.md](../API.md). One view: validates `range`/`compare`, picks the latest completed run once per request, calls the 6b queries, renders the full page or (for `HX-Request`) only `#analytics-panel`. Needs: an operator permission (the existing mixin checks `catalogue.toggle_product_active`; add `reporting.view_analytics` granted to the `store_operator` group, with a migration and a `seed_demo` update), the HTMX login redirect mixin, Chart.js vendored into `src/static/`, a `htmx:load` chart initializer, freshness and assumptions labels, the empty state when no completed run exists, and a nav link for operators. Design pass against DESIGN.md is a separate step after the data path is verified. Tests: operator-only (403 others, HX-Redirect when logged out), fragment versus full page, range validation, compare states, empty state.
 

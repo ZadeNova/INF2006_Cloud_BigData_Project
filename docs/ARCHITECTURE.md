@@ -1,6 +1,8 @@
 # Architecture contract
 
-Status (30 September 2026): Terraform stages 0 and 1 are applied (network, security groups, S3, ECR, secrets, logs, SNS); RDS and the first instance are written and reviewed, not applied; the application is not deployed ([plan](plans/aws-terraform.md)). Read the [scope](../PROJECT_SCOPE_INF2006.md).
+> **Sprint note (1 October 2026):** this document describes variant A (EC2 + Auto Scaling group). Variant B (ECS on Fargate) is being built for a measured comparison and the primary architecture is decided after the data. Until the post-sprint documentation sync, [docs/plans/aws-ecs-comparison.md](plans/aws-ecs-comparison.md) governs where they differ.
+
+Status (30 September 2026): Terraform stages 0 and 1 are applied (network, security groups, S3, ECR, secrets, logs, SNS); RDS and the first instance are written and reviewed, not applied; the application is not deployed ([plan](archive/plans/aws-terraform.md)). Read the [scope](../PROJECT_SCOPE_INF2006.md).
 
 ## Flows and responsibilities
 
@@ -11,7 +13,7 @@ Status (30 September 2026): Terraform stages 0 and 1 are applied (network, secur
 - ECR supplies the shared application image. Secrets Manager supplies database credentials and the shared Django signing key through runtime roles; denial blocks deployment. Systems Manager Session Manager provides administration and one-off jobs without SSH.
 - Included descriptive ML trains offline in `analytics/`. Selected flow: explicitly triggered offline batch -> validated assignment import -> protected dashboard. Saved-model inference is optional and unimplemented; Lambda is not selected; EventBridge Scheduler is an optional side quest. Local training/loading remain available and the web image has no ML dependency.
 - Batch handoff uses explicit completed run/file selections and independently configured deployment/database association. The producer and loader share only a standard-library contract in `src/reporting/segment_contract.py`; training libraries remain isolated. See [batch contract](ANALYTICS.md#explicit-batch-handoff-contract) and [operations](../analytics/README.md#included-descriptive-ml-explicit-batch-handoff).
-- Product images and `.glb` 3D models are static files in the image, served by WhiteNoise with hashed, cache-forever URLs; nothing is read from S3 by browsers (decided 29 September 2026). Alternative considered: private S3 media with pre-signed URLs and CORS, not selected because for a small, fixed asset set it adds a service, per-request signing and a CORS policy without benefit at this scale; at catalogue scale the assets would move to S3 behind CloudFront. See [aws-terraform.md](plans/aws-terraform.md).
+- Product images and `.glb` 3D models are static files in the image, served by WhiteNoise with hashed, cache-forever URLs; nothing is read from S3 by browsers (decided 29 September 2026). Alternative considered: private S3 media with pre-signed URLs and CORS, not selected because for a small, fixed asset set it adds a service, per-request signing and a CORS policy without benefit at this scale; at catalogue scale the assets would move to S3 behind CloudFront. See [aws-terraform.md](archive/plans/aws-terraform.md).
 - Django database sessions and persistent carts are shared by all instances with shared signing configuration. Stickiness disabled.
 
 Foundation package paths: src/config/ holds project configuration/WSGI; src/accounts/, src/catalogue/, src/cart/, src/orders/ and src/reporting/ are domain packages. Frontend-owned directories are src/templates/ and src/static/. Local Docker web/db configuration and framework migrations are verified in batch 2; initial domain schema and sealed inventory persistence are supplied by batch 3; batch 4 supplies process health and separate database readiness; the business workflows (auth, catalogue, cart, checkout, order history, import, analytics refresh and dashboard) are implemented locally on top of that. The local Compose deployment is not evidence of AWS deployment. Use explicit business functions callable from views/commands; avoid signals that deduct stock during historical import.
@@ -28,7 +30,7 @@ If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded
 - Managed RDS demonstrates cloud persistence; local Docker PostgreSQL supports reproducibility and INF2003.
 - ALB/ASG provide measurable app scaling. Queues/microservices are outside baseline.
 - CloudFront omitted for current workload/budget; private S3 retained for datasets and exports.
-- Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([aws-terraform.md](plans/aws-terraform.md)).
+- Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([aws-terraform.md](archive/plans/aws-terraform.md)).
 
 Create the submission diagram during implementation with users, services, trust boundaries, flows and observability. Planned output: `evidence/architecture.png`; do not claim it exists before creation. INF2003 extends the preserved submission later.
 

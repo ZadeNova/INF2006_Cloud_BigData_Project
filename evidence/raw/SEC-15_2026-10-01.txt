@@ -1,0 +1,32 @@
+# SEC-15  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_request_logging.py
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 19 items
+
+tests/test_request_logging.py::test_a_request_produces_exactly_one_line_with_the_documented_fields PASSED [  5%]
+tests/test_request_logging.py::test_the_numeric_user_id_is_logged_when_the_view_loaded_the_user PASSED [ 10%]
+tests/test_request_logging.py::test_logging_never_queries_the_database PASSED [ 15%]
+tests/test_request_logging.py::test_health_probes_are_not_logged_at_info PASSED [ 21%]
+tests/test_request_logging.py::test_an_unsafe_incoming_request_id_is_replaced[short] PASSED [ 26%]
+tests/test_request_logging.py::test_an_unsafe_incoming_request_id_is_replaced[xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx] PASSED [ 31%]
+tests/test_request_logging.py::test_an_unsafe_incoming_request_id_is_replaced[abcdefgh\n{"forged":true}] PASSED [ 36%]
+tests/test_request_logging.py::test_a_safe_incoming_request_id_is_kept_so_a_proxy_can_correlate PASSED [ 42%]
+tests/test_request_logging.py::test_query_strings_are_not_logged PASSED  [ 47%]
+tests/test_request_logging.py::test_a_login_post_logs_neither_the_password_nor_the_cookie PASSED [ 52%]
+tests/test_request_logging.py::test_a_controlled_failure_can_be_correlated_without_leaking_its_message PASSED [ 57%]
+tests/test_request_logging.py::test_a_database_outage_is_logged_with_its_class_and_request_id_and_without_a_lookup PASSED [ 63%]
+tests/test_request_logging.py::test_client_errors_are_logged_at_info_with_their_status PASSED [ 68%]
+tests/test_request_logging.py::test_a_rejected_referer_is_not_echoed_into_the_security_log PASSED [ 73%]
+tests/test_request_logging.py::test_the_formatter_emits_one_line_and_reduces_exceptions_to_class_and_frames PASSED [ 78%]
+tests/test_request_logging.py::test_the_formatter_replaces_the_message_of_every_django_security_logger PASSED [ 84%]
+tests/test_request_logging.py::test_the_formatter_tolerates_values_that_are_not_json_serialisable PASSED [ 89%]
+tests/test_request_logging.py::test_logging_is_configured_for_json_on_standard_output PASSED [ 94%]
+tests/test_request_logging.py::test_rejected_host_keeps_request_id_in_response_and_security_event PASSED [100%]
+
+============================== 19 passed in 3.15s ==============================
+pytest_exit=0

@@ -1,10 +1,10 @@
 # Cart review
 
-Task ID `cart`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
+Task ID `cart`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
 
 - **Base and snapshot:** `c0c1bfb..0c13334`. Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4`.
 - **Owned paths:** `src/cart/services.py`, `views.py`, `forms.py`, `urls.py`, `src/templates/cart/`, the Add-to-Cart control in `src/templates/catalogue/_product_card.html`, `tests/test_cart.py`.
-- **Specs:** [API.md](../API.md) cart rows and HTMX contract, [SCHEMA.md](../SCHEMA.md) Cart/CartItem, plan [batch-03-cart.md](../plans/batch-03-cart.md).
+- **Specs:** [API.md](../API.md) cart rows and HTMX contract, [SCHEMA.md](../SCHEMA.md) Cart/CartItem, plan [batch-03-cart.md](../archive/plans/batch-03-cart.md).
 - **Status:** Gate cleared. Round 2 resolved CART-001 and CART-002; rounds 3 and 4 did not reopen them (final head `7eea9b7`). Fixes were made by the user with Claude, not Astra Low.
 
 ## Checks and limitations

@@ -2,7 +2,7 @@
 # written into terraform.tfstate in plain text. Values are set with `aws secretsmanager
 # put-secret-value` at stage 1 step 8, straight to the API, never through Terraform state.
 # Field lists: docs/AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary and
-# docs/plans/aws-terraform-stage-1.md.
+# evidence/aws-build-runbook.md (Procedures).
 
 locals {
   # One secret per job, so a compromised process only ever holds its own credentials.

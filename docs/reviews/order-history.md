@@ -1,10 +1,10 @@
 # Order history review
 
-Task ID `order-history`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
+Task ID `order-history`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
 
 - **Base and snapshot:** `ce174af..a11247b`. Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4`.
 - **Owned paths:** `OrderListView` in `src/orders/views.py`, `src/orders/urls.py`, `src/templates/orders/list.html`, the nav and receipt links, the history tests in `tests/test_orders.py`.
-- **Specs:** [API.md](../API.md), plan [batch-05-order-history.md](../plans/batch-05-order-history.md).
+- **Specs:** [API.md](../API.md), plan [batch-05-order-history.md](../archive/plans/batch-05-order-history.md).
 - **Status:** Round 1 complete; **no actionable findings**.
 
 ## Result

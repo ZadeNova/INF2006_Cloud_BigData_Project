@@ -1,0 +1,27 @@
+# SEC-12  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_settings.py
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 14 items
+
+tests/test_settings.py::test_postgresql_connection_uses_non_superuser PASSED [  7%]
+tests/test_settings.py::test_invalid_configuration_fails[changes0-DJANGO_SECRET_KEY] PASSED [ 14%]
+tests/test_settings.py::test_invalid_configuration_fails[changes1-at least 50] PASSED [ 21%]
+tests/test_settings.py::test_invalid_configuration_fails[changes2-Explicit allowed hosts] PASSED [ 28%]
+tests/test_settings.py::test_invalid_configuration_fails[changes3-DJANGO_ENV] PASSED [ 35%]
+tests/test_settings.py::test_invalid_configuration_fails[changes4-true or false] PASSED [ 42%]
+tests/test_settings.py::test_invalid_configuration_fails[changes5-DEBUG is forbidden] PASSED [ 50%]
+tests/test_settings.py::test_invalid_configuration_fails[changes6-DJANGO_HSTS_SECONDS] PASSED [ 57%]
+tests/test_settings.py::test_invalid_configuration_fails[changes7-DJANGO_HEALTH_PROBE_HOST] PASSED [ 64%]
+tests/test_settings.py::test_invalid_configuration_fails[changes8-APP_RELEASE_ID] PASSED [ 71%]
+tests/test_settings.py::test_production_configuration PASSED             [ 78%]
+tests/test_settings.py::test_image_carries_a_loadable_rds_certificate_bundle PASSED [ 85%]
+tests/test_settings.py::test_shared_session_configuration PASSED         [ 92%]
+tests/test_settings.py::test_wsgi_startup_emits_only_nonsecret_release_identity PASSED [100%]
+
+============================== 14 passed in 5.54s ==============================
+pytest_exit=0

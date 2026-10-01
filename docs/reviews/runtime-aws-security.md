@@ -74,7 +74,7 @@ Unrun at this checkpoint: final image build, pinned Python 3.13 execution, actua
 | docs/AWS_INFRASTRUCTURE.md | 9f906c9944b5a2583571e006983cb8022f65ed045b750afa60bf457e82e1b9ed |
 | docs/SECURITY.md | 94be8dd9ca505b962744c24afe2e2adae11e0d8838dad74957493bf39138a84c |
 | docs/ARCHITECTURE.md | 3220417d3fb9a05fa672a9d04eca0502c7ad39b94cf017974c517a3732c3a287 |
-| docs/plans/deploy-readiness.md | a601ee63a2394b99f3f57d90576d8f0721ab8b99838ca7cc80415c5afef2eab1 |
+| docs/archive/plans/deploy-readiness.md | a601ee63a2394b99f3f57d90576d8f0721ab8b99838ca7cc80415c5afef2eab1 |
 | src/README.md | 9da0d7ca186df9066a94daeee60e962e323042526ecbd742affaaa101df426ea |
 
 ### A round 1 — findings; gate open
@@ -115,7 +115,7 @@ Complete 14-path A boundary refrozen below. Coordinator-owned records remain out
 | docs/AWS_INFRASTRUCTURE.md | c1c145046c22cf77062cfbc72fe539cad8da4be03321132371fab43a6efe36bd |
 | docs/SECURITY.md | 94be8dd9ca505b962744c24afe2e2adae11e0d8838dad74957493bf39138a84c |
 | docs/ARCHITECTURE.md | 3220417d3fb9a05fa672a9d04eca0502c7ad39b94cf017974c517a3732c3a287 |
-| docs/plans/deploy-readiness.md | a601ee63a2394b99f3f57d90576d8f0721ab8b99838ca7cc80415c5afef2eab1 |
+| docs/archive/plans/deploy-readiness.md | a601ee63a2394b99f3f57d90576d8f0721ab8b99838ca7cc80415c5afef2eab1 |
 | src/README.md | 9da0d7ca186df9066a94daeee60e962e323042526ecbd742affaaa101df426ea |
 
 Pinned-layout command (existing dependency image, source mounted read-only; not a final image build):
@@ -284,7 +284,7 @@ Durable commands use fresh scratch paths; actual scratch was `C:/Users/limch/App
 | tests/verify_runtime_image.py | f7e73d67a514ef6181ef9480d3e2839a2e1e62abef769b36e8455d7c16415c97 |
 | tests/README.md | 3a7ae5aba9c91cc81f64341364b3355c900d66011cb6b83940f9b6e7cdc8b75a |
 | docs/AWS_INFRASTRUCTURE.md | bd8311c8f992b8fdd97d44d6c406f733e658e5b2fdeff7aabb573e7242765371 |
-| docs/plans/deploy-readiness.md | 35f657fdd72a8800cdb4452c07687609f8ed9ace9d5be474c3835abb156a88bb |
+| docs/archive/plans/deploy-readiness.md | 35f657fdd72a8800cdb4452c07687609f8ed9ace9d5be474c3835abb156a88bb |
 | src/README.md | efbd8c29da3de42073854190743a870567186b9c3926cb14c02be91eb0619aa9 |
 
 C exact test selections (fixture environment as in B; task-only values are not real secrets):

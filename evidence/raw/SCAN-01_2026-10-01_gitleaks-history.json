@@ -1,0 +1,22 @@
+[
+ {
+  "RuleID": "generic-api-key",
+  "Description": "Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+  "StartLine": 11,
+  "EndLine": 11,
+  "StartColumn": 158,
+  "EndColumn": 188,
+  "Match": "Authentication, REDACTED ",
+  "Secret": "REDACTED",
+  "File": "evidence/test-security.md",
+  "SymlinkFile": "",
+  "Commit": "51e4ec112db82d7fef7ca95423dda83b29507910",
+  "Entropy": 3.807355,
+  "Author": "clllllllllllllll",
+  "Email": "limcheelong4@gmail.com",
+  "Date": "2026-09-12T05:21:27Z",
+  "Message": "feat: verify foundation health and readiness with frontend handover",
+  "Tags": [],
+  "Fingerprint": "51e4ec112db82d7fef7ca95423dda83b29507910:evidence/test-security.md:generic-api-key:11"
+ }
+]

@@ -39,7 +39,7 @@ Checked and found sound: `RedirectView` with `pattern_name` returns a temporary 
 
 ## Resolution (24 September 2026)
 
-The owner asked for OPUS-001 to OPUS-003 to be fixed; plan [opus-review-fixes.md](../plans/opus-review-fixes.md).
+The owner asked for OPUS-001 to OPUS-003 to be fixed; plan [opus-review-fixes.md](../archive/plans/opus-review-fixes.md).
 
 | ID | Fix | Regression |
 |---|---|---|

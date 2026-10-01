@@ -2,7 +2,7 @@
 
 Date: 25 September 2026. Reviewer: Claude Opus 5.5, read-only (no files changed, staged or committed).
 Snapshot: branch `erfan/analytics` at `91eba60`, plus the uncommitted `src/tools/aws_capability_check.py`,
-`tests/test_aws_capability_check.py` and an edit to `docs/plans/cloud-independent-prep.md`.
+`tests/test_aws_capability_check.py` and an edit to `docs/archive/plans/cloud-independent-prep.md`.
 
 **Independence.** One session ran four passes: `f5c6557..HEAD`, the storefront redesign and core, the ML component, and a final sweep. It never saw an implementing conversation. However, it is not a fresh-session review in the [DEVELOPMENT.md](DEVELOPMENT.md#backend-review-gate) sense, because later passes had the earlier ones in context. Log it as a **same-session** review if it is used for the backend gate.
 

@@ -69,7 +69,7 @@ Each file starts with a **Summary** table (Case | Proves | Threat/requirement | 
 | SEC-08 | T8 Secrets in logs (A09) | `test_request_logging.py::test_a_login_post_logs_neither_the_password_nor_the_cookie`, `::test_query_strings_are_not_logged`, `::test_a_rejected_referer_is_not_echoed_into_the_security_log` |
 | SEC-09–11 | T8–T10 cloud: private RDS/S3, HTTPS, Secrets Manager | PLANNED (after the AWS build) |
 
-**4. `evidence/threat-control-map.md`**: built from the "Sources" and "Draft map" sections of `docs/plans/threat-control-map.md`. Columns: ID | Threat (source) | How it applies | Control | Where implemented | Evidence (case) | Status. A row can be "Mitigated" only if its SEC case has a PASS. Cloud rows stay "Planned". Keep Partial/Accepted/Not applicable rows with their reasons. Check every "Where implemented" path exists, and flag any that don't. Finish with a References section for S1–S6.
+**4. `evidence/threat-control-map.md`**: built from the "Sources" and "Draft map" sections of `docs/archive/plans/threat-control-map.md`. Columns: ID | Threat (source) | How it applies | Control | Where implemented | Evidence (case) | Status. A row can be "Mitigated" only if its SEC case has a PASS. Cloud rows stay "Planned". Keep Partial/Accepted/Not applicable rows with their reasons. Check every "Where implemented" path exists, and flag any that don't. Finish with a References section for S1–S6.
 
 **5. `evidence/test-resilience.md`**
 - RES-01: pytest `/app/tests/test_db_unavailable.py /app/tests/test_health.py`. Expected: all pass.
@@ -93,7 +93,7 @@ Read `Last covered commit` from `evidence/README.md`, run `git log <commit>..HEA
 | `src/config/settings.py`, `middleware.py` | SEC-03, SEC-07, SEC-08, RES-01 |
 | `src/config/jsonlog.py` | SEC-08, MON-01 |
 | `tests/<file>` | the cases citing it |
-| `docs/plans/threat-control-map.md` | threat-control-map.md |
+| `docs/archive/plans/threat-control-map.md` | threat-control-map.md |
 | `analytics/`, `data/` | tell the human to notify the data owner (don't run) |
 | `terraform/` or AWS | tell the human: the cloud cases need instructions added here |
 

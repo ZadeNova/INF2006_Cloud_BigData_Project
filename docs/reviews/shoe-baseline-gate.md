@@ -42,7 +42,7 @@
 ## Round 2: re-review of the G-001 and G-002 fixes
 
 - Reviewer: **Same-session, Claude Opus 5.5.** This is a logged exception, not an independent review. The session that ran round 1 also wrote these fixes, at the user's direction instead of Astra Low. The user authorised Opus 5.5 to take the gate. Because the author reviewed its own fix, a shared blind spot is possible. The gate is cleared by the owner's acceptance of this same-session review, not by independent review. A fresh-session Astra Medium or Opus 5.5 pass remains the default if independence is wanted.
-- Date: 27 September 2026. Base `86e1d95` (a user docs-only commit after round 1, unrelated to these paths), with uncommitted changes to `src/config/dataset.py`, `src/catalogue/management/commands/seed_demo.py`, `tests/test_import.py` and `tests/test_catalogue.py`. Plan: [shoe-baseline-gate-fixes.md](../plans/shoe-baseline-gate-fixes.md).
+- Date: 27 September 2026. Base `86e1d95` (a user docs-only commit after round 1, unrelated to these paths), with uncommitted changes to `src/config/dataset.py`, `src/catalogue/management/commands/seed_demo.py`, `tests/test_import.py` and `tests/test_catalogue.py`. Plan: [shoe-baseline-gate-fixes.md](../archive/plans/shoe-baseline-gate-fixes.md).
 
 | Check | Result |
 |---|---|
@@ -62,7 +62,7 @@ Review of the fix diff:
 ## Round 3: test redundancy audit and trim
 
 - Reviewer: **Same-session, Claude Opus 5.5.** The same session also wrote the G-001 and G-002 fixes and this trim, so this is **not** an independent review. The user asked for it to be logged as independent; it is logged as same-session because DEVELOPMENT.md requires that label whenever the author reviews its own change. As with round 2, the gate is cleared by the owner's acceptance of a same-session review.
-- Date: 27 September 2026. Plan: [test-trim-shoe-baseline.md](../plans/test-trim-shoe-baseline.md).
+- Date: 27 September 2026. Plan: [test-trim-shoe-baseline.md](../archive/plans/test-trim-shoe-baseline.md).
 - Method: the 25 September trim ([test-trim.md](test-trim.md), 466 → 392) already removed cases that mutants showed to be equivalent. This round looked mainly at tests added since `0f7e9d4`, and at duplication across modules (`test_security_negative.py` against the feature modules). A case counts as redundant only if a kept case fails for every defect it would catch. Evidence citations (SEC-02, SEC-04) were checked before any removal.
 
 | Change | Kept coverage |

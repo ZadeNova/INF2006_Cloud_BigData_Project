@@ -1,6 +1,6 @@
 # Authentication review
 
-Task ID `auth-registration`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
+Task ID `auth-registration`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
 
 - **Base and snapshot:** `4795f9f..cafe528`. Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4`.
 - **Owned paths:** `src/accounts/` (urls, views), the related settings (`LOGIN_REDIRECT_URL`, `LOGOUT_REDIRECT_URL`), `tests/test_accounts.py`.

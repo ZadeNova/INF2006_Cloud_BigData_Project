@@ -13,7 +13,7 @@ Phase 4 is complete locally. The review and cleanup concluded without a commit o
 - Coordinator `/root` managed delegation and this log/status documentation; did not review or fix implementation code.
 - No worktree, branch switch, pull, rebase, reset, staging, commit or push. Original draft below is preserved as historical implementer evidence, not independent clearance.
 
-Contracts: [review gate](../DEVELOPMENT.md#backend-review-gate), [6c](../plans/batch-06c-dashboard.md), [scope](../../PROJECT_SCOPE_INF2006.md), [API](../API.md), [analytics](../ANALYTICS.md), [frontend](../FRONTEND.md), [architecture](../ARCHITECTURE.md), [schema](../SCHEMA.md), [security](../SECURITY.md), [testing](../TESTING.md), [INF2003](../INF2003_BASELINE.md), [design](../../DESIGN.md), current roadmap/status/tracker and existing reporting queries/ranges/models/refresh dependencies.
+Contracts: [review gate](../DEVELOPMENT.md#backend-review-gate), [6c](../archive/plans/batch-06c-dashboard.md), [scope](../../PROJECT_SCOPE_INF2006.md), [API](../API.md), [analytics](../ANALYTICS.md), [frontend](../FRONTEND.md), [architecture](../ARCHITECTURE.md), [schema](../SCHEMA.md), [security](../SECURITY.md), [testing](../TESTING.md), [INF2003](../INF2003_BASELINE.md), [design](../../DESIGN.md), current roadmap/status/tracker and existing reporting queries/ranges/models/refresh dependencies.
 
 Snapshot digest algorithm: SHA-256 of lexically sorted `path:lowercase-file-SHA256` lines, joined with LF and no trailing LF, encoded UTF-8.
 
@@ -115,7 +115,7 @@ All DASH-001–005 are resolved. Coordinator updated the implementation tracker,
 
 All paths below are relative to the repository root; this is the full final 29-path boundary.
 
-- Contracts/status/review (8): `docs/ANALYTICS.md`, `docs/API.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SCHEMA.md`, `docs/plans/analytics-status.md`, `docs/plans/backend-completion-roadmap.md`, `docs/plans/batch-06c-dashboard.md`, `docs/reviews/analytics-dashboard.md`.
+- Contracts/status/review (8): `docs/ANALYTICS.md`, `docs/API.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/SCHEMA.md`, `docs/archive/plans/analytics-status.md`, `docs/archive/plans/backend-completion-roadmap.md`, `docs/archive/plans/batch-06c-dashboard.md`, `docs/reviews/analytics-dashboard.md`.
 - Shared access/routing/seed (4): `src/accounts/mixins.py`, `src/cart/views.py`, `src/catalogue/management/commands/seed_demo.py`, `src/config/urls.py`.
 - Reporting (7): `src/reporting/forms.py`, `src/reporting/models.py`, `src/reporting/migrations/0004_analyticsrun_permissions.py`, `src/reporting/templatetags/__init__.py`, `src/reporting/templatetags/reporting_tags.py`, `src/reporting/urls.py`, `src/reporting/views.py`.
 - Presentation (5): `src/static/css/site.css`, `src/static/js/analytics.js`, `src/templates/base.html`, `src/templates/reporting/_panel.html`, `src/templates/reporting/dashboard.html`.
@@ -136,7 +136,7 @@ The checkout is `CL/Analytics` at the requested review base `df29b82311ec1a29ed0
 
 The integrated change covers the shared HTMX login mixin, reporting permission migration and seed grant, protected dashboard view/context, full and fragment templates, operator navigation, responsive dashboard styling, accessible table alternatives, Chart.js 4.4.7 vendoring and chart lifecycle/error handling. Analytics formulas, SQL queries, the Phase 3 pandas verifier, AWS, scheduling, caching, ML and INF2003 remain untouched.
 
-Requirements: [6c plan](../plans/batch-06c-dashboard.md), [analytics contract](../ANALYTICS.md), [API/context](../API.md#analytics-backend-context), [review gate](../DEVELOPMENT.md#backend-review-gate).
+Requirements: [6c plan](../archive/plans/batch-06c-dashboard.md), [analytics contract](../ANALYTICS.md), [API/context](../API.md#analytics-backend-context), [review gate](../DEVELOPMENT.md#backend-review-gate).
 
 ## Automated verification
 

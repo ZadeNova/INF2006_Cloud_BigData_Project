@@ -1,6 +1,6 @@
 # Catalogue and operator review
 
-Task ID `catalogue-operator`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
+Task ID `catalogue-operator`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
 
 - **Base and snapshot:** `cafe528..c0c1bfb` (includes `962d751`, `6ca93b8`, `9cee9d2`). Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4`.
 - **Owned paths:** `src/catalogue/` (models, views, urls, `seed_demo`, the permission migration), `tests/test_catalogue.py`, related URL and settings entries.

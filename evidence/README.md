@@ -18,10 +18,13 @@ Last covered commit: `ee334cf`
 | SEC-06 | T6 stored cross-site scripting (XSS) | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
 | SEC-07 | T7 weak passwords; partial control because there is no throttling or MFA | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
 | SEC-08 | T8 secrets and personal data kept out of logs | [test-security.md](test-security.md) | Local Docker | PASS | 2026-09-26 |
+| SEC-12 to SEC-16 | T7, T8, T10, T11, T12, T17 local controls: production settings, secret loading, health and Host handling, request logging, unusable imported passwords | [test-security.md](test-security.md) | Local Docker | PASS | 2026-10-01 |
+| SEC-ALL rerun | The 25 SEC-01 to SEC-08 test IDs rerun on the current commit | [test-security.md](test-security.md) | Local Docker | PASS | 2026-10-01 |
+| SCAN-01 to SCAN-07 | gitleaks, bandit, pip-audit, `check --deploy`, hadolint, Trivy image and IaC scans with triage | [security-scan-triage.md](security-scan-triage.md) | Local Docker (not CI) | Run; findings triaged, 4 open | 2026-10-01 |
 | SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED (S3 anonymous request returned 403 on 2026-09-29, recorded in the runbook, not yet a test case; RDS not built) | — |
 | SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | PLANNED | — |
 | SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
-| THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | Map filled: T1–T8 rest on SEC-01..08 PASS; other local rows NOT RUN YET as security cases; cloud rows PLANNED | 2026-09-27 |
+| THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | Map filled and extended to T19: local rows rest on SEC-01..08 and SEC-12..16 PASS plus the scans; cloud rows PLANNED | 2026-10-01 |
 | DATA-01 | Analytics refresh reconciled against an independent pandas check | [test-data-ai.md](test-data-ai.md) | Local Docker | PASS (existing prior record; not rerun here) | 2026-09-22 |
 | DATA-01 | Rerun on the derived shoe dataset the application now imports | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |
 | DATA-02 | ML customer segmentation on the shoe dataset: tests, training, strict import and operator dashboard | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |

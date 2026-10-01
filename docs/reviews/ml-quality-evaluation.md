@@ -18,7 +18,7 @@ Requirements: [analytics contract](../ANALYTICS.md), [data pipeline](../DATA_PIP
 
 Current accepted input is Analytics Engineering Ecommerce Sales & Returns v1.0.0, downloaded 22 September 2026, per `data/README.md` and `project_manifest.yaml`. Namespace `synthetic/revision-a/demo/v1`, seed 42, no shift, cutoff `2026-01-02T00:00:00+08:00`; expected inventory `import-v1-9884d29e2bf9a64778c63858230ebd71223569b293c28c8acb895b1920e10d0f`. Coordinator independently checked all four imported CSV SHA-256 hashes against the accepted record; implementer checked all six preserved source tables.
 
-The [shoe remap](../plans/shoe-dataset-remap.md) is explicitly plan-only; adoption requires a validated teammate build. `data/derived/shoes` is absent. Evaluation on the accepted release is not substitution for future shoe-data evaluation; READY-010 remains an adoption-time rerun requirement. Raw inputs are untouched, and source customer_segment labels are neither features nor ground truth.
+The [shoe remap](../archive/plans/shoe-dataset-remap.md) is explicitly plan-only; adoption requires a validated teammate build. `data/derived/shoes` is absent. Evaluation on the accepted release is not substitution for future shoe-data evaluation; READY-010 remains an adoption-time rerun requirement. Raw inputs are untouched, and source customer_segment labels are neither features nor ground truth.
 
 ## Verification and resources
 

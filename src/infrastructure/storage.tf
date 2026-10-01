@@ -5,7 +5,7 @@
 # Lab constraint (29 September 2026): the Learner Lab's service control policy denies
 # s3:GetBucketObjectLockConfiguration, which the aws_s3_bucket resource calls on every read, so
 # Terraform cannot manage the bucket itself. The bucket is created once with the CLI (command in
-# docs/plans/aws-terraform-stage-1.md) and looked up here; every security setting on it below is
+# evidence/aws-build-runbook.md, Procedures) and looked up here; every security setting on it below is
 # still a Terraform resource. Teardown deletes the bucket with the CLI after `terraform destroy`.
 
 data "aws_s3_bucket" "main" {

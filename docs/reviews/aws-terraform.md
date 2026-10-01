@@ -1,6 +1,6 @@
 # AWS Terraform review gate
 
-Review log for the Terraform stages, per [aws-terraform.md § Review](../plans/aws-terraform.md#review). One section per stage.
+Review log for the Terraform stages, per [aws-terraform.md § Review](../archive/plans/aws-terraform.md#review). One section per stage.
 
 ## Stage 1: network, security groups, storage, secrets, monitoring
 

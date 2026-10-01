@@ -43,7 +43,7 @@ The work here is mostly *extraction and packaging*, not new design:
 | Baseline architecture and flows | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §7, [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Alternatives already reasoned about (unpolished, needs rewriting as report prose) | [ARCHITECTURE.md](ARCHITECTURE.md)'s "Failure boundaries and alternatives" section |
 | Cost-control measures | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §7 "Budget plan" (USD 30 of 40 working cap, ASG max 2, Single-AZ RDS, short log retention) |
-| Expected workload | [cloud-independent-prep.md](plans/cloud-independent-prep.md) B1 (browse-heavy mix, small checkout share) |
+| Expected workload | [cloud-independent-prep.md](archive/plans/cloud-independent-prep.md) B1 (browse-heavy mix, small checkout share) |
 
 **Gaps:** the diagram doesn't exist yet; `report.pdf` and `project_manifest.yaml` don't exist yet;
 `ARCHITECTURE.md`'s alternatives are terse status notes, not the justified prose the report needs.
@@ -81,7 +81,7 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
 2. **Service model and deployment model, stated as a decision (report §3).** State plainly: IaaS —
    EC2 instances in an Auto Scaling Group behind an ALB, backed by managed RDS PostgreSQL and S3,
    provisioned with Terraform (see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md), "Deployment
-   method", and [aws-terraform.md](plans/aws-terraform.md)). This is a deliberate choice,
+   method", and [aws-terraform.md](archive/plans/aws-terraform.md)). This is a deliberate choice,
    not the only option — which leads to:
 
 3. **Justify the choice from the workload, then reject the alternatives against it.** Written
@@ -106,6 +106,8 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
    expected traffic with a small checkout share (from the load-test plan).
 
 ### Service-model justification (report §3 material)
+
+> **Sprint note (1 October 2026):** the rejection of ECS on Fargate under D5 below was argued from the design, not measured. It is being replaced by a measured EC2-versus-Fargate comparison ([plan](plans/aws-ecs-comparison.md)). Keep drivers D1 to D5; rewrite the Fargate paragraph and the summary matrix from the data once the runs are done.
 
 Structure: state the decision drivers first, each traced to the story, then test every option
 against them. The choice then follows from the requirements instead of being defended after the

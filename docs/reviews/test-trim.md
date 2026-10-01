@@ -44,7 +44,7 @@ Missed by the earlier review: the outage tests never reached a view body (a muta
 
 ## Task B: test trim
 
-Rule: a case was removed only when a mutant showed that a kept test fails for every defect it detects, or (three cases, marked) when it hits the same constraint or framework branch as a kept value. Plan: [test-trim.md](../plans/test-trim.md).
+Rule: a case was removed only when a mutant showed that a kept test fails for every defect it detects, or (three cases, marked) when it hits the same constraint or framework branch as a kept value. Plan: [test-trim.md](../archive/plans/test-trim.md).
 
 | File | Before → after | Evidence |
 |---|---|---|

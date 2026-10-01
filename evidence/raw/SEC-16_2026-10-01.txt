@@ -1,0 +1,14 @@
+# SEC-16  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_import.py::test_counts_mappings_rounding_and_sealed_inventory
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 1 item
+
+tests/test_import.py::test_counts_mappings_rounding_and_sealed_inventory PASSED [100%]
+
+============================== 1 passed in 1.46s ===============================
+pytest_exit=0

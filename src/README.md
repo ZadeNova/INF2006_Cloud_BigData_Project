@@ -65,7 +65,7 @@ Management commands (run as `docker compose run --rm web python manage.py <comma
 | `seed_demo --seed 42 [--no-products]` | Create the demo operator (`store_operator` group) and, unless `--no-products`, the 20 demo shoes in 10 sizes each (200 products) from `catalogue/shoes.py`. Create-only. |
 | `import_dataset --source /app/data/derived/shoes --namespace NS` | Import the derived shoe dataset (or `/app/data/raw` for the original) with sealed historical inventory. Needs a namespace with no demo products; see [data/README.md](../data/README.md). |
 | `snapshot_inventory --as-of YYYY-MM-DD` | Seal live stock as an immutable inventory version (today's Singapore date only). Leaves a permanent version, so avoid it on the shared dev database. |
-| `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/plans/analytics-status.md). |
+| `refresh_analytics --as-of YYYY-MM-DD` | Rebuild the daily sales summary for the dashboard. Details in [analytics status](../docs/archive/plans/analytics-status.md). |
 | `load_customer_segments --run-id ID --input FILE` | Load the optional customer segments made by `analytics/segment_customers.py` for one analytics run; see [analytics/README.md](../analytics/README.md). |
 | `check_database` | Connectivity and applied-migration gate. |
 

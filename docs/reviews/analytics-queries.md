@@ -1,6 +1,6 @@
 # Analytics queries review
 
-Task ID `analytics-queries`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
+Task ID `analytics-queries`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report.
 
 - **Base and snapshot:** `470becd..788f545`. Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4`.
 - **Owned paths:** `src/reporting/queries.py`, the snapshot half of `src/reporting/services.py`, `src/reporting/management/commands/snapshot_inventory.py`; tests `test_analytics_queries.py`, `test_analytics_snapshot.py`.

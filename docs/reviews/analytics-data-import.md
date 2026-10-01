@@ -2,7 +2,7 @@
 
 Base/HEAD: `3deed85024e841bd9dccc99c1860ca379d5012bc`, branch `CL/Analytics`.
 Scope: full uncommitted dataset batch, including untracked files; owned paths are
-listed in the [tracker handoff](../IMPLEMENTATION_PLAN.md#dataset-phases-12-review-handoff-22-september-2026).
+listed in the [tracker handoff](../archive/status-history.md#dataset-phases-12-review-handoff-22-september-2026).
 Reviewed implementation paths: `analytics/profile_dataset.py`, `analytics/requirements.txt`,
 `analytics/README.md`, `data/PROFILE.md`, `data/README.md`, `data/DATA_DICTIONARY.md`,
 `src/config/dataset.py`, `src/config/management/commands/import_dataset.py`,
@@ -10,9 +10,9 @@ Reviewed implementation paths: `analytics/profile_dataset.py`, `analytics/requir
 `docs/IMPLEMENTATION_PLAN.md`, `docs/DATA_PIPELINE.md`, `docs/SCHEMA.md`,
 `docs/ANALYTICS.md`, this review record, and `project_manifest.yaml`.
 Commit preparation additionally updates the status checklist in
-`docs/plans/backend-completion-roadmap.md`; no implementation change.
-No unrelated changes were present. References: [batch 6a](../plans/batch-06a-data-import.md),
-[roadmap Phases 1–2](../plans/backend-completion-roadmap.md), [data pipeline](../DATA_PIPELINE.md),
+`docs/archive/plans/backend-completion-roadmap.md`; no implementation change.
+No unrelated changes were present. References: [batch 6a](../archive/plans/batch-06a-data-import.md),
+[roadmap Phases 1–2](../archive/plans/backend-completion-roadmap.md), [data pipeline](../DATA_PIPELINE.md),
 [schema](../SCHEMA.md), [analytics](../ANALYTICS.md), [review gate](../DEVELOPMENT.md#backend-review-gate).
 
 ## Round 1 — user-supplied independent review

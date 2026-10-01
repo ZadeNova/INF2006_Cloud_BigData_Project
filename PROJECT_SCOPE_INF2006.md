@@ -189,7 +189,7 @@ The brief states no minimum row count. The selected 100,000 orders and 237,537 l
 
 Maintain three fixtures: a tiny independently hand-checkable correctness fixture, the validated imported historical dataset, and an isolated/resettable load-test fixture with sufficient stock and repeatable shoppers. Record seed, counts, date range and distribution assumptions for all generated additions. Larger fixtures must preserve valid relationships and plausible skew, not duplicate IDs or arbitrarily copy records.
 
-If this download also fails provenance, licence or integrity checks once profiled, use the documented fully synthetic generator ([batch-06a-dataset-generator.md](plans/batch-06a-dataset-generator.md)) with equivalent tables, and record that further change the same way this one was recorded. The generator remains needed regardless, for the tiny hand-checkable correctness fixture and the isolated load-test fixture required below. Selection is complete; validation and import remain implementation tasks.
+If this download also fails provenance, licence or integrity checks once profiled, use the documented fully synthetic generator ([batch-06a-dataset-generator.md](docs/archive/plans/batch-06a-dataset-generator.md)) with equivalent tables, and record that further change the same way this one was recorded. The generator remains needed regardless, for the tiny hand-checkable correctness fixture and the isolated load-test fixture required below. Selection is complete; validation and import remain implementation tasks.
 
 ### Analytics validation and limitations
 

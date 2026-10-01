@@ -58,13 +58,13 @@ Reviewer /root/phase2_reviewer, explicitly gpt-6-astra / medium, Independent (fr
 | docs/ANALYTICS.md | 82742ca81760d891b3aa4781d259399c97a56a35aa6665647b1118fe9549eed8 |
 | docs/API.md | cc35aed0c5323ce9825601db704e5d8ba1a7f6be076aabd146e178f4e693481a |
 | docs/ARCHITECTURE.md | 1fccbefecd1624cac4f8b3d4039b3a099fbf2fd8e817b4659f8344bb1719104f |
-| docs/AWS_CAPABILITY_CHECK.md | 07c29a3edd205551aad7b4678ff842c4cfa1506ca6f6365d3abfcd66733e99f6 |
+| docs/archive/AWS_CAPABILITY_CHECK.md | 07c29a3edd205551aad7b4678ff842c4cfa1506ca6f6365d3abfcd66733e99f6 |
 | docs/AWS_INFRASTRUCTURE.md | 0c713775e77987d11158e6ddac3c2a5abf99c386b907d84ff6f41e5d6bd93c0b |
 | docs/IMPLEMENTATION_PLAN.md | da62ce6915c892c37681948ea348524caeb028b038d5420e285f5e9efcfc6b21 |
 | docs/INF2003_BASELINE.md | cb43c79814d78751e2fe62a67b319b5362995a5733b79a0c0a4df2b38d05c29d |
 | docs/SECURITY.md | 29c09d7aca787d62be73349bbe9c796e7a9a280ea67365084f52fc8370689416 |
-| docs/plans/backend-aws-readiness.md | ad8dd619708f07c1f4c528db4660967fe201ed636f5aaa8253abfddab395d38b |
-| docs/plans/cloud-independent-prep.md | 64d1547b1d7b0dbbb85ffb2bad1d168b129fef3a687dd4f8d9f9124b53e17878 |
+| docs/archive/plans/backend-aws-readiness.md | ad8dd619708f07c1f4c528db4660967fe201ed636f5aaa8253abfddab395d38b |
+| docs/archive/plans/cloud-independent-prep.md | 64d1547b1d7b0dbbb85ffb2bad1d168b129fef3a687dd4f8d9f9124b53e17878 |
 | src/reporting/queries.py | f5bc2fba0a904f0bd5fdef4e22e2d48c29e612b292c4a061dc883c456f76e42c |
 | src/static/css/site.css | faeb7b908c85e56399eff716e130114c9c1703cd63fd45c986fbd66d62a84183 |
 | src/templates/reporting/_panel.html | 58612de6dc1e303108187b2763a00375d7369d76fd94042a4906a19e35f56bf6 |
@@ -77,7 +77,7 @@ Independent fresh-context Astra Medium reviewed all 18 tracked changed paths plu
 
 | ID | Severity | File/line | Required spec / evidence | Issue and expected correction | Fix / verification | Re-review outcome |
 |---|---|---|---|---|---|---|
-| SEG-001 | P2 | docs/plans/backend-aws-readiness.md:127 | Explicit batch ML, optional saved-model inference | AWS-ready exit still required scheduled ML publication and model path; require S3 dataset/import and explicit batch evidence, with saved-model evidence conditional | Coordinator corrected documentation-only criterion and linked current next-step ownership to tracker; source/test files unchanged | Resolved in round 2 |
+| SEG-001 | P2 | docs/archive/plans/backend-aws-readiness.md:127 | Explicit batch ML, optional saved-model inference | AWS-ready exit still required scheduled ML publication and model path; require S3 dataset/import and explicit batch evidence, with saved-model evidence conditional | Coordinator corrected documentation-only criterion and linked current next-step ownership to tracker; source/test files unchanged | Resolved in round 2 |
 
 Documentation is coordinator-owned; no backend fix or implementation escalation was needed. Revised complete diff submitted to the same reviewer tier. Repeated-issue rule remains in force.
 

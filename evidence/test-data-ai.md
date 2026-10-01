@@ -435,7 +435,7 @@ Pinned pure ML: 16 passes; Django-dependent analytics/strict loader: 54 passes; 
 ## Shoe dataset rerun — 26 September 2026
 
 Cases DATA-01 (rerun) and DATA-02. Plan and pass criteria were written before execution in
-[docs/plans/data-ml-evidence-rerun.md](../docs/plans/data-ml-evidence-rerun.md). Source commit
+[docs/archive/plans/data-ml-evidence-rerun.md](../docs/archive/plans/data-ml-evidence-rerun.md). Source commit
 `2698b05` (`erfan/merge-quarantine`); uncommitted catalogue-page edits in the working tree touch no
 analytics, import or ML code. Agent-executed (Claude Code) on the user's machine, not teammate
 execution. Raw output: `raw/DATA-01_2026-09-26_*.txt` and `raw/DATA-02_2026-09-26_*.txt`.
@@ -517,7 +517,7 @@ the `inf2006-data-check` containers, network and volume; label listings were emp
 ### Hold-out and subsample evaluation (M-02, M-05)
 
 Answers findings M-02 and M-05 of [the Opus 5.5 review](../docs/latest-opus5.5-review.md) with
-the new `analytics/evaluate_holdout.py` ([plan](../docs/plans/ml-holdout-evaluation.md)); the
+the new `analytics/evaluate_holdout.py` ([plan](../docs/archive/plans/ml-holdout-evaluation.md)); the
 published recipe and its version are unchanged. Fresh disposable project `inf2006-ml-holdout`,
 same shoe import (zero rejects) and refresh run `b96fbfa2-5c89-433f-91aa-77e3cb7d4c01` (41,345
 daily rows). Aggregate artifact: [ml-holdout-evaluation.json](ml-holdout-evaluation.json); raw
@@ -564,7 +564,7 @@ containers, network and volume; label listings were empty afterwards.
 
 ### Feature fix (M-03)
 
-Answers finding M-03 ([plan](../docs/plans/ml-feature-tenure-fix.md), criteria fixed before
+Answers finding M-03 ([plan](../docs/archive/plans/ml-feature-tenure-fix.md), criteria fixed before
 running). New recipe `log_rfm_aov`: standardized log1p recency, log1p frequency and log1p average
 order value (total spend ÷ orders) instead of raw recency and total spend. Stored rows and the
 dashboard still show lifetime recency, orders and spend. The import contract

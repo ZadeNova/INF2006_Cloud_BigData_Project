@@ -1,0 +1,38 @@
+# SEC-ALL-rerun  date=2026-10-01  commit=e6732ff (src unchanged since 27 Sep; docs/infra only dirty)
+# command: docker compose run --rm --no-deps web pytest -v -p no:cacheprovider /app/tests/test_orders.py::test_order_detail_returns_404_for_foreign_order_200_for_owner /app/tests/test_orders.py::test_order_list_shows_only_the_owners_orders_most_recent_first /app/tests/test_cart.py::test_update_on_foreign_item_returns_404_and_does_not_mutate /app/tests/test_cart.py::test_delete_does_not_touch_a_foreign_cart_item /app/tests/test_security_negative.py::test_a_customer_cannot_use_the_operator_toggle /app/tests/test_analytics_dashboard.py::test_customer_is_forbidden_even_with_htmx[False] /app/tests/test_analytics_dashboard.py::test_customer_is_forbidden_even_with_htmx[True] /app/tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_add] /app/tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_update] /app/tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_delete] /app/tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[toggle_active] /app/tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[checkout] /app/tests/test_accounts.py::test_logout_without_csrf_token_is_rejected /app/tests/test_security_negative.py::test_checkout_ignores_forged_price_owner_total_and_status_fields /app/tests/test_security_negative.py::test_cart_add_ignores_forged_owner_cart_and_price_fields /app/tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[0] /app/tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[abc] /app/tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[] /app/tests/test_analytics_dashboard.py::test_rendered_dashboard_escapes_product_names_and_shows_status_labels /app/tests/test_accounts.py::test_registration_enforces_the_password_validators /app/tests/test_request_logging.py::test_a_login_post_logs_neither_the_password_nor_the_cookie /app/tests/test_request_logging.py::test_query_strings_are_not_logged /app/tests/test_request_logging.py::test_a_rejected_referer_is_not_echoed_into_the_security_log /app/tests/test_orders.py::test_concurrent_checkouts_same_idempotency_key_create_exactly_one_order /app/tests/test_orders.py::test_concurrent_checkouts_different_users_racing_last_unit_of_stock
+============================= test session starts ==============================
+platform linux -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /app
+configfile: pytest.ini
+plugins: django-4.14.0
+collecting ... collected 25 items
+
+tests/test_orders.py::test_order_detail_returns_404_for_foreign_order_200_for_owner PASSED [  4%]
+tests/test_orders.py::test_order_list_shows_only_the_owners_orders_most_recent_first PASSED [  8%]
+tests/test_cart.py::test_update_on_foreign_item_returns_404_and_does_not_mutate PASSED [ 12%]
+tests/test_cart.py::test_delete_does_not_touch_a_foreign_cart_item PASSED [ 16%]
+tests/test_security_negative.py::test_a_customer_cannot_use_the_operator_toggle PASSED [ 20%]
+tests/test_analytics_dashboard.py::test_customer_is_forbidden_even_with_htmx[False] PASSED [ 24%]
+tests/test_analytics_dashboard.py::test_customer_is_forbidden_even_with_htmx[True] PASSED [ 28%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_add] PASSED [ 32%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_update] PASSED [ 36%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[cart_delete] PASSED [ 40%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[toggle_active] PASSED [ 44%]
+tests/test_security_negative.py::test_a_mutation_without_a_valid_csrf_token_is_rejected_and_changes_nothing[checkout] PASSED [ 48%]
+tests/test_accounts.py::test_logout_without_csrf_token_is_rejected PASSED [ 52%]
+tests/test_security_negative.py::test_checkout_ignores_forged_price_owner_total_and_status_fields PASSED [ 56%]
+tests/test_security_negative.py::test_cart_add_ignores_forged_owner_cart_and_price_fields PASSED [ 60%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[0] PASSED [ 64%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[abc] PASSED [ 68%]
+tests/test_security_negative.py::test_cart_add_rejects_bad_quantities_without_creating_anything[] PASSED [ 72%]
+tests/test_analytics_dashboard.py::test_rendered_dashboard_escapes_product_names_and_shows_status_labels PASSED [ 76%]
+tests/test_accounts.py::test_registration_enforces_the_password_validators PASSED [ 80%]
+tests/test_request_logging.py::test_a_login_post_logs_neither_the_password_nor_the_cookie PASSED [ 84%]
+tests/test_request_logging.py::test_query_strings_are_not_logged PASSED  [ 88%]
+tests/test_request_logging.py::test_a_rejected_referer_is_not_echoed_into_the_security_log PASSED [ 92%]
+tests/test_orders.py::test_concurrent_checkouts_same_idempotency_key_create_exactly_one_order PASSED [ 96%]
+tests/test_orders.py::test_concurrent_checkouts_different_users_racing_last_unit_of_stock PASSED [100%]
+
+============================== 25 passed in 4.17s ==============================
+pytest_exit=0

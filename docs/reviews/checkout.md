@@ -1,6 +1,6 @@
 # Checkout review
 
-Task ID `checkout`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report; the reviewer did not write to the repository.
+Task ID `checkout`. Round 1 of the independent backend review gate ([DEVELOPMENT.md](../DEVELOPMENT.md#backend-review-gate)); brief: [astra-review.md](../archive/plans/astra-review.md). Report received 20 September 2026 from the project's teammate running Astra as the independent reviewer (model and reasoning level are not stated in the report). Log written by the coordinator (the user with Claude Code) from that report; the reviewer did not write to the repository.
 
 - **Base and snapshot:** `0c13334..ce174af`. Reviewed PR head `d0922916e12c9df6c582c369032b70c975c967b4` (branch `erfan/backend-auth`), verified against GitHub.
 - **Owned paths:** `src/orders/services.py`, `src/orders/views.py`, `src/orders/urls.py`, `OrderItem.line_total` in `src/orders/models.py`, `src/templates/orders/checkout.html` and `detail.html`, `tests/test_orders.py`.

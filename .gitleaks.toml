@@ -1,0 +1,10 @@
+# gitleaks configuration: the default ruleset plus one recorded false positive.
+# Every suppression needs a reason here and a row in evidence/security-scan-triage.md.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "SCAN-01: generic-api-key matched ordinary prose ('Authentication, ownership/CSRF ...') in an evidence line of 12 September 2026; no credential present"
+condition = "AND"
+commits = ["51e4ec112db82d7fef7ca95423dda83b29507910"]
+paths = ['''evidence/test-security\.md''']

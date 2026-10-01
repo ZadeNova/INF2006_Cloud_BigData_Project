@@ -78,3 +78,91 @@ jobs:
       - name: Remove disposable analytics CI database and containers
         if: always()
         run: docker compose down --volumes --remove-orphans
+
+  # Security scans. Tools run as containers pinned by digest; no AWS credentials. Steps marked blocking fail
+  # the job; the rest are report-only (continue-on-error) until their findings are triaged, and every
+  # step's raw output is uploaded. Triage and accepted findings: evidence/security-scan-triage.md.
+  security:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      COMPOSE_PROJECT_NAME: inf2006-security-ci
+      GITLEAKS: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+      TRIVY: ghcr.io/aquasecurity/trivy@sha256:62b1e65e8869bc4b4c6aa4fa2b21595256c7c2f6018a9d9ad61caf87187c1969
+      HADOLINT: hadolint/hadolint@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d
+      PYTHON: python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e
+    steps:
+      - name: Check out source with full history
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Create output directory
+        run: mkdir scan-out
+      - name: Secret scan, git history (blocking; fails if no commits were scanned)
+        shell: bash
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" --mount "type=bind,source=$PWD,target=/repo,readonly" \
+            --mount "type=bind,source=$PWD/scan-out,target=/out" "$GITLEAKS" \
+            git /repo --config /repo/.gitleaks.toml --redact --no-banner --no-color --exit-code 1 \
+            --report-format json --report-path /out/gitleaks-history.json 2>&1 | tee scan-out/gitleaks-history.log
+          grep -Eq '[1-9][0-9]* commits scanned' scan-out/gitleaks-history.log
+      - name: Python dependency audit (blocking)
+        run: >-
+          docker run --rm --mount "type=bind,source=$PWD,target=/work,readonly"
+          --mount "type=bind,source=$PWD/scan-out,target=/out" --workdir /work "$PYTHON"
+          sh -c 'pip install -q pip-audit==2.10.1 &&
+          pip-audit --no-deps --disable-pip -r src/requirements.txt -f json -o /out/pip-audit-src.json &&
+          pip-audit --no-deps --disable-pip -r analytics/requirements.txt -f json -o /out/pip-audit-analytics.json'
+      - name: Python SAST, bandit (report-only)
+        continue-on-error: true
+        run: >-
+          docker run --rm --mount "type=bind,source=$PWD,target=/work,readonly"
+          --mount "type=bind,source=$PWD/scan-out,target=/out" --workdir /work "$PYTHON"
+          sh -c 'pip install -q bandit==1.9.4 &&
+          bandit -r src analytics -x src/static,src/infrastructure -f json -o /out/bandit.json'
+      - name: Dockerfile lint, hadolint (report-only)
+        continue-on-error: true
+        run: docker run --rm -i "$HADOLINT" hadolint --format json - < src/Dockerfile | tee scan-out/hadolint.json
+      - name: Initialize disposable local configuration
+        run: >-
+          docker run --rm --user "$(id -u):$(id -g)"
+          --mount "type=bind,source=$PWD/src,target=/work" "$PYTHON" python /work/tools/init_env.py
+      - name: Build pinned application image
+        run: docker compose build web
+      - name: Django production configuration, check --deploy (blocking on errors; warnings are printed)
+        shell: bash
+        run: >-
+          docker compose run --rm --no-deps
+          -e DJANGO_SETTINGS_MODULE=config.settings -e DJANGO_ENV=production -e DJANGO_DEBUG=false
+          -e AWS_SECRET_ID=fixture-secret -e AWS_REGION=ap-southeast-1 -e APP_RELEASE_ID=fixture-release
+          -e DJANGO_TRUST_PROXY=true web python -c 'import os;
+          from config import secrets;
+          secrets._retrieve = lambda secret_id, region: {key: os.environ[key] for key in secrets.APP_FIELDS};
+          import django; from django.core.management import call_command;
+          django.setup(); call_command("check", deploy=True)' 2>&1 | tee scan-out/check-deploy.txt
+      - name: Container image scan, Trivy (report-only)
+        continue-on-error: true
+        run: |
+          docker save "$(docker compose config --images web)" -o scan-out/app.tar
+          docker run --rm --user "$(id -u):$(id -g)" --mount "type=bind,source=$PWD/scan-out,target=/s" "$TRIVY" \
+            image --cache-dir /s/.trivy-cache --input /s/app.tar --scanners vuln,secret --format json --output /s/trivy-image.json
+          rm -f scan-out/app.tar
+      - name: Infrastructure scan, Trivy config (report-only)
+        continue-on-error: true
+        run: >-
+          docker run --rm --user "$(id -u):$(id -g)" --mount "type=bind,source=$PWD,target=/repo,readonly"
+          --mount "type=bind,source=$PWD/scan-out,target=/s" "$TRIVY"
+          config --cache-dir /s/.trivy-cache --format json --output /s/trivy-iac.json /repo/src/infrastructure
+      - name: Upload raw scan output
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: security-scans
+          path: |
+            scan-out
+            !scan-out/.trivy-cache
+          retention-days: 30
+      - name: Remove disposable CI containers
+        if: always()
+        run: docker compose down --volumes --remove-orphans
