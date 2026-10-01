@@ -50,3 +50,13 @@ output "sns_topic_arn" {
   description = "Alarm topic, wired to each stack's CloudWatch alarms."
   value       = aws_sns_topic.alarms.arn
 }
+
+output "route53_zone_id" {
+  description = "Hosted zone ID: each stack adds its alias record here."
+  value       = aws_route53_zone.main.zone_id
+}
+
+output "route53_name_servers" {
+  description = "The four name servers to enter at Namecheap (Custom DNS) once the zone exists."
+  value       = aws_route53_zone.main.name_servers
+}

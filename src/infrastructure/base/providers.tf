@@ -11,6 +11,7 @@ provider "aws" {
       Project   = local.name_prefix
       Env       = "evidence"
       ManagedBy = "terraform"
+      Stack     = "base" # ADR-001: which Terraform folder owns the resource
     }
   }
 }

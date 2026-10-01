@@ -19,3 +19,9 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket created with the CLI (the lab denies a read the aws_s3_bucket resource needs). Must start with the name prefix, e.g. inf2006-grp21-data-<suffix>."
   type        = string
 }
+
+variable "domain_name" {
+  description = "The team-owned domain (registered at Namecheap). base/ creates its Route 53 hosted zone; each stack adds its own alias record under it."
+  type        = string
+  default     = "fourtytwofactors.me"
+}
