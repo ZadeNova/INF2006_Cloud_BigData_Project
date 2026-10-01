@@ -75,3 +75,13 @@ output "db_master_secret_arn" {
   description = "The secret RDS created for the master login. Copy its username/password into the bootstrap secret right before each db_bootstrap run (it rotates every 7 days)."
   value       = aws_db_instance.main.master_user_secret[0].secret_arn
 }
+
+output "certificate_arn" {
+  description = "The issued ACM certificate for both hostnames. The ARN is only output once validation has finished, so a stack never attaches a pending certificate."
+  value       = aws_acm_certificate_validation.shop.certificate_arn
+}
+
+output "shop_hostnames" {
+  description = "The hostname each stack serves, by stack key (ec2, fargate). Each stack creates the alias record for its own."
+  value       = local.shop_hostnames
+}

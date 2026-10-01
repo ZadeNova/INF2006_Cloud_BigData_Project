@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# The one way to plan and apply a Terraform folder (aws-ecs-comparison.md section 8, ADR-005).
+#
+#   scripts/tf.sh <base|ec2|fargate> plan     fmt check, init, validate, saved plan; records the commit it was made from
+#   scripts/tf.sh <base|ec2|fargate> apply    applies that saved plan only if HEAD is still that commit; then backs up the state
+#
+# Refuses a dirty working tree under src/infrastructure, so the code that ran is always a recorded commit.
+# Needs: lab credentials exported in this shell (it checks), terraform, git.
+set -euo pipefail
+
+INFRA="$(cd "$(dirname "$0")/.." && pwd)"
+FOLDER="${1:-}"; ACTION="${2:-}"
+case "$FOLDER" in base|ec2|fargate) ;; *) echo "usage: $0 <base|ec2|fargate> <plan|apply>" >&2; exit 2 ;; esac
+case "$ACTION" in plan|apply) ;; *) echo "usage: $0 <base|ec2|fargate> <plan|apply>" >&2; exit 2 ;; esac
+DIR="$INFRA/$FOLDER"
+[ -d "$DIR" ] || { echo "STOP: $DIR does not exist yet" >&2; exit 1; }
+
+die() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
+
+aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
+  || die "no working lab credentials in this shell (run labcreds first)"
+[ -z "$(git -C "$INFRA" status --porcelain -- .)" ] || die "uncommitted changes in src/infrastructure; commit first"
+SHA="$(git -C "$INFRA" rev-parse --short HEAD)"
+PLAN="$FOLDER.tfplan"
+
+if [ "$ACTION" = plan ]; then
+  terraform -chdir="$DIR" fmt -check -recursive || die "terraform fmt would change files; run terraform fmt and commit"
+  terraform -chdir="$DIR" init -input=false >/dev/null
+  terraform -chdir="$DIR" validate
+  terraform -chdir="$DIR" plan -input=false -out="$PLAN"
+  echo "$SHA" > "$DIR/.plan-commit"
+  echo; echo "Plan saved from commit $SHA. Review it, then: scripts/tf.sh $FOLDER apply"
+else
+  [ -f "$DIR/$PLAN" ] || die "no saved plan; run: scripts/tf.sh $FOLDER plan"
+  [ "$(cat "$DIR/.plan-commit" 2>/dev/null)" = "$SHA" ] \
+    || die "the plan was made from commit $(cat "$DIR/.plan-commit" 2>/dev/null || echo '?'), HEAD is $SHA; plan again"
+  terraform -chdir="$DIR" apply -input=false "$PLAN"
+  rm -f "$DIR/$PLAN" "$DIR/.plan-commit"
+  if [ -f "$DIR/terraform.tfstate" ]; then
+    BAK="terraform.tfstate.$(date +%Y-%m-%d-%H%M).$SHA.bak"
+    cp -p "$DIR/terraform.tfstate" "$DIR/$BAK"
+    echo "State backed up as $FOLDER/$BAK. Copy it off this laptop (it holds resource IDs and may hold sensitive values)."
+  fi
+  echo "Applied from commit $SHA. Record it in evidence/aws-build-runbook.md."
+fi
