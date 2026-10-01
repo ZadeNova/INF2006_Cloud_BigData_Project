@@ -90,6 +90,21 @@ Not yet done: HTTP-to-HTTPS redirect check (`curl -I http://...`), a PASSWORD se
 
 Lab balance: to be read from the Learner Lab page and added here. Running now: RDS `db.t4g.small`, one `c5.large`, one ALB, the Route 53 zone, four secrets. Rough rate while both are up: about USD 0.20 per hour.
 
+## Variant A: operations, scaling, alarms and WAF (1 October 2026, evening)
+
+| Step | Commit | Result |
+|---|---|---|
+| `jobs.sh ec2 import` (first real run of `jobs.sh`) | `1d0f62d` | **The lab allows SSM `SendCommand`.** The first attempt failed: only `checksums.txt` and `product_map.csv` of the derived dataset are committed, so the rest was not on disk. `import` now rebuilds it from `data/raw/` and checks it against `checksums.txt` (all 5 files OK). Loaded 20,000 customers, 200 products, 100,000 orders, 237,537 lines, **0 rejected** |
+| Import rerun | same | Several runs were started and two interrupted on the laptop (the job keeps running on the instance). A clean rerun reported `created=0 unchanged=<full count>` for every table: the data is complete and the importer is idempotent |
+| `base/` operator secret | `c4ae7c4` | 1 added (`inf2006-grp21/operator`) |
+| `ec2/` scaling, alarms, queries, WAF | `c4ae7c4` | 8 added, 1 changed (ASG max 1 to 2): target tracking on requests per target (300), 3 alarms to SNS, 2 saved Logs Insights queries, WAF web ACL in count mode and its association with the ALB. **The lab allows WAFv2 web ACLs on an ALB, CloudWatch alarms and query definitions** |
+| `jobs.sh ec2 operator` | `c4ae7c4` | `demo-operator` created; the password was generated on the instance and stored in the operator secret |
+| `jobs.sh ec2 refresh` | `c4ae7c4` | Run `5d191a3b` completed: 41,345 daily rows from 71,079 order lines, business dates 2025-01-01 to 2026-01-01, 3.0 s |
+| `smoke.sh ec2` | `c4ae7c4` | 8 of 8 passed: `/health/` 200, HTTP 301 to HTTPS, certificate verifies, `/login/` 200, `/products/` lists products, HSTS, `nosniff`, `X-Frame-Options` |
+| Teardown `down.sh ec2` | `12d0e44` and later | To be recorded |
+
+Not yet done: the WAF block-mode test, any alarm firing, a scale-out, a recovery test and the Logs Insights export; these are the evidence runs.
+
 ## Procedures
 
 Carried forward from the retired stage guides (archived under `docs/archive/`). Commands run from `src/infrastructure/` unless stated; lab credentials must be exported first.
