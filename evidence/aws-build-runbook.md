@@ -50,6 +50,46 @@ Database logins chosen: `inf2006_web` (runtime), `inf2006_migration` (schema own
 
 Lab balance after stage 1: USD 0.20 of USD 50.00 used (read from the Learner Lab page, 29 September 2026; the figure updates with a delay, so same-day charges may not show yet). Nothing in stage 1 bills hourly; the four secrets cost about USD 0.05 per day together. The stack is left running between sessions.
 
+## State split, base/ and variant A (1 October 2026)
+
+Per [aws-ecs-comparison.md](../docs/plans/aws-ecs-comparison.md) and decisions [ADR-001 to ADR-008](../docs/decisions/). Applied with Terraform 1.16.4, AWS provider 6.66.0, from the owner's Fedora laptop, using `scripts/tf.sh` (plan from a clean tree, apply only that saved plan from the same commit).
+
+| Step | Commit | Result |
+|---|---|---|
+| Migration `scripts/migrate-state.sh run` | `308fb28` | 10 resources destroyed (`sg-alb`, `sg-app`, their 7 rules, app log group; nothing was attached) and 28 moved into `base/` with `terraform state mv`. **Gate:** the first `base/` plan showed 27 unchanged and one replace, the ECR lifecycle policy, which was an unapplied change from `f634a9c` (not a migration fault). Applied it; the next plan: **no changes** |
+| `base/` zone | `1931e27` | Route 53 zone for `fourtytwofactors.me`: 1 added, 16 tag-only updates (`Stack = base`). **The lab allows hosted-zone creation.** Name servers set at Namecheap; the `.me` registry showed the four Route 53 servers the same evening |
+| `base/` RDS | `894ce13` | 4 added in 8m35s. **The lab allows `db.t4g.small` and an RDS-managed master password.** PostgreSQL 17.9, private, encrypted, `rds.force_ssl = 1`, 7-day backups |
+| `base/` certificate | `3fe8b02` | 4 added. ACM certificate for `shop-ec2` and `shop-fargate`, DNS-validated in Terraform; issued within seconds because delegation was live |
+| Secrets, image | scripts `f6d528d` | `secrets.sh fill`: all four secrets hold exactly the loader's field sets; the runtime login, migration login, signing key and host/db checks all `match`. `push-image.sh c19d547`: nothing rebuilt; `release-c19d547` tagged; digest `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481` (unchanged from stage 1) |
+| `ec2/` | `eb9fd70`, fix `b8e936d` | 17 resources. First apply created 16 and failed on one: AWS rejected an apostrophe in a security-group rule description. Fixed, replanned (1 to add), applied. **The lab allows `c5.large`**; the instance registered with Session Manager and the target went healthy without the database being ready |
+
+### Acceptance (variant A)
+
+| Check | Result |
+|---|---|
+| Target healthy behind the ALB | Pass: `healthy` before any database job (`/health/` is database-independent) |
+| `db_bootstrap` | Pass: "Application database roles and grants configured." Run over Session Manager inside the VPC, with the RDS master login copied into the bootstrap secret only for the run and replaced by the placeholder straight after |
+| `migrate` | Pass: all migrations applied, including the `reporting` views and permissions |
+| Trainer login | Pass: both `psql` runs used `sslmode=verify-full` with the RDS CA bundle. Role has every privilege flag false; read on the 9 granted tables and some `auth_user` columns; `can_write` false on all 10 |
+| `check_database` as the runtime login | Pass: `{"database": "ok", "migrations": "applied"}` |
+| Runtime login cannot `CREATE TABLE` | Pass: `permission denied for schema public` |
+| Trainer login cannot `INSERT` | Pass: `permission denied for table catalogue_product` |
+| Trainer cannot read `auth_user.password` | Pass: `permission denied for table auth_user` |
+| HTTPS at its own hostname | Pass: `https://shop-ec2.fourtytwofactors.me/health/` and `/login/` both return 200 |
+
+Not yet done: HTTP-to-HTTPS redirect check (`curl -I http://...`), a PASSWORD search of the RDS log group, the dataset import, scaling, alarms and WAF.
+
+### Problems met
+
+- ECR lifecycle policy was an unapplied change when the gate ran. The gate caught it, as designed.
+- `rds.force_ssl`: AWS stores `pending-reboot`, the provider default was `immediate`, so every plan showed a change. Fixed by declaring it (`33280df`).
+- `tf.sh` wrote an untracked marker file, so the next plan saw a dirty tree. Fixed by ignoring it (`3fe8b02`).
+- Security-group rule descriptions reject an apostrophe (above).
+
+### Cost
+
+Lab balance: to be read from the Learner Lab page and added here. Running now: RDS `db.t4g.small`, one `c5.large`, one ALB, the Route 53 zone, four secrets. Rough rate while both are up: about USD 0.20 per hour.
+
 ## Procedures
 
 Carried forward from the retired stage guides (archived under `docs/archive/`). Commands run from `src/infrastructure/` unless stated; lab credentials must be exported first.
@@ -118,4 +158,4 @@ Active checks of 29 September 2026, from a throwaway `t3.micro` under `LabInstan
 | WAF | create and delete a regional Web ACL | allowed |
 | Cost | create and delete an AWS Budget | allowed |
 
-Not tested: whether a running instance survives a Learner Lab session boundary. Not yet tested: Route 53 hosted-zone creation, Multi-AZ, ECS and Fargate task roles (the professor confirmed ECS and Fargate work), SSM `SendCommand`, `c5.large`. Lab balance at 29 September 2026: USD 0.20 of USD 50.00 used.
+Not tested: whether a running instance survives a Learner Lab session boundary. Learned by apply on 1 October 2026: Route 53 hosted-zone creation, `db.t4g.small`, an RDS-managed master password and `c5.large` are all allowed; Session Manager works inside the project VPC. Not yet tested: Multi-AZ, ECS and Fargate task roles (the professor confirmed ECS and Fargate work), SSM `SendCommand`. Lab balance at 29 September 2026: USD 0.20 of USD 50.00 used.
