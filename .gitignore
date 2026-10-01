@@ -25,3 +25,6 @@ crash.*.log
 data/derived/shoes/*
 !data/derived/shoes/checksums.txt
 !data/derived/shoes/product_map.csv
+
+# Commit recorded by scripts/tf.sh next to a saved plan.
+.plan-commit
