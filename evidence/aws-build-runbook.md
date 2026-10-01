@@ -101,7 +101,7 @@ Lab balance: to be read from the Learner Lab page and added here. Running now: R
 | `jobs.sh ec2 operator` | `c4ae7c4` | `demo-operator` created; the password was generated on the instance and stored in the operator secret |
 | `jobs.sh ec2 refresh` | `c4ae7c4` | Run `5d191a3b` completed: 41,345 daily rows from 71,079 order lines, business dates 2025-01-01 to 2026-01-01, 3.0 s |
 | `smoke.sh ec2` | `c4ae7c4` | 8 of 8 passed: `/health/` 200, HTTP 301 to HTTPS, certificate verifies, `/login/` 200, `/products/` lists products, HSTS, `nosniff`, `X-Frame-Options` |
-| Teardown `down.sh ec2` | `12d0e44` and later | To be recorded |
+| Teardown `down.sh ec2` | `0cccb09` | 25 destroyed (the whole `ec2/` stack). Checked afterwards: no `inf2006-grp21-ec2` load balancer, no instance tagged `Stack=ec2`, `ec2/` state empty. `base/` (database and data, zone, certificate, registry, secrets) left running by design, about USD 1.2 per day |
 
 Not yet done: the WAF block-mode test, any alarm firing, a scale-out, a recovery test and the Logs Insights export; these are the evidence runs.
 
