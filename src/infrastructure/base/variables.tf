@@ -25,3 +25,9 @@ variable "domain_name" {
   type        = string
   default     = "fourtytwofactors.me"
 }
+
+variable "db_instance_class" {
+  description = "RDS instance class, one size for every recorded run (ADR-004). db.t4g.small: 2 vCPU, 2 GiB. Change only between runs, through the pilot gate; use db.t3.small if the lab refuses t4g."
+  type        = string
+  default     = "db.t4g.small"
+}

@@ -60,3 +60,18 @@ output "route53_name_servers" {
   description = "The four name servers to enter at Namecheap (Custom DNS) once the zone exists."
   value       = aws_route53_zone.main.name_servers
 }
+
+output "db_host" {
+  description = "RDS endpoint hostname: the POSTGRES_HOST value in the web, migration, trainer and bootstrap secrets."
+  value       = aws_db_instance.main.address
+}
+
+output "db_engine_version" {
+  description = "The actual PostgreSQL version RDS chose within major 17, for the runbook."
+  value       = aws_db_instance.main.engine_version_actual
+}
+
+output "db_master_secret_arn" {
+  description = "The secret RDS created for the master login. Copy its username/password into the bootstrap secret right before each db_bootstrap run (it rotates every 7 days)."
+  value       = aws_db_instance.main.master_user_secret[0].secret_arn
+}
