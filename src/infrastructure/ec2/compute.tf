@@ -1,5 +1,5 @@
 # The app instances: a launch template (the recipe for one instance) and an Auto Scaling group (keeps the right
-# number running and replaces an instance that stops answering the ALB). Exactly one instance for now.
+# number running and replaces an instance that stops answering the ALB). One instance normally, two at most (scaling.tf).
 
 locals {
   # ECR registry host (the part of the repository URL before the first "/"), for docker login.
@@ -82,7 +82,7 @@ resource "aws_launch_template" "app" {
 resource "aws_autoscaling_group" "app" {
   name                = "${local.stack_prefix}-asg"
   min_size            = 1
-  max_size            = 1 # raised to 2 with the scaling policy in the next step
+  max_size            = 2 # ADR-011: one more instance is enough to show scale-out and keeps the lab bill small
   desired_capacity    = 1
   vpc_zone_identifier = values(local.base.public_subnet_ids)
 

@@ -2,8 +2,9 @@
 # The one-off database and data jobs, run on the stack's compute from the laptop, one command each (ADR-009).
 #
 #   scripts/jobs.sh ec2 <job>
-#   jobs: bootstrap | migrate | trainer-sql | restart | check | import | all
-#   all = bootstrap, migrate, trainer-sql, restart (restart ends with check_database)
+#   jobs: bootstrap | migrate | trainer-sql | restart | check | import | operator | refresh | all
+#   all = everything a fresh database needs, in order: bootstrap, migrate, trainer-sql, restart (ends with
+#   check_database), import, operator, refresh. Safe to repeat: each job skips or changes nothing the second time.
 #
 # Runs through SSM Run Command (aws ssm send-command): no interactive session, no typing on the instance, output
 # printed here. If the lab denies SendCommand it says so; the manual Session Manager commands in
@@ -12,7 +13,9 @@
 # back on exit even if the job fails (RDS rotates that password every 7 days; it must not sit in the secret).
 # import builds data/derived/shoes if missing, checks it against checksums.txt, uploads it to the bucket, then loads it
 # from there. Run it once per fresh database.
-# Every job is safe to repeat except import, which refuses a namespace that already has demo products.
+# operator creates the demo-operator login with a random password generated ON the instance (a password passed
+# through SSM parameters would sit in the command history) and stores it in the operator secret; read it with
+#   aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator --query SecretString --output text
 # Needs: lab credentials, aws, jq, terraform. The `fargate` variant is added with the fargate/ stack.
 set -euo pipefail
 
@@ -20,11 +23,12 @@ INFRA="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "$INFRA/../.." && pwd)"
 REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 NAMESPACE="synthetic/shoes/revision-a/demo/v1"
+AS_OF="2026-01-02"   # the cutoff the local README uses; the dataset ends here
 die() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
 
 VARIANT="${1:-}"; JOB="${2:-}"
-[ "$VARIANT" = ec2 ] || die "usage: $0 ec2 <bootstrap|migrate|trainer-sql|restart|check|import|all>  (fargate comes with the fargate/ stack)"
-case "$JOB" in bootstrap|migrate|trainer-sql|restart|check|import|all) ;; *) die "unknown job '$JOB'" ;; esac
+[ "$VARIANT" = ec2 ] || die "usage: $0 ec2 <bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all>  (fargate comes with the fargate/ stack)"
+case "$JOB" in bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all) ;; *) die "unknown job '$JOB'" ;; esac
 for t in aws jq terraform; do command -v "$t" >/dev/null || die "$t is required"; done
 aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
   || die "no working lab credentials in this shell (run labcreds first)"
@@ -110,6 +114,28 @@ job_check() {
   remote "check_database" '/usr/local/bin/app-job web python manage.py check_database'
 }
 
+job_operator() {
+  # Skips if the operator secret already holds a value, so a rerun never replaces a password the database does not have.
+  remote "operator" "NS='$NAMESPACE'; $(cat <<'EOS'
+if aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator >/dev/null 2>&1; then
+  echo "operator secret already set; leaving the operator account as it is"; exit 0
+fi
+IMAGE=$(docker inspect --format '{{.Config.Image}}' web)
+export DEMO_OPERATOR_PASSWORD="$(head -c 18 /dev/urandom | base64 | tr -d '/+=')"
+docker run --rm --env-file /etc/inf2006/app.env -e AWS_SECRET_ID=inf2006-grp21/web -e DEMO_OPERATOR_PASSWORD \
+  "$IMAGE" python manage.py seed_demo --no-products
+aws secretsmanager put-secret-value --secret-id inf2006-grp21/operator \
+  --secret-string "$(jq -cn --arg u demo-operator --arg p "$DEMO_OPERATOR_PASSWORD" '{username:$u, password:$p}')" >/dev/null
+unset DEMO_OPERATOR_PASSWORD
+echo "demo-operator created; the password is in the operator secret"
+EOS
+)"
+}
+
+job_refresh() {
+  remote "refresh_analytics" "/usr/local/bin/app-job web python manage.py refresh_analytics --as-of $AS_OF"
+}
+
 job_import() {
   # Only checksums.txt and product_map.csv are committed; the rest is rebuilt from data/raw (deterministic), then
   # checked against the committed checksums, so the cloud gets exactly the inputs the local tests used.
@@ -136,6 +162,8 @@ case "$JOB" in
   restart) job_restart ;;
   check) job_check ;;
   import) job_import ;;
-  all) job_bootstrap; job_migrate; job_trainer_sql; job_restart ;;
+  operator) job_operator ;;
+  refresh) job_refresh ;;
+  all) job_bootstrap; job_migrate; job_trainer_sql; job_restart; job_import; job_operator; job_refresh ;;
 esac
 echo; echo "Done: $JOB"

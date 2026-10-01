@@ -32,3 +32,8 @@ output "image_digest" {
   description = "The exact image the instances run (from var.image_tag)."
   value       = data.aws_ecr_image.app.image_digest
 }
+
+output "web_acl_name" {
+  description = "The WAF web ACL on the ALB (for the security test and its sampled requests)."
+  value       = aws_wafv2_web_acl.app.name
+}

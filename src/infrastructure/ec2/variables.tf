@@ -14,3 +14,26 @@ variable "instance_type" {
   type        = string
   default     = "c5.large"
 }
+
+variable "scale_target_requests" {
+  description = "ADR-011: target tracking keeps the average requests per instance per minute near this value. Starting point; tune from the load rehearsal. Low enough that the load test can trigger scale-out."
+  type        = number
+  default     = 300
+}
+
+variable "waf_login_limit" {
+  description = "ADR-012: requests allowed per IP per 5 minutes to POST /login/ before the WAF rule acts (minimum 10). A person logging in does not reach 20; credential stuffing does."
+  type        = number
+  default     = 20
+}
+
+variable "waf_login_action" {
+  description = "ADR-012: count (record only) or block (reject with 403). Starts at count so the rule is observed before it can lock anyone out; set block for the security test."
+  type        = string
+  default     = "count"
+
+  validation {
+    condition     = contains(["count", "block"], var.waf_login_action)
+    error_message = "waf_login_action must be count or block."
+  }
+}

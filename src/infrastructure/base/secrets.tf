@@ -5,12 +5,14 @@
 # evidence/aws-build-runbook.md (Procedures).
 
 locals {
-  # One secret per job, so a compromised process only ever holds its own credentials.
+  # One secret per job, so a compromised process only ever holds its own credentials. The first four are read by
+  # the app (exact fields: src/config/secrets.py); `operator` is a person's login, written once by jobs.sh (ADR-010).
   secret_jobs = {
     web       = "Unprivileged runtime DB login and the Django signing key, read by every app instance at boot"
     migration = "Migration-owner DB login, read once by the coordinated migration run"
     trainer   = "Read-only DB login for the standalone ML trainer and refresh verifier, no Django signing key"
     bootstrap = "RDS master login plus the migration and runtime credentials it provisions; the one-off db_bootstrap run only"
+    operator  = "Generated login for the demo-operator account, written by the operator job and read by a person; the app never reads it"
   }
 }
 
