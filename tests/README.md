@@ -25,7 +25,7 @@ The image copies `src/` at build time and only `tests/` is mounted, so run `dock
 
 `analytics/tests/` covers independent pandas reconciliation (`test_verify_refresh.py`), offline segmentation quality and batch identity (`test_segment_customers.py`), producer/loader integration (`test_segment_loader_integration.py`), fake production credential delivery (`test_startup_credentials.py`), and the derived shoe dataset build (`test_build_shoe_dataset.py`, no pandas needed). The others need pandas and, for segmentation, scikit-learn, and run outside the web image (see [../analytics/README.md](../analytics/README.md)). `db_helpers.py` and `analytics_helpers.py` are shared builders, not tests.
 
-Locking and concurrency tests use real independent connections. A passing suite is not by itself a functional or security claim; record the command, date and outcome in the files under [../evidence/](../evidence/README.md). No load, scaling or AWS test exists yet.
+Locking and concurrency tests use real independent connections. A passing suite is not by itself a functional or security claim; record the command, date and outcome in the files under [../evidence/](../evidence/README.md). The Locust load harness is in [load/](load/README.md) (not collected by pytest); no load or AWS result has been recorded yet.
 
 
 ## Local runtime image and TLS verification
