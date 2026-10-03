@@ -1,0 +1,4 @@
+# Load-harness dependencies (direct). The pinned, complete list is requirements.txt.
+# Kept apart from src/requirements.txt on purpose: nothing here goes into the application image.
+locust==2.46.6
+boto3==1.43.108

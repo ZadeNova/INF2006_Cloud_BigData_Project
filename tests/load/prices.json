@@ -1,0 +1,13 @@
+{
+  "_note": "On-demand us-east-1 list prices as remembered by the author on 2026-10-03; NOT checked against the AWS price pages. The user must verify each figure and then set verified_by_user to true. Excluded: EBS, data transfer, ALB LCUs (identical for A and B), WAF request charges, CloudWatch.",
+  "checked": "2026-10-03",
+  "verified_by_user": false,
+  "ec2_c5_large_hour": 0.085,
+  "fargate_vcpu_hour": 0.04048,
+  "fargate_gb_hour": 0.004445,
+  "fargate_task": {"vcpu": 2, "gb": 4},
+  "alb_hour": 0.0225,
+  "public_ipv4_hour": 0.005,
+  "rds_t4g_small_hour": 0.032,
+  "generator_c5_large_hour": 0.085
+}
