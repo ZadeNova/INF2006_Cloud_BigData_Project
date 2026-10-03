@@ -104,8 +104,8 @@ pytest_exit=0
 - [raw/FUNC-02_2026-09-26_setup.txt](raw/FUNC-02_2026-09-26_setup.txt): database reset, shoe import, operator seed and analytics refresh
 - [raw/FUNC-02_2026-09-26_generator.txt](raw/FUNC-02_2026-09-26_generator.txt): failed host Python generator attempt
 - [raw/FUNC-02_2026-09-26_step6-deactivated-check-rerun2.txt](raw/FUNC-02_2026-09-26_step6-deactivated-check-rerun2.txt) and [raw/FUNC-02_2026-09-26_step6-reactivated-check-rerun2.txt](raw/FUNC-02_2026-09-26_step6-reactivated-check-rerun2.txt): read-only size state checks
-- [raw/FUNC-02_2026-09-26_step7-current-crosscheck-rerun2.txt](raw/FUNC-02-2026-09-26_step7-current-crosscheck-rerun2.txt): current dashboard figures and operator requests
-- [raw/FUNC-02_2026-09-26_step8-analytics-check.txt](raw/FUNC-02-2026-09-26_step8-analytics-check.txt): customer login and 403 request
+- [raw/FUNC-02_2026-09-26_step7-current-crosscheck-rerun2.txt](raw/FUNC-02_2026-09-26_step7-current-crosscheck-rerun2.txt): current dashboard figures and operator requests
+- [raw/FUNC-02_2026-09-26_step8-analytics-check.txt](raw/FUNC-02_2026-09-26_step8-analytics-check.txt): customer login and 403 request
 - Browser screenshots: shown in the session but not saved as files
 
 **Date/commit:** 2026-09-26, `ee334cf`

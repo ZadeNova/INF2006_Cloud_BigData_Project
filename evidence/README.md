@@ -21,9 +21,9 @@ Last covered commit: `ee334cf`
 | SEC-12 to SEC-16 | T7, T8, T10, T11, T12, T17 local controls: production settings, secret loading, health and Host handling, request logging, unusable imported passwords | [test-security.md](test-security.md) | Local Docker | PASS | 2026-10-01 |
 | SEC-ALL rerun | The 25 SEC-01 to SEC-08 test IDs rerun on the current commit | [test-security.md](test-security.md) | Local Docker | PASS | 2026-10-01 |
 | SCAN-01 to SCAN-07 | gitleaks, bandit, pip-audit, `check --deploy`, hadolint, Trivy image and IaC scans with triage | [security-scan-triage.md](security-scan-triage.md) | Local Docker (not CI) | Run; findings triaged, 4 open | 2026-10-01 |
-| SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | PLANNED (S3 anonymous request returned 403 on 2026-09-29, recorded in the runbook, not yet a test case; RDS not built) | — |
-| SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | PLANNED | — |
-| SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | PLANNED | — |
+| SEC-09 | Cloud: RDS and S3 are not publicly reachable | [test-security.md](test-security.md) | AWS | NOT RUN YET as a test case (the runbook records an anonymous S3 request returning 403 on 2026-09-29; RDS was built in `base/` on 2026-10-01 but its reachability has not been tested as a case) | — |
+| SEC-10 | Cloud: HTTPS is enforced | [test-security.md](test-security.md) | AWS | NOT RUN YET as a test case (the runbook records HTTPS 200, HTTP 301 to HTTPS, a verifying certificate and HSTS from `smoke.sh` on 2026-10-01) | — |
+| SEC-11 | Cloud: runtime secrets come from Secrets Manager | [test-security.md](test-security.md) | AWS | NOT RUN YET as a test case (the runbook records the runtime secrets matching their schema and `check_database` passing as the runtime login on 2026-10-01) | — |
 | THREAT | T1–T17 threats mapped to controls, implementation and evidence | [threat-control-map.md](threat-control-map.md) | Local Docker and AWS | Map filled and extended to T19: local rows rest on SEC-01..08 and SEC-12..16 PASS plus the scans; cloud rows PLANNED | 2026-10-01 |
 | DATA-01 | Analytics refresh reconciled against an independent pandas check | [test-data-ai.md](test-data-ai.md) | Local Docker | PASS (existing prior record; not rerun here) | 2026-09-22 |
 | DATA-01 | Rerun on the derived shoe dataset the application now imports | [test-data-ai.md](test-data-ai.md#shoe-dataset-rerun--26-september-2026) | Local Docker | PASS | 2026-09-26 |
@@ -40,7 +40,7 @@ Last covered commit: `ee334cf`
 
 | File | Contents | Status |
 |---|---|---|
-| [aws-build-runbook.md](aws-build-runbook.md) | One dated entry per Terraform stage: commits, plans, acceptance checks, problems, lab balance (stage 1 recorded 2026-09-29) | In progress (infrastructure owner) |
+| [aws-build-runbook.md](aws-build-runbook.md) | One dated entry per build step: commits, plans, acceptance checks, problems, lab balance (stage 1 on 2026-09-29; the state split, variant A and its operations on 2026-10-01) | In progress (infrastructure owner) |
 | `architecture.png` | Architecture diagram showing users, application components, cloud services, trust boundaries, data stores, observability and data flows | TODO (report lead) |
 | [raw/](raw/) | Raw command output named `<CASE-ID>_<YYYY-MM-DD>.<ext>`; screenshots, if needed, named `<CASE-ID>_<YYYY-MM-DD>_<n>.png` | Contains current FUNC-01/FUNC-02 and DATA-01/DATA-02 output |
 
