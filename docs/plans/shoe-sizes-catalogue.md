@@ -1,6 +1,6 @@
 # Shoe catalogue with sizes
 
-Written 25 September 2026, branch `quarantine`. Status: **approved by the user 26 September 2026 (option 1: derived dataset, `data/raw/` untouched); implementation in progress.**
+Written 25 September 2026, branch `quarantine`. Status: **approved by the user 26 September 2026 (option 1: derived dataset, `data/raw/` untouched); implemented and merged (26 September 2026, `0291b29`).**
 
 Extends the approved [shoe dataset remap](../archive/plans/shoe-dataset-remap.md) with one scope change the user made on 25 September 2026: **every shoe has 10 sizes**. The remap's "Not in scope: sizes" line is superseded. The user takes over the build that the remap assigned to a teammate. The remap's other rules still apply unchanged: `data/raw/` is not modified, a reproducible script writes a derived dataset, all 100,000 orders and 237,537 lines are kept, the app moves to a new namespace, and the importer must report zero rejects.
 

@@ -2,14 +2,14 @@
 
 Part of [aws-terraform.md](../archive/plans/aws-terraform.md), which this plan supersedes where they differ (layout, ownership, RDS size, stage order). Written and consolidated 1 October 2026.
 
-**Status:** plan agreed in discussion with the user; awaiting the user's final read. Nothing is applied beyond stage 1. `src/infrastructure/` is still the old single folder. Stage 2 ([aws-terraform-stage-2.md](../archive/plans/aws-terraform-stage-2.md)) is written and reviewed but **not applied**; its code moves into the layout below and is applied from there.
+**Status (3 October 2026):** plan agreed with the user and in execution. **Done on 1 October:** the state migration, `base/` (RDS, zone, certificate, ECR, secrets, alarm topic), the scripts, and variant A (`ec2/`) with its database jobs, scaling, alarms and WAF, verified (`smoke.sh` 8 of 8) and then torn down; `base/` stays up. See the [runbook](../../evidence/aws-build-runbook.md). **Not done:** `fargate/` (not written), the Fargate lab checks, the load harness ([load-harness.md](load-harness.md), draft), the comparison weights, and every load, scaling, recovery and monitoring run. The rules below were written before the build and still apply to the remaining work.
 
 ## 1. Read this first
 
 **What the project does now.** The backend is frozen ([AGENTS.md](../../AGENTS.md#current-phase-backend-freeze-decided-by-the-user-1-october-2026)). The remaining work is AWS infrastructure, testing and evidence. The professor confirmed ECS and Fargate work in the lab and said a performance comparison between EC2 and Fargate would make the project stand out, and that every architectural decision, down to the small ones, must be justified. So the comparison is a deliverable and every setting traces to a recorded decision.
 
 **Hard rules for every Claude session**
-1. **Do not run `terraform apply` for stage 2 from the old single-folder layout.** Stage 2 (RDS, instance) is applied only after the `base/` split and the state migration pass their gate (section 5).
+1. **Never apply from the retired single-folder layout.** It was removed after the state migration passed its gate on 1 October (section 5); `base/` and each stack are applied only through `scripts/tf.sh` from committed code.
 2. **One writer per file.** The **writing session** (writes the Terraform and scripts) is the only one that edits `src/infrastructure/**`. The **reviewing session** (discusses the architecture, reviews diffs read-only, owns decision records, the load harness and evidence) never edits those files. If both must write, one uses a separate `git worktree` and branch and they merge through git. The independent-review rule in AGENTS.md forbids a session reviewing its own code.
 3. **The user runs every `plan` and `apply`.** Sessions prepare; they do not apply.
 4. **Nothing is committed or pushed unless the user asks** (CLAUDE.md).
@@ -105,20 +105,13 @@ src/infrastructure/
 
 Writing order: `base/` first, then `ec2/`, then `fargate/`.
 
-## 5. State migration (before anything is applied)
+## 5. State migration (done 1 October 2026)
 
-The 40 stage 1 resources move into `base/` with `terraform state mv`. `sg-alb`, `sg-app` and their rules move to the stacks; they are attached to nothing, so recreating them costs nothing. Procedure: dated state backup, move, then **gate: `terraform plan` in `base/` shows no changes.** Nothing else proceeds until it passes. Recreating stage 1 is the fallback, but it loses the secret values and the pushed image.
+The 40 stage 1 resources move into `base/` with `terraform state mv`. `sg-alb`, `sg-app` and their rules move to the stacks; they are attached to nothing, so recreating them costs nothing. Procedure: dated state backup, move, then **gate: `terraform plan` in `base/` shows no changes.** Nothing else proceeds until it passes. Recreating stage 1 is the fallback, but it loses the secret values and the pushed image. The migration ran with `scripts/migrate-state.sh` (one-time, done); the result is in the runbook.
 
 ## 6. What differs between the variants
 
-| | A: EC2 + ASG | B: ECS on Fargate |
-|---|---|---|
-| Runs | Docker on an AL2023 instance, started by user data | ECS task, no instance to manage |
-| App scaling | ASG target tracking on `ALBRequestCountPerTarget` | Application Auto Scaling on the same metric |
-| Probe host | read from IMDSv2 at boot | read from the ECS metadata endpoint by a `command` override (no image change) |
-| One-off jobs | `app-job` through SSM | `aws ecs run-task` with overrides |
-| Credentials | instance role (`iam-role`) | `container-role` (already accepted by `secrets.py`) |
-| Network | host port 8000 | `awsvpc`, one network interface per task |
+The A-versus-B table is recorded in the contract: [AWS_INFRASTRUCTURE.md, Variant B](../AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-designed-not-built). Summary: B runs an ECS task with no instance, scales with Application Auto Scaling on the same request-count metric, reads its probe host from the ECS metadata endpoint, runs jobs with `aws ecs run-task`, and uses the task role.
 
 Both use LabRole (no IAM creation), the same ALB design and health check (`/health/`), no stickiness, the same Gunicorn settings and the same image digest. Fargate has its own vCPU quota that the lab will not let us read, so how far B can scale is learned at apply.
 
@@ -161,17 +154,17 @@ To verify early: whether `LabRole` allows SSM `SendCommand` (fallback: a non-int
 
 Order of value: A fully working with its required evidence first, then B, then the comparison runs.
 
-| # | Step | Owner | Gate |
-|---|---|---|---|
-| 1 | State migration into `base/` | W prepares, U runs | zero-diff plan in `base/` |
-| 2 | `base/`: **the Route 53 zone first** (section 3, DNS), then stage 2's RDS and parameter group, the certificate and its validation, outputs | W writes, R reviews, U applies | applied; RDS reachable only from sg-app; certificate issued |
-| 3 | `scripts/`: `tf.sh`, `push-image.sh`, `secrets.sh` | W, R reviews | secrets match; image digest recorded |
-| 4 | `ec2/`: stage 2 compute plus the ALB, HTTPS and alias record | W, R, U | healthy through the ALB at its hostname |
-| 5 | `jobs.sh`: `db_bootstrap`, `migrate`, trainer SQL, dataset import, once (shared by both variants) | W, U | `check_database` passes as the runtime login |
-| 6 | `fargate/` | W, R, U | healthy through its ALB on the same digest |
-| 7 | Load harness (in-region), RDS pilot, then the ladder and saturation runs on each variant | R builds the harness; U runs | RDS is not the bottleneck, or the limit is stated |
-| 8 | Multi-AZ failover test, with the app running | U, R records | error window and recovery recorded |
-| 9 | Evidence, decision records, redacted configuration, teardown | R, U | evidence files written; destroy order followed |
+| # | Step | Owner | Gate | Status |
+|---|---|---|---|---|
+| 1 | State migration into `base/` | W prepares, U runs | zero-diff plan in `base/` | Done 1 Oct |
+| 2 | `base/`: **the Route 53 zone first** (section 3, DNS), then stage 2's RDS and parameter group, the certificate and its validation, outputs | W writes, R reviews, U applies | applied; RDS reachable only from sg-app; certificate issued | Done 1 Oct |
+| 3 | `scripts/`: `tf.sh`, `push-image.sh`, `secrets.sh` | W, R reviews | secrets match; image digest recorded | Done 1 Oct |
+| 4 | `ec2/`: stage 2 compute plus the ALB, HTTPS and alias record | W, R, U | healthy through the ALB at its hostname | Done 1 Oct (stack torn down between sessions) |
+| 5 | `jobs.sh`: `db_bootstrap`, `migrate`, trainer SQL, dataset import, once (shared by both variants) | W, U | `check_database` passes as the runtime login | Done 1 Oct |
+| 6 | `fargate/` | W, R, U | healthy through its ALB on the same digest | Not started |
+| 7 | Load harness (in-region), RDS pilot, then the ladder and saturation runs on each variant | R builds the harness; U runs | RDS is not the bottleneck, or the limit is stated | Harness is a draft ([load-harness.md](load-harness.md)); no runs yet |
+| 8 | Multi-AZ failover test, with the app running | U, R records | error window and recovery recorded | Not started |
+| 9 | Evidence, decision records, redacted configuration, teardown | R, U | evidence files written; destroy order followed | Partly: runbook entries written; ADR-001 to ADR-012 drafted for review |
 
 ## 10. Acceptance
 
@@ -189,9 +182,10 @@ A rough order of magnitude, to be verified against current pricing before each s
 
 - [ ] U confirms the SME scale assumption and the 3-minute session / 10% peak-hour parameters; find sources if possible.
 - [ ] U fixes the comparison weights before the first run.
-- [ ] Lab permissions learned at plan and apply: Route 53 zone creation, `c5.large`, `db.t4g.small`, Multi-AZ, SSM `SendCommand`, the Fargate vCPU quota. Each has a stated fallback.
+- [x] Lab permissions learned by apply (1 October): Route 53 zone creation, `c5.large`, `db.t4g.small`, SSM `SendCommand`, WAFv2 on an ALB, CloudWatch alarms and query definitions all allowed ([runbook](../../evidence/aws-build-runbook.md)).
+- [ ] Lab permissions still unknown: Multi-AZ, `LabRole` as an ECS task and execution role, a Fargate task pulling the ECR image, the Fargate vCPU quota. [`scripts/probe-lab-comparison.sh`](../../src/infrastructure/scripts/probe-lab-comparison.sh) answers these but was written for the retired single folder and needs a small update first. Each has a stated fallback.
 - [ ] Record a browser session (HAR) against the local build to count requests per visit, dynamic and static separately.
-- [ ] Per-stack log groups: confirm the move out of `base/` while writing each stack.
+- [ ] Per-stack log groups: done for `ec2/` (its own log group); confirm the same while writing `fargate/`.
 
 ## 13. Carried forward from the retired Terraform plans
 
@@ -228,9 +222,9 @@ The old plan ([aws-terraform.md](../archive/plans/aws-terraform.md) and the stag
 **Load harness.** Locust (k6 only if Locust cannot generate the load from one machine). Files `tests/load/locustfile.py` and a README with exact commands, pinned in its own requirements file, outside the app image. Workload fixed before any cloud run: anonymous browsing, a logged-in customer adds a size to the cart and checks out with its own idempotency key, a small operator share on `/analytics/`; synthetic accounts only. Rehearse locally against Docker first. Output: Locust CSV and failure files saved as `evidence/raw/RES-...`, summarised in `evidence/test-resilience.md`.
 
 **Open items per step, still unchecked**
-- [ ] Target-group health-check values (path, interval, thresholds, deregistration delay): they set the recovery times measured later.
-- [ ] Target-tracking value and cooldowns (from the local Locust rehearsal); alarm thresholds (ALB 5xx, unhealthy hosts); WAF rate limit and the Locust exemption.
-- [ ] One saved CloudWatch Logs Insights query and its exported result (MON-02).
+- [ ] Target-group health-check values (path, interval, thresholds, deregistration delay): set in [ADR-008](../decisions/ADR-008-alb-and-health-check-settings.md) as starting values; tune from the replacement test, they set the recovery times measured.
+- [ ] Target-tracking value and cooldowns, alarm thresholds, WAF rate limit: set in [ADR-011](../decisions/ADR-011-target-tracking-on-request-count.md) and [ADR-012](../decisions/ADR-012-alarms-and-login-rate-limit.md) as starting values; tune from the local Locust rehearsal and the failure tests, and record the Locust exemption.
+- [ ] Logs Insights: the queries are saved on variant A (ADR-012); run one and export the result (MON-02).
 - [ ] Success thresholds fixed before running; each run mapped to its evidence ID (RES-03, MON-02, SEC-09 to SEC-11); the local RES-01, RES-02 and MON-01 cases run as a safety net.
 - [ ] The reference IAM policies and the threat-row update (above).
 - [ ] The architecture diagram `evidence/architecture.drawio` and `.png` with `inf2006-grp21-*` names (the brief requires it; missing).
@@ -246,11 +240,13 @@ Until the data is in, the primary architecture is undecided, so the contract doc
 | Document | State | Action | When |
 |---|---|---|---|
 | This plan | Governs AWS decisions and the sprint | none | n/a |
-| [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md) | The runtime contract (secrets, environment, TLS, health) is still valid; the baseline and setup-order text describe variant A only | Banner added; later generalise "ASG instance" to "compute unit" | after data |
-| [ARCHITECTURE.md](../ARCHITECTURE.md) | Describes variant A only | Banner added; rewrite for the primary architecture | after data |
+| [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md) | The runtime contract (secrets, environment, TLS, health) is still valid; the baseline and setup-order text describe variant A only | Banner added; status line, setup order and integration checklist corrected 3 October 2026; later generalise "ASG instance" to "compute unit" | after data |
+| [ARCHITECTURE.md](../ARCHITECTURE.md) | Describes variant A only | Banner added; status line and archived links corrected 3 October 2026; rewrite for the primary architecture | after data |
 | [PROBLEM_FRAMING_AND_ARCHITECTURE.md](../PROBLEM_FRAMING_AND_ARCHITECTURE.md) | Fargate rejected on D5 by argument, not measurement | Banner added; rewrite that paragraph and the matrix from the data | after data |
 | [PROJECT_SCOPE_INF2006.md](../../PROJECT_SCOPE_INF2006.md) sections 3 and 7 | Name EC2 and ASG as the cloud stack; the scope budget is USD 40 per member while the runbook records USD 50 | **User decision:** amend the scope for the comparison; reconcile the budget figure | user, soon |
-| [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) | Status owner; pointer to this plan added | Update as each step completes | continuous |
+| [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) | Status owner; rewritten 3 October 2026 around this comparison | Update as each step completes | continuous |
+| [load-harness.md](load-harness.md) | Draft harness plan for the load runs | Answer its section 3, then implement | before step 7 |
+| [submissions-plans.md](submissions-plans.md) | Parked submission plan | Start only once engineering is done | after data |
 | [TESTING.md](../TESTING.md) signature demos | "Instance lost" wording is EC2-specific | Make it "instance or task" | with the harness |
 | README.md | Check run and deploy statements | Check at the final sync | after data |
 

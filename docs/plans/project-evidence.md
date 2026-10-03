@@ -1,6 +1,6 @@
 # Project evidence plan
 
-Status (updated 24 September 2026): **plan.** Only `evidence/test-data-ai.md` holds executed results; the other files are templates or do not exist. Nothing in this file is evidence. It records what evidence the submission needs, where each item comes from, what can be produced now versus later, and who leads it. Rules: [testing](../TESTING.md), [scope §12–13](../../PROJECT_SCOPE_INF2006.md), and the [evidence README](../../evidence/README.md). Placeholder or planned results must never be presented as run results; every claim in the report links to a dated artefact.
+Status (updated 3 October 2026): **plan.** Executed results exist in `evidence/test-functional.md`, `test-security.md` and `test-data-ai.md` (local Docker) and in the AWS build runbook; `test-resilience.md` and `monitoring.md` are still templates and `architecture.png` does not exist. Nothing in this file is evidence. It records what evidence the submission needs, where each item comes from, what can be produced now versus later, and who leads it. Rules: [testing](../TESTING.md), [scope §12–13](../../PROJECT_SCOPE_INF2006.md), and the [evidence README](../../evidence/README.md). Placeholder or planned results must never be presented as run results; every claim in the report links to a dated artefact.
 
 Role-based ownership (no names): the three testing/report/administration members lead test execution, evidence organisation and the report; the two developers set up tests, fix defects and provide technical context. The testing/evidence lead coordinates coverage. Record actual contributions honestly in `TEAM_CONTRIBUTIONS.md`.
 
@@ -63,7 +63,7 @@ Sanitised request logging is implemented (`config/jsonlog.py`, `tests/test_reque
 
 ## C4: test results to record now
 
-The application has an automated suite (438 tests per the tracker on 24 September 2026; the count was 135 when this section was first written) plus the foundation results in `docs/reviews/`. Re-run it before citing a number. When the testing members run them, record the command, date, environment and full outcome in `test-functional.md` and `test-security.md`, citing the specific tests behind each claim. A count of passing tests is not a security or functional claim on its own; tie each test to the behaviour it proves.
+The application has an automated suite (the latest recorded count is in [tests/README.md](../../tests/README.md)) plus the foundation results in `docs/reviews/`. Re-run it before citing a number. When the testing members run them, record the command, date, environment and full outcome in `test-functional.md` and `test-security.md`, citing the specific tests behind each claim. A count of passing tests is not a security or functional claim on its own; tie each test to the behaviour it proves.
 
 ## C5: manifest and declarations
 
