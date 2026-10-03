@@ -6,7 +6,7 @@ repurchase difference (the synthetic data has none to find); k=2 subsample ARI 0
 
 ## Why
 
-[latest-opus5.5-review.md](../../latest-opus5.5-review.md) found that the ML evidence only describes
+[latest-opus5.5-review.md](../latest-opus5.5-review.md) found that the ML evidence only describes
 cluster geometry. M-02: nothing shows the segments say anything about later behaviour, and the
 rubric asks for "credible evaluation". M-05: "stability" only reruns other seeds on the same data;
 refitting on subsamples is the stronger check and ANALYTICS.md allows seeds **or resamples**.

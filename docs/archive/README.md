@@ -55,4 +55,8 @@ The live AWS documents are [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md) (th
 - [threat-control-map.md](plans/threat-control-map.md): Threat-control map: research and plan
 - [two-small-defects.md](plans/two-small-defects.md): Two small defects: checkout subtotal and `--band-ink-soft`
 
+## Superseded reviews
+
+- [latest-opus5.5-review.md](latest-opus5.5-review.md): whole-codebase Opus 5.5 review of 25 September 2026 (snapshot `91eba60`, before the shoe baseline). Its findings were triaged in [test-trim.md](../reviews/test-trim.md) and [backend-aws-readiness.md](../reviews/backend-aws-readiness.md); the review logs and plans that cite it still link here.
+
 To restore a file: `git mv docs/archive/plans/<name>.md docs/plans/` and rerun a link check.

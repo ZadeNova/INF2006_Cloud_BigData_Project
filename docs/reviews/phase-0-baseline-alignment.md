@@ -14,7 +14,7 @@ Date: 25 September 2026. Status: Phase 0 complete; independent Astra Medium revi
 
 Coordinator owns this record, tracker status, selective staging and local commit. Implementer `/root/phase0_implementer` is explicitly `gpt-6-astra` / `low`; no staging or commits. A separate fresh-context `gpt-6-astra` / `medium` reviewer will be read-only. Both model assignments are supported by the delegation interface.
 
-Requirements: [B0 and upstream coordination](../archive/plans/backend-aws-readiness.md), [finding dispositions](backend-aws-readiness.md), [review gate](../DEVELOPMENT.md#backend-review-gate), scope and relevant security/analytics/architecture/infrastructure contracts. The [original Opus review](../latest-opus5.5-review.md) remains historical and unchanged.
+Requirements: [B0 and upstream coordination](../archive/plans/backend-aws-readiness.md), [finding dispositions](backend-aws-readiness.md), [review gate](../DEVELOPMENT.md#backend-review-gate), scope and relevant security/analytics/architecture/infrastructure contracts. The [original Opus review](../archive/latest-opus5.5-review.md) remains historical and unchanged.
 
 Retain existing infrastructure and console-first/Terraform reproduction. Include descriptive segmentation, ECR, SNS, CloudTrail, WAF, EventBridge Scheduler and Lambda. Secrets Manager is required for credentials/shared signing key; denial blocks deployment. Systems Manager is not selected. Offline training plus scheduled inference is the intended design; saved-model inference and Lambda integration remain unimplemented. Preserve local execution, ML isolation, budgets and actual AWS verification. No loader fixes, evaluation, inference, packaging, frontend or Terraform work is authorised in Phase 0.
 

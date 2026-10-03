@@ -516,7 +516,7 @@ the `inf2006-data-check` containers, network and volume; label listings were emp
 
 ### Hold-out and subsample evaluation (M-02, M-05)
 
-Answers findings M-02 and M-05 of [the Opus 5.5 review](../docs/latest-opus5.5-review.md) with
+Answers findings M-02 and M-05 of [the Opus 5.5 review](../docs/archive/latest-opus5.5-review.md) with
 the new `analytics/evaluate_holdout.py` ([plan](../docs/archive/plans/ml-holdout-evaluation.md)); the
 published recipe and its version are unchanged. Fresh disposable project `inf2006-ml-holdout`,
 same shoe import (zero rejects) and refresh run `b96fbfa2-5c89-433f-91aa-77e3cb7d4c01` (41,345

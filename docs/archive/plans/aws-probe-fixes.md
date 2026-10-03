@@ -1,6 +1,6 @@
 # AWS probe fixes: W-01 and W-02, and a usage guide
 
-Written 25 September 2026, branch `erfan/analytics` at `e80339b`, from [latest-opus5.5-review.md](../../latest-opus5.5-review.md). The probe (`src/tools/aws_capability_check.py`, plan item B4) writes a Markdown record meant for `evidence/`, which the brief forbids from holding personal data. Both findings were confirmed by reading the code.
+Written 25 September 2026, branch `erfan/analytics` at `e80339b`, from [latest-opus5.5-review.md](../latest-opus5.5-review.md). The probe (`src/tools/aws_capability_check.py`, plan item B4) writes a Markdown record meant for `evidence/`, which the brief forbids from holding personal data. Both findings were confirmed by reading the code.
 
 ## W-01: redaction misses personal names
 

@@ -4,7 +4,7 @@ Date: 26 September 2026. Reviewed snapshot: `2c8b7dfe44f220644034d7bb393999c9dc6
 
 ## Scope and independence
 
-User requested a final independent review against the original Opus and additional ML/backend findings before deciding whether to authorise a push. Reviewer `/root/final_ml_audit`, explicitly `gpt-6-astra` / `medium`, Independent (fresh session), read-only, received bounded task context without implementing conversation history. Coordinator reconciled evidence and performed separate checks. References: [original Opus review](../latest-opus5.5-review.md), [additional findings](backend-aws-readiness.md), and phase review records linked by the tracker.
+User requested a final independent review against the original Opus and additional ML/backend findings before deciding whether to authorise a push. Reviewer `/root/final_ml_audit`, explicitly `gpt-6-astra` / `medium`, Independent (fresh session), read-only, received bounded task context without implementing conversation history. Coordinator reconciled evidence and performed separate checks. References: [original Opus review](../archive/latest-opus5.5-review.md), [additional findings](backend-aws-readiness.md), and phase review records linked by the tracker.
 
 Reviewer inspected final producer/loader/shared contract, serving queries/view/template integration, evaluation, TLS/secrets/bootstrap/startup policies, CI and relevant contracts/review records. This is a final integration audit, not a new exhaustive audit of every unrelated application feature.
 

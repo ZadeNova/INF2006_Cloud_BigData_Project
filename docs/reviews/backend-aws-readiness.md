@@ -2,7 +2,7 @@
 
 Date: 25 September 2026.
 Snapshot: origin/erfan/analytics at f72a872590c5ebafe37e0385c07637b4a785fc8c.
-Reference: [Opus review](../latest-opus5.5-review.md), which covered 91eba60 plus the then-uncommitted AWS probe.
+Reference: [Opus review](../archive/latest-opus5.5-review.md), which covered 91eba60 plus the then-uncommitted AWS probe.
 Reviewer: Codex, primary planning session; model/reasoning not asserted. This is a findings reconciliation and static readiness review, not the independent implementation approval gate.
 Owned changes: this document, the [remediation plan](../archive/plans/backend-aws-readiness.md), and one tracker entry. No application, Terraform, dependencies, dataset or deployment changes.
 

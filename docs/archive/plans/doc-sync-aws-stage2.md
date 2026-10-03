@@ -50,7 +50,7 @@ Between 28 and 29 September 2026 the Terraform build started: stage 0 (scaffold)
 
 ## Deliberately not edited
 
-- `docs/reviews/*`, other `docs/plans/*` and `docs/latest-opus5.5-review.md`: dated historical records.
+- `docs/reviews/*`, other `docs/plans/*` and `docs/archive/latest-opus5.5-review.md`: dated historical records.
 - `PROJECT_SCOPE_INF2006.md`: owns requirements and dates. One discrepancy is reported to the user, not changed: the scope says USD 40 per member; the integration account's Learner Lab page shows USD 50.
 - `AGENTS.md`, `DESIGN.md`, `docs/SECURITY.md`, `docs/API.md`, `docs/SCHEMA.md`, `docs/FRONTEND.md`, `docs/DATA_PIPELINE.md`, `docs/ANALYTICS.md`, `analytics/README.md`, `data/*`: no statement affected.
 - `TEAM_CONTRIBUTIONS.md` and `AI_USE_DECLARATION.md`: written last, after the cloud work, so they cover all of it. Pending.

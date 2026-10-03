@@ -5,7 +5,7 @@ passed all criteria and is the default; results in `evidence/test-data-ai.md#fea
 
 ## Finding
 
-From [latest-opus5.5-review.md](../../latest-opus5.5-review.md), M-03: recency is left raw (skew
+From [latest-opus5.5-review.md](../latest-opus5.5-review.md), M-03: recency is left raw (skew
 1.41) and total spend correlates with order count (r=0.74), so purchase volume counts twice and
 outweighs recency. Fix: log-transform recency, and use average order value instead of total spend.
 

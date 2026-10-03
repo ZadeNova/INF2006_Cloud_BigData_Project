@@ -2,7 +2,7 @@
 
 - Reviewer: **Independent (fresh session), Claude Opus 5.5**. The session had never seen the implementing conversations. It was read-only until the user approved the test trim; this log also records that implementation.
 - Date: 25 September 2026. Snapshot: branch `erfan/analytics` at `f72a872`, clean working tree.
-- Scope: (A) every finding ID in [latest-opus5.5-review.md](../latest-opus5.5-review.md) checked against the code; (B) the pytest suite judged by the test-budget rule in [AGENTS.md](../../AGENTS.md#simplicity-and-maintainability).
+- Scope: (A) every finding ID in [latest-opus5.5-review.md](../archive/latest-opus5.5-review.md) checked against the code; (B) the pytest suite judged by the test-budget rule in [AGENTS.md](../../AGENTS.md#simplicity-and-maintainability).
 - AWS was not contacted and no sub-agents were used. A disposable Compose project (`inf2006-review`) held a full import for the ML checks and was deleted with its volume. Probe tests and mutant copies stayed in the session scratchpad; none were added to the repository.
 
 ## Checks run

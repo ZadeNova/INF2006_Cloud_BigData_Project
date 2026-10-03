@@ -1,6 +1,6 @@
 # Documentation drift after the ML merge: F-05 and S-005
 
-Written 25 September 2026, branch `erfan/analytics` at `9e07dcf`, from [latest-opus5.5-review.md](../../latest-opus5.5-review.md). The user asked for these two findings only. Each was checked against the code before this plan; the customer-segmentation merge (`958ba3e`) made several documents false.
+Written 25 September 2026, branch `erfan/analytics` at `9e07dcf`, from [latest-opus5.5-review.md](../latest-opus5.5-review.md). The user asked for these two findings only. Each was checked against the code before this plan; the customer-segmentation merge (`958ba3e`) made several documents false.
 
 | ID | File | Statement that is now wrong | Correction |
 |---|---|---|---|
