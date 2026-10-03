@@ -2,22 +2,58 @@
 
 > **Sprint note (1 October 2026):** this document describes variant A (EC2 + Auto Scaling group). Variant B (ECS on Fargate) is being built for a measured comparison and the primary architecture is decided after the data. Until the post-sprint documentation sync, [docs/plans/aws-ecs-comparison.md](plans/aws-ecs-comparison.md) governs where they differ.
 
-Status (30 September 2026): **Terraform stages 0 and 1 are applied** in the team's Learner Lab account (network, security groups, one private S3 bucket, ECR, secrets, log group, SNS); stage 2 (RDS and the first app instance) is written and reviewed, not applied; the application is not deployed ([build record](../evidence/aws-build-runbook.md), [plan](archive/plans/aws-terraform.md)). Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before deployment. Teammate-reported probe (25 September 2026, us-east-1 Learner Lab): probed list/describe APIs were reachable, lab roles/profiles were listed and the vCPU quota lookup was denied. These observations were not rerun during integration and do not establish creation permissions or coverage of every selected service.
+**Which AWS file owns what.** Link to the owner rather than copy.
+
+| Question | Owner |
+|---|---|
+| What the deployed system is: baseline, runtime contract, secrets, TLS, health, both variants | this file |
+| Why we chose it: each decision, options and driver | [decisions/](decisions/) (one ADR per decision) |
+| How the comparison is run, the schedule and the carried-forward decisions | [plans/aws-ecs-comparison.md](plans/aws-ecs-comparison.md) |
+| How the load runs are built | [plans/load-harness.md](plans/load-harness.md) |
+| How to bring it up, take it down and recover | [src/infrastructure/README.md](../src/infrastructure/README.md) |
+| What was applied, when, with what result, and the lab capability record | [evidence/aws-build-runbook.md](../evidence/aws-build-runbook.md) |
+| Independent review of the Terraform | [reviews/aws-terraform.md](reviews/aws-terraform.md) |
+
+Status (3 October 2026): **`base/` and variant A (`ec2/`) are written and were applied and verified on 1 October 2026** in the team's Learner Lab account: `https://shop-ec2.fourtytwofactors.me` served the shop with the dataset imported, the operator account created, analytics refreshed, scaling, alarms and the WAF in place, and `smoke.sh` passing 8 of 8. The `ec2/` stack is torn down between work sessions; `base/` (RDS, zone, certificate, ECR, secrets) stays up. **Variant B (`fargate/`) is not written.** No load, scaling-run or recovery evidence exists yet. Records: [build runbook](../evidence/aws-build-runbook.md) (as-built log and lab capability record), [how to run it](../src/infrastructure/README.md), [decisions](decisions/). Read [scope](../PROJECT_SCOPE_INF2006.md) for budget and risks. Verify actual lab permissions and regional prices before each deployment; the lab capability record in the runbook lists what was observed and what was learned by apply.
 
 ## Baseline
 
 - Terraform lives in `src/infrastructure/` (confirmed 26 September 2026), owned by the user, with the AWS provider pinned to 6.x and locked in `.terraform.lock.hcl`. State is local on one apply device (below).
 - HTTPS ALB across two permitted Availability Zones, health-checked EC2 targets in an ASG.
 - Same container image, signing configuration and database sessions on every instance; stickiness disabled.
-- Private Single-AZ RDS PostgreSQL, inbound only from application security group. State its availability limitation.
+- Private Single-AZ RDS PostgreSQL, inbound only from application security group. State its availability limitation. One controlled Multi-AZ failover test is planned ([plan](plans/aws-ecs-comparison.md), section 3).
 - One private S3 bucket for checked inputs and optional exports (`data/`, `exports/`); block public access, versioning, encryption and a TLS-only policy, all in Terraform. The bucket itself is created with the CLI and looked up as a data source, because the Learner Lab's service control policy denies `s3:GetBucketObjectLockConfiguration`, which the `aws_s3_bucket` resource reads on every plan. Product images and `.glb` models are static files in the image served by WhiteNoise, not S3 media (decided 29 September 2026). Retain local input mode.
 - CloudWatch sanitised logs/metrics with short retention.
 - IAM runtime roles and Secrets Manager for database credentials/shared Django signing key; unavailable storage or retrieval blocks deployment. No baked-in access keys or plaintext user-data/launch-template secrets.
-- ECR is the selected image route. SNS, CloudTrail and regional WAF (one rate-based login rule) are included; verify lab permissions, roles, costs and actual behaviour before claiming readiness. **Systems Manager Session Manager is selected (reinstated 26 September 2026)** for administration and one-off jobs, with no SSH and no inbound admin ports. Decision record: [aws-terraform.md](archive/plans/aws-terraform.md).
+- ECR is the selected image route. SNS and a regional WAF (one rate-based rule on `POST /login/`, count mode first) are applied by Terraform; CloudTrail is the account's default event history (90 days), not a Terraform resource. Verify lab permissions, roles, costs and actual behaviour before claiming readiness. **Systems Manager Session Manager is selected (reinstated 26 September 2026)** for administration and one-off jobs, with no SSH and no inbound admin ports; the database and data jobs run through SSM Run Command ([ADR-009](decisions/ADR-009-database-jobs-by-ssm-run-command.md)). Decisions: [docs/decisions/](decisions/) and [plan section 13](plans/aws-ecs-comparison.md); the retired stage plan is history only ([aws-terraform.md](archive/plans/aws-terraform.md)).
 - Region: `us-east-1`, two Availability Zones; the lab has no Singapore region. This is a documented lab constraint against the Singapore story (latency and data-residency notes in the decision record).
-- Offline ML uses an explicitly triggered batch workflow; saved-model inference is optional and unimplemented. Lambda is not selected; EventBridge Scheduler (with SSM Run Command) is an optional side quest after the evidence runs. Preserve local training/loading and keep ML libraries outside the web image.
+- Offline ML uses an explicitly triggered batch workflow. Saved-model inference and Lambda are not part of the plan (user decision, 3 October 2026); EventBridge Scheduler (with SSM Run Command) is an optional side quest after the evidence runs. Preserve local training/loading and keep ML libraries outside the web image.
 
 Initial/minimum ASG capacity one, default test maximum two. Have two healthy targets before failure demonstration. Additional capacity requires quota/cost checks. Budget baseline: EC2 public subnets with application ingress restricted to ALB to avoid mandatory NAT cost; RDS private. Restrict management access separately through permitted facilities.
+
+## Variant B: ECS on Fargate (designed, not built)
+
+Status (3 October 2026): **nothing in this section is built or evidenced.** `src/infrastructure/fargate/` does not exist. It records the design agreed in [the comparison plan](plans/aws-ecs-comparison.md) so variant B has the same kind of record as variant A; when the two differ before B is built, the plan governs. Each choice below becomes an ADR when `fargate/` is written, and the as-built result goes in the [runbook](../evidence/aws-build-runbook.md).
+
+**Same as variant A (so the comparison is fair).** One image digest, the same RDS from `base/`, the same ALB design and `/health/` check, app compute in the public subnets with public IPs and no NAT gateway (`sg-app` accepts port 8000 only from `sg-alb`; RDS stays private), no stickiness, the same Gunicorn settings, `LabRole` for every role (no IAM creation), the same secrets and runtime contract below, the same WAF rule on `POST /login/`, and the same request-count scaling metric. Matched compute: Fargate 2 vCPU / 4 GB against the `c5.large` (2 vCPU, 4 GiB).
+
+**What `fargate/` owns.** Its own ALB, `sg-alb` and `sg-app`, an ECS cluster, a task definition, a service, scaling, the alias record `shop-fargate.fourtytwofactors.me` (the shared ACM certificate already names it, [ADR-006](decisions/ADR-006-one-acm-certificate-two-hostnames.md)), and a per-stack log group. It reads `base/` through `terraform_remote_state` and is applied and destroyed on its own; `base/` never reads it.
+
+**What differs from variant A.**
+
+| | A: EC2 + ASG | B: ECS on Fargate |
+|---|---|---|
+| Runs | Docker on an AL2023 instance, started by user data | ECS task, no instance to manage |
+| App scaling | ASG target tracking on `ALBRequestCountPerTarget` | Application Auto Scaling on the same metric |
+| Health-probe host | read from IMDSv2 at boot | read from the ECS metadata endpoint by a `command` override, with no image change |
+| One-off jobs | `app-job` through SSM Run Command | `aws ecs run-task` with overrides, waiting for the exit code |
+| Credentials | instance role (`iam-role`) | task role (`container-role`, already accepted by `config/secrets.py`) |
+| Network | host port 8000 | `awsvpc`, one network interface per task |
+| Capacity limit | instance quota | a Fargate vCPU quota the lab does not let us read; learned at apply |
+
+**Unknown until tried.** Whether `LabRole` can act as an ECS task and execution role, whether a Fargate task can pull the ECR image and write to CloudWatch, and how far the vCPU quota lets B scale. [`scripts/probe-lab-comparison.sh`](../src/infrastructure/scripts/probe-lab-comparison.sh) answers the first two before any Terraform is written; it needs a small update for the `base/` layout. The unmeasured question of whether a difference comes from ECS or from Fargate is stated in the report from the design, because ECS on EC2 was dropped for time.
+
+**Acceptance for B** (same as A, plan section 10): the task is healthy behind its ALB over HTTPS at its own hostname, no port 22, running from the recorded digest, logs arriving in CloudWatch, and the database jobs pass as the runtime login. Then the load runs, which decide the primary architecture.
 
 ## Early gates and deployment
 
@@ -43,7 +79,7 @@ Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, R
 
 ## Setup order and verification
 
-The numbered stages Terraform executes (0 to 6, with their acceptance checks) are in [aws-terraform.md](archive/plans/aws-terraform.md); the table below is the dependency order they follow. Use dependency order and small reviewable changes, not an unexamined full deployment. **Deployment method (revised 25 September 2026): Terraform first.** Terraform creates and owns every team-managed resource (named `inf2006-grp21-<component>`, tagged `Project=inf2006-grp21` and `ManagedBy=terraform`). The console is for learning and inspection only: reading settings, logs, metrics and CloudTrail event history, plus the few steps Terraform cannot do (the ACM validation record at the external domain registrar, confirming the SNS email subscription, reading the lab balance). Anything created by hand is imported into Terraform or deleted, so there is no drift. This replaces the earlier "console first, then reproduce in Terraform" decision. The user is learning Terraform while building it, so the work goes phase by phase with a guide per phase, and it starts only when the user says so. Pre-existing lab roles (`LabRole`, `LabInstanceProfile`) are referenced as external dependencies, never recreated. Record authorised emergency/manual changes and reconcile configuration afterwards. Plan and decisions: [aws-terraform.md](archive/plans/aws-terraform.md).
+The table below is the dependency order the build follows; the order actually executed, with commits, results and costs, is the [runbook](../evidence/aws-build-runbook.md) and the schedule is [plan section 9](plans/aws-ecs-comparison.md). Use dependency order and small reviewable changes, not an unexamined full deployment. **Deployment method: Terraform first.** Terraform creates and owns every team-managed resource (named `inf2006-grp21-<component>`, tagged `Project=inf2006-grp21` and `ManagedBy=terraform`), in `base/` (long-lived) and one folder per variant. The console is for inspection only: reading settings, logs, metrics and CloudTrail event history, plus the few steps Terraform cannot do (the ACM validation record at the external domain registrar, confirming the SNS email subscription, reading the lab balance). Anything created by hand is imported into Terraform or deleted, so there is no drift. Pre-existing lab roles (`LabRole`, `LabInstanceProfile`) are referenced as external dependencies, never recreated. Record authorised emergency/manual changes and reconcile configuration afterwards.
 
 | Stage | Work and verification |
 |---|---|
@@ -104,11 +140,11 @@ DML grants. Run `manage.py migrate --noinput` once using the migration credentia
 or bootstrap credentials to web containers. Local Compose intentionally retains its existing
 single local owner/developer role and requires no AWS configuration.
 
-**Trainer login (stage 2).** `db_bootstrap` creates only the runtime and migration logins, so the read-only login for the standalone trainer and refresh verifier is created by two SQL files in `src/infrastructure/sql/`, run once from the instance with `psql` and `verify-full` TLS: `trainer_role_create.sql` as the RDS master (login only, every privilege flag false) and `trainer_role_grant.sql` as the migration owner. The grant is narrow on purpose: `SELECT` on the nine tables `analytics/segment_customers.py` and `verify_refresh.py` read, plus `id`, `is_staff` and `is_superuser` of `auth_user`, and no default privileges, so `django_session` (whose keys would allow session takeover), password hashes and later tables stay unreadable. Tested on a disposable PostgreSQL 17 (the real segment query runs; `INSERT`, `django_session` and `auth_user.password` are refused); see [the stage 2 review](reviews/aws-terraform.md).
+**Trainer login.** `db_bootstrap` creates only the runtime and migration logins, so the read-only login for the standalone trainer and refresh verifier is created by two SQL files in `src/infrastructure/sql/`, run once from the instance with `psql` and `verify-full` TLS: `trainer_role_create.sql` as the RDS master (login only, every privilege flag false) and `trainer_role_grant.sql` as the migration owner. The grant is narrow on purpose: `SELECT` on the nine tables `analytics/segment_customers.py` and `verify_refresh.py` read, plus `id`, `is_staff` and `is_superuser` of `auth_user`, and no default privileges, so `django_session` (whose keys would allow session takeover), password hashes and later tables stay unreadable. Tested on a disposable PostgreSQL 17 (the real segment query runs; `INSERT`, `django_session` and `auth_user.password` are refused; see [the stage 2 review](reviews/aws-terraform.md)) and then run on the real RDS instance on 1 October 2026 through `jobs.sh trainer-sql` (runbook, variant A acceptance).
 
 ## Secrets Manager startup and ALB boundary
 
-The Terraform for these secrets is applied as empty containers (`inf2006-grp21/web`, `/migration`, `/trainer`, `/bootstrap`; values are set with the CLI so they never enter state) and the launch template and user data that deliver them are written (stage 2). The following is the
+The Terraform for these secrets is applied as empty containers (`inf2006-grp21/web`, `/migration`, `/trainer`, `/bootstrap`; values are set with the CLI so they never enter state) and the launch template and user data that deliver them are applied in `ec2/` (variant A; the Fargate task definition for variant B is not written). The following is the
 application handoff contract, not a claim of compatible infrastructure or deployed verification.
 `AWS_SECRET_ID` and `AWS_REGION` are required nonsecret configuration outside `DJANGO_ENV=local`.
 One `config/secrets.py` loader retrieves `SecretString` once per process/startup through the SDK's
@@ -202,6 +238,8 @@ certificate availability, security groups, ALB/RDS behavior or ECR publication.
 ## Joint integration checklist after Phase 6
 
 The [Phase 6 release record](reviews/ml-local-release-readiness.md) owns the exact locally tested source/image and limits. Local completion does not clear the following joint gates. The infrastructure owner implements the cloud configuration; the application owner supplies the reviewed image/contracts and checks behavior together with that owner. This checklist does not authorise an apply or deployment.
+
+**Status of the checklist on variant A (3 October 2026; evidence in the [runbook](../evidence/aws-build-runbook.md)).** Items 1 to 3 are done: permissions and region recorded, the image published and pinned by digest, the role-separated secrets wired, `db_bootstrap`, `migrate` and the trainer SQL run over SSM, and the denied actions checked (runtime login cannot `CREATE TABLE`, trainer login cannot `INSERT` or read `auth_user.password`). Item 4 is partly done: HTTPS, the health probe and `smoke.sh` (8 of 8) pass; session and cart continuity across two instances is not yet shown. Item 5 is partly done: the dataset import from S3 and the analytics refresh ran; the segmentation train and load on AWS and the failure and retry cases are not recorded. Item 6 is partly done: three alarms, two saved log queries and the WAF (count mode) are applied, but no alarm has fired, the WAF block-mode test has not run and there is no scaling or recovery evidence. Item 7 continues through the runbook. Variant B has none of this yet.
 
 1. Confirm actual lab region, account, budget, service/role permissions and the permitted certificate/hostname/client-trust route. Review Terraform plan and costs; preserve shared-state coordination and teardown ownership.
 2. After separate publication authorisation, publish the tested application image through the agreed ECR route, record the registry manifest digest, and pin that digest plus the same release ID on every instance. A local Docker image ID is not this evidence.

@@ -24,7 +24,7 @@ To be completed by the team. Keep final details consistent with the manifest and
 
 ## Features
 
-Implemented locally (not yet deployed):
+Implemented, running locally in Docker; variant A was also deployed to AWS on 1 October 2026 and is torn down between sessions (see the status above):
 
 - Registration, login/logout and shared database-backed sessions.
 - Shoe catalogue: 20 shoe models, each sold in 10 US sizes (7 to 11.5) with its own stock, with 3D previews and a product detail page; persistent shopping cart.
@@ -55,7 +55,7 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 | Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
 | Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
 | Analytics | Django management commands/SQL; pandas where useful |
-| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, Secrets Manager (planned) |
+| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, Secrets Manager; ECS on Fargate is variant B, not yet built |
 | Access and secrets | IAM roles and selected Secrets Manager; unavailable access blocks deployment |
 | Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
 
@@ -112,7 +112,7 @@ The delivered application must run locally without paid AWS access for marking. 
 | [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |
 | [Schema](docs/SCHEMA.md) / [API](docs/API.md) | Data constraints, checkout semantics and route contracts |
 | [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md) | Provenance, import behaviour, metrics and validation |
-| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [Terraform plan](docs/archive/plans/aws-terraform.md) | Component responsibilities, AWS contract and operations, and the staged Terraform build with its decisions |
+| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [AWS comparison plan](docs/plans/aws-ecs-comparison.md) | Component responsibilities, AWS contract and operations, and the EC2 versus Fargate plan with its decisions |
 | [Security](docs/SECURITY.md) / [testing](docs/TESTING.md) | Controls, verification and evidence requirements |
 | [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
 | [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
