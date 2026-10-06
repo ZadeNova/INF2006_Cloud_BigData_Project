@@ -85,3 +85,8 @@ output "shop_hostnames" {
   description = "The hostname each stack serves, by stack key (ec2, fargate). Each stack creates the alias record for its own."
   value       = local.shop_hostnames
 }
+
+output "db_instance_identifier" {
+  description = "The RDS instance identifier, the CloudWatch dimension for the load-test database metrics."
+  value       = aws_db_instance.main.identifier
+}

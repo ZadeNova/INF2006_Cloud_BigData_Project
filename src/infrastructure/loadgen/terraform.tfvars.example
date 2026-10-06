@@ -1,0 +1,2 @@
+# Copy to terraform.tfvars (gitignored) only to change a default.
+instance_type = "c5.large"

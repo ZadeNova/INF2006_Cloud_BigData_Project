@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # The one way to plan and apply a Terraform folder (aws-ecs-comparison.md section 8, ADR-005).
 #
-#   scripts/tf.sh <base|ec2|fargate> plan     fmt check, init, validate, saved plan; records the commit it was made from
-#   scripts/tf.sh <base|ec2|fargate> apply    applies that saved plan only if HEAD is still that commit; then backs up the state
+#   scripts/tf.sh <base|ec2|fargate|loadgen> plan     fmt check, init, validate, saved plan; records the commit it was made from
+#   scripts/tf.sh <base|ec2|fargate|loadgen> apply    applies that saved plan only if HEAD is still that commit; then backs up the state
 #
 # Refuses a dirty working tree under src/infrastructure, so the code that ran is always a recorded commit.
 # Needs: lab credentials exported in this shell (it checks), terraform, git.
@@ -10,8 +10,8 @@ set -euo pipefail
 
 INFRA="$(cd "$(dirname "$0")/.." && pwd)"
 FOLDER="${1:-}"; ACTION="${2:-}"
-case "$FOLDER" in base|ec2|fargate) ;; *) echo "usage: $0 <base|ec2|fargate> <plan|apply>" >&2; exit 2 ;; esac
-case "$ACTION" in plan|apply) ;; *) echo "usage: $0 <base|ec2|fargate> <plan|apply>" >&2; exit 2 ;; esac
+case "$FOLDER" in base|ec2|fargate|loadgen) ;; *) echo "usage: $0 <base|ec2|fargate|loadgen> <plan|apply>" >&2; exit 2 ;; esac
+case "$ACTION" in plan|apply) ;; *) echo "usage: $0 <base|ec2|fargate|loadgen> <plan|apply>" >&2; exit 2 ;; esac
 DIR="$INFRA/$FOLDER"
 [ -d "$DIR" ] || { echo "STOP: $DIR does not exist yet" >&2; exit 1; }
 

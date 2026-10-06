@@ -1,6 +1,6 @@
 # AWS infrastructure: how to run it
 
-Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-012), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
+Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-013), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
 
 **Status (1 October 2026).** `base/` is applied. **Variant A (`ec2/`) is applied and verified**: `https://shop-ec2.fourtytwofactors.me` serves the shop over HTTPS, with the dataset imported, the operator account created, the analytics refreshed, scaling, alarms and the WAF in place, and `smoke.sh` passing 8 of 8. Variant B (`fargate/`) is not written yet. Between work sessions the `ec2` stack is torn down to save money; `base/` stays up.
 
@@ -25,6 +25,7 @@ Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). D
 |---|---|---|
 | `base/` | VPC, subnets, `sg-db`, Route 53 zone, ACM certificate, RDS PostgreSQL 17, ECR, S3 bucket settings, the five secrets, SNS alarm topic. Stays up between experiments | `base/terraform.tfstate` |
 | `ec2/` | Variant A: its own `sg-alb` and `sg-app`, ALB with HTTPS, launch template, Auto Scaling group (1 to 2 instances), scaling policy, alarms, saved log queries, WAF, alias record `shop-ec2.fourtytwofactors.me`, log group | `ec2/terraform.tfstate` |
+| `loadgen/` | The load generator for the benchmarks (ADR-013): one `c5.large`, no inbound rules, Session Manager only. Up only during test sessions: `scripts/tf.sh loadgen plan`, then `apply`; `scripts/down.sh loadgen` to remove | `loadgen/terraform.tfstate` |
 | `fargate/` | Variant B (not written yet) | |
 | `scripts/` | The commands below | |
 | `sql/` | The trainer login's two SQL files (run by `jobs.sh trainer-sql`) | |
@@ -185,7 +186,7 @@ For a teammate's cold-backup account, or to reproduce the build. About 45 minute
 | `scripts/tf.sh <base\|ec2> plan` | fmt check, validate, saved plan, records the commit | before every apply |
 | `scripts/tf.sh <base\|ec2> apply` | applies that saved plan only, then backs up the state | after reading the plan |
 | `scripts/up.sh ec2` | plan, confirm, apply, secrets, all jobs, smoke | start of a session |
-| `scripts/down.sh ec2` | destroy the stack, list leftovers | end of a session |
+| `scripts/down.sh ec2` (or `loadgen`) | destroy the stack, list leftovers | end of a session |
 | `scripts/smoke.sh ec2` (or a hostname) | 8 outside-in checks, no credentials needed | after any change |
 | `scripts/jobs.sh ec2 <job>` | one job on the instance through SSM: `bootstrap`, `migrate`, `trainer-sql`, `restart`, `check`, `import`, `operator`, `refresh`, `all` | fresh database; `check` any time |
 | `scripts/secrets.sh fill\|check` | complete or check the secrets (prints key names and match/DIFFER only) | once; `check` any time |

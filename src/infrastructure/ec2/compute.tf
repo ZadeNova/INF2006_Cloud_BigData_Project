@@ -29,6 +29,13 @@ resource "aws_launch_template" "app" {
     arn = data.aws_iam_instance_profile.lab.arn
   }
 
+  # Detailed monitoring: instance metrics every minute instead of every five (ADR-013). A scale-out that takes two
+  # minutes cannot be seen on a five-minute graph. Small extra charge per instance; it applies to instances launched
+  # from this template version onward.
+  monitoring {
+    enabled = true
+  }
+
   # A public IP lets the instance reach ECR, Secrets Manager, S3, CloudWatch and SSM without a NAT gateway.
   # Nothing can connect in: sg-app only accepts port 8000 from sg-alb.
   network_interfaces {
@@ -81,9 +88,9 @@ resource "aws_launch_template" "app" {
 
 resource "aws_autoscaling_group" "app" {
   name                = "${local.stack_prefix}-asg"
-  min_size            = 1
-  max_size            = 2 # ADR-011: one more instance is enough to show scale-out and keeps the lab bill small
-  desired_capacity    = 1
+  min_size            = var.asg_min_size # ADR-011 defaults: 1 to 2 instances. ADR-013: variables so a fixed-capacity
+  max_size            = var.asg_max_size # run can pin all three to the same number and take scaling out of the result
+  desired_capacity    = var.asg_desired_capacity
   vpc_zone_identifier = values(local.base.public_subnet_ids)
 
   # Replace an instance when the ALB says it is unhealthy, not only when the machine itself fails (ADR-008).
@@ -91,6 +98,16 @@ resource "aws_autoscaling_group" "app" {
   target_group_arns         = [aws_lb_target_group.app.arn]
   health_check_type         = "ELB"
   health_check_grace_period = 300
+
+  # One-minute group metrics (instances wanted, in service, pending, terminating) for the scale-out and replacement
+  # timelines (ADR-013). They are off by default and free to publish.
+  metrics_granularity = "1Minute"
+  enabled_metrics = [
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupPendingInstances",
+    "GroupTerminatingInstances",
+  ]
 
   # A new template version (a new image or AMI) applies to instances launched from then on. Running instances are
   # replaced only by an instance refresh: aws autoscaling start-instance-refresh (that time is a measured result).
