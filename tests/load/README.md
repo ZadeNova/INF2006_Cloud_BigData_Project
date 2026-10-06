@@ -79,7 +79,7 @@ python aws_capture.py kill  --variant ec2 --run-id <RUN-ID>      # asks you to t
 
 `kill` is **graceful on both variants** (ADR-017): A asks the Auto Scaling group to terminate the instance (it is drained from the load balancer first, then replaced); B stops one task (ECS drains it, then SIGTERM). The replacement test therefore measures a planned replacement, not a sudden crash; say so in the report.
 
-**Once per variant per session**, on the laptop, record the processor model (an instance via SSM; Fargate through a one-off task) so the report can state the hardware behind "2 vCPU":
+**Once per variant per session**, on the laptop, record the processor model (an instance via SSM; Fargate through a one-off task) so the report can state the hardware behind "2 vCPU". **Limitation to state in the report:** on Fargate the model comes from a one-off task, which may run on different hardware from the service tasks that served the load; on EC2 it is read from the serving instance itself:
 
 ```bash
 python aws_capture.py cpu --variant ec2

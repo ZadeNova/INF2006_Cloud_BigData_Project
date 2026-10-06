@@ -523,3 +523,133 @@ Fixer: the writing session (Claude Sonnet 5.5). Offline checks: `terraform fmt -
 
 Round 3: re-check only the diff since `6ab07ef`, keeping the INF IDs.
 
+
+## Round 3 (6 October 2026)
+
+- **Diff reviewed:** `6ab07ef..41e6ed2` (8 files), with "Fixes applied after round 2" as the fixer's account.
+- **Reviewer:** Claude Opus 5.5 (`claude-opus-5-5`), the same session as rounds 1 and 2. It did not write the fixes and
+  had no access to the fixing conversation. The same-session disclosure from round 2 applies: it reviews its own earlier
+  findings and may share their blind spots.
+- **Where the user asked to look hardest:**
+  - the `targets.jsonl` healthy-count rule;
+  - `--reference` and the distinct-value warning;
+  - the exit-code check in `run_in_task`;
+  - challenge the decision to leave out the start-up CPU log line (INF-021).
+
+### Checks run
+
+| Check | Result |
+|---|---|
+| `python3 tests/load/selftest.py` | 15 of 15 PASS |
+| `bash -n src/infrastructure/scripts/jobs.sh` (the only script changed) | Pass |
+| Terraform | Not re-run: no `.tf` file changed in this diff |
+| Probe: `analyze.campaign_reference(runs, {"rds-class": "db.t4g.medium"})` (a misspelled key) | The key is silently ignored and the majority value is used (INF-024) |
+| Grep of README, plan, ADRs and `analyze.py` for the one-off-task CPU limitation | Not stated anywhere outside this log (INF-021) |
+
+### Status of earlier findings
+
+| ID | Round 3 status | Notes |
+|---|---|---|
+| INF-017 | **Resolved** | fargate-variant.md lists the outputs that exist; load-harness.md section 10 says the three outputs were not added and why |
+| INF-018 | **Resolved**, with a new edge: INF-024 | `--reference` overrides the majority; every distinct value is listed with run counts in sorted order (output stays deterministic); a warning is printed when runs disagree. Tested, including the RDS-resize case |
+| INF-019 | **Resolved** (documentation, as directed) | README says `stack.json` describes the stack at export time and to export before any apply, unpinning or WAF change. The optional cross-check was not added; that is acceptable |
+| INF-020 | **Resolved for the two-unit runs**; residual stays in "Not verifiable offline" | `scaleout` and `replace` take the last watcher record at or before the measurement start. That is exact, because `watch` writes a record as soon as it starts and on every change; a missing record is flagged, not invalid. Tested (good, bad, no watcher). **Residual:** the fixer's reason for keeping CloudWatch on single-unit runs ("nothing to disagree about") overstates it. If the zone-less series averaged per-zone or per-node reports, one healthy target could read 0.5 and fail the 0.01 tolerance. That is still the round 2 not-verifiable item, now named in the README as "confirmed on the first pilot". A simpler way to remove it: run `watch` for every run type and use `targets.jsonl` everywhere. Not a new finding |
+| INF-021 | **Partly resolved; part still open, and it is the user's call** | See "INF-021: challenge" below |
+| INF-022 | **Resolved** | The docstring no longer claims `kill` is the only command that changes AWS, and says what `cpu` costs. `run_in_task` keeps the last `describe_tasks` result and stops on a non-zero or missing exit code, showing `stoppedReason`. Tested with a stubbed `CannotPullContainerError` |
+| INF-023 | **Resolved** | `trap 'rm -f "$F"' EXIT` is set right after `mktemp`, after the early `exit 0` branch. The heredoc is quoted, so `$F` expands on the instance; `F` is defined before the trap can fire under `set -u` |
+
+### INF-021: challenge of the fixer's decision
+
+The fixer left out the start-up CPU line because it "would not be uniform": the EC2 container runs the image's own CMD,
+so only Fargate could log the model at start-up without changing the image or the Docker command.
+
+**The uniformity argument does not hold.** The goal is to record the hardware that served each run, not to collect it
+the same way on both variants:
+
+- **On A:** the CPU model is a property of the host, which the container shares. In the pinned single-unit runs, the
+  SSM read in `aws_capture.py cpu` already lands on the serving instance, so A's figure is exact provided it is taken
+  in the same session. That matters here because a `c5.large` can be either of two Xeon generations.
+- **On B:** the figure comes from a separate one-off task, which Fargate may place on different hardware. B's figure
+  is the only inexact one, and the start-up line would fix exactly that.
+
+**The cost of adding it is small:**
+
+- one line before `exec` in `fargate/ecs.tf`'s `web_command`, for example `grep -m1 'model name' /proc/cpuinfo || true`;
+- `|| true` is needed because of `set -eu`;
+- the `tf.sh` drift check is unaffected, because it matches only the `exec gunicorn …` line;
+- each serving task's model would then be in its own log stream.
+
+**What is still open either way:** the limitation is not written where a report author or marker will see it. The
+README, plan section 15, ADR-015/017 and `analyze.py`'s "CPU model" line all present B's figure as the hardware,
+without saying it comes from a one-off task that may not have served the load. It is mentioned only in this review log.
+
+**Under DEVELOPMENT.md this is an unresolved finding after its remediation attempt**, so it goes to the user, not to
+another fixer retry. The user picks one:
+
+- **(a) Accept the limitation.** State it in the harness README and in `analyze.py`'s "CPU model" line (for example
+  "fargate: from a one-off task; the serving task may differ").
+- **(b) Add the start-up line** to the Fargate `web_command`.
+
+**Reviewer's recommendation:** (b), which removes the limitation, keeping `aws_capture.py cpu` for A.
+
+### New findings (round 3)
+
+Both **open**. Neither blocks an apply or a load run.
+
+#### INF-024 — Low — area F — `--reference` silently ignores unknown keys and over-claims in the report
+
+- **Location:** `tests/load/analyze.py` `campaign_reference` (the `ref.update(...)` line) and the "Campaign reference"
+  header in `main`.
+- **Evidence:** keys not in `CAMPAIGN_KEYS` are dropped without a message. The probe above: `{"rds-class": …}` left the
+  majority value in place. The header still reads "stated by the user in reference.json" whenever the file is given,
+  even if it covers only some keys, or none because of a typo. A JSON file that is not an object (a list) raises an
+  unhandled `AttributeError`.
+- **Impact:** the user believes the reference is pinned while the majority decides, which is exactly the INF-018
+  failure the option exists to prevent. The report then attributes it to the user.
+- **Direction:** stop on an unknown key or a non-object file. In the header, say per setting whether the value was
+  stated or taken from the majority.
+
+#### INF-025 — Info — area F — two clocks meet in the replacement and healthy-start figures
+
+- **Location:** `tests/load/analyze.py` `replace_timings` and `check_stack`; `aws_capture.py` (`kill.json`,
+  `targets.jsonl`).
+- **Evidence:** `kill.json` and `targets.jsonl` carry the laptop's clock. The request rows and `timing.json` carry the
+  generator's clock, whose offset is checked (under 50 ms). The laptop's offset is never recorded.
+- **Impact:** a laptop clock off by seconds would shift which errors fall inside the bounded error window (INF-004) and
+  which watcher record counts as "at the start". Small with chrony on Fedora, but unmeasured, in a criterion weighted
+  25. Not introduced by this diff; noted because the round 2 fixes made both rules depend on it.
+- **Direction:** record the laptop's `chronyc tracking` offset in `kill.json` and at the start of `watch`, and apply the
+  same 50 ms rule.
+
+### Verdict (round 3)
+
+**Ready to apply** (no change in this diff touches Terraform; the one script change passes `bash -n`).
+
+- **For the load campaign:** decide INF-021 ((a) or (b)) before the first recorded Fargate run, because it decides
+  whether B's hardware line in the report is true.
+- **INF-024:** should be fixed before `--reference` is relied on.
+- **INF-025:** information only.
+
+### Next step
+
+1. The user decides INF-021 (a) or (b).
+2. INF-024 (and optionally INF-025) go to the fixer.
+3. Round 4 reviews that diff, keeping these IDs.
+
+## Decisions after round 3 and close-out (6 October 2026)
+
+The user chose to wrap up: about 3 to 4 days remain before the deadline, so low-value work is skipped.
+
+| ID | Decision | Done |
+|---|---|---|
+| INF-021 | **User chose (a): accept and state the limitation.** No start-up CPU line | The limitation is now stated in the harness README (the `aws_capture.py cpu` paragraph) and in `analyze.py`'s "CPU model" report line. This is a two-line documentation change, made by the reviewer session at the user's direction; `selftest.py` still passes 15 of 15. **Closed** |
+| INF-024 | **Accepted, not fixed** (low value for the time left) | Procedure: check the "Campaign reference" line at the top of the report against the reference file. The distinct-value warning still appears whenever runs disagree. **Closed as a known limit** |
+| INF-025 | **Accepted, not fixed** (Info) | Keep the laptop clock synced (chrony is on by default on Fedora). **Closed as a known limit** |
+
+**Final state:**
+
+- No finding is open.
+- The round 2 and round 3 "Not verifiable offline" items stay as the checklist for the first apply and the first pilot.
+
+**Role note:** the INF-021 documentation edit was written by the reviewing session, not a separate fixer, at the
+user's request. It changes text only. No separate review round was run for it.

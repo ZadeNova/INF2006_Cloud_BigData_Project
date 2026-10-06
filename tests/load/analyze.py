@@ -393,7 +393,8 @@ def main():
         if r.get("cpu_model"):
             models.setdefault(r["meta"]["variant"], set()).add(f"{r['cpu_model'].get('model')} ({r['cpu_model'].get('vcpus')} vCPU)")
     if models:
-        w("CPU model, read once per session: " + "; ".join(f"{v}: {', '.join(sorted(m))}" for v, m in sorted(models.items())) + ".\n")
+        w("CPU model, read once per session: " + "; ".join(f"{v}: {', '.join(sorted(m))}" for v, m in sorted(models.items()))
+          + ". Fargate's comes from a one-off task; the service tasks that served the load may run on different hardware.\n")
     else:
         w("CPU model: not recorded (run `aws_capture.py cpu` once per variant per session).\n")
 
