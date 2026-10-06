@@ -2,12 +2,17 @@
 """AWS side of a load run. Runs on the laptop with lab credentials; the load generator never needs them.
 
   aws_capture.py watch  --variant ec2|fargate --run-id ID            while a scale-out or replacement run is going
-  aws_capture.py kill   --variant ec2|fargate --run-id ID [--yes]    replacement run: terminate/stop ONE unit
+  aws_capture.py kill   --variant ec2|fargate --run-id ID [--yes]    replacement run: replace ONE unit, gracefully
+  aws_capture.py cpu    --variant ec2|fargate                        once per variant per session: record the CPU model
   aws_capture.py export --variant ec2|fargate --run-id ID --run-dir out/ID   after the run, before any teardown
 
 watch  polls target health every few seconds and logs every change with a UTC timestamp (aws-out/<ID>/targets.jsonl).
 kill   is the only command here that changes AWS. It asks first, logs the UTC time to aws-out/<ID>/kill.json, then
-       terminates one in-service EC2 instance (A) or stops one running task (B). The user runs it; no session does.
+       replaces one unit the same graceful way on both variants (ADR-017): A asks the Auto Scaling group to terminate an
+       in-service instance (it is taken out of the load balancer and drained first, then replaced); B stops one running
+       task (ECS drains it, then sends SIGTERM). The user runs it; no session does. A sudden crash is not tested.
+cpu    reads the processor model on one instance (through SSM) or in a one-off Fargate task (its log), and saves it to
+       aws-out/cpu-<variant>.json; export adds it to each run's folder, so the report can state the hardware.
 export copies the run folder into evidence/raw/<ID>/, adds the CloudWatch metrics for the run's window, alarm history,
        scaling activities (A) or ECS service events (B), and a stack.json describing what was tested, then redacts
        account IDs and public IPs in every text file. Refuses to overwrite an existing evidence folder.
@@ -124,17 +129,88 @@ def kill(clients, variant, outputs, path, assume_yes):
         sys.exit("STOP: no running unit found")
     if count < 2:
         sys.exit(f"STOP: only {count} unit running; a replacement test needs two (pin min = max = 2 first)")
-    print(f"About to {'terminate EC2 instance' if variant == 'ec2' else 'stop ECS task'} {unit} ({count} running).")
+    print(f"About to {'terminate (gracefully, through the Auto Scaling group) EC2 instance' if variant == 'ec2' else 'stop ECS task'} {unit} ({count} running).")
     if not assume_yes and input("Type kill to go ahead: ").strip() != "kill":
         sys.exit("Not killed.")
     t0 = now_utc()
     if variant == "ec2":
-        clients.get("ec2").terminate_instances(InstanceIds=[unit])
+        # Through the group, not EC2 directly: the group deregisters the instance from the target group and waits for the
+        # deregistration delay before terminating, as ECS does for a stopped task. The group then launches a replacement.
+        clients.get("autoscaling").terminate_instance_in_auto_scaling_group(InstanceId=unit, ShouldDecrementDesiredCapacity=False)
     else:
         clients.get("ecs").stop_task(cluster=outputs["cluster_name"], task=unit, reason="load test: replacement")
     t1 = now_utc()
-    path.write_text(json.dumps(dict(ts_utc=utc(t0), api_returned_utc=utc(t1), variant=variant, unit_id=unit, units_before=count), indent=2))
+    path.write_text(json.dumps(dict(ts_utc=utc(t0), api_returned_utc=utc(t1), variant=variant, unit_id=unit, units_before=count,
+                                    mode="graceful"), indent=2))
     print(f"Killed at {utc(t0)} UTC. Keep `watch` running until two units are healthy again.")
+
+
+# --- cpu ---------------------------------------------------------------------------------------------------
+
+CPU_COMMAND = "grep -m1 'model name' /proc/cpuinfo; nproc"
+
+
+def parse_cpu(text):
+    """('Intel(R) ...', 2) from the output of CPU_COMMAND."""
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    model = next((ln.split(":", 1)[1].strip() for ln in lines if ln.startswith("model name")), None)
+    vcpus = next((int(ln) for ln in reversed(lines) if ln.isdigit()), None)
+    if not model:
+        raise ValueError(f"no 'model name' line in: {text!r}")
+    return model, vcpus
+
+
+def run_on_instance(clients, instance_id, command, timeout_s=90):
+    ssm = clients.get("ssm")
+    cid = ssm.send_command(InstanceIds=[instance_id], DocumentName="AWS-RunShellScript",
+                           Parameters={"commands": [command]})["Command"]["CommandId"]
+    deadline = time.time() + timeout_s
+    while True:
+        inv = ssm.get_command_invocation(CommandId=cid, InstanceId=instance_id)
+        if inv["Status"] in ("Success", "Failed", "Cancelled", "TimedOut"):
+            break
+        if time.time() > deadline:
+            sys.exit(f"STOP: the command on {instance_id} did not finish in {timeout_s} s")
+        time.sleep(3)
+    if inv["Status"] != "Success":
+        sys.exit(f"STOP: the command on {instance_id} ended {inv['Status']}")
+    return inv["StandardOutputContent"]
+
+
+def run_in_task(clients, outputs, command, timeout_s=300):
+    """Run a one-off Fargate task from the stack's task definition with its own command; return what it logged."""
+    ecs = clients.get("ecs")
+    resp = ecs.run_task(cluster=outputs["cluster_name"], taskDefinition=outputs["task_definition_arn"], launchType="FARGATE", count=1,
+                        networkConfiguration={"awsvpcConfiguration": {"subnets": list(outputs["subnet_ids"]),
+                                                                     "securityGroups": [outputs["security_group_ids"]["app"]],
+                                                                     "assignPublicIp": "ENABLED"}},
+                        overrides={"containerOverrides": [{"name": "web", "command": ["sh", "-c", command]}]})
+    if not resp.get("tasks"):
+        sys.exit(f"STOP: ECS did not start a task: {resp.get('failures')}")
+    arn = resp["tasks"][0]["taskArn"]
+    deadline = time.time() + timeout_s
+    while ecs.describe_tasks(cluster=outputs["cluster_name"], tasks=[arn])["tasks"][0]["lastStatus"] != "STOPPED":
+        if time.time() > deadline:
+            sys.exit(f"STOP: the task {arn.rsplit('/', 1)[-1]} did not stop in {timeout_s} s")
+        time.sleep(5)
+    time.sleep(5)  # log lines arrive a few seconds after the task stops
+    events = clients.get("logs").get_log_events(logGroupName=outputs["log_group_name"],
+                                                logStreamName=f"web/web/{arn.rsplit('/', 1)[-1]}")["events"]
+    return "\n".join(e["message"] for e in events)
+
+
+def record_cpu(clients, variant, outputs, path):
+    if variant == "ec2":
+        unit, _ = pick_unit(clients, "ec2", outputs)
+        if not unit:
+            sys.exit("STOP: no in-service instance to read the CPU model from")
+        text = run_on_instance(clients, unit, CPU_COMMAND)
+    else:
+        text = run_in_task(clients, outputs, CPU_COMMAND)
+    model, vcpus = parse_cpu(text)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(dict(variant=variant, model=model, vcpus=vcpus, ts_utc=utc(now_utc())), indent=2))
+    print(f"{variant}: {model} ({vcpus} vCPU). Saved to {path}")
 
 
 # --- export ------------------------------------------------------------------------------------------------
@@ -166,8 +242,7 @@ def metric_queries(variant, outputs, lb, tg, rds_id):
         svc = [dim("ClusterName", outputs["cluster_name"]), dim("ServiceName", outputs["service_name"])]
         q += [("ecs_cpu", "AWS/ECS", "CPUUtilization", svc, "Average"),
               ("ecs_cpu_max", "AWS/ECS", "CPUUtilization", svc, "Maximum"),
-              ("ecs_memory", "AWS/ECS", "MemoryUtilization", svc, "Average"),
-              ("ecs_running_tasks", "ECS/ContainerInsights", "RunningTaskCount", svc, "Average")]
+              ("ecs_memory", "AWS/ECS", "MemoryUtilization", svc, "Average")]  # no RunningTaskCount: Container Insights is off (ADR-015)
     if rds_id:
         db = [dim("DBInstanceIdentifier", rds_id)]
         q += [("rds_cpu", "AWS/RDS", "CPUUtilization", db, "Average"),
@@ -290,6 +365,8 @@ def export(clients, variant, outputs, run_dir, evidence_root, pad_s=300):
     for name in ("targets.jsonl", "kill.json"):
         if (local / name).exists():
             shutil.copy(local / name, dest / name)
+    if (HERE / "aws-out" / f"cpu-{variant}.json").exists():
+        shutil.copy(HERE / "aws-out" / f"cpu-{variant}.json", dest / "cpu.json")
     warnings = []
 
     def section(label, fn):
@@ -337,9 +414,9 @@ def export(clients, variant, outputs, run_dir, evidence_root, pad_s=300):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["watch", "kill", "export"])
+    ap.add_argument("command", choices=["watch", "kill", "export", "cpu"])
     ap.add_argument("--variant", choices=["ec2", "fargate"], required=True)
-    ap.add_argument("--run-id", required=True, help="run id, as printed by run.py")
+    ap.add_argument("--run-id", help="run id, as printed by run.py (not needed for cpu)")
     ap.add_argument("--run-dir", help="export: the run folder copied back from the generator")
     ap.add_argument("--evidence-root", default=str(REPO / "evidence" / "raw"))
     ap.add_argument("--interval", type=float, default=5.0)
@@ -356,7 +433,12 @@ def main():
     except Exception as exc:
         sys.exit(f"STOP: no working AWS credentials ({exc.__class__.__name__}); refresh the lab credentials")
     print(f"AWS identity: {common.redact(identity)}")
-    if args.command == "watch":
+    if args.command in ("watch", "kill", "export") and not args.run_id:
+        sys.exit(f"STOP: {args.command} needs --run-id")
+    if args.command == "cpu":
+        need(outputs, *(["asg_name"] if args.variant == "ec2" else ["cluster_name", "task_definition_arn", "subnet_ids", "security_group_ids", "log_group_name"]))
+        record_cpu(clients, args.variant, outputs, HERE / "aws-out" / f"cpu-{args.variant}.json")
+    elif args.command == "watch":
         need(outputs, "target_group_arn")
         watch(clients, outputs["target_group_arn"], aws_out(args.run_id) / "targets.jsonl", args.interval)
     elif args.command == "kill":

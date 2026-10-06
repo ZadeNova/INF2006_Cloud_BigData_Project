@@ -23,6 +23,6 @@ module "web_entry" {
 | `waf_login_limit`, `waf_login_action` | ADR-012 |
 
 Outputs the compute needs: `app_security_group_id`, `target_group_arn`, `log_group_name`, `app_environment`. Outputs for
-scaling and the load tests: `alb_arn_suffix`, `target_group_arn_suffix`, `https_listener_arn`, `web_acl_name`.
+scaling: `alb_arn_suffix`, `target_group_arn_suffix`; for the stacks' outputs: `alb_dns_name`, `alb_security_group_id`, `web_acl_name`.
 
 The module configures no provider; it uses the one in the calling folder (region and default tags).

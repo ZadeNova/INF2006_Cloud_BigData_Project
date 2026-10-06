@@ -64,6 +64,7 @@ exec docker run --rm \\
   --log-driver awslogs \\
   --log-opt awslogs-region="${region}" \\
   --log-opt awslogs-group="${log_group}" \\
+  --log-opt mode=blocking \\
   --log-opt awslogs-stream="job-\$job-$INSTANCE_ID-\$(date -u +%Y%m%dT%H%M%SZ)" \\
   "${image_ref}" "\$@"
 EOF
@@ -82,6 +83,7 @@ start_web() {
   --log-driver awslogs \
   --log-opt awslogs-region="${region}" \
   --log-opt awslogs-group="${log_group}" \
+  --log-opt mode=blocking \
   --log-opt awslogs-stream="web-$INSTANCE_ID" \
     "${image_ref}"
 }

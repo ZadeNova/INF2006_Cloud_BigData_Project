@@ -340,13 +340,17 @@ def test_aws_capture_export_and_kill():
                                           Instances=[dict(InstanceId=i, AvailabilityZone="a", LifecycleState="InService",
                                                           HealthStatus="Healthy", ProtectedFromScaleIn=False) for i in ("i-b", "i-a")])]}
         kc.stub("autoscaling").add_response("describe_auto_scaling_groups", two)
-        kc.stub("ec2").add_response("terminate_instances", {"TerminatingInstances": []}, expected_params={"InstanceIds": ["i-a"]})
+        # graceful: through the Auto Scaling group (drains from the load balancer first), and the group replaces it
+        kc.stub("autoscaling").add_response("terminate_instance_in_auto_scaling_group", {"Activity": dict(
+            ActivityId="a-1", AutoScalingGroupName="x", Cause="load test", StartTime=datetime.now(timezone.utc), StatusCode="InProgress")},
+            expected_params={"InstanceId": "i-a", "ShouldDecrementDesiredCapacity": False})
         for stubber in kc.stubs.values():
             stubber.activate()
         path = Path(tmp) / "kill.json"
         aws_capture.kill(kc, "ec2", outputs, path, True)
         killed = json.loads(path.read_text())
         assert killed["unit_id"] == "i-a" and killed["units_before"] == 2 and killed["ts_utc"].endswith("Z")
+        assert killed["mode"] == "graceful"
         for stubber in kc.stubs.values():
             stubber.assert_no_pending_responses()
         one = stubbed_clients()
@@ -440,6 +444,157 @@ def test_aws_capture_export_fargate():
         aws_capture.kill(kc, "fargate", outputs, path, True)
         assert json.loads(path.read_text())["unit_id"] == tasks[1]
         kc.stub("ecs").assert_no_pending_responses()
+
+
+# --- run validity from stack.json, the bounded error window, per-step database figures, CPU model ----------------------
+
+def write_series(folder, name, values, step=60, offset=0):
+    (folder / "cloudwatch").mkdir(exist_ok=True)
+    with open(folder / "cloudwatch" / f"{name}.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["ts_epoch", "ts_utc", "value"])
+        for i, v in enumerate(values):
+            w.writerow([f"{T0 + offset + step * i:.3f}", iso(T0 + offset + step * i), v])
+
+
+def good_stack(variant="ec2", **over):
+    stack = dict(variant=variant, image_digest="sha256:" + "a" * 64, rds_class="db.t4g.small", waf_login_action="count", min=1, max=1, desired=1)
+    stack.update(over)
+    return stack
+
+
+def test_stack_validity():
+    win = [dict(label="u10", start=0, end=300, users=1)]
+
+    def run(tmp, name, rtype="ladder", stack=None, healthy=1.0, windows=win, markers=None):
+        extra = {"stack.json": stack} if stack is not None else {}
+        d = make_run(tmp, f"LOAD-ec2-{rtype}-{name}_x", "ec2", rtype, 10, windows, 1, steady_rows(300, 100, 0), markers=markers,
+                     planned=300, extra=extra)
+        if healthy is not None:
+            write_series(d, "alb_healthy_hosts", [healthy, healthy], offset=-60)
+        return d
+
+    with tempfile.TemporaryDirectory() as tmp:
+        runs = {
+            "ok1": run(tmp, "ok1", stack=good_stack()), "ok2": run(tmp, "ok2", stack=good_stack()),
+            "ok3": run(tmp, "ok3", stack=good_stack()),
+            "digest": run(tmp, "digest", stack=good_stack(image_digest="sha256:" + "b" * 64)),
+            "cap": run(tmp, "cap", stack=good_stack(max=2)),
+            "waf": run(tmp, "waf", stack=good_stack(waf_login_action="block")),
+            "healthy": run(tmp, "healthy", stack=good_stack(), healthy=0.0),
+            "nostack": run(tmp, "nostack"),
+            "nohealth": run(tmp, "nohealth", stack=good_stack(), healthy=None),
+            "scale": run(tmp, "scale", rtype="scaleout", stack=good_stack(min=1, max=2), markers={"step_up": 100}),
+            "replace": run(tmp, "replace", rtype="replace", stack=good_stack(min=2, max=2), healthy=2.0, markers={"kill_at": 100}),
+            "replace1": run(tmp, "replace1", rtype="replace", stack=good_stack(min=1, max=2), healthy=2.0, markers={"kill_at": 100}),
+        }
+        loaded = {k: analyze.load_run(d) for k, d in runs.items()}
+        ref = analyze.campaign_reference(loaded.values())
+        assert ref["image_digest"] == "sha256:" + "a" * 64 and ref["waf_login_action"] == "count", ref
+        out = {k: analyze.analyse_run(r, ref) for k, r in loaded.items()}
+        for good in ("ok1", "ok2", "ok3", "scale", "replace"):
+            assert not out[good]["invalid"], (good, out[good]["invalid"])
+        assert any("image digest" in x for x in out["digest"]["invalid"]), out["digest"]
+        assert any("capacity min 1 max 2" in x for x in out["cap"]["invalid"]), out["cap"]
+        assert any("WAF mode" in x for x in out["waf"]["invalid"]), out["waf"]
+        assert any("0 healthy targets" in x for x in out["healthy"]["invalid"]), out["healthy"]
+        assert any("needs min 2 max 2" in x for x in out["replace1"]["invalid"]), out["replace1"]
+        assert not out["nostack"]["invalid"] and any("stack.json missing" in f for f in out["nostack"]["flags"])
+        assert not out["nohealth"]["invalid"] and any("not verified" in f for f in out["nohealth"]["flags"])
+        # a stack.json for the other variant is a mislabelled run
+        mis = analyze.analyse_run(analyze.load_run(run(tmp, "mis", stack=good_stack(variant="fargate"))), ref)
+        assert any("labelled ec2" in x for x in mis["invalid"]), mis
+
+
+def test_replace_error_window_is_bounded():
+    errs = tuple(range(305, 331)) + (590,)  # the kill's errors, and one unrelated error long after recovery (550 s)
+    with tempfile.TemporaryDirectory() as tmp:
+        d = make_run(tmp, "RES-03-ec2-replace-r1_x", "ec2", "replace", None, [dict(label="all", start=0, end=600, users=100)], 36,
+                     steady_rows(600, 100, 0, errors_at=errs), markers={"kill_at": 300}, planned=600, extra={
+                         "kill.json": dict(ts_utc=iso(T0 + 300), unit_id="i-1"),
+                         "targets.jsonl": "\n".join(json.dumps(x) for x in (dict(ts_utc=iso(T0 + 100), healthy=2),
+                                                                           dict(ts_utc=iso(T0 + 330), healthy=1),
+                                                                           dict(ts_utc=iso(T0 + 550), healthy=2)))})
+        rep = analyze.analyse_run(analyze.load_run(d))["timings"]
+        assert rep["error_window_s"] == 25.0 and rep["errors_after_kill"] == 26 and rep["errors_later"] == 1, rep
+        # never recovered: every error up to the end of the run belongs to the window
+        d2 = make_run(tmp, "RES-03-ec2-replace-r2_x", "ec2", "replace", None, [dict(label="all", start=0, end=600, users=100)], 36,
+                      steady_rows(600, 100, 0, errors_at=errs), markers={"kill_at": 300}, planned=600, extra={
+                          "kill.json": dict(ts_utc=iso(T0 + 300), unit_id="i-1"),
+                          "targets.jsonl": "\n".join(json.dumps(x) for x in (dict(ts_utc=iso(T0 + 100), healthy=2),
+                                                                            dict(ts_utc=iso(T0 + 330), healthy=1)))})
+        rep2 = analyze.analyse_run(analyze.load_run(d2))["timings"]
+        assert rep2["replacement_s"] is None and rep2["errors_after_kill"] == 27 and rep2["errors_later"] == 0, rep2
+
+
+def test_database_figures_per_step():
+    windows = [dict(label=f"u{u}", start=i * 100, end=(i + 1) * 100, users=u) for i, u in enumerate((1, 2, 4))]
+    with tempfile.TemporaryDirectory() as tmp:
+        d = make_run(tmp, "LOAD-ec2-saturation-r1_x", "ec2", "saturation", None, windows, 0, steady_rows(300, 100, 0), planned=300)
+        write_series(d, "rds_cpu", [10, 12, 30, 35, 50])
+        write_series(d, "rds_cpu_credit_balance", [90, 80, 70, 60, 50])
+        out = analyze.analyse_run(analyze.load_run(d))
+        assert [w["rds_cpu_max"] for w in out["windows"]] == [12, 35, 50], [w["rds_cpu_max"] for w in out["windows"]]
+        assert [w["rds_credit_min"] for w in out["windows"]] == [80, 60, 50]
+
+
+def test_cpu_model_record():
+    import aws_capture
+    assert aws_capture.parse_cpu("model name\t: Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz\n2\n") == ("Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz", 2)
+    try:
+        aws_capture.parse_cpu("nothing useful")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("a missing model line must be an error")
+    real_sleep, aws_capture.time.sleep = aws_capture.time.sleep, lambda s: None
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            # EC2: SSM Run Command on the lowest in-service instance
+            kc = stubbed_clients()
+            asg = {"AutoScalingGroups": [dict(AutoScalingGroupName="x", MinSize=1, MaxSize=1, DesiredCapacity=1, DefaultCooldown=300,
+                                              AvailabilityZones=["a"], HealthCheckType="ELB", CreatedTime=datetime.now(timezone.utc),
+                                              Instances=[dict(InstanceId="i-a", AvailabilityZone="a", LifecycleState="InService",
+                                                              HealthStatus="Healthy", ProtectedFromScaleIn=False)])]}
+            kc.stub("autoscaling").add_response("describe_auto_scaling_groups", asg)
+            kc.stub("ssm").add_response("send_command", {"Command": {"CommandId": "11111111-2222-3333-4444-555555555555"}}, expected_params={
+                "InstanceIds": ["i-a"], "DocumentName": "AWS-RunShellScript", "Parameters": {"commands": [aws_capture.CPU_COMMAND]}})
+            kc.stub("ssm").add_response("get_command_invocation", {"Status": "Success", "StandardOutputContent": "model name\t: Intel X\n2\n"},
+                                        expected_params={"CommandId": "11111111-2222-3333-4444-555555555555", "InstanceId": "i-a"})
+            for stubber in kc.stubs.values():
+                stubber.activate()
+            path = Path(tmp) / "cpu-ec2.json"
+            aws_capture.record_cpu(kc, "ec2", {"asg_name": "x"}, path)
+            assert json.loads(path.read_text())["model"] == "Intel X" and json.loads(path.read_text())["vcpus"] == 2
+            for stubber in kc.stubs.values():
+                stubber.assert_no_pending_responses()
+            # Fargate: a one-off task from the service's task definition, read back from its log stream
+            outputs = dict(cluster_name="c", task_definition_arn="arn:aws:ecs:us-east-1:123456789012:task-definition/t:1",
+                           subnet_ids=["subnet-a", "subnet-b"], security_group_ids={"alb": "sg-1", "app": "sg-2"}, log_group_name="/g/app")
+            task = "arn:aws:ecs:us-east-1:123456789012:task/c/abc"
+            kf = stubbed_clients()
+            kf.stub("ecs").add_response("run_task", {"tasks": [{"taskArn": task}], "failures": []}, expected_params={
+                "cluster": "c", "taskDefinition": outputs["task_definition_arn"], "launchType": "FARGATE", "count": 1,
+                "networkConfiguration": {"awsvpcConfiguration": {"subnets": ["subnet-a", "subnet-b"], "securityGroups": ["sg-2"], "assignPublicIp": "ENABLED"}},
+                "overrides": {"containerOverrides": [{"name": "web", "command": ["sh", "-c", aws_capture.CPU_COMMAND]}]}})
+            kf.stub("ecs").add_response("describe_tasks", {"tasks": [{"lastStatus": "STOPPED"}], "failures": []},
+                                        expected_params={"cluster": "c", "tasks": [task]})
+            kf.stub("logs").add_response("get_log_events", {"events": [{"timestamp": 1, "message": "model name\t: AMD EPYC Y", "ingestionTime": 1},
+                                                                       {"timestamp": 2, "message": "2", "ingestionTime": 2}]},
+                                         expected_params={"logGroupName": "/g/app", "logStreamName": "web/web/abc"})
+            for stubber in kf.stubs.values():
+                stubber.activate()
+            path = Path(tmp) / "cpu-fargate.json"
+            aws_capture.record_cpu(kf, "fargate", outputs, path)
+            assert json.loads(path.read_text())["model"] == "AMD EPYC Y"
+            for stubber in kf.stubs.values():
+                stubber.assert_no_pending_responses()
+            # the model reaches the report
+            d = make_run(tmp, "LOAD-ec2-ladder-u10-m_x", "ec2", "ladder", 10, [dict(label="u10", start=0, end=300, users=1)], 1,
+                         steady_rows(300, 100, 0), planned=300, extra={"cpu.json": dict(variant="ec2", model="Intel X", vcpus=2)})
+            assert analyze.analyse_run(analyze.load_run(d))["cpu_model"]["model"] == "Intel X"
+    finally:
+        aws_capture.time.sleep = real_sleep
 
 
 if __name__ == "__main__":

@@ -28,7 +28,18 @@ aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
 umask 077
 TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
 
-get() { aws secretsmanager get-secret-value --region "$REGION" --secret-id "$PREFIX/$1" --query SecretString --output text 2>/dev/null || echo '{}'; }
+# Only "no value yet" (ResourceNotFoundException, also an empty container) counts as {}; any other failure stops the script,
+# so a hiccup can never look like an empty secret and lead to new passwords being generated and stored.
+get() {
+  local out
+  if out="$(aws secretsmanager get-secret-value --region "$REGION" --secret-id "$PREFIX/$1" --query SecretString --output text 2>&1)"; then
+    printf '%s' "$out"
+  elif printf '%s' "$out" | grep -q ResourceNotFoundException; then
+    echo '{}'
+  else
+    die "could not read the $1 secret: $(printf '%s' "$out" | head -1)"
+  fi
+}
 # put <name> <json in env var named by $2>: the value goes through a private temp file, not argv.
 put() { printf '%s' "${!2}" > "$TMP"; aws secretsmanager put-secret-value --region "$REGION" --secret-id "$PREFIX/$1" \
   --secret-string "file://$TMP" >/dev/null && echo "$1: updated, keys: $(jq -r 'keys | join(",")' "$TMP")"; }

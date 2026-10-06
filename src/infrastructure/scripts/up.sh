@@ -72,14 +72,22 @@ up_base() {
   # The certificate is validated through DNS, so the apply waits until the domain's name servers are the zone's. While
   # it waits, this loop prints the four name servers once, so you can set them at your registrar.
   "$INFRA/scripts/tf.sh" base apply &
-  local apply_pid=$! shown=0 zone ns
+  local apply_pid=$! shown=0 zone ns delegated
   while kill -0 "$apply_pid" 2>/dev/null; do
     if [ "$shown" = 0 ]; then
+      # A failed lookup here must not end this script while the apply carries on: try again on the next round.
       zone="$(aws route53 list-hosted-zones-by-name --dns-name "$domain." --max-items 1 --query "HostedZones[?Name=='$domain.'].Id|[0]" --output text 2>/dev/null || true)"
+      ns=""
       if [ -n "$zone" ] && [ "$zone" != None ]; then
+        ns="$(aws route53 get-hosted-zone --id "$zone" --query 'DelegationSet.NameServers' --output text 2>/dev/null || true)"
+      fi
+      if [ -n "$ns" ] && [ "$ns" != None ]; then
         shown=1
-        if command -v dig >/dev/null && dig +short NS "$domain" 2>/dev/null | grep -q awsdns; then :; else
-          ns="$(aws route53 get-hosted-zone --id "$zone" --query 'DelegationSet.NameServers' --output text)"
+        # Skip the prompt only if the registrar already points at THIS zone's four servers (an old zone of an earlier
+        # build also has awsdns servers, so "any awsdns name" would be wrong).
+        delegated=""
+        command -v dig >/dev/null && delegated="$(dig +short NS "$domain" 2>/dev/null | sed 's/\.$//' | tr 'A-Z' 'a-z' | sort | tr '\n' ' ')"
+        if [ "$delegated" != "$(printf '%s\n' $ns | sed 's/\.$//' | tr 'A-Z' 'a-z' | sort | tr '\n' ' ')" ]; then
           printf '\n>>> ACTION NEEDED NOW: at your domain registrar, set the name servers of %s to (custom DNS):\n' "$domain"
           printf '      %s\n' $ns
           printf '    The apply is waiting for this and carries on by itself within minutes of the change.\n    Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick.\n\n'
@@ -101,7 +109,19 @@ need_base() { [ -s "$INFRA/base/terraform.tfstate" ] || die "base/ is not applie
 # An image must be chosen for the stack (image.auto.tfvars, written by push-image.sh); push one if not.
 need_image() {
   if [ ! -f "$INFRA/$1/image.auto.tfvars" ]; then
-    echo "No image chosen for $1 yet: running push-image.sh (builds and pushes the app image; needs Docker)."
+    # Both variants must run the same image (the comparison depends on it), so a stack with no image copies the one
+    # the other stack already runs; only when neither has one is a new image built.
+    local other
+    for other in ec2 fargate; do
+      if [ "$other" != "$1" ] && [ -f "$INFRA/$other/image.auto.tfvars" ]; then
+        cp "$INFRA/$other/image.auto.tfvars" "$INFRA/$1/image.auto.tfvars"
+        echo "No image chosen for $1 yet: using the one $other runs, so both variants run the same image."
+        break
+      fi
+    done
+  fi
+  if [ ! -f "$INFRA/$1/image.auto.tfvars" ]; then
+    echo "No image chosen for any stack yet: running push-image.sh (builds and pushes the app image; needs Docker)."
     "$INFRA/scripts/push-image.sh"
   fi
   [ -f "$INFRA/$1/image.auto.tfvars" ] || die "no image.auto.tfvars in $1/ after push-image.sh"

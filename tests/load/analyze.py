@@ -23,6 +23,11 @@ P95_LIMIT_MS, ERR_LIMIT = 800.0, 0.01          # thresholds accepted for the pla
 CPU_LIMIT, CPU_WINDOW_S, CLOCK_LIMIT_MS = 70.0, 30, 50.0
 OVERLOAD_RATIO, RDS_LIMIT = 0.95, 80.0
 CREDIT_EMPTY = 1.0  # burstable RDS: a balance under one CPU credit counts as exhausted
+# Plan section 3 (D3): capacity is pinned per run type, and the healthy targets at the start of measurement are as intended.
+CAPACITY = {"pilot": (1, 1), "ladder": (1, 1), "saturation": (1, 1), "singapore": (1, 1), "scaleout": (1, 2), "replace": (2, 2)}  # (min, max)
+HEALTHY_AT_START = {"pilot": 1, "ladder": 1, "saturation": 1, "singapore": 1, "scaleout": 1, "replace": 2}
+CAMPAIGN_KEYS = (("image_digest", "image digest"), ("rds_class", "RDS class"), ("waf_login_action", "WAF mode"))
+REPLACE_MARGIN_S = 30  # errors this long after the replacement counts as healthy again still belong to the error window
 WEIGHTS = {"operational burden": 25, "replacement time and error window": 25, "steady-state latency": 20,
            "cost": 15, "scale-out time": 10, "capacity per unit": 5}
 
@@ -71,6 +76,7 @@ def load_run(folder):
     except OSError:
         pass
     return dict(meta=meta, rows=rows, cpu=cpu, metrics=metrics, targets=targets,
+                stack=read_json(os.path.join(folder, "stack.json"), {}), cpu_model=read_json(os.path.join(folder, "cpu.json")),
                 timing=read_json(os.path.join(folder, "timing.json"), {}), kill=read_json(os.path.join(folder, "kill.json")),
                 alarms=read_json(os.path.join(folder, "alarm_history.json"), []),
                 activities=read_json(os.path.join(folder, "scaling_activities.json"), []),
@@ -89,7 +95,7 @@ def window_stats(rows, t0, t1, users, think, label):
     errors = sum(1 for r in reqs if r["outcome"] == "error")
     actions = sum(1 for r in sel if r["seq"] == "1" and r["outcome"] != "late")
     intended = users / think if think else None
-    return dict(label=label, users=users, seconds=span, n_req=len(reqs), n_dyn=len(dyn),
+    return dict(label=label, users=users, seconds=span, t0=t0, t1=t1, n_req=len(reqs), n_dyn=len(dyn),
                 p50=common.percentile(lat, 50), p95=common.percentile(lat, 95) if len(lat) >= 100 else None,
                 p99=common.percentile(lat, 99) if len(lat) >= 1000 else None,
                 checkout_p95=common.percentile(checkout, 95) if len(checkout) >= 20 else None,
@@ -128,7 +134,54 @@ def credit_check(metrics, start, seconds, flags):
     return min(balance) if balance else None
 
 
-def analyse_run(run):
+def in_window(series, t0, t1):
+    """Values of a one-minute CloudWatch series whose minute overlaps [t0, t1)."""
+    return [v for t, v in series or [] if t0 - 60 < t < t1]
+
+
+def campaign_reference(runs):
+    """The value most runs agree on for each setting a campaign must hold fixed (ties go to the sorted-first value)."""
+    ref = {}
+    for key, _ in CAMPAIGN_KEYS:
+        values = [r["stack"].get(key) for r in runs if r and r.get("stack") and r["stack"].get(key) is not None]
+        if values:
+            counts = {v: values.count(v) for v in sorted(set(values))}
+            ref[key] = max(counts, key=lambda v: counts[v])
+    return ref
+
+
+def check_stack(run, ref, start, out):
+    """Plan section 3 run validity from stack.json and the CloudWatch healthy-host series; a failure makes the run invalid."""
+    meta, stack = run["meta"], run["stack"]
+    if not stack:
+        out["flags"].append("stack.json missing: image, capacity, WAF mode and healthy targets not verified")
+        return
+    if stack.get("variant") != meta["variant"]:
+        out["invalid"].append(f"stack.json describes variant {stack.get('variant')}, the run is labelled {meta['variant']}")
+    for key, label in CAMPAIGN_KEYS:
+        value, want = stack.get(key), (ref or {}).get(key)
+        if value is None:
+            out["flags"].append(f"{label} not recorded")
+        elif want is not None and value != want:
+            out["invalid"].append(f"{label} {str(value)[:19]} differs from the campaign's {str(want)[:19]}")
+    cap = CAPACITY.get(meta["type"])
+    if cap:
+        mn, mx = stack.get("min"), stack.get("max")
+        if mn is None or mx is None:
+            out["flags"].append("capacity not recorded")
+        elif (mn, mx) != cap:
+            out["invalid"].append(f"capacity min {mn} max {mx} at export; a {meta['type']} run needs min {cap[0]} max {cap[1]}")
+    expected = HEALTHY_AT_START.get(meta["type"])
+    if expected:
+        t_start = start + run["meta"]["plan"]["windows"][0]["start"]
+        near = [(t, v) for t, v in run["metrics"].get("alb_healthy_hosts", []) if t <= t_start and t_start - t <= 120]
+        if not near:
+            out["flags"].append("healthy targets at the start of measurement not verified (no alb_healthy_hosts point)")
+        elif abs(near[-1][1] - expected) > 0.01:
+            out["invalid"].append(f"{near[-1][1]:g} healthy targets at the start of measurement, expected {expected}")
+
+
+def analyse_run(run, ref=None):
     meta, plan = run["meta"], run["meta"]["plan"]
     start = run["timing"].get("start_epoch")
     out = dict(meta=meta, windows=[], flags=[], invalid=[], timings=None)
@@ -137,6 +190,11 @@ def analyse_run(run):
         return out
     for w in plan["windows"]:
         out["windows"].append(window_stats(run["rows"], start + w["start"], start + w["end"], w["users"], plan["think"], w["label"]))
+    for win in out["windows"]:   # database figures per window, so a saturation step shows its own, not the run's
+        cpu_vals, credits = in_window(run["metrics"].get("rds_cpu"), win["t0"], win["t1"]), in_window(run["metrics"].get("rds_cpu_credit_balance"), win["t0"], win["t1"])
+        win["rds_cpu_max"], win["rds_credit_min"] = (max(cpu_vals) if cpu_vals else None), (min(credits) if credits else None)
+    check_stack(run, ref, start, out)
+    out["cpu_model"] = run.get("cpu_model")
     if run["meta"].get("aborted"):
         out["flags"].append("aborted: " + str(meta.get("abort_reason")))
     peak = rolling_cpu_peak(run["cpu"])
@@ -205,10 +263,15 @@ def replace_timings(run, start):
     series = [(t, h) for t, h in healthy_series(run) if t >= t_kill]
     dropped = next((t for t, h in series if h < 2), None)
     recovered = next((t for t, h in series if dropped is not None and t > dropped and h >= 2), None)
-    errs = sorted(r["ts"] for r in run["rows"] if r["outcome"] == "error" and r["ts"] >= t_kill)
+    # The error window is the errors from the kill until healthy again (plus a margin; to the end of the run if it never
+    # recovered). An unrelated error later in the run is counted apart, so it cannot stretch the window.
+    t_end = (recovered if recovered else start + run["meta"]["planned_seconds"]) + REPLACE_MARGIN_S
+    every = sorted(r["ts"] for r in run["rows"] if r["outcome"] == "error" and r["ts"] >= t_kill)
+    errs = [t for t in every if t <= t_end]
     return dict(replacement_s=round(recovered - t_kill, 1) if recovered else None,
                 detected_s=round(dropped - t_kill, 1) if dropped else None,
-                error_window_s=round(errs[-1] - errs[0], 1) if errs else 0.0, errors_after_kill=len(errs))
+                error_window_s=round(errs[-1] - errs[0], 1) if errs else 0.0, errors_after_kill=len(errs),
+                errors_later=len(every) - len(errs))
 
 
 # --- aggregation --------------------------------------------------------------------------------------------
@@ -271,15 +334,16 @@ def main():
     prices = json.loads(Path(args.prices).read_text())
     operational = read_json(args.operational, {}) if args.operational else {}
 
-    runs = []
-    for folder in sorted(glob.glob(os.path.join(args.raw, "LOAD-*")) + glob.glob(os.path.join(args.raw, "RES-03-*"))):
-        run = load_run(folder)
-        if run:
-            analysed = analyse_run(run)
-            analysed["id"] = run["meta"]["run_id"]
-            runs.append(analysed)
-    if not runs:
+    loaded = [load_run(f) for f in sorted(glob.glob(os.path.join(args.raw, "LOAD-*")) + glob.glob(os.path.join(args.raw, "RES-03-*")))]
+    loaded = [r for r in loaded if r]
+    if not loaded:
         sys.exit(f"No run folders with run.json under {args.raw}")
+    ref = campaign_reference(loaded)
+    runs = []
+    for run in loaded:
+        analysed = analyse_run(run, ref)
+        analysed["id"] = run["meta"]["run_id"]
+        runs.append(analysed)
 
     L = []
     w = L.append
@@ -287,6 +351,18 @@ def main():
     w(f"Latency is per dynamic HTTP request (static files reported separately); p95 needs at least 100 samples and p99 "
       f"at least 1,000. Limits: p95 under {P95_LIMIT_MS:.0f} ms, errors under {ERR_LIMIT:.0%}. "
       f"Prices: {'verified by the user' if prices.get('verified_by_user') else 'NOT verified by the user'} ({prices['checked']}).\n")
+
+    if ref:
+        w("Campaign reference (the value most runs agree on; a run that differs is invalid): "
+          + "; ".join(f"{label} {str(ref[key])[:19]}" for key, label in CAMPAIGN_KEYS if key in ref) + ".\n")
+    models = {}
+    for r in runs:
+        if r.get("cpu_model"):
+            models.setdefault(r["meta"]["variant"], set()).add(f"{r['cpu_model'].get('model')} ({r['cpu_model'].get('vcpus')} vCPU)")
+    if models:
+        w("CPU model, read once per session: " + "; ".join(f"{v}: {', '.join(sorted(m))}" for v, m in sorted(models.items())) + ".\n")
+    else:
+        w("CPU model: not recorded (run `aws_capture.py cpu` once per variant per session).\n")
 
     w("## Runs\n")
     w("| Run | Window | Requests | Errors | Stock conflicts | Orders | Actions/s (intended) | Generator CPU peak | Status |")
@@ -326,11 +402,11 @@ def main():
     for variant in ("ec2", "fargate"):
         for r in [x for x in valid if x["meta"]["variant"] == variant and x["meta"]["type"] == "saturation"]:
             w(f"### {r['id']}\n")
-            w("| Users | Requests/s | Actions/s | p50 ms | p95 ms | Errors | RDS CPU max | RDS credits min |")
+            w("| Users | Requests/s | Actions/s | p50 ms | p95 ms | Errors | RDS CPU max (this step) | RDS credits min (this step) |")
             w("|---|---|---|---|---|---|---|---|")
             for win in r["windows"]:
                 w(f"| {win['users']} | {win['req_s']:.1f} | {win['actions_s']:.2f} | {fmt(win['p50'])} | {fmt(win['p95'])} | "
-                  f"{fmt((win['error_rate'] or 0) * 100, 2, '%')} | {fmt(r.get('rds_cpu_max'), 0, '%')} | {fmt(r.get('rds_credit_min'), 1)} |")
+                  f"{fmt((win['error_rate'] or 0) * 100, 2, '%')} | {fmt(win.get('rds_cpu_max'), 0, '%')} | {fmt(win.get('rds_credit_min'), 1)} |")
             cap = capacity_step(r["windows"])
             top = max(r["windows"], key=lambda x: x["req_s"])
             sat.setdefault(variant, []).append(dict(
@@ -343,13 +419,13 @@ def main():
     timing_rows = [r for r in valid if r["timings"]]
     w("## Scale-out and replacement timings\n")
     if timing_rows:
-        w("| Run | Detection s | Alarm to scaling action s | Scale-out s (alarm to healthy) | Load step to healthy s | Kill to detected s | Replacement s | Error window s | Errors after kill |")
-        w("|---|---|---|---|---|---|---|---|---|")
+        w("| Run | Detection s | Alarm to scaling action s | Scale-out s (alarm to healthy) | Load step to healthy s | Kill to detected s | Replacement s | Error window s | Errors in window | Errors later in run |")
+        w("|---|---|---|---|---|---|---|---|---|---|")
         for r in timing_rows:
             t = r["timings"]
             w(f"| {r['id']} | {fmt(t.get('detection_s'))} | {fmt(t.get('provisioning_s'))} | {fmt(t.get('scale_out_s'))} | "
               f"{fmt(t.get('total_from_load_s'))} | {fmt(t.get('detected_s'))} | {fmt(t.get('replacement_s'))} | "
-              f"{fmt(t.get('error_window_s'))} | {fmt(t.get('errors_after_kill'))} |")
+              f"{fmt(t.get('error_window_s'))} | {fmt(t.get('errors_after_kill'))} | {fmt(t.get('errors_later'))} |")
     else:
         w("No scale-out or replacement runs with AWS data yet.")
 

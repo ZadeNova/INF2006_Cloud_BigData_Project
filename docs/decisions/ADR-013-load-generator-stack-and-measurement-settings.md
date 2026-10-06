@@ -7,7 +7,7 @@
 - **`src/infrastructure/loadgen/`** is a third Terraform folder with its own state: one `c5.large` Amazon Linux 2023 instance in a `base/` public subnet with a public IP, `LabInstanceProfile`, **no inbound rules** (HTTPS out only), IMDSv2 required, 16 GB encrypted root volume, and user data that installs `python3.12`, `python3.12-pip`, `git` and `tmux`. Tag `Stack = loadgen`. A shell is opened with Session Manager; the harness and results move through the project bucket. It is up only during test sessions.
 - **`ec2/` measurement settings.** Detailed monitoring on the launch template (instance metrics every minute, not every five). Auto Scaling group metrics at one-minute granularity: `GroupDesiredCapacity`, `GroupInServiceInstances`, `GroupPendingInstances`, `GroupTerminatingInstances`.
 - **Capacity pinning.** Variables `min_capacity`, `max_capacity` and `desired_capacity` (the same names in `ec2/` and `fargate/`; defaults 1, 2, 1, the ADR-011 values), checked so min is at most desired is at most max. Setting all three to the same number gives a fixed-capacity run.
-- **Extra outputs:** `alb_arn_suffix` and `target_group_arn_suffix` on `ec2/`, `db_instance_identifier` on `base/`.
+- **No extra outputs:** the capture script derives the load balancer, target group and database identifiers itself (review INF-010), so none were added.
 - **The WAF is not changed:** load runs keep the `count` default.
 
 ## Options considered

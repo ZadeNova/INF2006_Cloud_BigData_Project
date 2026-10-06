@@ -22,10 +22,6 @@ output "target_group_arn_suffix" {
   value       = aws_lb_target_group.app.arn_suffix
 }
 
-output "alb_arn" {
-  value = aws_lb.app.arn
-}
-
 output "alb_arn_suffix" {
   description = "CloudWatch dimension value (app/<name>/<id>)."
   value       = aws_lb.app.arn_suffix
@@ -42,9 +38,4 @@ output "log_group_name" {
 output "web_acl_name" {
   description = "The WAF web ACL on the ALB (for the security test and its sampled requests)."
   value       = aws_wafv2_web_acl.app.name
-}
-
-output "https_listener_arn" {
-  description = "Scaling and services depend on this: the target group must be attached to a listener before its metrics exist."
-  value       = aws_lb_listener.https.arn
 }

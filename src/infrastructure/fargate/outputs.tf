@@ -8,21 +8,8 @@ output "alb_dns_name" {
   value       = module.web_entry.alb_dns_name
 }
 
-output "alb_arn" {
-  value = module.web_entry.alb_arn
-}
-
-output "alb_arn_suffix" {
-  description = "The ALB's CloudWatch dimension value, for the load-test metric queries."
-  value       = module.web_entry.alb_arn_suffix
-}
-
 output "target_group_arn" {
   value = module.web_entry.target_group_arn
-}
-
-output "target_group_arn_suffix" {
-  value = module.web_entry.target_group_arn_suffix
 }
 
 output "cluster_name" {

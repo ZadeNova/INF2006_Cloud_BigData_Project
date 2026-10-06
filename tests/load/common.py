@@ -4,13 +4,19 @@ Standard library only, so analyze.py can import it without Locust installed.
 """
 import ipaddress
 import math
+import os
 import re
 from urllib.parse import urlsplit
 
 HARNESS_VERSION = "1.0.0"
 
-# The harness only ever talks to our own hosts (docs/plans/load-harness.md, section 1).
-ALLOWED_REMOTE_HOSTS = {"shop-ec2.fourtytwofactors.me", "shop-fargate.fourtytwofactors.me"}
+# The harness only ever talks to our own hosts (docs/plans/load-harness.md, section 1): the two shop hostnames under our
+# domain. Another account with another domain sets LOAD_DOMAIN (the same value as `domain_name` in base/terraform.tfvars).
+DOMAIN = os.environ.get("LOAD_DOMAIN", "fourtytwofactors.me").strip().lower()
+if not re.fullmatch(r"[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+", DOMAIN):
+    raise SystemExit(f"LOAD_DOMAIN {DOMAIN!r} is not a plain domain name")
+HOSTS_BY_VARIANT = {"ec2": f"shop-ec2.{DOMAIN}", "fargate": f"shop-fargate.{DOMAIN}"}
+ALLOWED_REMOTE_HOSTS = set(HOSTS_BY_VARIANT.values())
 ALLOWED_LOCAL_HOSTS = {"localhost", "127.0.0.1"}
 
 

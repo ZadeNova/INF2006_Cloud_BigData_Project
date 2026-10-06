@@ -22,6 +22,15 @@ aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
 [ -z "$(git -C "$INFRA" status --porcelain -- .)" ] || die "uncommitted changes in src/infrastructure; commit first"
 SHA="$(git -C "$INFRA" rev-parse --short HEAD)"
 
+# ADR-017: the two variants are compared on the same image. Release tags are immutable, so equal tags are the same bytes.
+# A deliberate difference (for example timing a rollout) needs ALLOW_IMAGE_MISMATCH=1.
+if { [ "$FOLDER" = ec2 ] || [ "$FOLDER" = fargate ]; } && [ "$ACTION" = plan ] && [ -z "${ALLOW_IMAGE_MISMATCH:-}" ]; then
+  tag_of() { sed -n 's/^image_tag *= *"\(.*\)".*/\1/p' "$INFRA/$1/image.auto.tfvars" 2>/dev/null; }
+  a="$(tag_of ec2)"; b="$(tag_of fargate)"
+  [ -z "$a" ] || [ -z "$b" ] || [ "$a" = "$b" ] \
+    || die "ec2 runs $a but fargate runs $b: the comparison needs the same image. Make them equal (copy one image.auto.tfvars over the other), or set ALLOW_IMAGE_MISMATCH=1 for a deliberate difference"
+fi
+
 # ADR-016: the Fargate task starts the image's own command from a copy in fargate/ecs.tf. If src/Dockerfile's CMD has
 # changed and the copy has not, the two variants would run different server settings without anyone deciding so.
 if [ "$FOLDER" = fargate ] && [ "$ACTION" = plan ]; then

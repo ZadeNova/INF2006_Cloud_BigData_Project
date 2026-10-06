@@ -33,7 +33,7 @@ Initial/minimum ASG capacity one, default test maximum two. Have two healthy tar
 
 ## Variant B: ECS on Fargate (designed, not built)
 
-Status (3 October 2026): **nothing in this section is built or evidenced.** `src/infrastructure/fargate/` does not exist. It records the design agreed in [the comparison plan](plans/aws-ecs-comparison.md) so variant B has the same kind of record as variant A; when the two differ before B is built, the plan governs. Each choice below becomes an ADR when `fargate/` is written, and the as-built result goes in the [runbook](../evidence/aws-build-runbook.md).
+Status (6 October 2026): **written and checked offline (`terraform validate`), not applied, so nothing in this section is evidenced yet.** `src/infrastructure/fargate/` exists and uses the shared `modules/web-entry` ([ADR-014](decisions/ADR-014-shared-web-entry-module.md)); the choices below are recorded in ADR-015 to ADR-017 and [fargate-variant.md](plans/fargate-variant.md). Where they differ from this text, the ADRs govern until the post-sprint sync. The as-built result goes in the [runbook](../evidence/aws-build-runbook.md) after the first apply.
 
 **Same as variant A (so the comparison is fair).** One image digest, the same RDS from `base/`, the same ALB design and `/health/` check, app compute in the public subnets with public IPs and no NAT gateway (`sg-app` accepts port 8000 only from `sg-alb`; RDS stays private), no stickiness, the same Gunicorn settings, `LabRole` for every role (no IAM creation), the same secrets and runtime contract below, the same WAF rule on `POST /login/`, and the same request-count scaling metric. Matched compute: Fargate 2 vCPU / 4 GB against the `c5.large` (2 vCPU, 4 GiB).
 
@@ -51,7 +51,7 @@ Status (3 October 2026): **nothing in this section is built or evidenced.** `src
 | Network | host port 8000 | `awsvpc`, one network interface per task |
 | Capacity limit | instance quota | a Fargate vCPU quota the lab does not let us read; learned at apply |
 
-**Unknown until tried.** Whether `LabRole` can act as an ECS task and execution role, whether a Fargate task can pull the ECR image and write to CloudWatch, and how far the vCPU quota lets B scale. [`scripts/probe-lab-comparison.sh`](../src/infrastructure/scripts/probe-lab-comparison.sh) answers the first two before any Terraform is written; it needs a small update for the `base/` layout. The unmeasured question of whether a difference comes from ECS or from Fargate is stated in the report from the design, because ECS on EC2 was dropped for time.
+**Unknown until tried.** Whether `LabRole` can act as an ECS task and execution role, whether a Fargate task can pull the ECR image and write to CloudWatch, and how far the vCPU quota lets B scale. The user reports the lab does not block Fargate or Application Auto Scaling (not recorded from output); the first apply of `fargate/` is the test (the probe script was retired). The unmeasured question of whether a difference comes from ECS or from Fargate is stated in the report from the design, because ECS on EC2 was dropped for time.
 
 **Acceptance for B** (same as A, plan section 10): the task is healthy behind its ALB over HTTPS at its own hostname, no port 22, running from the recorded digest, logs arriving in CloudWatch, and the database jobs pass as the runtime login. Then the load runs, which decide the primary architecture.
 

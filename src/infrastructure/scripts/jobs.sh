@@ -103,7 +103,7 @@ remote() {
 # the web container's start command and AWS_SECRET_ID names the secret the job may read.
 ecs_task() {
   local label="$1" secret="$2"; shift 2
-  local task id exit_code reason
+  local task id exit_code reason result
   printf '\n== %s ==\n' "$label"
   # The command goes in as a JSON list built from NUL-separated words, so words that look like options
   # (--noinput, --as-of) are not mistaken for options by jq.
@@ -117,8 +117,10 @@ ecs_task() {
   id="${task##*/}"
   echo "Task $id started; waiting for it to finish (a minute or two) ..."
   aws ecs wait tasks-stopped --region "$REGION" --cluster "$CLUSTER" --tasks "$task" || die "$label: the task did not stop within the wait; check the cluster in the console"
-  read -r exit_code reason < <(aws ecs describe-tasks --region "$REGION" --cluster "$CLUSTER" --tasks "$task" \
-    --query 'tasks[0].[containers[0].exitCode, stoppedReason]' --output text)
+  result="$(aws ecs describe-tasks --region "$REGION" --cluster "$CLUSTER" --tasks "$task" \
+    --query 'tasks[0].[containers[0].exitCode, stoppedReason]' --output text)" \
+    || die "$label: could not read the task result (credentials expired?). The task may still have run: see the cluster $CLUSTER in the console"
+  read -r exit_code reason <<<"$result"
   sleep 5   # log lines arrive a few seconds after the task stops
   aws logs get-log-events --region "$REGION" --log-group-name "$LOG_GROUP" --log-stream-name "web/web/$id" \
     --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' || echo "(no log lines found in $LOG_GROUP, stream web/web/$id)"
@@ -133,9 +135,16 @@ run_app() {
   else ecs_task "$label" "$secret" "$@"; fi
 }
 
+# Puts the placeholder back in the bootstrap secret. If that fails (credentials expired during the job), say exactly what
+# to run, because the RDS master login would otherwise stay in the secret.
+bootstrap_cleanup() {
+  "$INFRA/scripts/secrets.sh" master-out \
+    || echo "STOP: could NOT put the placeholder back in the bootstrap secret. Run labcreds, then: $INFRA/scripts/secrets.sh master-out" >&2
+}
+
 job_bootstrap() {
   # Master login in for this run only; the placeholder goes back on any exit.
-  ( trap '"$INFRA/scripts/secrets.sh" master-out' EXIT
+  ( trap 'bootstrap_cleanup' EXIT
     "$INFRA/scripts/secrets.sh" master-in
     run_app "bootstrap" bootstrap python tools/db_bootstrap.py )
 }
@@ -182,9 +191,11 @@ IMAGE=$(docker inspect --format '{{.Config.Image}}' web)
 export DEMO_OPERATOR_PASSWORD="$(head -c 18 /dev/urandom | base64 | tr -d '/+=')"
 docker run --rm --env-file /etc/inf2006/app.env -e AWS_SECRET_ID=inf2006-grp21/web -e DEMO_OPERATOR_PASSWORD \
   "$IMAGE" python manage.py seed_demo --no-products
-aws secretsmanager put-secret-value --secret-id inf2006-grp21/operator \
-  --secret-string "$(jq -cn --arg u demo-operator --arg p "$DEMO_OPERATOR_PASSWORD" '{username:$u, password:$p}')" >/dev/null
-unset DEMO_OPERATOR_PASSWORD
+# The password goes to the secret through a private file, not a command line (a command line is readable in /proc).
+umask 077; F=$(mktemp)
+jq -cn --arg u demo-operator '{username:$u, password:$ENV.DEMO_OPERATOR_PASSWORD}' > "$F"
+aws secretsmanager put-secret-value --secret-id inf2006-grp21/operator --secret-string "file://$F" >/dev/null
+rm -f "$F"; unset DEMO_OPERATOR_PASSWORD
 echo "demo-operator created; the password is in the operator secret"
 EOS
 )"

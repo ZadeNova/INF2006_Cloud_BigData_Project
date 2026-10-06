@@ -5,7 +5,8 @@
 #
 # Checks: /health/ 200, HTTP redirects to HTTPS, the certificate verifies and is TLS 1.2+, the login and product
 # pages answer, the product page really lists products, and the security headers the app promises are present.
-# Needs only curl and openssl; no AWS credentials, so a marker can run it against any deployment.
+# Needs only curl and openssl when given a hostname, and no AWS credentials, so a marker can run it against any deployment.
+# The `ec2` and `fargate` forms look the hostname up in base/'s Terraform state, so they also need jq and terraform.
 set -uo pipefail
 
 INFRA="$(cd "$(dirname "$0")/.." && pwd)"

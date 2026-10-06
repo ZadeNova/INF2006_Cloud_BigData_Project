@@ -8,11 +8,11 @@ locals {
 
   # The ALB health-checks a task by its private IP, and Django accepts that Host only if DJANGO_HEALTH_PROBE_HOST
   # names it (ADR-016). The IP exists only once the task runs, so this start command reads it from the ECS metadata
-  # endpoint and then starts the image's own command unchanged. If the lookup fails the task stops (set -e) instead
+  # endpoint (the container's own document, which lists its network) and then starts the image's own command unchanged. If the lookup fails the task stops (set -e) instead
   # of running unhealthy. The gunicorn line is the CMD of src/Dockerfile: keep them the same (ADR-016).
   web_command = <<-EOT
     set -eu
-    IP=$(python -c 'import json, os, urllib.request as u; print(json.load(u.urlopen(os.environ["ECS_CONTAINER_METADATA_URI_V4"] + "/task", timeout=5))["Containers"][0]["Networks"][0]["IPv4Addresses"][0])')
+    IP=$(python -c 'import json, os, urllib.request as u; print(json.load(u.urlopen(os.environ["ECS_CONTAINER_METADATA_URI_V4"], timeout=5))["Networks"][0]["IPv4Addresses"][0])')
     export DJANGO_HEALTH_PROBE_HOST="$IP:8000"
     exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 30 --error-logfile - --no-control-socket
   EOT
@@ -70,6 +70,7 @@ resource "aws_ecs_task_definition" "app" {
           awslogs-group         = module.web_entry.log_group_name
           awslogs-region        = var.region
           awslogs-stream-prefix = "web"
+          mode                  = "blocking" # set on purpose, same as the ec2 stack, so logging cannot differ between variants (ADR-017)
         }
       }
     }

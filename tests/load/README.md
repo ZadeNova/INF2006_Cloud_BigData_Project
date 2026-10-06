@@ -13,7 +13,7 @@ Results are reported as **capacity per unit of compute** and as a **multiple of 
 | `run.py` | Runs one test type with a fixed schedule; prints expected time and cost first; writes `out/<run-id>/` |
 | `locustfile.py` | The visitor (three visit kinds), constant pacing, per-request log, load shape, generator-CPU sampler, automatic abort |
 | `accounts.py` | Creates the synthetic test accounts through the normal `/register/` form; empties carts between runs |
-| `aws_capture.py` | Laptop only: `watch` target health, `kill` one unit, `export` CloudWatch/scaling data and redact |
+| `aws_capture.py` | Laptop only: `watch` target health, `kill` replaces one unit gracefully, `cpu` records the CPU model, `export` CloudWatch/scaling data and redact |
 | `analyze.py` | Raw run folders to summary tables, timings, cost per 1,000 requests and weighted scores |
 | `selftest.py` | Checks of the harness's own logic (no network); `python selftest.py` |
 | `common.py`, `prices.json` | Shared helpers; hourly prices (**unverified, see below**) |
@@ -26,7 +26,7 @@ All commands below run from this folder (`tests/load/`).
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt            # Python 3.12 (the generator) or 3.14 (the laptop)
-cp .env.example .env                       # then edit: LOADTEST_PASSWORD, LOAD_BASE_URL
+cp .env.example .env                       # then edit: LOADTEST_PASSWORD, LOAD_BASE_URL (and LOAD_DOMAIN if the domain is not fourtytwofactors.me)
 set -a; . ./.env; set +a
 ```
 
@@ -77,6 +77,15 @@ python aws_capture.py watch --variant ec2 --run-id <RUN-ID>      # logs every ta
 python aws_capture.py kill  --variant ec2 --run-id <RUN-ID>      # asks you to type "kill"; logs the UTC time
 ```
 
+`kill` is **graceful on both variants** (ADR-017): A asks the Auto Scaling group to terminate the instance (it is drained from the load balancer first, then replaced); B stops one task (ECS drains it, then SIGTERM). The replacement test therefore measures a planned replacement, not a sudden crash; say so in the report.
+
+**Once per variant per session**, on the laptop, record the processor model (an instance via SSM; Fargate through a one-off task) so the report can state the hardware behind "2 vCPU":
+
+```bash
+python aws_capture.py cpu --variant ec2
+python aws_capture.py cpu --variant fargate
+```
+
 The run id is known in advance: it is printed by `run.py` at the confirmation prompt, before you answer.
 
 ## After every run
@@ -90,7 +99,7 @@ python aws_capture.py export --variant ec2 --run-id <RUN-ID> --run-dir out/<RUN-
 python analyze.py --out ../../evidence/load-summary.md     # reads evidence/raw only; rerun any time
 ```
 
-`export` must run **before any teardown**: CloudWatch keeps 1-minute data for about 15 days and ECS drops service events with the service. It copies the run into `evidence/raw/<RUN-ID>/` (and refuses to overwrite one), adds `cloudwatch/*.csv`, `alarm_history.json`, `scaling_activities.json` or `ecs_events.json`, `stack.json`, then replaces account IDs with `<ACCOUNT>` and public IPs with `<PUBLIC-IP>` in every text file. Raw files are never edited afterwards. Whether the lab role may write `exports/load/` in the bucket has not been checked; if it may not, copy with Session Manager port forwarding or paste the folder through the console and note it in the evidence.
+`export` must run **before any teardown**: CloudWatch keeps 1-minute data for about 15 days and ECS drops service events with the service. It copies the run into `evidence/raw/<RUN-ID>/` (and refuses to overwrite one), adds `cloudwatch/*.csv`, `alarm_history.json`, `scaling_activities.json` or `ecs_events.json`, `stack.json`, `cpu.json` (if `aws_capture.py cpu` was run), then replaces account IDs with `<ACCOUNT>` and public IPs with `<PUBLIC-IP>` in every text file. Raw files are never edited afterwards. Whether the lab role may write `exports/load/` in the bucket has not been checked; if it may not, copy with Session Manager port forwarding or paste the folder through the console and note it in the evidence.
 
 ## What a run folder contains
 
@@ -101,7 +110,7 @@ Outcomes in the request log: `ok`; `stock_conflict` (a stock refusal, counted ap
 ## How a run is judged
 
 * **Warm-up** of 120 s after the ramp is discarded; the measurement window has a fixed length (plan section 6).
-* **Invalid** (rerun; the failed run is kept): generator CPU above 70% averaged over any 30 s, clock offset above 50 ms, no requests recorded.
+* **Invalid** (rerun; the failed run is kept): generator CPU above 70% averaged over any 30 s, clock offset above 50 ms, no requests recorded; and, from `stack.json` and the CloudWatch healthy-host series, a run whose image digest, RDS class or WAF mode differs from the campaign's (the value most runs agree on, printed at the top of the report), whose capacity was not pinned for its type (ladder, pilot, saturation, Singapore: min = max = 1; replacement: min = max = 2; scale-out: min 1, max 2), whose `stack.json` describes the other variant, or that did not start with the intended number of healthy targets (1; 2 for replacement). A run with no `stack.json`, or no healthy-host data, is flagged "not verified", not invalid. "One variant under load" cannot be checked from a run's own files: keep to it by procedure.
 * **Flagged, but a result:** `aborted` (errors above 20% or p95 above 10 s for 60 s), `overloaded` (achieved page-action rate under 95% of intended), `database-limited` (RDS CPU above 80%), `credit-limited` (the burstable RDS instance ran out of CPU credits or used surplus credits, from `CPUCreditBalance` and `CPUSurplusCreditBalance`; surplus credits charged are listed too).
 * **Thresholds:** p95 under 800 ms, p99 under 1.8 s (quoted only with at least 1,000 samples), checkout p95 under 2 s, errors under 1%.
 * **Repeats:** the tables show the median with the min-max range over valid repeats. A difference whose ranges overlap scores as a tie.
@@ -118,6 +127,6 @@ Outcomes in the request log: `ok`; `stock_conflict` (a stock refusal, counted ap
 
 ## Verified locally and not yet verified
 
-Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 10 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
+Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 14 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
 
 **Not verified until the first AWS session:** every real AWS call and its permissions under the lab role; that metric names, dimensions and the WAF rule dimension exist as assumed; the generator instance and moving files through S3; Locust with `--processes 2` at 1,000 users and the 70% CPU limit; the ladder, saturation, scale-out and replacement schedules at full length; the p95 and capacity figures themselves; and the whole Fargate path.

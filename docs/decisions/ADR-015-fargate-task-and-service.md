@@ -20,7 +20,7 @@
 | ARM (Graviton) tasks | Cheaper, but the image and the `c5.large` are x86_64; a different architecture would confound the result |
 | Fargate Spot | Tasks can be reclaimed at any time, which breaks the repeated, comparable runs |
 | A NAT gateway and private subnets | About USD 1 a day plus data for no gain in the comparison; the ALB-only security group already keeps the task unreachable (ADR-007) |
-| Container Insights | A charge per metric and per GB of logs; the ALB's healthy-host count and the service's own CPU and memory metrics are enough, and the capture script falls back to them |
+| Container Insights | A charge per metric and per GB of logs; the ALB's healthy-host count, the service's own CPU and memory metrics and the ECS service events are enough (the capture script collects exactly those; it has no running-task series) |
 | ECS Exec | Needs extra permissions on the role and gives a shell on a task; jobs run as one-off tasks and logs are in CloudWatch |
 | Secrets injected by ECS (`secrets` in the task definition) | The app already fetches its own secret at start-up, as on EC2; two mechanisms would be a difference in the comparison |
 | Docker health check in the task | The ALB check is the one that matters for routing, and the image has no `curl` |

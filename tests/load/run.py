@@ -164,7 +164,7 @@ def main():
     except ValueError as exc:
         sys.exit(f"STOP: {exc}")
     host = origin.split("//", 1)[1].split(":")[0]
-    expected = {"shop-ec2.fourtytwofactors.me": "ec2", "shop-fargate.fourtytwofactors.me": "fargate"}.get(host, "local")
+    expected = {h: v for v, h in common.HOSTS_BY_VARIANT.items()}.get(host, "local")
     if args.variant != expected:
         sys.exit(f"STOP: --variant {args.variant} does not match target {host} (that would label {expected} data as {args.variant})")
 

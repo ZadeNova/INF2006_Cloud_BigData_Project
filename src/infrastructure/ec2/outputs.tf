@@ -37,13 +37,3 @@ output "web_acl_name" {
   description = "The WAF web ACL on the ALB (for the security test and its sampled requests)."
   value       = module.web_entry.web_acl_name
 }
-
-output "alb_arn_suffix" {
-  description = "The ALB's CloudWatch dimension value (app/<name>/<id>), for the load-test metric queries."
-  value       = module.web_entry.alb_arn_suffix
-}
-
-output "target_group_arn_suffix" {
-  description = "The target group's CloudWatch dimension value (targetgroup/<name>/<id>)."
-  value       = module.web_entry.target_group_arn_suffix
-}
