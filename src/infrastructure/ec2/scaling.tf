@@ -13,11 +13,11 @@ resource "aws_autoscaling_policy" "requests" {
   target_tracking_configuration {
     predefined_metric_specification {
       predefined_metric_type = "ALBRequestCountPerTarget"
-      resource_label         = "${aws_lb.app.arn_suffix}/${aws_lb_target_group.app.arn_suffix}"
+      resource_label         = "${module.web_entry.alb_arn_suffix}/${module.web_entry.target_group_arn_suffix}"
     }
     target_value = var.scale_target_requests
   }
 
   # The target group must be attached to a listener before the metric exists.
-  depends_on = [aws_lb_listener.https]
+  depends_on = [module.web_entry]
 }

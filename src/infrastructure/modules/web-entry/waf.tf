@@ -2,7 +2,7 @@
 # (credential stuffing and password guessing). Count mode first; block mode is the same rule with a different action.
 
 resource "aws_wafv2_web_acl" "app" {
-  name        = "${local.stack_prefix}-waf"
+  name        = "${var.name}-waf"
   description = "Rate limit on POST /login/ per client IP"
   scope       = "REGIONAL"
 
@@ -67,18 +67,18 @@ resource "aws_wafv2_web_acl" "app" {
 
     visibility_config {
       cloudwatch_metrics_enabled = true
-      metric_name                = "${local.stack_prefix}-login-rate"
+      metric_name                = "${var.name}-login-rate"
       sampled_requests_enabled   = true
     }
   }
 
   visibility_config {
     cloudwatch_metrics_enabled = true
-    metric_name                = "${local.stack_prefix}-waf"
+    metric_name                = "${var.name}-waf"
     sampled_requests_enabled   = true
   }
 
-  tags = { Name = "${local.stack_prefix}-waf" }
+  tags = { Name = "${var.name}-waf" }
 }
 
 resource "aws_wafv2_web_acl_association" "app" {

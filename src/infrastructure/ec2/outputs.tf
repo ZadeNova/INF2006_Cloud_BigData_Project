@@ -5,11 +5,11 @@ output "hostname" {
 
 output "alb_dns_name" {
   description = "The ALB's own address, for checks before DNS is trusted."
-  value       = aws_lb.app.dns_name
+  value       = module.web_entry.alb_dns_name
 }
 
 output "target_group_arn" {
-  value = aws_lb_target_group.app.arn
+  value = module.web_entry.target_group_arn
 }
 
 output "asg_name" {
@@ -19,13 +19,13 @@ output "asg_name" {
 
 output "security_group_ids" {
   value = {
-    alb = aws_security_group.alb.id
-    app = aws_security_group.app.id
+    alb = module.web_entry.alb_security_group_id
+    app = module.web_entry.app_security_group_id
   }
 }
 
 output "log_group_name" {
-  value = aws_cloudwatch_log_group.app.name
+  value = module.web_entry.log_group_name
 }
 
 output "image_digest" {
@@ -35,15 +35,15 @@ output "image_digest" {
 
 output "web_acl_name" {
   description = "The WAF web ACL on the ALB (for the security test and its sampled requests)."
-  value       = aws_wafv2_web_acl.app.name
+  value       = module.web_entry.web_acl_name
 }
 
 output "alb_arn_suffix" {
   description = "The ALB's CloudWatch dimension value (app/<name>/<id>), for the load-test metric queries."
-  value       = aws_lb.app.arn_suffix
+  value       = module.web_entry.alb_arn_suffix
 }
 
 output "target_group_arn_suffix" {
   description = "The target group's CloudWatch dimension value (targetgroup/<name>/<id>)."
-  value       = aws_lb_target_group.app.arn_suffix
+  value       = module.web_entry.target_group_arn_suffix
 }

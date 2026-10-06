@@ -1,6 +1,6 @@
 # ADR-001: Split Terraform into `base/`, `ec2/` and `fargate/`, one local state each
 
-**Status:** drafted by the writing session for review (1 October 2026). Numbering is provisional: `docs/decisions/` did not exist, so this starts at 001.
+**Status:** drafted by the writing session for review (1 October 2026). Numbering is provisional: `docs/decisions/` did not exist, so this starts at 001. **Partly superseded by [ADR-014](ADR-014-shared-web-entry-module.md) (6 October 2026):** the rule "no child modules" no longer applies to the shared front door; the rest (three folders, one local state each) stands.
 
 ## Decision
 

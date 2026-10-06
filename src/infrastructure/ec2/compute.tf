@@ -40,7 +40,7 @@ resource "aws_launch_template" "app" {
   # Nothing can connect in: sg-app only accepts port 8000 from sg-alb.
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [aws_security_group.app.id]
+    security_groups             = [module.web_entry.app_security_group_id]
     delete_on_termination       = true
   }
 
@@ -63,13 +63,12 @@ resource "aws_launch_template" "app" {
   }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh.tftpl", {
-    region        = var.region
-    ecr_registry  = local.ecr_registry
-    image_ref     = local.image_ref
-    log_group     = aws_cloudwatch_log_group.app.name
-    release_id    = var.image_tag
-    app_hostname  = local.app_hostname
-    trust_proxy   = "true" # behind the ALB; "false" here would redirect-loop with SECURE_SSL_REDIRECT
+    region       = var.region
+    ecr_registry = local.ecr_registry
+    image_ref    = local.image_ref
+    log_group    = module.web_entry.log_group_name
+    # The shared application settings (ADR-014), one KEY=value line each; the probe host is added at boot.
+    app_env       = join("\n", [for k, v in module.web_entry.app_environment : "${k}=${v}"])
     secret_prefix = local.name_prefix
   }))
 
@@ -88,14 +87,14 @@ resource "aws_launch_template" "app" {
 
 resource "aws_autoscaling_group" "app" {
   name                = "${local.stack_prefix}-asg"
-  min_size            = var.asg_min_size # ADR-011 defaults: 1 to 2 instances. ADR-013: variables so a fixed-capacity
-  max_size            = var.asg_max_size # run can pin all three to the same number and take scaling out of the result
-  desired_capacity    = var.asg_desired_capacity
+  min_size            = var.min_capacity # ADR-011 defaults: 1 to 2 instances. ADR-013: variables so a fixed-capacity
+  max_size            = var.max_capacity # run can pin all three to the same number and take scaling out of the result
+  desired_capacity    = var.desired_capacity
   vpc_zone_identifier = values(local.base.public_subnet_ids)
 
   # Replace an instance when the ALB says it is unhealthy, not only when the machine itself fails (ADR-008).
   # The grace period covers boot: Docker install, image pull, first health check.
-  target_group_arns         = [aws_lb_target_group.app.arn]
+  target_group_arns         = [module.web_entry.target_group_arn]
   health_check_type         = "ELB"
   health_check_grace_period = 300
 

@@ -39,14 +39,8 @@ retry ecr_pull
 # ---- Non-secret settings shared by the web container and the one-off jobs ----
 install -d -m 0755 /etc/inf2006
 cat > /etc/inf2006/app.env <<EOF
-DJANGO_ENV=production
-AWS_REGION=${region}
-APP_RELEASE_ID=${release_id}
-DJANGO_ALLOWED_HOSTS=${app_hostname}
-DJANGO_CSRF_TRUSTED_ORIGINS=https://${app_hostname}
+${app_env}
 DJANGO_HEALTH_PROBE_HOST=$PRIVATE_IP:8000
-DJANGO_TRUST_PROXY=${trust_proxy}
-DJANGO_HSTS_SECONDS=3600
 EOF
 chmod 0644 /etc/inf2006/app.env
 

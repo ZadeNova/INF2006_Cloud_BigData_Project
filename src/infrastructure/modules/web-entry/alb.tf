@@ -1,29 +1,30 @@
 # The public entry point: an internet-facing ALB that ends TLS, health-checks the app and replaces nothing itself
-# (the ASG does, on its health signal). ADR-008.
+# (the Auto Scaling group or the ECS service does, on its health signal). ADR-008, ADR-014.
 
 resource "aws_lb" "app" {
-  name               = "${local.stack_prefix}-alb"
+  name               = "${var.name}-alb"
   load_balancer_type = "application"
   internal           = false
   security_groups    = [aws_security_group.alb.id]
-  subnets            = values(local.base.public_subnet_ids)
+  subnets            = var.public_subnet_ids
 
   drop_invalid_header_fields = true # refuse malformed headers rather than pass them to Gunicorn
 
-  tags = { Name = "${local.stack_prefix}-alb" }
+  tags = { Name = "${var.name}-alb" }
 }
 
 resource "aws_lb_target_group" "app" {
-  name     = "${local.stack_prefix}-tg"
-  port     = 8000
-  protocol = "HTTP"
-  vpc_id   = local.base.vpc_id
+  name        = "${var.name}-tg"
+  port        = 8000
+  protocol    = "HTTP"
+  vpc_id      = var.vpc_id
+  target_type = var.target_type # instance for the Auto Scaling group, ip for Fargate tasks
 
-  # No stickiness: sessions and carts live in PostgreSQL, so any instance can serve any request.
+  # No stickiness: sessions and carts live in PostgreSQL, so any target can serve any request.
   deregistration_delay = 30 # ADR-008: seconds a draining target keeps finishing requests; sets scale-in and replacement time
 
-  # The probe goes to the instance's private IP, so Django accepts it through DJANGO_HEALTH_PROBE_HOST
-  # (set in user data) and does not redirect it to HTTPS.
+  # The probe goes to the target's private IP, so Django accepts it through DJANGO_HEALTH_PROBE_HOST
+  # (set at start-up by the stack's compute) and does not redirect it to HTTPS.
   health_check {
     path                = "/health/"
     matcher             = "200"
@@ -33,7 +34,7 @@ resource "aws_lb_target_group" "app" {
     unhealthy_threshold = 3
   }
 
-  tags = { Name = "${local.stack_prefix}-tg" }
+  tags = { Name = "${var.name}-tg" }
 }
 
 # HTTP only redirects, permanently, to HTTPS.
@@ -57,7 +58,7 @@ resource "aws_lb_listener" "https" {
   port              = 443
   protocol          = "HTTPS"
   ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06" # TLS 1.2 and 1.3 only
-  certificate_arn   = local.base.certificate_arn
+  certificate_arn   = var.certificate_arn
 
   default_action {
     type             = "forward"
@@ -67,8 +68,8 @@ resource "aws_lb_listener" "https" {
 
 # The hostname follows the ALB: a recreated ALB needs no DNS edit.
 resource "aws_route53_record" "app" {
-  zone_id = local.base.route53_zone_id
-  name    = local.app_hostname
+  zone_id = var.zone_id
+  name    = var.hostname
   type    = "A"
 
   alias {

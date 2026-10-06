@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars (gitignored) only to change a default.
+# image_tag comes from image.auto.tfvars, written by scripts/push-image.sh.
+task_cpu    = 2048
+task_memory = 4096

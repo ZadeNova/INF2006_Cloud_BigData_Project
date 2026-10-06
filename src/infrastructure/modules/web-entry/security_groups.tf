@@ -1,21 +1,22 @@
 # The chain: internet -> sg-alb (443/80) -> sg-app (8000) -> sg-db (5432). No port 22 anywhere.
 # Rules are separate resources so sg-alb and sg-app can reference each other without a creation cycle.
-# sg-db lives in base/; this stack adds its own rule to it, so base/ never refers to a stack (ADR-001).
+# sg-db lives in base/; this module adds the stack's own rule to it, so base/ never refers to a stack (ADR-001).
+# Rule descriptions must not contain an apostrophe: AWS rejects it.
 
 resource "aws_security_group" "alb" {
-  name        = "${local.stack_prefix}-sg-alb"
+  name        = "${var.name}-sg-alb"
   description = "ALB: HTTPS and HTTP-redirect from the internet"
-  vpc_id      = local.base.vpc_id
+  vpc_id      = var.vpc_id
 
-  tags = { Name = "${local.stack_prefix}-sg-alb" }
+  tags = { Name = "${var.name}-sg-alb" }
 }
 
 resource "aws_security_group" "app" {
-  name        = "${local.stack_prefix}-sg-app"
-  description = "App instances: port 8000 from the ALB only"
-  vpc_id      = local.base.vpc_id
+  name        = "${var.name}-sg-app"
+  description = "App compute: port 8000 from the ALB only"
+  vpc_id      = var.vpc_id
 
-  tags = { Name = "${local.stack_prefix}-sg-app" }
+  tags = { Name = "${var.name}-sg-app" }
 }
 
 # --- sg-alb ---
@@ -70,7 +71,7 @@ resource "aws_vpc_security_group_egress_rule" "app_https" {
 resource "aws_vpc_security_group_egress_rule" "app_to_db" {
   security_group_id            = aws_security_group.app.id
   description                  = "PostgreSQL to RDS"
-  referenced_security_group_id = local.base.sg_db_id
+  referenced_security_group_id = var.sg_db_id
   ip_protocol                  = "tcp"
   from_port                    = 5432
   to_port                      = 5432
@@ -79,8 +80,8 @@ resource "aws_vpc_security_group_egress_rule" "app_to_db" {
 # --- sg-db (owned by base/): this stack's own way in ---
 
 resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
-  security_group_id            = local.base.sg_db_id
-  description                  = "PostgreSQL from the ec2 stack app instances"
+  security_group_id            = var.sg_db_id
+  description                  = "PostgreSQL from the ${var.stack} stack app compute"
   referenced_security_group_id = aws_security_group.app.id
   ip_protocol                  = "tcp"
   from_port                    = 5432

@@ -41,35 +41,35 @@ variable "waf_login_action" {
 # ADR-013: capacity pinning for fixed-capacity load runs. Defaults are the ADR-011 values (1 to 2, starting at 1).
 # Pin by setting all three to the same number (for example 2), apply, and unpin the same way afterwards. Applying
 # also resets a desired capacity that scaling has moved, so the group starts a run where the variables say.
-variable "asg_min_size" {
-  description = "Smallest number of instances the Auto Scaling group keeps."
+variable "min_capacity" {
+  description = "Smallest number of instances the Auto Scaling group keeps (fargate/ uses the same variable names for tasks)."
   type        = number
   default     = 1
 
   validation {
-    condition     = var.asg_min_size >= 1
-    error_message = "asg_min_size must be at least 1."
+    condition     = var.min_capacity >= 1
+    error_message = "min_capacity must be at least 1."
   }
 }
 
-variable "asg_max_size" {
+variable "max_capacity" {
   description = "Largest number of instances scaling may add. Keep it small: it caps the cost of a runaway load test."
   type        = number
   default     = 2
 
   validation {
-    condition     = var.asg_max_size >= var.asg_min_size
-    error_message = "asg_max_size must be at least asg_min_size."
+    condition     = var.max_capacity >= var.min_capacity
+    error_message = "max_capacity must be at least min_capacity."
   }
 }
 
-variable "asg_desired_capacity" {
+variable "desired_capacity" {
   description = "Instances wanted when the group is created or this stack is applied."
   type        = number
   default     = 1
 
   validation {
-    condition     = var.asg_desired_capacity >= var.asg_min_size && var.asg_desired_capacity <= var.asg_max_size
-    error_message = "asg_desired_capacity must be between asg_min_size and asg_max_size."
+    condition     = var.desired_capacity >= var.min_capacity && var.desired_capacity <= var.max_capacity
+    error_message = "desired_capacity must be between min_capacity and max_capacity."
   }
 }
