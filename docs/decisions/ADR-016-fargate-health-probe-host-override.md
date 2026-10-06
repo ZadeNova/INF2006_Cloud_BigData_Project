@@ -28,7 +28,7 @@ Keep one image and one probe mechanism for both variants. The difference that re
 
 ## Consequences
 
-- **Duplicated command.** The gunicorn line repeats the Dockerfile's `CMD`. If the Dockerfile changes it and `fargate/ecs.tf` does not, the two variants would run different server settings without anyone deciding so. Mitigation: `scripts/tf.sh fargate plan` compares the two lines and stops if they differ (added with the script step), and `jobs.sh` runs other commands through their own overrides, unaffected.
+- **Duplicated command.** The gunicorn line repeats the Dockerfile's `CMD`. If the Dockerfile changes it and `fargate/ecs.tf` does not, the two variants would run different server settings without anyone deciding so. Mitigation: `scripts/tf.sh fargate plan` compares the two lines and stops if they differ, and `jobs.sh` runs other commands through their own overrides, unaffected.
 - **Metadata endpoint shape.** The path (`Containers[0].Networks[0].IPv4Addresses[0]`) was tested only against a sample document; the first real task is the proof.
 - One-off jobs on Fargate override the command with the job's own, so they do not need the probe host.
 

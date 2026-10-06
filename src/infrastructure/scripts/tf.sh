@@ -21,6 +21,16 @@ aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
   || die "no working lab credentials in this shell (run labcreds first)"
 [ -z "$(git -C "$INFRA" status --porcelain -- .)" ] || die "uncommitted changes in src/infrastructure; commit first"
 SHA="$(git -C "$INFRA" rev-parse --short HEAD)"
+
+# ADR-016: the Fargate task starts the image's own command from a copy in fargate/ecs.tf. If src/Dockerfile's CMD has
+# changed and the copy has not, the two variants would run different server settings without anyone deciding so.
+if [ "$FOLDER" = fargate ] && [ "$ACTION" = plan ]; then
+  cmd="$(python3 -c 'import json, sys
+line = [l for l in open(sys.argv[1]) if l.startswith("CMD ")][0]
+print(" ".join(json.loads(line[4:])))' "$INFRA/../Dockerfile")" || die "could not read the CMD line of src/Dockerfile"
+  grep -qF "exec $cmd" "$DIR/ecs.tf" \
+    || die "src/Dockerfile's CMD is not the command in fargate/ecs.tf (web_command). Make them the same (ADR-016): $cmd"
+fi
 PLAN="$FOLDER.tfplan"
 
 if [ "$ACTION" = plan ]; then

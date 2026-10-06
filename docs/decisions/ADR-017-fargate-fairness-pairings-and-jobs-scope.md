@@ -15,7 +15,7 @@
 
 **2. `jobs.sh fargate` offers four jobs:** `check`, `migrate`, `refresh` and `bootstrap`, each a one-off task started with `aws ecs run-task` (command override and `AWS_SECRET_ID` override), then waits for it to stop, prints its logs and fails on a non-zero exit code. `trainer-sql`, `import` and `operator` need `psql`, the AWS CLI or a data folder that the frozen image lacks, so they are **not offered on Fargate** and the script says to run them on variant A. `restart` has no Fargate meaning.
 
-**3. Script front door** (written in the next step): `status.sh`, `up.sh base|ec2|fargate|loadgen`, `down.sh ec2|fargate|loadgen`, `smoke.sh`; `tf.sh`, `secrets.sh`, `jobs.sh` and `push-image.sh` stay internal helpers. `migrate-state.sh` and the stale probe script are deleted. State stays local, one folder per stack.
+**3. Script front door** (written 6 October 2026): `status.sh`, `up.sh base|ec2|fargate|loadgen`, `down.sh ec2|fargate|loadgen`, `smoke.sh`; `tf.sh`, `secrets.sh`, `jobs.sh` and `push-image.sh` stay internal helpers. `migrate-state.sh` (one-time, done) and the stale probe script are deleted; they stay in git history. State stays local, one folder per stack.
 
 ## Options considered
 

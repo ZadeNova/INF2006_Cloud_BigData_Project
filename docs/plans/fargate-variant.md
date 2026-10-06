@@ -1,6 +1,6 @@
 # Plan: variant B (`fargate/`), ECS on Fargate
 
-**Status (6 October 2026):** plan agreed. **Step 2 written, not applied:** `modules/web-entry`, `ec2/` refactored onto it, `fargate/`, ADR-014 to 017 (offline `terraform validate` passes for all three folders). Scripts, README quick start and every apply are still to do. Governed by [aws-ecs-comparison.md](aws-ecs-comparison.md) (the comparison, the fairness rules) and the design table in [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-designed-not-built); where this file differs from them it is newer and they get synced after the build. Measurement needs come from [load-harness.md](load-harness.md) section 10 item 3.
+**Status (6 October 2026):** plan agreed. **Written, not applied:** `modules/web-entry`, `ec2/` refactored onto it, `fargate/`, ADR-014 to 017, and the script front door (`status.sh`, `up.sh` for base, ec2, fargate and loadgen, `down.sh`, `jobs.sh fargate`, the Dockerfile drift check in `tf.sh`); the README is rewritten around a quick start. `terraform validate` passes for every folder and the scripts were tested offline against stand-ins for `aws` and `terraform`. **Still to do:** apply `ec2/` then `fargate/` (the user), record both in the runbook, independent review.
 
 ## 1. Goal
 

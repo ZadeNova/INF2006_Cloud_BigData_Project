@@ -35,9 +35,9 @@ output "service_name" {
   value       = aws_ecs_service.app.name
 }
 
-output "task_definition_family" {
-  description = "Task definition family, for the one-off jobs (aws ecs run-task uses the latest active revision)."
-  value       = aws_ecs_task_definition.app.family
+output "task_definition_arn" {
+  description = "The current task definition revision, for the one-off jobs (aws ecs run-task, scripts/jobs.sh fargate)."
+  value       = aws_ecs_task_definition.app.arn
 }
 
 output "subnet_ids" {

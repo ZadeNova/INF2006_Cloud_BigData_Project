@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# The one-off database and data jobs, run on the stack's compute from the laptop, one command each (ADR-009).
+# The one-off database and data jobs, one command each (ADR-009, ADR-017).
 #
-#   scripts/jobs.sh ec2 <job>
-#   jobs: bootstrap | migrate | trainer-sql | restart | check | import | operator | refresh | all
+#   scripts/jobs.sh ec2 <bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all>
+#   scripts/jobs.sh fargate <bootstrap|migrate|check|refresh>
 #   all = everything a fresh database needs, in order: bootstrap, migrate, trainer-sql, restart (ends with
 #   check_database), import, operator, refresh. Safe to repeat: each job skips or changes nothing the second time.
 #
-# Runs through SSM Run Command (aws ssm send-command): no interactive session, no typing on the instance, output
+# ec2: runs through SSM Run Command (aws ssm send-command) on the stack's instance: no interactive session, output
 # printed here. If the lab denies SendCommand it says so; the manual Session Manager commands in
 # evidence/aws-build-runbook.md (Procedures) still work.
+# fargate: each job is a one-off ECS task (aws ecs run-task) from the stack's task definition, with the job's command
+# and secret name overriding the web container's; the script waits for it to stop, prints its log and fails on a
+# non-zero exit code. Only the four jobs that need nothing but the app image are offered; trainer-sql, import and
+# operator need psql, the AWS CLI or a data folder the frozen image does not have, so run those on variant A (the
+# database is shared). Needs the fargate/ stack to be up.
 # bootstrap copies the RDS master login into the bootstrap secret for the run only, and puts the placeholder
 # back on exit even if the job fails (RDS rotates that password every 7 days; it must not sit in the secret).
 # import builds data/derived/shoes if missing, checks it against checksums.txt, uploads it to the bucket, then loads it
@@ -16,19 +21,29 @@
 # operator creates the demo-operator login with a random password generated ON the instance (a password passed
 # through SSM parameters would sit in the command history) and stores it in the operator secret; read it with
 #   aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator --query SecretString --output text
-# Needs: lab credentials, aws, jq, terraform. The `fargate` variant is added with the fargate/ stack.
+# Needs: lab credentials, aws, jq, terraform.
 set -euo pipefail
 
 INFRA="$(cd "$(dirname "$0")/.." && pwd)"
 REPO="$(cd "$INFRA/../.." && pwd)"
 REGION="${AWS_DEFAULT_REGION:-us-east-1}"
 NAMESPACE="synthetic/shoes/revision-a/demo/v1"
+PREFIX="inf2006-grp21"
 AS_OF="2026-01-02"   # the cutoff the local README uses; the dataset ends here
 die() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
 
 VARIANT="${1:-}"; JOB="${2:-}"
-[ "$VARIANT" = ec2 ] || die "usage: $0 ec2 <bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all>  (fargate comes with the fargate/ stack)"
-case "$JOB" in bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all) ;; *) die "unknown job '$JOB'" ;; esac
+case "$VARIANT" in
+  ec2) JOBS="bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all" ;;
+  fargate) JOBS="bootstrap|migrate|check|refresh" ;;
+  *) die "usage: $0 <ec2|fargate> <job>   (ec2: bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all; fargate: bootstrap|migrate|check|refresh)" ;;
+esac
+case "$JOB" in
+  bootstrap|migrate|check|refresh) ;;
+  trainer-sql|restart|import|operator|all)
+    [ "$VARIANT" = ec2 ] || die "'$JOB' is not offered on fargate (it needs tools or files the frozen image lacks). Run it on variant A: scripts/jobs.sh ec2 $JOB   (offered on fargate: $JOBS)" ;;
+  *) die "unknown job '$JOB' (for $VARIANT: $JOBS)" ;;
+esac
 for t in aws jq terraform; do command -v "$t" >/dev/null || die "$t is required"; done
 aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
   || die "no working lab credentials in this shell (run labcreds first)"
@@ -36,21 +51,30 @@ aws sts get-caller-identity --query Account --output text >/dev/null 2>&1 \
 tfout() { terraform -chdir="$INFRA/$1" output -raw "$2"; }
 BUCKET="$(tfout base s3_bucket_name)"
 MASTER_ARN="$(tfout base db_master_secret_arn)"
-ASG="$(tfout ec2 asg_name)"
 
-INSTANCE="$(aws autoscaling describe-auto-scaling-groups --region "$REGION" --auto-scaling-group-names "$ASG" \
-  --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService']|[0].InstanceId" --output text)"
-{ [ -n "$INSTANCE" ] && [ "$INSTANCE" != None ]; } || die "no InService instance in $ASG yet"
-echo "Instance: $INSTANCE"
+if [ "$VARIANT" = ec2 ]; then
+  ASG="$(tfout ec2 asg_name)"
+  INSTANCE="$(aws autoscaling describe-auto-scaling-groups --region "$REGION" --auto-scaling-group-names "$ASG" \
+    --query "AutoScalingGroups[0].Instances[?LifecycleState=='InService']|[0].InstanceId" --output text)"
+  { [ -n "$INSTANCE" ] && [ "$INSTANCE" != None ]; } || die "no InService instance in $ASG yet"
+  echo "Instance: $INSTANCE"
 
-# Wait up to 5 minutes for the SSM agent to register.
-for _ in $(seq 1 30); do
+  # Wait up to 5 minutes for the SSM agent to register.
+  for _ in $(seq 1 30); do
+    [ "$(aws ssm describe-instance-information --region "$REGION" --filters "Key=InstanceIds,Values=$INSTANCE" \
+      --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null)" = Online ] && break
+    sleep 10
+  done
   [ "$(aws ssm describe-instance-information --region "$REGION" --filters "Key=InstanceIds,Values=$INSTANCE" \
-    --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null)" = Online ] && break
-  sleep 10
-done
-[ "$(aws ssm describe-instance-information --region "$REGION" --filters "Key=InstanceIds,Values=$INSTANCE" \
-  --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null)" = Online ] || die "$INSTANCE is not Online in Systems Manager"
+    --query 'InstanceInformationList[0].PingStatus' --output text 2>/dev/null)" = Online ] || die "$INSTANCE is not Online in Systems Manager"
+else
+  CLUSTER="$(tfout fargate cluster_name)"
+  TASK_DEF="$(tfout fargate task_definition_arn)"
+  LOG_GROUP="$(tfout fargate log_group_name)"
+  SUBNETS="$(terraform -chdir="$INFRA/fargate" output -json subnet_ids | jq -r 'join(",")')"
+  APP_SG="$(terraform -chdir="$INFRA/fargate" output -json security_group_ids | jq -r .app)"
+  echo "Cluster: $CLUSTER"
+fi
 
 TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
 
@@ -75,15 +99,49 @@ remote() {
   echo "$label: ok"
 }
 
+# ecs_task <label> <secret> <command...>: one-off task from the fargate stack's task definition. The command replaces
+# the web container's start command and AWS_SECRET_ID names the secret the job may read.
+ecs_task() {
+  local label="$1" secret="$2"; shift 2
+  local task id exit_code reason
+  printf '\n== %s ==\n' "$label"
+  # The command goes in as a JSON list built from NUL-separated words, so words that look like options
+  # (--noinput, --as-of) are not mistaken for options by jq.
+  jq -n --arg secret "$PREFIX/$secret" --argjson cmd "$(printf '%s\0' "$@" | jq -Rsc 'split("\u0000")[:-1]')" \
+    '{containerOverrides: [{name: "web", command: $cmd, environment: [{name: "AWS_SECRET_ID", value: $secret}]}]}' > "$TMP"
+  task="$(aws ecs run-task --region "$REGION" --cluster "$CLUSTER" --task-definition "$TASK_DEF" --launch-type FARGATE --count 1 \
+    --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$APP_SG],assignPublicIp=ENABLED}" \
+    --overrides "file://$TMP" --query 'tasks[0].taskArn' --output text)" \
+    || die "run-task was refused (see the error above)"
+  { [ -n "$task" ] && [ "$task" != None ]; } || die "$label: ECS did not start a task (capacity or permissions); see: aws ecs run-task failures"
+  id="${task##*/}"
+  echo "Task $id started; waiting for it to finish (a minute or two) ..."
+  aws ecs wait tasks-stopped --region "$REGION" --cluster "$CLUSTER" --tasks "$task" || die "$label: the task did not stop within the wait; check the cluster in the console"
+  read -r exit_code reason < <(aws ecs describe-tasks --region "$REGION" --cluster "$CLUSTER" --tasks "$task" \
+    --query 'tasks[0].[containers[0].exitCode, stoppedReason]' --output text)
+  sleep 5   # log lines arrive a few seconds after the task stops
+  aws logs get-log-events --region "$REGION" --log-group-name "$LOG_GROUP" --log-stream-name "web/web/$id" \
+    --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' || echo "(no log lines found in $LOG_GROUP, stream web/web/$id)"
+  [ "$exit_code" = 0 ] || die "$label: exit code ${exit_code:-none} ($reason)"
+  echo "$label: ok"
+}
+
+# run_app <label> <web|migration|bootstrap> <command...>: the same app job on either variant.
+run_app() {
+  local label="$1" secret="$2"; shift 2
+  if [ "$VARIANT" = ec2 ]; then remote "$label" "/usr/local/bin/app-job $secret $*"
+  else ecs_task "$label" "$secret" "$@"; fi
+}
+
 job_bootstrap() {
   # Master login in for this run only; the placeholder goes back on any exit.
   ( trap '"$INFRA/scripts/secrets.sh" master-out' EXIT
     "$INFRA/scripts/secrets.sh" master-in
-    remote "bootstrap" '/usr/local/bin/app-job bootstrap python tools/db_bootstrap.py' )
+    run_app "bootstrap" bootstrap python tools/db_bootstrap.py )
 }
 
 job_migrate() {
-  remote "migrate" '/usr/local/bin/app-job migration python manage.py migrate --noinput'
+  run_app "migrate" migration python manage.py migrate --noinput
 }
 
 job_trainer_sql() {
@@ -111,7 +169,7 @@ job_restart() {
 }
 
 job_check() {
-  remote "check_database" '/usr/local/bin/app-job web python manage.py check_database'
+  run_app "check_database" web python manage.py check_database
 }
 
 job_operator() {
@@ -133,7 +191,7 @@ EOS
 }
 
 job_refresh() {
-  remote "refresh_analytics" "/usr/local/bin/app-job web python manage.py refresh_analytics --as-of $AS_OF"
+  run_app "refresh_analytics" web python manage.py refresh_analytics --as-of "$AS_OF"
 }
 
 job_import() {

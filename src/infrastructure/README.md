@@ -1,43 +1,80 @@
 # AWS infrastructure: how to run it
 
-Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-013), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
+Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`) in two variants that are compared: **A, EC2 with an Auto Scaling group**, and **B, containers on ECS Fargate**. Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-017), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md) and [fargate-variant.md](../../docs/plans/fargate-variant.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
 
-**Status (1 October 2026).** `base/` is applied. **Variant A (`ec2/`) is applied and verified**: `https://shop-ec2.fourtytwofactors.me` serves the shop over HTTPS, with the dataset imported, the operator account created, the analytics refreshed, scaling, alarms and the WAF in place, and `smoke.sh` passing 8 of 8. Variant B (`fargate/`) is not written yet. Between work sessions the `ec2` stack is torn down to save money; `base/` stays up.
+**Status (6 October 2026).** `base/` is applied and stays up. Variant A was applied and verified on 1 October: `https://shop-ec2.fourtytwofactors.me` served the shop, with `smoke.sh` passing 8 of 8. Since then the front door shared by both variants moved into a module (`modules/web-entry`), the Fargate stack (`fargate/`) and the load-generator stack (`loadgen/`) were written, and the scripts were extended. **All of that passes `terraform validate` but has not been applied yet**, so variant A needs a fresh apply and verification before it counts again. Between work sessions the stacks are torn down to save money.
+
+## Quick start
+
+Run everything from the **repository root**, on the laptop that holds the Terraform state, in a terminal with lab credentials (see [credentials](#tools-and-credentials)).
+
+| I want to | Run |
+|---|---|
+| See what is running, and what to do next | `src/infrastructure/scripts/status.sh` |
+| Set up from nothing (first time only) | `src/infrastructure/scripts/up.sh base` |
+| Start variant A (EC2) | `src/infrastructure/scripts/up.sh ec2` |
+| Start variant B (Fargate) | `src/infrastructure/scripts/up.sh fargate` |
+| Check that a running shop works | `src/infrastructure/scripts/smoke.sh ec2` (or `fargate`) |
+| Stop a stack (always do this when you finish) | `src/infrastructure/scripts/down.sh ec2` (or `fargate`) |
+| Start or stop the load-test machine | `src/infrastructure/scripts/up.sh loadgen` / `down.sh loadgen` |
+
+A normal session:
+
+```bash
+labcreds                                     # paste the lab credentials (below)
+src/infrastructure/scripts/status.sh         # what is up, what is missing
+src/infrastructure/scripts/up.sh ec2         # shows the plan, you type yes, then it builds and checks everything
+# ... work, test ...
+src/infrastructure/scripts/down.sh ec2       # shows what it will destroy, you type yes
+```
+
+Every script says what it is doing, shows the Terraform plan before changing anything, stops at the first error, and is safe to run again.
 
 ## Contents
 
 1. [Layout](#layout)
 2. [Rules](#rules)
 3. [Tools and credentials](#tools-and-credentials)
-4. [Bring variant A up (the usual case)](#bring-variant-a-up-the-usual-case)
-5. [Take variant A down](#take-variant-a-down)
-6. [If you are not on the apply laptop](#if-you-are-not-on-the-apply-laptop)
-7. [Build everything from nothing in a new account](#build-everything-from-nothing-in-a-new-account)
-8. [Command reference](#command-reference)
-9. [Cost](#cost)
-10. [Troubleshooting](#troubleshooting)
-11. [Final teardown](#final-teardown)
-12. [What comes next](#what-comes-next)
+4. [Start a variant](#start-a-variant)
+5. [Stop a stack](#stop-a-stack)
+6. [The load generator](#the-load-generator)
+7. [If you are not on the apply laptop](#if-you-are-not-on-the-apply-laptop)
+8. [Build everything from nothing in a new account](#build-everything-from-nothing-in-a-new-account)
+9. [Command reference](#command-reference)
+10. [Cost](#cost)
+11. [Troubleshooting](#troubleshooting)
+12. [Final teardown](#final-teardown)
+13. [What comes next](#what-comes-next)
 
 ## Layout
 
+```
+src/infrastructure/
+  base/                 shared, stays up
+  modules/web-entry/    the front door both variants use
+  ec2/                  variant A
+  fargate/              variant B
+  loadgen/              the load-test machine
+  scripts/              the commands above
+  sql/                  the trainer login's two SQL files (run by jobs.sh trainer-sql)
+```
+
 | Folder | What it owns | State |
 |---|---|---|
-| `base/` | VPC, subnets, `sg-db`, Route 53 zone, ACM certificate, RDS PostgreSQL 17, ECR, S3 bucket settings, the five secrets, SNS alarm topic. Stays up between experiments | `base/terraform.tfstate` |
-| `ec2/` | Variant A: its own `sg-alb` and `sg-app`, ALB with HTTPS, launch template, Auto Scaling group (1 to 2 instances), scaling policy, alarms, saved log queries, WAF, alias record `shop-ec2.fourtytwofactors.me`, log group | `ec2/terraform.tfstate` |
-| `loadgen/` | The load generator for the benchmarks (ADR-013): one `c5.large`, no inbound rules, Session Manager only. Up only during test sessions: `scripts/tf.sh loadgen plan`, then `apply`; `scripts/down.sh loadgen` to remove | `loadgen/terraform.tfstate` |
-| `fargate/` | Variant B (not written yet) | |
-| `scripts/` | The commands below | |
-| `sql/` | The trainer login's two SQL files (run by `jobs.sh trainer-sql`) | |
+| `base/` | VPC and subnets, `sg-db`, Route 53 zone, ACM certificate, RDS PostgreSQL 17, ECR, S3 bucket settings, the five secrets, SNS alarm topic. Stays up between experiments | `base/terraform.tfstate` |
+| `modules/web-entry/` | Everything in front of the app, identical for both variants by construction ([ADR-014](../../docs/decisions/ADR-014-shared-web-entry-module.md)): the `sg-alb` and `sg-app` security groups, ALB with HTTPS and the 80 redirect, target group and `/health/` check, WAF rate rule, alarms and saved log queries, log group, DNS alias, and the app's non-secret environment. Not applied by itself: each stack calls it ([README](modules/web-entry/README.md)) | none |
+| `ec2/` | Variant A: the module plus the launch template, Auto Scaling group (1 to 2 instances) and scaling policy. Hostname `shop-ec2.fourtytwofactors.me` | `ec2/terraform.tfstate` |
+| `fargate/` | Variant B: the module plus an ECS cluster, task definition (2 vCPU / 4 GB), service and Application Auto Scaling (1 to 2 tasks). Hostname `shop-fargate.fourtytwofactors.me` | `fargate/terraform.tfstate` |
+| `loadgen/` | The load generator for the benchmarks ([ADR-013](../../docs/decisions/ADR-013-load-generator-stack-and-measurement-settings.md)): one `c5.large`, no inbound rules, Session Manager only. Up only during test sessions | `loadgen/terraform.tfstate` |
 
-`ec2/` reads `base/` through `terraform_remote_state` (`../base/terraform.tfstate`); `base/` never reads a stack, so a stack can be destroyed without touching the database.
+The stacks read `base/` through `terraform_remote_state` (`../base/terraform.tfstate`); `base/` never reads a stack, so a stack can be destroyed without touching the database. Both variants use the **same** database and the **same** image digest, so they can be load-tested one at a time.
 
-**There is no Terraform directly in `src/infrastructure/`.** The single-folder version from stages 1 and 2 was split into `base/` and `ec2/` on 1 October 2026 (`scripts/migrate-state.sh`, one-time, done) and its files removed afterwards; on the apply laptop the old local state is kept only as a record (`terraform.tfstate.migrated` and dated backups, git-ignored). `scripts/probe-lab-comparison.sh` was written for the old folder and is not used.
+**There is no Terraform directly in `src/infrastructure/`.** The single-folder version from stages 1 and 2 was split into `base/` and `ec2/` on 1 October 2026 (one-time migration script, since deleted; it stays in git history) and its files removed afterwards.
 
 ## Rules
 
 1. **One apply device.** The owner's Fedora laptop holds the state files and is the only machine that runs `plan`, `apply` or `destroy`. Other devices write and review code through git. Never create a second state for the same resources.
-2. **Apply only committed code.** `scripts/tf.sh` refuses a dirty tree and refuses a plan made from another commit.
+2. **Apply only committed code.** `scripts/tf.sh` (which every `up.sh` uses) refuses a dirty tree and refuses a plan made from another commit.
 3. **Never commit** `*.tfstate*`, `*.tfvars` (except `*.tfvars.example`), `*.tfplan` or secret values. They are git-ignored; keep it that way.
 4. **Back up state after every apply.** `tf.sh apply` writes `terraform.tfstate.<date>.<commit>.bak`; copy it off the laptop (USB or a private drive, never git).
 5. **Read every plan before applying it.** Anything replaced or destroyed that you did not expect: stop.
@@ -45,15 +82,15 @@ Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`). D
 
 ## Tools and credentials
 
-Installed on the apply laptop (versions used):
+Installed on the apply laptop (versions used); `scripts/status.sh` checks them:
 
 | Tool | Version | Used for |
 |---|---|---|
-| Terraform | 1.16.4 (needs 1.10 or newer) | everything in `base/` and `ec2/` |
+| Terraform | 1.16.4 (needs 1.10 or newer) | every folder |
 | AWS CLI v2 | 2.37 | every script |
-| Session Manager plugin | 1.2 | `aws ssm start-session` (manual debugging only) |
+| Session Manager plugin | 1.2 | `aws ssm start-session` (manual debugging, the load generator) |
 | `jq`, `openssl`, `curl`, `git`, `python3` | any recent | scripts |
-| Docker | any recent | building the app image (`push-image.sh`) |
+| Docker | any recent | building the app image (`push-image.sh`, run by `up.sh` when no image is chosen) |
 
 **Lab credentials** expire after about 4 hours and every script checks them first. In the Learner Lab: Start Lab, then AWS Details, then Show next to AWS CLI. Add this function to `~/.bashrc` once, then run `labcreds` in each new terminal and paste the block, followed by an empty line:
 
@@ -75,28 +112,35 @@ labcreds() {
 
 It prints your account and an `assumed-role/voclabs/...` ARN when it worked. Do not screenshot or paste these credentials anywhere.
 
-All commands below run from the **repository root**.
+## Start a variant
 
-## Bring variant A up (the usual case)
-
-On the apply laptop, with `base/` already applied (it is):
+With `base/` applied (`status.sh` says so), on the apply laptop:
 
 ```bash
 labcreds
-src/infrastructure/scripts/up.sh ec2
+src/infrastructure/scripts/up.sh ec2        # variant A
+src/infrastructure/scripts/up.sh fargate    # variant B
 ```
 
-What happens:
+**What `up.sh ec2` does**
 
-1. `tf.sh ec2 plan` prints the plan. **Read it.** After a teardown it should be 25 to add, 0 to change, 0 to destroy (security groups, ALB, listeners, target group, launch template, ASG, scaling policy, 3 alarms, 2 queries, WAF and its association, alias record, log group). Type `yes`.
-2. `tf.sh ec2 apply` builds it (about 3 to 5 minutes, mostly the ALB) and backs up the state.
-3. `secrets.sh fill` adds any missing secret field; it never changes an existing password.
-4. `jobs.sh ec2 all` runs every database job in order on the new instance through SSM. On the existing database each one finds its work already done and changes nothing (the import reports `created=0 unchanged=...`). This takes a few minutes; it waits for the instance to register with Systems Manager first.
-5. `smoke.sh ec2` checks the site from outside. Expect `All checks passed.` (8 of 8).
+1. If no image is chosen for the stack, builds and pushes the app image (`push-image.sh`).
+2. `tf.sh ec2 plan` prints the plan. **Read it.** After a teardown it should show about 25 to add, 0 to change, 0 to destroy (expected, not yet confirmed after the module refactor). Type `yes`.
+3. `tf.sh ec2 apply` builds it (about 3 to 5 minutes, mostly the ALB) and backs up the state.
+4. `secrets.sh fill` adds any missing secret field; it never changes an existing password.
+5. `jobs.sh ec2 all` runs every database job in order on the new instance through SSM. On the existing database each one finds its work already done and changes nothing (the import reports `created=0 unchanged=...`). It waits for the instance to register with Systems Manager first.
+6. `smoke.sh ec2` checks the site from outside. Expect `All checks passed.` (8 of 8).
 
-The shop is then at **https://shop-ec2.fourtytwofactors.me**. The hostname follows the new load balancer automatically.
+**What `up.sh fargate` does**
 
-Faster, when you know the database is intact (skips step 4): `scripts/tf.sh ec2 plan`, `scripts/tf.sh ec2 apply`, `scripts/smoke.sh ec2`.
+1. Same image step. It also stops with a clear message if the shared database was never set up (**on a brand-new database run `up.sh ec2` once first**: setting up the database needs tools the frozen image lacks, so only variant A does it).
+2. `tf.sh fargate plan` (first checking that the Dockerfile's start command and the copy in `fargate/ecs.tf` agree, [ADR-016](../../docs/decisions/ADR-016-fargate-health-probe-host-override.md)), then your `yes`, then apply. The apply returns when the service is steady, so a task that cannot start fails the apply instead of looping quietly. Expect about 27 to add.
+3. `jobs.sh fargate check` runs `check_database` as a one-off task, proving a task can reach the database.
+4. `smoke.sh fargate`.
+
+The shops are at **https://shop-ec2.fourtytwofactors.me** and **https://shop-fargate.fourtytwofactors.me**. A hostname follows a new load balancer automatically.
+
+Faster, when you know the database is intact: `scripts/tf.sh ec2 plan`, `scripts/tf.sh ec2 apply`, `scripts/smoke.sh ec2`.
 
 **Operator login** (`demo-operator`, for `/analytics/`):
 
@@ -104,117 +148,115 @@ Faster, when you know the database is intact (skips step 4): `scripts/tf.sh ec2 
 aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator --query SecretString --output text
 ```
 
-**Prerequisites `up.sh` checks:** `base/` applied; `src/infrastructure/ec2/image.auto.tfvars` present (written by `push-image.sh`; it stays on the laptop between sessions, currently `image_tag = "release-c19d547"`); a clean committed tree; working credentials.
+**Fixed or free capacity.** Both stacks have `min_capacity`, `max_capacity` and `desired_capacity` (default 1, 2, 1). For a fixed-capacity load run set all three to the same number in `<stack>/terraform.tfvars` (git-ignored), re-run `up.sh` or `tf.sh plan`/`apply`, and clear them afterwards. An apply resets the count to these values ([ADR-013](../../docs/decisions/ADR-013-load-generator-stack-and-measurement-settings.md)).
 
-## Take variant A down
+## Stop a stack
 
 ```bash
 labcreds
-src/infrastructure/scripts/down.sh ec2
+src/infrastructure/scripts/down.sh ec2        # or fargate, or loadgen
 ```
 
-Terraform lists everything it will destroy; type `yes`. The script then prints leftover load balancers, instances and NAT gateways; all three lists must be empty. The database, its data, the zone, the certificate, the image and the secrets stay ([cost](#cost)).
+Terraform lists everything it will destroy; type `yes`. The script then prints leftover load balancers, instances, ECS clusters and NAT gateways; all lists must be empty. The database, its data, the zone, the certificate, the image and the secrets stay ([cost](#cost)).
+
+## The load generator
+
+Used only for the benchmarks ([load-harness.md](../../docs/plans/load-harness.md), [tests/load/README.md](../../tests/load/README.md)):
+
+```bash
+src/infrastructure/scripts/up.sh loadgen      # one c5.large, no inbound rules
+aws ssm start-session --target <the instance id it prints>
+src/infrastructure/scripts/down.sh loadgen    # when the test session ends
+```
 
 ## If you are not on the apply laptop
 
-You cannot plan or apply against the team's stack: the state is on the owner's laptop, and a second state would fight over the same resources. You can:
+You cannot plan or apply against the team's stacks: the state is on the owner's laptop, and a second state would fight over the same resources. You can:
 
-- **Write and check code:** `terraform -chdir=src/infrastructure/ec2 init -backend=false` then `terraform -chdir=src/infrastructure/ec2 validate` (no credentials needed), commit, and ask the owner to plan and apply.
-- **Check the live site** (no credentials needed): `src/infrastructure/scripts/smoke.sh shop-ec2.fourtytwofactors.me`.
+- **Write and check code:** `terraform -chdir=src/infrastructure/fargate init -backend=false` then `terraform -chdir=src/infrastructure/fargate validate` (no credentials needed; same for `ec2`, `loadgen`, `base`), commit, and ask the owner to plan and apply.
+- **Check a live site** (no credentials needed): `src/infrastructure/scripts/smoke.sh shop-ec2.fourtytwofactors.me`.
 - **Read the record:** [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
 
 If the apply laptop is lost or unavailable, use the next section in your own Learner Lab account; never copy the owner's state to another machine.
 
 ## Build everything from nothing in a new account
 
-For a teammate's cold-backup account, or to reproduce the build. About 45 minutes, most of it waiting. Everything is created fresh; nothing is shared with the team's account.
+For a teammate's own lab account, or to reproduce the build. About 45 minutes, most of it waiting. Everything is created fresh; nothing is shared with the team's account. You need a **domain you control** (HTTPS needs a certificate and the app enforces HTTPS); the team's `fourtytwofactors.me` can be delegated to only one Route 53 zone at a time, so another account must use its own domain.
 
-**Domain caveat.** `fourtytwofactors.me` can be delegated to only one Route 53 zone at a time. A new account creates a new zone with different name servers; pointing Namecheap at it moves the domain away from the team's account. Agree this with the domain owner first, or set `domain_name` in `base/terraform.tfvars` to another domain you control.
-
-1. **Credentials and a clean clone**
+1. **Clone and credentials**
    ```bash
-   labcreds
    git clone <repo-url> && cd <repo> && git checkout <branch>
+   labcreds
+   src/infrastructure/scripts/status.sh      # tools and credentials ok? it says what to do next
    ```
 
-2. **Create the S3 bucket with the CLI** (the lab denies one read the Terraform bucket resource needs; Terraform then manages all its settings):
+2. **Set up the shared part**
    ```bash
-   B="inf2006-grp21-data-$(openssl rand -hex 8)"
-   aws s3api create-bucket --bucket "$B" --region us-east-1
-   aws s3api put-bucket-tagging --bucket "$B" --tagging \
-     'TagSet=[{Key=Name,Value=inf2006-grp21-data},{Key=Project,Value=inf2006-grp21},{Key=Env,Value=evidence},{Key=ManagedBy,Value=cli}]'
+   src/infrastructure/scripts/up.sh base
    ```
+   It asks for an alarm email address and your domain, creates the S3 bucket with the CLI (the lab denies a read Terraform's bucket resource needs; Terraform then manages every setting on it), writes `base/terraform.tfvars`, shows the plan (about 38 to add) and applies it. The RDS database takes about 9 minutes. **While the apply waits for the certificate, it prints four name servers: set them at your registrar** (Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick). The apply then finishes by itself within minutes. Click the confirmation link in the email AWS sends (check spam).
 
-3. **Fill in `base/terraform.tfvars`** (git-ignored):
-   ```bash
-   cp src/infrastructure/base/terraform.tfvars.example src/infrastructure/base/terraform.tfvars
-   ```
-   Set `alarm_email` (you will get a confirmation email) and `s3_bucket_name = "<the $B from step 2>"`. Add `domain_name = "..."` only if not using `fourtytwofactors.me`.
+   Check delegation by hand if you like: `dig NS <domain> @a0.nic.me +norec | grep -A8 'AUTHORITY SECTION'` should show the AWS servers.
 
-4. **Apply `base/`** (RDS takes about 9 minutes; the certificate waits for DNS):
-   ```bash
-   src/infrastructure/scripts/tf.sh base plan      # expect 38 to add, 0 to change, 0 to destroy
-   src/infrastructure/scripts/tf.sh base apply
-   ```
-   While it waits on `aws_acm_certificate_validation.shop`, get the zone's name servers in a second terminal and set them at the registrar (Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick):
-   ```bash
-   aws route53 get-hosted-zone --id "$(aws route53 list-hosted-zones-by-name --dns-name <domain> --query 'HostedZones[0].Id' --output text)" \
-     --query 'DelegationSet.NameServers' --output text
-   ```
-   Check delegation with `dig NS <domain> @a0.nic.me +norec | grep -A8 'AUTHORITY SECTION'`. Once it shows the AWS servers, the certificate issues within minutes and the apply finishes. **Click the SNS confirmation link** in the email (check spam).
-
-5. **Build and push the image, and choose it for the stack:**
-   ```bash
-   src/infrastructure/scripts/push-image.sh
-   ```
-   It builds `src/Dockerfile` at the current commit, pushes it, adds the protected `release-<sha>` tag, prints the digest and writes `ec2/image.auto.tfvars`. The recorded evidence used `c19d547` (digest `sha256:fa72e949...cb481`); the application code is unchanged since then, but a rebuild has a different digest, so record yours.
-
-6. **Fill the secrets** (random passwords, generated once, never printed):
-   ```bash
-   src/infrastructure/scripts/secrets.sh fill       # expect four "match" lines
-   ```
-
-7. **Bring variant A up**, which also bootstraps the database, migrates, creates the trainer login, imports the dataset (built from `data/raw/` and checked against `data/derived/shoes/checksums.txt`), creates the operator and refreshes the analytics:
+3. **Start variant A** (builds and pushes the image, fills the secrets, bootstraps and migrates the database, creates the trainer login, imports the dataset built from `data/raw/` and checked against `data/derived/shoes/checksums.txt`, creates the operator, refreshes the analytics, smoke-tests):
    ```bash
    src/infrastructure/scripts/up.sh ec2
    ```
 
+4. **Start variant B** when you want it:
+   ```bash
+   src/infrastructure/scripts/up.sh fargate
+   ```
+
+The recorded evidence used the image `release-c19d547` (digest `sha256:fa72e949...cb481`); a rebuild has a different digest, so record yours.
+
 ## Command reference
+
+All scripts are under `src/infrastructure/scripts/`, stop at the first error, and need `labcreds` except `status.sh` (it reports instead of stopping) and `smoke.sh`.
 
 | Command | Does | When |
 |---|---|---|
-| `scripts/tf.sh <base\|ec2> plan` | fmt check, validate, saved plan, records the commit | before every apply |
-| `scripts/tf.sh <base\|ec2> apply` | applies that saved plan only, then backs up the state | after reading the plan |
-| `scripts/up.sh ec2` | plan, confirm, apply, secrets, all jobs, smoke | start of a session |
-| `scripts/down.sh ec2` (or `loadgen`) | destroy the stack, list leftovers | end of a session |
-| `scripts/smoke.sh ec2` (or a hostname) | 8 outside-in checks, no credentials needed | after any change |
-| `scripts/jobs.sh ec2 <job>` | one job on the instance through SSM: `bootstrap`, `migrate`, `trainer-sql`, `restart`, `check`, `import`, `operator`, `refresh`, `all` | fresh database; `check` any time |
-| `scripts/secrets.sh fill\|check` | complete or check the secrets (prints key names and match/DIFFER only) | once; `check` any time |
-| `scripts/secrets.sh master-in\|master-out` | used by `jobs.sh bootstrap`; do not run by hand | |
-| `scripts/push-image.sh [sha]` | build (only if the tag is missing), push, release-tag, record the digest | per image change |
+| `status.sh` | tools, credentials, what each folder has built and whether AWS agrees, what to run next. Changes nothing | first, any time |
+| `up.sh base` | first-time setup: questions, bucket, tfvars, plan, apply, name-server prompt | once per account |
+| `up.sh <ec2\|fargate\|loadgen> [--yes]` | image, plan, confirm, apply, then the stack's jobs and smoke test | start of a session |
+| `down.sh <ec2\|fargate\|loadgen>` | destroy the stack, list leftovers | end of a session |
+| `smoke.sh <ec2\|fargate\|hostname>` | 8 outside-in checks, no credentials needed | after any change |
+| `jobs.sh ec2 <job>` | one job on the instance through SSM: `bootstrap`, `migrate`, `trainer-sql`, `restart`, `check`, `import`, `operator`, `refresh`, `all` | fresh database; `check` any time |
+| `jobs.sh fargate <job>` | one job as a one-off ECS task: `bootstrap`, `migrate`, `check`, `refresh` (the rest need tools the frozen image lacks; use `jobs.sh ec2`) | `check` any time |
+| `tf.sh <base\|ec2\|fargate\|loadgen> plan\|apply` | fmt check, validate, saved plan, records the commit; applies only that plan, then backs up the state | used by `up.sh`; use directly for a faster or partial run |
+| `secrets.sh fill\|check` | complete or check the secrets (prints key names and match/DIFFER only) | `up.sh ec2` runs `fill`; `check` any time |
+| `secrets.sh master-in\|master-out` | used by `jobs.sh bootstrap`; do not run by hand | |
+| `push-image.sh [sha]` | build (only if the tag is missing), push, release-tag, record the digest for the stacks | per image change; `up.sh` runs it if no image is chosen |
 
-All scripts are under `src/infrastructure/scripts/`, stop at the first error, and need `labcreds` except `smoke.sh`.
+**Manual access** (debugging only; no SSH, no port 22):
 
-**Manual access to the instance** (debugging only; no SSH, no port 22):
 ```bash
+# variant A: a shell on the instance
 INSTANCE=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names inf2006-grp21-ec2-asg \
   --query "AutoScalingGroups[0].Instances[0].InstanceId" --output text)
 aws ssm start-session --target "$INSTANCE"
 sudo docker logs --tail 50 web          # the app
 sudo cat /var/log/cloud-init-output.log # the boot script
+
+# variant B: logs and service events (there is no shell on a task)
+aws logs tail /inf2006-grp21-fargate/app --since 30m
+aws ecs describe-services --cluster inf2006-grp21-fargate-cluster --services inf2006-grp21-fargate-service \
+  --query 'services[0].events[:5].message'
 ```
 
 ## Cost
 
-US East list prices, rounded; verify before relying on them. Read the lab balance (Learner Lab page) at the start and end of each session.
+US East list prices, rounded and from memory; verify before relying on them. Read the lab balance (Learner Lab page) at the start and end of each session.
 
 | Running | About |
 |---|---|
 | `base/` only (RDS `db.t4g.small` and storage, secrets, zone) | USD 1.2 per day |
-| plus the `ec2` stack (one `c5.large`, ALB, 3 public IPv4 addresses, WAF) | plus USD 0.13 per hour, about USD 3 per day |
-| a second instance while scaled out | plus USD 0.085 per hour |
+| plus the `ec2` stack (one `c5.large`, ALB, public IPv4 addresses, WAF) | plus USD 0.13 per hour, about USD 3 per day |
+| plus the `fargate` stack (one 2 vCPU / 4 GB task, ALB, public IPv4 addresses, WAF) | about USD 0.15 per hour (unverified) |
+| a second instance or task while scaled out | plus USD 0.085 (instance) or 0.10 (task) per hour |
+| `loadgen` (one `c5.large`) | about USD 0.09 per hour |
 
-Everything running continuously is about USD 4 per day; the lab budget is USD 50. **Tear the stack down when you stop** and keep `base/` up: rebuilding the stack takes about 5 minutes, rebuilding `base/` means re-bootstrapping and re-importing.
+Everything running continuously is about USD 4 per day for one variant; the lab budget is USD 50. **Tear the stacks down when you stop** and keep `base/` up: rebuilding a stack takes about 5 minutes, rebuilding `base/` means re-bootstrapping and re-importing.
 
 ## Troubleshooting
 
@@ -224,8 +266,12 @@ Everything running continuously is about USD 4 per day; the lab budget is USD 50
 | `uncommitted changes in src/infrastructure; commit first` | `tf.sh` only applies committed code. Commit (or stash), then plan again |
 | `the plan was made from commit X, HEAD is Y` | You committed after planning. Plan again |
 | A plan shows a replace (`-/+`) or destroy you did not expect | Stop and ask; do not apply |
-| `jobs.sh`: `is not Online in Systems Manager` | The instance is still booting (about 3 to 4 minutes after launch). Rerun |
-| Target unhealthy, site returns 502/503 | Start a session (above) and read `docker logs web` and the cloud-init log |
+| `STOP: src/Dockerfile's CMD is not the command in fargate/ecs.tf` | Someone changed the Dockerfile's start command. Make `web_command` in `fargate/ecs.tf` match it ([ADR-016](../../docs/decisions/ADR-016-fargate-health-probe-host-override.md)) |
+| `up.sh fargate`: the shared secrets are empty | The database was never set up. Run `up.sh ec2` once first |
+| `jobs.sh ec2`: `is not Online in Systems Manager` | The instance is still booting (about 3 to 4 minutes after launch). Rerun |
+| Variant A: target unhealthy, site returns 502/503 | Start a session (above) and read `docker logs web` and the cloud-init log |
+| Variant B: the apply fails or waits on the service | `aws ecs describe-services` (events, above) and `aws logs tail` show why the task stopped (image pull, role, the probe-host lookup) |
+| `down.sh fargate` waits a long time on a security group | A stopped task's network interface is still releasing; Terraform retries by itself |
 | `smoke.sh`: `/products/ lists 0 product links` | The database has no data. `scripts/jobs.sh ec2 import` |
 | `app-job: usage: ...` | Job name mistyped; it is `bootstrap`, not `boostrap` |
 | A security group rule fails with `Invalid rule description` | AWS rejects some characters (an apostrophe, for one) in descriptions |
@@ -237,7 +283,9 @@ More history: the "Problems met" lists in the [build runbook](../../evidence/aws
 Only after all evidence is exported (plan section 13: pre-destroy export checklist). In this order:
 
 ```bash
+src/infrastructure/scripts/down.sh fargate
 src/infrastructure/scripts/down.sh ec2
+src/infrastructure/scripts/down.sh loadgen
 terraform -chdir=src/infrastructure/base destroy        # database, zone, certificate, registry, secrets
 # The bucket is not Terraform's: empty every object version, then delete it.
 B=<bucket name>
@@ -247,14 +295,14 @@ jq -e '.Objects | length > 0' /tmp/v.json >/dev/null && aws s3api delete-objects
 aws s3api delete-bucket --bucket "$B"
 ```
 
-`delete-objects` takes at most 1,000 entries per call; this bucket holds far fewer. Then set the Namecheap name servers back to Namecheap BasicDNS if the domain is reused.
+Skip a `down.sh` for a stack that is already down (`status.sh` shows). `delete-objects` takes at most 1,000 entries per call; this bucket holds far fewer. Then set the registrar's name servers back to its own DNS if the domain is reused.
 
 ## What comes next
 
-In order (plan: [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md), sections 7 and 9):
+In order (plans: [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md) sections 7 and 9, [fargate-variant.md](../../docs/plans/fargate-variant.md)):
 
-1. **Load-testing method and harness.** Locust under `tests/load/` with its own pinned requirements, outside the app image; workload fixed before any cloud run (anonymous browsing, a logged-in customer adding a size to the cart and checking out with its own idempotency key, a small operator share on `/analytics/`, about 1% checkouts); rehearsed locally against Docker first. The load generator runs in-region (`us-east-1`) so results measure the infrastructure, not the distance. The WAF login limit is raised or the generator's IP exempted during these runs, and that is recorded.
-2. **Benchmark variant A.**
+1. **Apply and verify both variants** (`up.sh ec2`, then `up.sh fargate`), record both in the runbook with the measured cost, then the independent review of the module, both stacks and the scripts.
+2. **Benchmark variant A.** The harness is in `tests/load/`; the generator runs in-region from `loadgen/`.
    - **RDS pilot:** one run at the 1,000-user step with RDS CPU, connections, memory and credits captured; size up once (`db.t4g.medium`) only if the database is the limit.
    - **The ladder:** 1, 10, 100 and 1,000 users, at least 3 repeats each, plus a separate saturation run.
    - **Scale-out:** time from the scaling trigger to a healthy second instance.
@@ -262,7 +310,6 @@ In order (plan: [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md),
    - **Rollout:** time for an instance refresh to a new image.
    - **The rest:** WAF block-mode test, Logs Insights export, Multi-AZ failover test.
 
-   Results go to `evidence/raw/` and `evidence/test-resilience.md`.
-3. **Variant B (`fargate/`).** Same `base/`, same image digest, same ALB design and health check: ECS cluster, task definition (2 vCPU / 4 GB, matched to `c5.large`), service, Application Auto Scaling on requests per target, alarms, WAF, alias record `shop-fargate.fourtytwofactors.me`. `jobs.sh`, `up.sh` and `down.sh` gain a `fargate` branch (`aws ecs run-task` instead of SSM). The database jobs are not rerun: both variants share the database.
-4. **Benchmark variant B** with the identical harness, ladder and repeats, one variant taking load at a time; then the comparison (criteria and weights fixed before the first comparison run): scale-out time, recovery, rollout, latency and throughput, cost per hour and per 1,000 requests, and operational burden.
-5. **Write-up pieces:** `docs/REPRODUCE_CLOUD.md` (based on this file), the architecture diagram check, the threat-control map update, reference IAM policies, then final teardown.
+   Results go to `evidence/raw/` and `evidence/test-performance.md`, `evidence/test-resilience.md`.
+3. **Benchmark variant B** with the identical harness, ladder and repeats, one variant taking load at a time; then the comparison (criteria and weights fixed before the first comparison run): scale-out time, recovery, rollout, latency and throughput, cost per hour and per 1,000 requests, and operational burden.
+4. **Write-up pieces:** `docs/REPRODUCE_CLOUD.md` (based on this file), the architecture diagram check, the threat-control map update, reference IAM policies, then final teardown.
