@@ -199,6 +199,34 @@ def test_analysis():
         assert "not measured yet" in next(line for line in out.splitlines() if line.startswith("| capacity per unit"))
 
 
+def test_credit_flag():
+    def series(folder, name, values):
+        (folder / "cloudwatch").mkdir(exist_ok=True)
+        with open(folder / "cloudwatch" / f"{name}.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["ts_epoch", "ts_utc", "value"])
+            for i, v in enumerate(values):
+                w.writerow([f"{T0 + 60 * i:.3f}", iso(T0 + 60 * i), v])
+    windows = [dict(label="u10", start=0, end=300, users=1)]
+    with tempfile.TemporaryDirectory() as tmp:
+        results = {}
+        for name, balance, surplus, charged in (("ok", [80, 70, 60], [0, 0, 0], [0, 0, 0]),
+                                                 ("empty", [20, 0.2, 0], [0, 0, 0], [0, 0, 0]),
+                                                 ("unlimited", [0, 0, 0], [0, 4, 9], [0, 0, 3])):
+            d = make_run(tmp, f"LOAD-ec2-ladder-u10-{name}_x", "ec2", "ladder", 10, windows, 1, steady_rows(300, 100, 0), planned=300)
+            series(d, "rds_cpu_credit_balance", balance)
+            series(d, "rds_cpu_surplus_credit_balance", surplus)
+            series(d, "rds_cpu_surplus_credits_charged", charged)
+            results[name] = analyze.analyse_run(analyze.load_run(d))
+        assert not any("credit" in f for f in results["ok"]["flags"]) and results["ok"]["rds_credit_min"] == 60
+        assert any(f.startswith("credit-limited: RDS CPU credit balance") for f in results["empty"]["flags"]), results["empty"]["flags"]
+        flags = results["unlimited"]["flags"]
+        assert any(f.startswith("credit-limited:") and "surplus credits used up to 9.0" in f for f in flags), flags
+        assert any("charged: 3.0" in f for f in flags), flags
+        assert not any("credit" in f for f in analyze.analyse_run(analyze.load_run(make_run(
+            tmp, "LOAD-ec2-ladder-u10-none_x", "ec2", "ladder", 10, windows, 1, steady_rows(300, 100, 0), planned=300)))["flags"])
+
+
 def test_score_pair():
     assert analyze.score_pair([100, 110], [105, 120], False) == (10.0, 10.0)  # ranges overlap: a tie
     a, b = analyze.score_pair([100, 101], [200, 202], False)

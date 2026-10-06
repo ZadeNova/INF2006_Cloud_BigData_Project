@@ -102,7 +102,7 @@ Outcomes in the request log: `ok`; `stock_conflict` (a stock refusal, counted ap
 
 * **Warm-up** of 120 s after the ramp is discarded; the measurement window has a fixed length (plan section 6).
 * **Invalid** (rerun; the failed run is kept): generator CPU above 70% averaged over any 30 s, clock offset above 50 ms, no requests recorded.
-* **Flagged, but a result:** `aborted` (errors above 20% or p95 above 10 s for 60 s), `overloaded` (achieved page-action rate under 95% of intended), `database-limited` (RDS CPU above 80%).
+* **Flagged, but a result:** `aborted` (errors above 20% or p95 above 10 s for 60 s), `overloaded` (achieved page-action rate under 95% of intended), `database-limited` (RDS CPU above 80%), `credit-limited` (the burstable RDS instance ran out of CPU credits or used surplus credits, from `CPUCreditBalance` and `CPUSurplusCreditBalance`; surplus credits charged are listed too).
 * **Thresholds:** p95 under 800 ms, p99 under 1.8 s (quoted only with at least 1,000 samples), checkout p95 under 2 s, errors under 1%.
 * **Repeats:** the tables show the median with the min-max range over valid repeats. A difference whose ranges overlap scores as a tie.
 
@@ -118,6 +118,6 @@ Outcomes in the request log: `ok`; `stock_conflict` (a stock refusal, counted ap
 
 ## Verified locally and not yet verified
 
-Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 9 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
+Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 10 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
 
 **Not verified until the first AWS session:** every real AWS call and its permissions under the lab role; that metric names, dimensions and the WAF rule dimension exist as assumed; the generator instance and moving files through S3; Locust with `--processes 2` at 1,000 users and the 70% CPU limit; the ladder, saturation, scale-out and replacement schedules at full length; the p95 and capacity figures themselves; and the whole Fargate path.

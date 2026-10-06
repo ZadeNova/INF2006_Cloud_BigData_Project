@@ -22,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 P95_LIMIT_MS, ERR_LIMIT = 800.0, 0.01          # thresholds accepted for the plan (section 3)
 CPU_LIMIT, CPU_WINDOW_S, CLOCK_LIMIT_MS = 70.0, 30, 50.0
 OVERLOAD_RATIO, RDS_LIMIT = 0.95, 80.0
+CREDIT_EMPTY = 1.0  # burstable RDS: a balance under one CPU credit counts as exhausted
 WEIGHTS = {"operational burden": 25, "replacement time and error window": 25, "steady-state latency": 20,
            "cost": 15, "scale-out time": 10, "capacity per unit": 5}
 
@@ -107,6 +108,26 @@ def rolling_cpu_peak(cpu):
     return max(sum(vals[i:i + CPU_WINDOW_S]) / CPU_WINDOW_S for i in range(len(vals) - CPU_WINDOW_S + 1))
 
 
+def credit_check(metrics, start, seconds, flags):
+    """Lowest CPU credit balance in the run window; flags the run when a burstable database ran out of credits.
+
+    Past the baseline a t4g database spends credits, and with none left it is throttled (standard mode) or
+    keeps going on surplus credits that are billed (unlimited mode). Either way RDS CPU alone would not say so."""
+    def inside(name):
+        return [v for t, v in metrics.get(name, []) if start <= t <= start + seconds]
+    balance = inside("rds_cpu_credit_balance")
+    surplus = inside("rds_cpu_surplus_credit_balance")
+    charged = inside("rds_cpu_surplus_credits_charged")
+    empty = bool(balance) and min(balance) < CREDIT_EMPTY
+    used = bool(surplus) and max(surplus) > 0
+    if empty or used:
+        flags.append("credit-limited: RDS CPU credit balance " + (f"fell to {min(balance):.1f}" if balance else "not recorded")
+                     + (f", surplus credits used up to {max(surplus):.1f}" if used else ""))
+    if charged and sum(charged) > 0:
+        flags.append(f"RDS surplus credits charged: {sum(charged):.1f} (billed, not in the cost figures)")
+    return min(balance) if balance else None
+
+
 def analyse_run(run):
     meta, plan = run["meta"], run["meta"]["plan"]
     start = run["timing"].get("start_epoch")
@@ -139,6 +160,7 @@ def analyse_run(run):
         if window and max(window) > RDS_LIMIT:
             out["flags"].append(f"database-limited: RDS CPU peaked at {max(window):.0f}%")
         out["rds_cpu_max"] = max(window) if window else None
+    out["rds_credit_min"] = credit_check(run["metrics"], start, meta["planned_seconds"], out["flags"])
     if meta["type"] == "scaleout":
         out["timings"] = scaleout_timings(run, start)
     if meta["type"] == "replace":
@@ -304,11 +326,11 @@ def main():
     for variant in ("ec2", "fargate"):
         for r in [x for x in valid if x["meta"]["variant"] == variant and x["meta"]["type"] == "saturation"]:
             w(f"### {r['id']}\n")
-            w("| Users | Requests/s | Actions/s | p50 ms | p95 ms | Errors | RDS CPU max |")
-            w("|---|---|---|---|---|---|---|")
+            w("| Users | Requests/s | Actions/s | p50 ms | p95 ms | Errors | RDS CPU max | RDS credits min |")
+            w("|---|---|---|---|---|---|---|---|")
             for win in r["windows"]:
                 w(f"| {win['users']} | {win['req_s']:.1f} | {win['actions_s']:.2f} | {fmt(win['p50'])} | {fmt(win['p95'])} | "
-                  f"{fmt((win['error_rate'] or 0) * 100, 2, '%')} | {fmt(r.get('rds_cpu_max'), 0, '%')} |")
+                  f"{fmt((win['error_rate'] or 0) * 100, 2, '%')} | {fmt(r.get('rds_cpu_max'), 0, '%')} | {fmt(r.get('rds_credit_min'), 1)} |")
             cap = capacity_step(r["windows"])
             top = max(r["windows"], key=lambda x: x["req_s"])
             sat.setdefault(variant, []).append(dict(

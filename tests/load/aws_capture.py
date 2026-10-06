@@ -175,7 +175,8 @@ def metric_queries(variant, outputs, lb, tg, rds_id):
               ("rds_connections", "AWS/RDS", "DatabaseConnections", db, "Average"),
               ("rds_freeable_memory", "AWS/RDS", "FreeableMemory", db, "Average"),
               ("rds_cpu_credit_balance", "AWS/RDS", "CPUCreditBalance", db, "Average"),
-              ("rds_cpu_surplus_credit_balance", "AWS/RDS", "CPUSurplusCreditBalance", db, "Average")]
+              ("rds_cpu_surplus_credit_balance", "AWS/RDS", "CPUSurplusCreditBalance", db, "Average"),
+              ("rds_cpu_surplus_credits_charged", "AWS/RDS", "CPUSurplusCreditsCharged", db, "Sum")]
     acl = outputs.get("web_acl_name")
     if acl:
         waf = [dim("WebACL", acl), dim("Rule", acl.removesuffix("-waf") + "-login-rate"), dim("Region", REGION)]
