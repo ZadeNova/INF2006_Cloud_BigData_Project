@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Turn raw run folders into summary tables. Deterministic, standard library only, reads nothing but the raw files.
 
-  analyze.py [--raw evidence/raw] [--out FILE] [--operational operational.json] [--prices prices.json]
+  analyze.py [--raw evidence/raw] [--out FILE] [--operational operational.json] [--prices prices.json] [--reference FILE]
 
 --raw          folder holding LOAD-* and RES-03-* run folders (default evidence/raw; use tests/load/out for local runs)
 --operational  {"ec2": 12, "fargate": 9}: operational-burden figures, lower is better (not measured by this harness)
+--reference    {"image_digest": "sha256:...", "rds_class": "db.t4g.small", "waf_login_action": "count"}: the values the campaign
+               holds fixed, stated by you. Without it the value most runs share is used, and every distinct value is listed.
 Rerunning on the same raw folders gives byte-identical output.
 """
 import argparse
@@ -27,6 +29,7 @@ CREDIT_EMPTY = 1.0  # burstable RDS: a balance under one CPU credit counts as ex
 CAPACITY = {"pilot": (1, 1), "ladder": (1, 1), "saturation": (1, 1), "singapore": (1, 1), "scaleout": (1, 2), "replace": (2, 2)}  # (min, max)
 HEALTHY_AT_START = {"pilot": 1, "ladder": 1, "saturation": 1, "singapore": 1, "scaleout": 1, "replace": 2}
 CAMPAIGN_KEYS = (("image_digest", "image digest"), ("rds_class", "RDS class"), ("waf_login_action", "WAF mode"))
+CPU_MODEL_MAX_AGE_S = 12 * 3600  # the CPU model is read once per session; a file this far from the run is probably another session's
 REPLACE_MARGIN_S = 30  # errors this long after the replacement counts as healthy again still belong to the error window
 WEIGHTS = {"operational burden": 25, "replacement time and error window": 25, "steady-state latency": 20,
            "cost": 15, "scale-out time": 10, "capacity per unit": 5}
@@ -139,14 +142,22 @@ def in_window(series, t0, t1):
     return [v for t, v in series or [] if t0 - 60 < t < t1]
 
 
-def campaign_reference(runs):
-    """The value most runs agree on for each setting a campaign must hold fixed (ties go to the sorted-first value)."""
-    ref = {}
+def campaign_values(runs):
+    """{setting: {value: number of runs}} for the settings a campaign holds fixed, in sorted order."""
+    found = {}
     for key, _ in CAMPAIGN_KEYS:
         values = [r["stack"].get(key) for r in runs if r and r.get("stack") and r["stack"].get(key) is not None]
         if values:
-            counts = {v: values.count(v) for v in sorted(set(values))}
-            ref[key] = max(counts, key=lambda v: counts[v])
+            found[key] = {v: values.count(v) for v in sorted(set(values))}
+    return found
+
+
+def campaign_reference(runs, explicit=None):
+    """What a run is compared with: the user's explicit value if given, else the value most runs share (ties go to the
+    sorted-first value). A majority is a fallback: after a deliberate change (an RDS resize) the newer runs may be the
+    minority, which is why `--reference` exists and every distinct value is listed in the report."""
+    ref = {key: counts and max(counts, key=lambda v: counts[v]) for key, counts in campaign_values(runs).items()}
+    ref.update({k: v for k, v in (explicit or {}).items() if k in dict(CAMPAIGN_KEYS) and v is not None})
     return ref
 
 
@@ -174,11 +185,20 @@ def check_stack(run, ref, start, out):
     expected = HEALTHY_AT_START.get(meta["type"])
     if expected:
         t_start = start + run["meta"]["plan"]["windows"][0]["start"]
-        near = [(t, v) for t, v in run["metrics"].get("alb_healthy_hosts", []) if t <= t_start and t_start - t <= 120]
-        if not near:
-            out["flags"].append("healthy targets at the start of measurement not verified (no alb_healthy_hosts point)")
-        elif abs(near[-1][1] - expected) > 0.01:
-            out["invalid"].append(f"{near[-1][1]:g} healthy targets at the start of measurement, expected {expected}")
+        if meta["type"] in ("scaleout", "replace"):
+            # Two units, possibly in two zones, and one of them may be changing: use the watcher's exact, timestamped count
+            # of healthy targets, not a one-minute CloudWatch average whose zone aggregation we have not observed.
+            before = [t for t in run["targets"] if epoch(t["ts_utc"]) <= t_start]
+            if not before:
+                out["flags"].append("healthy targets at the start of measurement not verified (no watcher record before the start; start `aws_capture.py watch` first)")
+            elif before[-1]["healthy"] != expected:
+                out["invalid"].append(f"{before[-1]['healthy']} healthy targets at the start of measurement, expected {expected}")
+        else:
+            near = [(t, v) for t, v in run["metrics"].get("alb_healthy_hosts", []) if t <= t_start and t_start - t <= 120]
+            if not near:
+                out["flags"].append("healthy targets at the start of measurement not verified (no alb_healthy_hosts point)")
+            elif abs(near[-1][1] - expected) > 0.01:
+                out["invalid"].append(f"{near[-1][1]:g} healthy targets at the start of measurement, expected {expected}")
 
 
 def analyse_run(run, ref=None):
@@ -195,6 +215,9 @@ def analyse_run(run, ref=None):
         win["rds_cpu_max"], win["rds_credit_min"] = (max(cpu_vals) if cpu_vals else None), (min(credits) if credits else None)
     check_stack(run, ref, start, out)
     out["cpu_model"] = run.get("cpu_model")
+    recorded = (run.get("cpu_model") or {}).get("ts_utc")
+    if recorded and abs(start - epoch(recorded)) > CPU_MODEL_MAX_AGE_S:
+        out["flags"].append(f"CPU model was recorded {abs(start - epoch(recorded)) / 3600:.0f} h from this run: it may be another session's hardware")
     if run["meta"].get("aborted"):
         out["flags"].append("aborted: " + str(meta.get("abort_reason")))
     peak = rolling_cpu_peak(run["cpu"])
@@ -330,6 +353,7 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--operational")
     ap.add_argument("--prices", default=str(HERE / "prices.json"))
+    ap.add_argument("--reference", help="JSON file with the campaign's fixed values (default: the value most runs share)")
     args = ap.parse_args()
     prices = json.loads(Path(args.prices).read_text())
     operational = read_json(args.operational, {}) if args.operational else {}
@@ -338,7 +362,11 @@ def main():
     loaded = [r for r in loaded if r]
     if not loaded:
         sys.exit(f"No run folders with run.json under {args.raw}")
-    ref = campaign_reference(loaded)
+    explicit = read_json(args.reference, None) if args.reference else None
+    if args.reference and explicit is None:
+        sys.exit(f"STOP: cannot read {args.reference} as JSON")
+    ref = campaign_reference(loaded, explicit)
+    values = campaign_values(loaded)
     runs = []
     for run in loaded:
         analysed = analyse_run(run, ref)
@@ -353,8 +381,13 @@ def main():
       f"Prices: {'verified by the user' if prices.get('verified_by_user') else 'NOT verified by the user'} ({prices['checked']}).\n")
 
     if ref:
-        w("Campaign reference (the value most runs agree on; a run that differs is invalid): "
+        w(f"Campaign reference ({'stated by the user in ' + Path(args.reference).name if explicit else 'the value most runs share'}; "
+          "a run that differs is invalid): "
           + "; ".join(f"{label} {str(ref[key])[:19]}" for key, label in CAMPAIGN_KEYS if key in ref) + ".\n")
+    for key, label in CAMPAIGN_KEYS:
+        if len(values.get(key, {})) > 1:
+            w(f"WARNING: runs disagree on the {label}: " + "; ".join(f"{str(v)[:19]} ({n} runs)" for v, n in values[key].items())
+              + ". Check that the reference above is the one you intend (`--reference`).\n")
     models = {}
     for r in runs:
         if r.get("cpu_model"):

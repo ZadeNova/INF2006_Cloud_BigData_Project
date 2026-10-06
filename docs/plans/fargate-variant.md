@@ -37,7 +37,7 @@ src/infrastructure/
 | Scaling | Application Auto Scaling on `ALBRequestCountPerTarget`, target `scale_target_requests` (300), min 1, max 2; scale-out and scale-in cooldowns set explicitly and recorded beside the ASG warm-up |
 | Pinning | Same three variables as `ec2/`, as the scaling target's min and max; an apply resets the count, as on `ec2/` |
 | Left out | ECS Exec and Container Insights (cost and permissions, no value for the comparison) |
-| Outputs | `hostname`, `alb_dns_name`, `target_group_arn`, `image_digest`, `web_acl_name`, `cluster_name`, `service_name`, `alb_arn_suffix`, `target_group_arn_suffix`, `log_group_name`, `security_group_ids` (the same names on `ec2/`, where they exist) |
+| Outputs | `hostname`, `alb_dns_name`, `target_group_arn`, `image_digest`, `web_acl_name`, `cluster_name`, `service_name`, `task_definition_arn`, `subnet_ids`, `log_group_name`, `security_group_ids` (the same names on `ec2/` where they exist; the load-test suffix outputs were dropped, review INF-010) |
 
 ## 4. Scripts: a small front door
 

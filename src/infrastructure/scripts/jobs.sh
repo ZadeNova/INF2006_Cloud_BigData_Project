@@ -192,10 +192,10 @@ export DEMO_OPERATOR_PASSWORD="$(head -c 18 /dev/urandom | base64 | tr -d '/+=')
 docker run --rm --env-file /etc/inf2006/app.env -e AWS_SECRET_ID=inf2006-grp21/web -e DEMO_OPERATOR_PASSWORD \
   "$IMAGE" python manage.py seed_demo --no-products
 # The password goes to the secret through a private file, not a command line (a command line is readable in /proc).
-umask 077; F=$(mktemp)
+umask 077; F=$(mktemp); trap 'rm -f "$F"' EXIT   # removed even if the put fails
 jq -cn --arg u demo-operator '{username:$u, password:$ENV.DEMO_OPERATOR_PASSWORD}' > "$F"
 aws secretsmanager put-secret-value --secret-id inf2006-grp21/operator --secret-string "file://$F" >/dev/null
-rm -f "$F"; unset DEMO_OPERATOR_PASSWORD
+unset DEMO_OPERATOR_PASSWORD
 echo "demo-operator created; the password is in the operator secret"
 EOS
 )"

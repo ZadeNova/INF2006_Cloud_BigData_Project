@@ -335,3 +335,191 @@ Fixer: the writing session (Claude Sonnet 5.5), at the user's request and with t
 
 Round 2: a fresh Opus 5.5 session reviews only the diff since `f36c663`, keeping the INF IDs.
 
+
+## Round 2 (6 October 2026)
+
+- **Diff reviewed:** `f36c663..6ab07ef` (26 files), with the fixes table above as the fixer's account of each INF ID.
+- **Reviewer:** Claude Opus 5.5 (`claude-opus-5-5`). **The same session that wrote round 1**: it did not write the fixes
+  and had no access to the fixing (Sonnet 5.5) conversation. Because it re-checked its own round 1 findings, it may
+  share their blind spots; this is the same-session disclosure DEVELOPMENT.md asks for. Read-only for code: the only
+  file written is this log.
+- **Extra asks from the user:** (1) look for regressions the fixes introduced, especially the stack-validity rules in
+  `analyze.py` and the new `aws_capture.py cpu` command; (2) challenge the fixer's disagreement on INF-012.
+
+### Checks run
+
+| Check | Result |
+|---|---|
+| `terraform validate` and `fmt -check -recursive` for `base`, `ec2`, `fargate`, `loadgen`; `fmt -check` for `modules/` | All pass (same local-tfvars warnings on `base/` as round 1). No new `init` was needed, so no files were created |
+| `bash -n` on all scripts | Pass. shellcheck still not installed |
+| `python3 tests/load/selftest.py` | 14 of 14 PASS |
+| `git show f36c663:tests/load/selftest.py` | Checked what `test_analysis` asserted before the fix (INF-012) |
+| Grep for the removed outputs and the removed metric across docs, scripts and harness | Two docs still name them (INF-017) |
+| `base/storage.tf` | ECR `image_tag_mutability = "IMMUTABLE"` confirmed, so `tf.sh` comparing tags (not digests) is sound |
+
+### Status of round 1 findings
+
+No round 1 finding recurs, so the repeat-after-fix stop rule is not triggered.
+
+| ID | Round 2 status | Notes |
+|---|---|---|
+| INF-001 | **Resolved** | `need_image` copies the other stack's `image.auto.tfvars` and builds only when neither stack has one; `tf.sh ec2\|fargate plan` stops on unequal tags. Equal tags mean equal bytes because ECR tags are immutable |
+| INF-002 | **Resolved** (user decision: graceful on both) | Recorded in ADR-017, plan section 15 and the harness README. That the group drains before terminating is an AWS assumption; see "Not verifiable offline (round 2)" |
+| INF-003 | **Resolved**, with new issues | Rules implemented as described. New weaknesses in the fix: INF-018, INF-019, INF-020 |
+| INF-004 | **Resolved** | Window bounded to recovery + 30 s (to run end + 30 s if never recovered); `errors_later` reported; covered by `test_replace_error_window_is_bounded` |
+| INF-005 | **Resolved** | Only ResourceNotFoundException becomes `{}`; any other error dies inside the command substitution, and `set -e` stops the caller. Observation, not a finding: `2>&1` also merges stderr into a *successful* read, so a CLI warning on stderr would corrupt the JSON. Unlikely with AWS CLI v2 |
+| INF-006 | **Resolved** | `mode=blocking` on the EC2 web and job containers and on the ECS task; recorded in ADR-017 |
+| INF-007 | **Resolved** | Prompt skipped only when the sorted, lower-cased, dot-stripped delegation equals this zone's four servers; without `dig`, the prompt always shows (safe) |
+| INF-008 | **Resolved** | Both lookups tolerate failure and retry on the next round |
+| INF-009 | **Resolved** | describe-tasks failure dies with a message; `bootstrap_cleanup` (a function, inherited by the subshell trap) prints the exact master-out command when it fails |
+| INF-010 | **Resolved in code** | Outputs and the query removed; ADR-013 and ADR-015 corrected. Two other docs still list the removed outputs: INF-017 |
+| INF-011 | **Resolved** | AWS_INFRASTRUCTURE.md synced, smoke.sh header correct, `LOAD_DOMAIN` with validation; `run.py` derives the variant from the same map |
+| INF-012 | **Withdrawn: the fixer's disagreement is upheld** | At `f36c663`, `test_analysis` already asserted `detection_s`, `provisioning_s`, `scale_out_s`, `total_from_load_s` (scale-out) and `detected_s`, `replacement_s`, `error_window_s`, `errors_after_kill` (replacement). The round 1 statement "no test covers `scaleout_timings` or `replace_timings`" was wrong. The real gap was narrower: no case had an error after recovery, which is how INF-004 went unnoticed. The new bounded-window test closes it |
+| INF-013 | **Resolved**, small residue | Password now reaches `put-secret-value` through a 0600 file and `$ENV`, not argv. Residue: INF-023 |
+| INF-014 | **Resolved** | Per-window RDS CPU and credits (`in_window` uses minute-start timestamps correctly); covered by `test_database_figures_per_step` |
+| INF-015 | **Resolved** | Reads the container's own metadata document (`Networks[0].IPv4Addresses[0]`); ADR-016 updated |
+| INF-016 | **Addressed**, accuracy issue | A CPU model is now recorded and reported, but it may not be the hardware that served the load: INF-021 |
+
+### New findings (round 2)
+
+All **open**. None blocks an apply.
+
+#### INF-017 — Low — area G — two docs still list the outputs INF-010 removed
+
+- **Location:** `docs/plans/fargate-variant.md:40`; `docs/plans/load-harness.md:200`.
+- **Evidence:** fargate-variant.md's outputs row still names `alb_arn_suffix` and `target_group_arn_suffix` as
+  `fargate/` outputs. load-harness.md section 10 item 4 still asks for them and `db_instance_identifier`, and section 15
+  (as built) does not record that they were dropped.
+- **Impact:** a reader or an agent checking "plan vs code" finds outputs that do not exist.
+- **Direction:** update the outputs row; add one line to load-harness.md section 15 saying they were not added (INF-010).
+
+#### INF-018 — Low — area F — the campaign reference is a majority vote, not a stated value
+
+- **Location:** `tests/load/analyze.py:142-150` (`campaign_reference`).
+- **Evidence:** the reference digest, RDS class and WAF mode are whichever value most runs share; ties go to the
+  value that sorts first.
+- **Impact:** plan section 3 says that after an RDS resize the old runs are kept (marked superseded) and the affected
+  runs rerun. Whichever set is larger then becomes "the campaign", so the current runs can be the ones marked invalid.
+  On a tie (for example 3 A runs on one digest and 3 B runs on another), which variant is invalidated depends on the
+  digest's spelling.
+- **Direction:** take the reference as an explicit input (a flag or a small committed file), and list every distinct
+  value found so a split is visible.
+
+#### INF-019 — Low — area F — capacity, image and WAF are checked as they were at export, not during the run
+
+- **Location:** `tests/load/aws_capture.py` `describe_stack` (called from `export`); `tests/load/analyze.py:167-173`.
+- **Evidence:** `stack.json` is written by `export`, after the run. The capacity message itself says "at export".
+- **Impact:** if pinning, image or WAF mode is changed between a run and its export (for example several runs
+  exported at the end of a session after unpinning), a good run is marked invalid, or a bad run passes. The README asks
+  for export "before any teardown", not "before any change".
+- **Direction:** state in the harness README that `export` must run before any apply. Optionally cross-check pinned
+  runs against data from the run itself (for example the maximum of `alb_healthy_hosts` over the measurement window
+  must not exceed the pinned count).
+
+#### INF-020 — Medium, might fail (unverified) — area F — healthy-at-start depends on HealthyHostCount aggregation
+
+- **Location:** `tests/load/analyze.py:174-181`; `tests/load/aws_capture.py` query `alb_healthy_hosts`
+  (`HealthyHostCount`, dimensions TargetGroup + LoadBalancer, statistic Average).
+- **Evidence:** the check requires the last 1-minute Average before measurement start to equal exactly 1 (or 2 for
+  `replace`, within 0.01). The value this aggregate reports when targets sit in two Availability Zones has not been
+  observed. The reviewer is not certain the zone-less dimension reports the total rather than a per-zone or
+  per-load-balancer-node figure.
+- **Impact:** if the series reports per zone, every replacement run (two units, usually in two zones) reads 1 and is
+  marked invalid. A minute with a target mid-transition averages to a fraction and fails the 0.01 tolerance even when
+  the start itself was fine.
+- **Direction:** for `replace` and `scaleout` use `targets.jsonl` (the watcher's exact, timestamped healthy count,
+  already exported for those runs) instead of CloudWatch. Confirm the CloudWatch semantics on the first pilot before
+  relying on it for the other run types.
+
+#### INF-021 — Low — area C, F — the recorded CPU model may not be the hardware that served the load
+
+- **Location:** `tests/load/aws_capture.py` (`record_cpu`, `run_in_task`; `export` copies `aws-out/cpu-<variant>.json`).
+- **Evidence:** on B the model comes from a separate one-off task, which Fargate may place on different hardware from
+  the service's tasks. On A it comes from the lexically first in-service instance. `export` copies whatever
+  `cpu-<variant>.json` exists, with no check that it is from the same session (its `ts_utc` is not compared with the
+  run's time).
+- **Impact:** the report can name a processor that did not serve the run, for example a stale file from an earlier
+  session, or a one-off task on newer hardware than the service task.
+- **Direction:** have `export` flag a `cpu.json` older than the run's stack (or than a set age). Simpler and exact:
+  have the serving containers log the model at start-up (one `grep` line in the Fargate `web_command` before `exec`,
+  and in the EC2 user data), so each unit's hardware is in its own log stream.
+
+#### INF-022 — Low — area F, G — `aws_capture.py cpu`: a false docstring and an unclear failure
+
+- **Location:** `tests/load/aws_capture.py` module docstring (the `kill` paragraph), `run_in_task`.
+- **Evidence:** the docstring still says "kill is the only command here that changes AWS". `cpu` now also starts a
+  Fargate task (billed; creates a log stream) or sends an SSM command. `run_in_task` never checks the task's exit code
+  or stop reason, so an image-pull or permission failure ends in a `ValueError` traceback from `parse_cpu`
+  ("no 'model name' line") rather than a STOP message naming the cause.
+- **Impact:** a misleading safety statement; an opaque error on the first real use (the command is untested against
+  AWS).
+- **Direction:** correct the sentence; read `stoppedReason` and the container exit code before parsing.
+
+#### INF-023 — Low — area D — the operator password file can be left behind on failure
+
+- **Location:** `src/infrastructure/scripts/jobs.sh` `job_operator` (the remote script, after the `umask 077` line).
+- **Evidence:** `rm -f "$F"` runs only if `put-secret-value` succeeds. Under the remote script's `set -euo pipefail`,
+  a failed put exits first and leaves the 0600 root-owned file holding the password in the instance's `/tmp`.
+- **Impact:** small: root-only file on a single-purpose instance, gone when the instance is replaced. But it is the
+  one place this flow persists the password outside Secrets Manager.
+- **Direction:** remove the file in a `trap … EXIT` inside the remote script.
+
+### Regression check on the areas the user named
+
+- **Stack-validity rules (`analyze.py`):** logic is correct against its own tests (11 cases), and output stays
+  deterministic (sorted inputs; ties resolved by sorted order). Weak points are INF-018, INF-019 and INF-020. The
+  variant-mismatch rule, the per-type capacity table and the "flag, don't invalidate when data is missing" behaviour
+  match plan section 15 item 12.
+- **`aws_capture.py cpu`:** parameters pass botocore's stubbed models (`test_cpu_model_record`). `grep` and `nproc` exist
+  in the Debian-based image, and user 10001 can read `/proc/cpuinfo`. Issues: INF-021 and INF-022.
+- **Other fixed code checked for regressions, none found:**
+  - the `tf.sh` image check (runs at plan only, skips when either file is missing, can be overridden);
+  - `up.sh` `need_image` (copies in either direction, builds only when neither stack has an image);
+  - `secrets.sh` `get` under `set -e`;
+  - the `jobs.sh` `ecs_task` result read;
+  - the trap function in the bootstrap subshell;
+  - the Fargate metadata read;
+  - the module and stack outputs (no remaining reference to a removed output in code; `terraform validate` passes).
+
+### Verdict (round 2)
+
+**Ready to apply.** Nothing blocks `up.sh ec2` or `up.sh fargate`.
+
+**Before trusting load-run validity, address INF-020** (or confirm the HealthyHostCount semantics on the first
+pilot). The other round 2 findings are Low.
+
+### Not verifiable offline (round 2 additions)
+
+These add to the round 1 list.
+
+| Assumption | Observable that confirms it |
+|---|---|
+| `terminate-instance-in-auto-scaling-group` deregisters and drains (30 s) before terminating, as `StopTask` does on ECS (INF-002 fix) | During the first A replacement run, `targets.jsonl` shows the killed instance `draining` before it disappears, and the ASG activity for it starts at the kill time with termination about 30 s later |
+| `HealthyHostCount` (TargetGroup + LoadBalancer, Average) reports the total healthy targets across zones (INF-020) | With two healthy targets in two zones, `aws cloudwatch get-metric-statistics --namespace AWS/ApplicationELB --metric-name HealthyHostCount --dimensions Name=TargetGroup,Value=… Name=LoadBalancer,Value=… --statistics Average --period 60 …` returns 2.0 |
+| ECS accepts `mode = "blocking"` in the awslogs options, and Docker accepts `--log-opt mode=blocking` with awslogs | The task definition registers; on A, `docker inspect web --format '{{.HostConfig.LogConfig}}'` shows `mode:blocking` |
+| The container metadata document on Fargate has `Networks[0].IPv4Addresses[0]` | The first task becomes healthy (same observable as round 1) |
+| `aws_capture.py cpu` works end to end (SSM on A, one-off task and log on B) | `aws-out/cpu-ec2.json` and `cpu-fargate.json` are written on the first session |
+
+### Next step
+
+Hand the open findings the user approves (INF-017 to INF-023) to the fixer; the same reviewer tier reviews that diff
+in round 3, keeping these IDs. INF-012 is closed (withdrawn).
+
+## Fixes applied after round 2 (6 October 2026, before round 3)
+
+Fixer: the writing session (Claude Sonnet 5.5). Offline checks: `terraform fmt -check` and `validate`, `bash -n`, `tests/load/selftest.py` 15 of 15 (was 14).
+
+| ID | Disposition |
+|---|---|
+| INF-017 | Fixed. fargate-variant.md and load-harness.md section 10 list the outputs that exist and say the suffix outputs and `db_instance_identifier` were not added. |
+| INF-018 | Fixed. `analyze.py --reference FILE` states the campaign's fixed values; without it the majority is used, and the report lists every distinct value found and warns when runs disagree. |
+| INF-019 | Fixed in the README: `stack.json` describes the stack at export, so export before any apply, unpinning or WAF change. The optional cross-check was not added. |
+| INF-020 | Fixed as the reviewer directed: scale-out and replacement runs read the healthy count from the watcher's `targets.jsonl` (exact); the CloudWatch average is used only for single-unit runs, where there is nothing to disagree about, and its semantics are still to be confirmed on the first pilot. A missing watcher record is flagged, not invalid. |
+| INF-021 | Partly. `analyze.py` flags a CPU model recorded more than 12 h from the run. The start-up log line in the serving containers was not added: it would not be uniform (the EC2 container's start command cannot log it without changing the image or the Docker command), so the limitation (a one-off task may differ from the serving task) is left for the report to state. |
+| INF-022 | Fixed. The docstring no longer claims `kill` is the only command that changes AWS; `run_in_task` reads the exit code and stop reason and stops with the cause. Tested with a task that fails to pull. |
+| INF-023 | Fixed. The operator password file is removed by a trap in the remote script, so a failed put leaves nothing behind. |
+
+### Next step
+
+Round 3: re-check only the diff since `6ab07ef`, keeping the INF IDs.
+

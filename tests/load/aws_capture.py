@@ -7,12 +7,12 @@
   aws_capture.py export --variant ec2|fargate --run-id ID --run-dir out/ID   after the run, before any teardown
 
 watch  polls target health every few seconds and logs every change with a UTC timestamp (aws-out/<ID>/targets.jsonl).
-kill   is the only command here that changes AWS. It asks first, logs the UTC time to aws-out/<ID>/kill.json, then
+kill   is the only command here that stops anything of the stack's. It asks first, logs the UTC time to aws-out/<ID>/kill.json, then
        replaces one unit the same graceful way on both variants (ADR-017): A asks the Auto Scaling group to terminate an
        in-service instance (it is taken out of the load balancer and drained first, then replaced); B stops one running
        task (ECS drains it, then sends SIGTERM). The user runs it; no session does. A sudden crash is not tested.
-cpu    reads the processor model on one instance (through SSM) or in a one-off Fargate task (its log), and saves it to
-       aws-out/cpu-<variant>.json; export adds it to each run's folder, so the report can state the hardware.
+cpu    reads the processor model on one instance (through SSM: one read-only command) or in a one-off Fargate task (a few
+       seconds of billed compute and a log stream), and saves it to aws-out/cpu-<variant>.json; export adds it to each run's folder, so the report can state the hardware.
 export copies the run folder into evidence/raw/<ID>/, adds the CloudWatch metrics for the run's window, alarm history,
        scaling activities (A) or ECS service events (B), and a stack.json describing what was tested, then redacts
        account IDs and public IPs in every text file. Refuses to overwrite an existing evidence folder.
@@ -189,10 +189,17 @@ def run_in_task(clients, outputs, command, timeout_s=300):
         sys.exit(f"STOP: ECS did not start a task: {resp.get('failures')}")
     arn = resp["tasks"][0]["taskArn"]
     deadline = time.time() + timeout_s
-    while ecs.describe_tasks(cluster=outputs["cluster_name"], tasks=[arn])["tasks"][0]["lastStatus"] != "STOPPED":
+    while True:
+        task = ecs.describe_tasks(cluster=outputs["cluster_name"], tasks=[arn])["tasks"][0]
+        if task["lastStatus"] == "STOPPED":
+            break
         if time.time() > deadline:
             sys.exit(f"STOP: the task {arn.rsplit('/', 1)[-1]} did not stop in {timeout_s} s")
         time.sleep(5)
+    # An image-pull or permission failure ends the task with no exit code: say why instead of failing later on empty output.
+    code = (task.get("containers") or [{}])[0].get("exitCode")
+    if code != 0:
+        sys.exit(f"STOP: the one-off task ended with exit code {code} ({task.get('stoppedReason', 'no reason given')})")
     time.sleep(5)  # log lines arrive a few seconds after the task stops
     events = clients.get("logs").get_log_events(logGroupName=outputs["log_group_name"],
                                                 logStreamName=f"web/web/{arn.rsplit('/', 1)[-1]}")["events"]

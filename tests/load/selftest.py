@@ -466,8 +466,10 @@ def good_stack(variant="ec2", **over):
 def test_stack_validity():
     win = [dict(label="u10", start=0, end=300, users=1)]
 
-    def run(tmp, name, rtype="ladder", stack=None, healthy=1.0, windows=win, markers=None):
+    def run(tmp, name, rtype="ladder", stack=None, healthy=1.0, windows=win, markers=None, targets=None):
         extra = {"stack.json": stack} if stack is not None else {}
+        if targets is not None:   # the watcher's exact record: (seconds from the run start, healthy count)
+            extra["targets.jsonl"] = "\n".join(json.dumps(dict(ts_utc=iso(T0 + t), healthy=h)) for t, h in targets)
         d = make_run(tmp, f"LOAD-ec2-{rtype}-{name}_x", "ec2", rtype, 10, windows, 1, steady_rows(300, 100, 0), markers=markers,
                      planned=300, extra=extra)
         if healthy is not None:
@@ -484,9 +486,13 @@ def test_stack_validity():
             "healthy": run(tmp, "healthy", stack=good_stack(), healthy=0.0),
             "nostack": run(tmp, "nostack"),
             "nohealth": run(tmp, "nohealth", stack=good_stack(), healthy=None),
-            "scale": run(tmp, "scale", rtype="scaleout", stack=good_stack(min=1, max=2), markers={"step_up": 100}),
-            "replace": run(tmp, "replace", rtype="replace", stack=good_stack(min=2, max=2), healthy=2.0, markers={"kill_at": 100}),
-            "replace1": run(tmp, "replace1", rtype="replace", stack=good_stack(min=1, max=2), healthy=2.0, markers={"kill_at": 100}),
+            "scale": run(tmp, "scale", rtype="scaleout", stack=good_stack(min=1, max=2), markers={"step_up": 100}, targets=[(-30, 1)]),
+            # replacement: the exact watcher count decides, so a CloudWatch series that reads 1 (per zone, say) changes nothing
+            "replace": run(tmp, "replace", rtype="replace", stack=good_stack(min=2, max=2), healthy=1.0, markers={"kill_at": 100},
+                           targets=[(-60, 1), (-30, 2)]),
+            "replace1": run(tmp, "replace1", rtype="replace", stack=good_stack(min=1, max=2), markers={"kill_at": 100}, targets=[(-30, 2)]),
+            "replace_bad": run(tmp, "replace_bad", rtype="replace", stack=good_stack(min=2, max=2), markers={"kill_at": 100}, targets=[(-30, 1)]),
+            "replace_nowatch": run(tmp, "replace_nowatch", rtype="replace", stack=good_stack(min=2, max=2), markers={"kill_at": 100}),
         }
         loaded = {k: analyze.load_run(d) for k, d in runs.items()}
         ref = analyze.campaign_reference(loaded.values())
@@ -499,11 +505,43 @@ def test_stack_validity():
         assert any("WAF mode" in x for x in out["waf"]["invalid"]), out["waf"]
         assert any("0 healthy targets" in x for x in out["healthy"]["invalid"]), out["healthy"]
         assert any("needs min 2 max 2" in x for x in out["replace1"]["invalid"]), out["replace1"]
+        assert any("1 healthy targets at the start" in x and "expected 2" in x for x in out["replace_bad"]["invalid"]), out["replace_bad"]
+        assert not out["replace_nowatch"]["invalid"] and any("no watcher record" in f for f in out["replace_nowatch"]["flags"]), out["replace_nowatch"]
+        assert not any("not verified" in f for f in out["replace"]["flags"] + out["scale"]["flags"]), (out["replace"], out["scale"])
         assert not out["nostack"]["invalid"] and any("stack.json missing" in f for f in out["nostack"]["flags"])
         assert not out["nohealth"]["invalid"] and any("not verified" in f for f in out["nohealth"]["flags"])
         # a stack.json for the other variant is a mislabelled run
         mis = analyze.analyse_run(analyze.load_run(run(tmp, "mis", stack=good_stack(variant="fargate"))), ref)
         assert any("labelled ec2" in x for x in mis["invalid"]), mis
+
+
+def test_reference_and_cpu_age():
+    win = [dict(label="u10", start=0, end=300, users=1)]
+    with tempfile.TemporaryDirectory() as tmp:
+        old, new = "sha256:" + "a" * 64, "sha256:" + "c" * 64
+        folders = [make_run(tmp, f"LOAD-ec2-ladder-u10-o{i}_x", "ec2", "ladder", 10, win, 1, steady_rows(300, 100, 0), planned=300,
+                            extra={"stack.json": good_stack(image_digest=old, rds_class="db.t4g.small")}) for i in range(3)]
+        folders += [make_run(tmp, f"LOAD-ec2-ladder-u10-n{i}_x", "ec2", "ladder", 10, win, 1, steady_rows(300, 100, 0), planned=300,
+                             extra={"stack.json": good_stack(image_digest=new, rds_class="db.t4g.medium"),
+                                    "cpu.json": dict(variant="ec2", model="Intel X", vcpus=2, ts_utc=iso(T0 - 30 * 3600))}) for i in range(4)]
+        loaded = [analyze.load_run(d) for d in folders]
+        values = analyze.campaign_values(loaded)
+        assert values["image_digest"] == {old: 3, new: 4} and values["rds_class"] == {"db.t4g.medium": 4, "db.t4g.small": 3}, values
+        # by majority the newer runs (the user's intended campaign after a resize) are the reference ...
+        assert analyze.campaign_reference(loaded)["rds_class"] == "db.t4g.medium"
+        # ... and the user can state the reference instead, which then wins over the majority
+        ref = analyze.campaign_reference(loaded, {"rds_class": "db.t4g.small", "image_digest": old})
+        assert ref["rds_class"] == "db.t4g.small" and ref["image_digest"] == old and ref["waf_login_action"] == "count"
+        stated = [analyze.analyse_run(r, ref) for r in loaded]
+        assert all(not x["invalid"] for x in stated[:3]) and all(any("RDS class" in i for i in x["invalid"]) for x in stated[3:])
+        # a CPU model recorded 30 hours before the run is flagged as possibly another session's
+        assert any("CPU model was recorded 30 h from this run" in f for f in stated[3]["flags"]), stated[3]["flags"]
+        # the report lists the disagreement and uses the stated file
+        refile = Path(tmp) / "reference.json"
+        refile.write_text(json.dumps({"rds_class": "db.t4g.small", "image_digest": old}))
+        out = subprocess.run([sys.executable, str(HERE / "analyze.py"), "--raw", tmp, "--reference", str(refile)],
+                             capture_output=True, text=True, check=True).stdout
+        assert "WARNING: runs disagree on the RDS class" in out and "stated by the user in reference.json" in out, out[:600]
 
 
 def test_replace_error_window_is_bounded():
@@ -577,7 +615,7 @@ def test_cpu_model_record():
                 "cluster": "c", "taskDefinition": outputs["task_definition_arn"], "launchType": "FARGATE", "count": 1,
                 "networkConfiguration": {"awsvpcConfiguration": {"subnets": ["subnet-a", "subnet-b"], "securityGroups": ["sg-2"], "assignPublicIp": "ENABLED"}},
                 "overrides": {"containerOverrides": [{"name": "web", "command": ["sh", "-c", aws_capture.CPU_COMMAND]}]}})
-            kf.stub("ecs").add_response("describe_tasks", {"tasks": [{"lastStatus": "STOPPED"}], "failures": []},
+            kf.stub("ecs").add_response("describe_tasks", {"tasks": [{"lastStatus": "STOPPED", "containers": [{"exitCode": 0}]}], "failures": []},
                                         expected_params={"cluster": "c", "tasks": [task]})
             kf.stub("logs").add_response("get_log_events", {"events": [{"timestamp": 1, "message": "model name\t: AMD EPYC Y", "ingestionTime": 1},
                                                                        {"timestamp": 2, "message": "2", "ingestionTime": 2}]},
@@ -589,6 +627,18 @@ def test_cpu_model_record():
             assert json.loads(path.read_text())["model"] == "AMD EPYC Y"
             for stubber in kf.stubs.values():
                 stubber.assert_no_pending_responses()
+            # a task that could not start (image pull, permissions) names its reason instead of a parse error
+            kb = stubbed_clients()
+            kb.stub("ecs").add_response("run_task", {"tasks": [{"taskArn": task}], "failures": []})
+            kb.stub("ecs").add_response("describe_tasks", {"tasks": [{"lastStatus": "STOPPED", "stoppedReason": "CannotPullContainerError"}], "failures": []})
+            for stubber in kb.stubs.values():
+                stubber.activate()
+            try:
+                aws_capture.record_cpu(kb, "fargate", outputs, Path(tmp) / "cpu-bad.json")
+            except SystemExit as exc:
+                assert "CannotPullContainerError" in str(exc), exc
+            else:
+                raise AssertionError("a task that did not run must stop the command with its reason")
             # the model reaches the report
             d = make_run(tmp, "LOAD-ec2-ladder-u10-m_x", "ec2", "ladder", 10, [dict(label="u10", start=0, end=300, users=1)], 1,
                          steady_rows(300, 100, 0), planned=300, extra={"cpu.json": dict(variant="ec2", model="Intel X", vcpus=2)})
