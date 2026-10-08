@@ -1,0 +1,141 @@
+# file: evidence/raw/MON-01_2026-10-08_ec2_sample_rerun.txt
+# date_utc: 2026-10-08T18:51:18Z
+# commit: 3c910b8
+# command: insights fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+$ aws logs start-query --log-group-name /inf2006-grp21-ec2/app (from 2026-10-08T12:51:18Z to now)
+query: fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 88064.0,
+    "recordsScanned": 88064.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 23183359.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 20.0
+  },
+  "results": [
+    {
+      "@timestamp": "2026-10-08 18:50:25.904",
+      "@logStream": "web-i-0375a1086e96bad06",
+      "@message": "{\"ts\":\"2026-10-08T18:50:25.904+00:00\",\"level\":\"ERROR\",\"logger\":\"django.security.DisallowedHost\",\"message\":\"Django security rejection\",\"status\":400,\"request_id\":\"b4728fdb16474dba92aeed44eabeb21a\",\"exception\":\"DisallowedHost\",\"frames\":[\"handlers/exception.py:55 inner\",\"config/middleware.py:32 __call__\",\"http/request.py:203 get_host\"]}",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQyNh8xNzkxNDg1NDI2NDY3HzE0NjA2MzI5ODcwMTc1MDM5NjMfMh8xNzkxNDg1NDI1OTA0"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:25.904",
+      "@logStream": "web-i-0375a1086e96bad06",
+      "@message": "{\"ts\":\"2026-10-08T18:50:25.904+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"b4728fdb16474dba92aeed44eabeb21a\",\"method\":\"GET\",\"path\":\"/\",\"status\":400,\"duration_ms\":0.42,\"user_id\":null}",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQyNh8xNzkxNDg1NDI2NDY3HzE0NjA2MzI5ODcwMTc1MDM5NjMfMx8xNzkxNDg1NDI1OTA0"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:24.722",
+      "@logStream": "web-i-0375a1086e96bad06",
+      "@message": "{\"ts\":\"2026-10-08T18:50:24.721+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"8805fbf854ec46b7a539fe49a75cedc7\",\"method\":\"GET\",\"path\":\"/\",\"status\":400,\"duration_ms\":1.46,\"user_id\":null}",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQyNh8xNzkxNDg1NDI2NDY3HzE0NjA2MzI5ODcwMTc1MDM5NjMfMR8xNzkxNDg1NDI0NzIy"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:24.721",
+      "@logStream": "web-i-0375a1086e96bad06",
+      "@message": "{\"ts\":\"2026-10-08T18:50:24.721+00:00\",\"level\":\"ERROR\",\"logger\":\"django.security.DisallowedHost\",\"message\":\"Django security rejection\",\"status\":400,\"request_id\":\"8805fbf854ec46b7a539fe49a75cedc7\",\"exception\":\"DisallowedHost\",\"frames\":[\"handlers/exception.py:55 inner\",\"config/middleware.py:32 __call__\",\"http/request.py:203 get_host\"]}",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQyNh8xNzkxNDg1NDI2NDY3HzE0NjA2MzI5ODcwMTc1MDM5NjMfMB8xNzkxNDg1NDI0NzIx"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.137",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "APPLIED. Left: load orders 0 | order lines 0 | cart lines 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfNx8xNzkxNDg1NDExMTM3"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.041",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "  most ordered: Converse Chuck High · US 9 | stock 26 -> 35",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfNh8xNzkxNDg1NDExMDQx"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.040",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "  most ordered: Adidas Runner \"Core Black\" · US 10.5 | stock 29 -> 38",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfNR8xNzkxNDg1NDExMDQw"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.039",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "  most ordered: Adidas Yellow & Black Runner · US 9.5 | stock 35 -> 44",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfNB8xNzkxNDg1NDExMDM5"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.038",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "  most ordered: Air Jordan 1 High \"Bred\" · US 9 | stock 10 -> 19",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfMx8xNzkxNDg1NDExMDM4"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.037",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "  most ordered: Adidas Runner \"Core Black\" · US 7 | stock 99 -> 112",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfMh8xNzkxNDg1NDExMDM3"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:11.035",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "accounts: 2200 | load orders: 274 | order lines: 274 | units to put back: 274 | products: 65 | cart lines: 394",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfMR8xNzkxNDg1NDExMDM1"
+    },
+    {
+      "@timestamp": "2026-10-08 18:50:10.986",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T185009Z",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTQxMR8xNzkxNDg1NDExMjY4Hzc1ODg3Nzk4Mzg1MTIxODY4MTQfMB8xNzkxNDg1NDEwOTg2"
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.143",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "  most ordered: Converse Chuck High · US 9 | stock 26 -> 35",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR82HzE3OTE0ODUzOTkxNDM="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.143",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "DRY RUN: nothing was changed. Run again with --apply to do it.",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR83HzE3OTE0ODUzOTkxNDM="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.142",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "  most ordered: Adidas Runner \"Core Black\" · US 10.5 | stock 29 -> 38",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR81HzE3OTE0ODUzOTkxNDI="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.141",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "  most ordered: Adidas Yellow & Black Runner · US 9.5 | stock 35 -> 44",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR80HzE3OTE0ODUzOTkxNDE="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.140",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "  most ordered: Air Jordan 1 High \"Bred\" · US 9 | stock 10 -> 19",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR8zHzE3OTE0ODUzOTkxNDA="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.139",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "  most ordered: Adidas Runner \"Core Black\" · US 7 | stock 99 -> 112",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR8yHzE3OTE0ODUzOTkxMzk="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.138",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "accounts: 2200 | load orders: 274 | order lines: 274 | units to put back: 274 | products: 65 | cart lines: 394",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR8xHzE3OTE0ODUzOTkxMzg="
+    },
+    {
+      "@timestamp": "2026-10-08 18:49:59.086",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T184957Z",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4NTM5OR8xNzkxNDg1Mzk5MjgxHzM0NTY3MDU2NDA1MjQxNTYwOR8wHzE3OTE0ODUzOTkwODY="
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-08T18:51:20Z

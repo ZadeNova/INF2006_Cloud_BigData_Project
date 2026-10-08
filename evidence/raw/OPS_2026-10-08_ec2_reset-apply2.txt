@@ -1,0 +1,17 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_reset-apply2.txt
+# date_utc: 2026-10-08T18:50:07Z
+# commit: 3c910b8
+# command: bash -c cd tests/load && .venv/bin/python reset_state.py --target ec2 --apply
+APPLYING on ec2, accounts 'loadtest-*'
+
+Running on i-0375a1086e96bad06 through Systems Manager ...
+17 objects imported automatically (use -v 2 for details).
+
+accounts: 2200 | load orders: 274 | order lines: 274 | units to put back: 274 | products: 65 | cart lines: 394
+  most ordered: Adidas Runner "Core Black" · US 7 | stock 99 -> 112
+  most ordered: Air Jordan 1 High "Bred" · US 9 | stock 10 -> 19
+  most ordered: Adidas Yellow & Black Runner · US 9.5 | stock 35 -> 44
+  most ordered: Adidas Runner "Core Black" · US 10.5 | stock 29 -> 38
+  most ordered: Converse Chuck High · US 9 | stock 26 -> 35
+APPLIED. Left: load orders 0 | order lines 0 | cart lines 0
+# exit: 0  end_utc: 2026-10-08T18:50:12Z

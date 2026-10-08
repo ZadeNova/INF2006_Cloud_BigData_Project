@@ -1,0 +1,20 @@
+# file: evidence/raw/SEC-18_2026-10-08_ec2_count_rerun.txt
+# date_utc: 2026-10-08T18:51:29Z
+# commit: 3c910b8
+# command: insights filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | stats count(*) as matches
+$ aws logs start-query --log-group-name /inf2006-grp21-ec2/app (from 2026-10-08T12:51:18Z to now)
+query: filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | stats count(*) as matches
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 0.0,
+    "recordsScanned": 88044.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 23180502.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 0.0
+  },
+  "results": []
+}
+# exit: 0  end_utc: 2026-10-08T18:51:32Z

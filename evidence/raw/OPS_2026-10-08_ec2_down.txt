@@ -1,0 +1,1117 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_down.txt
+# date_utc: 2026-10-08T18:51:45Z
+# commit: 3c910b8
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/down.sh ec2
+[0m[1mdata.terraform_remote_state.base: Reading...[0m[0m
+[0m[1mdata.terraform_remote_state.base: Read complete after 0s[0m
+[0m[1mdata.aws_ssm_parameter.al2023_ami: Reading...[0m[0m
+[0m[1mdata.aws_default_tags.current: Reading...[0m[0m
+[0m[1mdata.aws_iam_instance_profile.lab: Reading...[0m[0m
+[0m[1mdata.aws_ecr_image.app: Reading...[0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Refreshing state... [id=/inf2006-grp21-ec2/app][0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Refreshing state... [id=sg-04f14bade0ca81162][0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d][0m
+[0m[1mmodule.web_entry.aws_security_group.app: Refreshing state... [id=sg-022114c7028ec94a5][0m
+[0m[1mdata.aws_default_tags.current: Read complete after 0s [id=aws][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Refreshing state... [id=5705ef5f-9a49-4d87-bba9-892c527a32bf][0m
+[0m[1mdata.aws_iam_instance_profile.lab: Read complete after 1s [id=AIPAQ4YCUDIEUFRTKYC67][0m
+[0m[1mdata.aws_ssm_parameter.al2023_ami: Read complete after 1s [id=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Refreshing state... [id=sgr-053740a7f3ed73a08][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-0169b1878c708a065][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-0e8eb56f9ec183553][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Refreshing state... [id=sgr-0610a055a828f70c2][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Refreshing state... [id=sgr-03e2daa93b0676a39][0m
+[0m[1mmodule.web_entry.aws_lb.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Refreshing state... [id=sgr-006aec444c86531d7][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Refreshing state... [id=sgr-0ca0c2511386dc120][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Refreshing state... [id=5111ae2a-15c7-4b0a-b596-4bf2036c192a][0m
+[0m[1mdata.aws_ecr_image.app: Read complete after 2s [id=sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Refreshing state... [id=5ea413df-a88f-45eb-90e2-0a6d2eeebffc][0m
+[0m[1maws_launch_template.app: Refreshing state... [id=lt-004ae5d92cd5a84ac][0m
+[0m[1maws_autoscaling_group.app: Refreshing state... [id=inf2006-grp21-ec2-asg][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Refreshing state... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Refreshing state... [id=inf2006-grp21-ec2-no-healthy-hosts][0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Refreshing state... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Refreshing state... [id=inf2006-grp21-ec2-unhealthy-hosts][0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ae4e3b7404d9d4c6][0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ec9b39e37eb966eb][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Refreshing state... [id=inf2006-grp21-ec2-target-5xx][0m
+[0m[1maws_autoscaling_policy.requests: Refreshing state... [id=inf2006-grp21-ec2-requests-per-target][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [31m-[0m destroy[0m
+
+Terraform will perform the following actions:
+
+[1m  # aws_autoscaling_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_autoscaling_group" "app" {
+      [31m-[0m[0m arn                              = "arn:aws:autoscaling:us-east-1:<ACCOUNT>:autoScalingGroup:03b028ad-14ff-4c31-8bc5-4bcb94534f22:autoScalingGroupName/inf2006-grp21-ec2-asg" [90m-> null[0m[0m
+      [31m-[0m[0m availability_zones               = [
+          [31m-[0m[0m "us-east-1a",
+          [31m-[0m[0m "us-east-1b",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m capacity_rebalance               = false [90m-> null[0m[0m
+      [31m-[0m[0m default_cooldown                 = 300 [90m-> null[0m[0m
+      [31m-[0m[0m default_instance_warmup          = 0 [90m-> null[0m[0m
+      [31m-[0m[0m desired_capacity                 = 1 [90m-> null[0m[0m
+      [31m-[0m[0m enabled_metrics                  = [
+          [31m-[0m[0m "GroupDesiredCapacity",
+          [31m-[0m[0m "GroupInServiceInstances",
+          [31m-[0m[0m "GroupPendingInstances",
+          [31m-[0m[0m "GroupTerminatingInstances",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m force_delete                     = false [90m-> null[0m[0m
+      [31m-[0m[0m force_delete_warm_pool           = false [90m-> null[0m[0m
+      [31m-[0m[0m health_check_grace_period        = 300 [90m-> null[0m[0m
+      [31m-[0m[0m health_check_type                = "ELB" [90m-> null[0m[0m
+      [31m-[0m[0m id                               = "inf2006-grp21-ec2-asg" [90m-> null[0m[0m
+      [31m-[0m[0m ignore_failed_scaling_activities = false [90m-> null[0m[0m
+      [31m-[0m[0m load_balancers                   = [] [90m-> null[0m[0m
+      [31m-[0m[0m max_instance_lifetime            = 0 [90m-> null[0m[0m
+      [31m-[0m[0m max_size                         = 1 [90m-> null[0m[0m
+      [31m-[0m[0m metrics_granularity              = "1Minute" [90m-> null[0m[0m
+      [31m-[0m[0m min_size                         = 1 [90m-> null[0m[0m
+      [31m-[0m[0m name                             = "inf2006-grp21-ec2-asg" [90m-> null[0m[0m
+      [31m-[0m[0m predicted_capacity               = 0 [90m-> null[0m[0m
+      [31m-[0m[0m protect_from_scale_in            = false [90m-> null[0m[0m
+      [31m-[0m[0m region                           = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m service_linked_role_arn          = "arn:aws:iam::<ACCOUNT>:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling" [90m-> null[0m[0m
+      [31m-[0m[0m suspended_processes              = [] [90m-> null[0m[0m
+      [31m-[0m[0m target_group_arns                = [
+          [31m-[0m[0m "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m termination_policies             = [] [90m-> null[0m[0m
+      [31m-[0m[0m vpc_zone_identifier              = [
+          [31m-[0m[0m "subnet-00a90504457c9cd4e",
+          [31m-[0m[0m "subnet-0455388ee1b027306",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m wait_for_capacity_timeout        = "10m" [90m-> null[0m[0m
+      [31m-[0m[0m warm_pool_size                   = 0 [90m-> null[0m[0m
+        [90m# (5 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m availability_zone_distribution {
+          [31m-[0m[0m capacity_distribution_strategy = "balanced-best-effort" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m capacity_reservation_specification {
+          [31m-[0m[0m capacity_reservation_preference = "default" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m instance_lifecycle_policy {
+          [31m-[0m[0m retention_triggers {
+              [31m-[0m[0m terminate_hook_abandon = "terminate" [90m-> null[0m[0m
+            }
+        }
+
+      [31m-[0m[0m launch_template {
+          [31m-[0m[0m id      = "lt-004ae5d92cd5a84ac" [90m-> null[0m[0m
+          [31m-[0m[0m name    = "inf2006-grp21-ec2-lt" [90m-> null[0m[0m
+          [31m-[0m[0m version = "1" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m traffic_source {
+          [31m-[0m[0m identifier = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+          [31m-[0m[0m type       = "elbv2" [90m-> null[0m[0m
+        }
+    }
+
+[1m  # aws_autoscaling_policy.requests[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_autoscaling_policy" "requests" {
+      [31m-[0m[0m arn                       = "arn:aws:autoscaling:us-east-1:<ACCOUNT>:scalingPolicy:5c6d4dcb-e2d9-407c-ab00-ade8c457d048:autoScalingGroupName/inf2006-grp21-ec2-asg:policyName/inf2006-grp21-ec2-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m autoscaling_group_name    = "inf2006-grp21-ec2-asg" [90m-> null[0m[0m
+      [31m-[0m[0m cooldown                  = 0 [90m-> null[0m[0m
+      [31m-[0m[0m enabled                   = true [90m-> null[0m[0m
+      [31m-[0m[0m estimated_instance_warmup = 240 [90m-> null[0m[0m
+      [31m-[0m[0m id                        = "inf2006-grp21-ec2-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m min_adjustment_magnitude  = 0 [90m-> null[0m[0m
+      [31m-[0m[0m name                      = "inf2006-grp21-ec2-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m policy_type               = "TargetTrackingScaling" [90m-> null[0m[0m
+      [31m-[0m[0m region                    = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m scaling_adjustment        = 0 [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m target_tracking_configuration {
+          [31m-[0m[0m disable_scale_in = false [90m-> null[0m[0m
+          [31m-[0m[0m target_value     = 300 [90m-> null[0m[0m
+
+          [31m-[0m[0m predefined_metric_specification {
+              [31m-[0m[0m predefined_metric_type = "ALBRequestCountPerTarget" [90m-> null[0m[0m
+              [31m-[0m[0m resource_label         = "app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+            }
+        }
+    }
+
+[1m  # aws_launch_template.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_launch_template" "app" {
+      [31m-[0m[0m arn                                  = "arn:aws:ec2:us-east-1:<ACCOUNT>:launch-template/lt-004ae5d92cd5a84ac" [90m-> null[0m[0m
+      [31m-[0m[0m default_version                      = 1 [90m-> null[0m[0m
+      [31m-[0m[0m disable_api_stop                     = false [90m-> null[0m[0m
+      [31m-[0m[0m disable_api_termination              = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                   = "lt-004ae5d92cd5a84ac" [90m-> null[0m[0m
+      [31m-[0m[0m image_id                             = "ami-0d27e0fb3bac4d724" [90m-> null[0m[0m
+      [31m-[0m[0m instance_type                        = "c5.large" [90m-> null[0m[0m
+      [31m-[0m[0m latest_version                       = 1 [90m-> null[0m[0m
+      [31m-[0m[0m name                                 = "inf2006-grp21-ec2-lt" [90m-> null[0m[0m
+      [31m-[0m[0m region                               = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_names                 = [] [90m-> null[0m[0m
+      [31m-[0m[0m tags                                 = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-lt"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                             = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-lt"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m update_default_version               = true [90m-> null[0m[0m
+      [31m-[0m[0m user_data                            = "IyEvYmluL2Jhc2gKIyBVc2VyIGRhdGE6IHJ1bnMgb25jZSwgYXMgcm9vdCwgb24gZWFjaCBpbnN0YW5jZSdzIGZpcnN0IGJvb3QgKGNsb3VkLWluaXQpLiBPdXRwdXQgZ29lcyB0bwojIC92YXIvbG9nL2Nsb3VkLWluaXQtb3V0cHV0LmxvZzsgcmVhZCBpdCBvdmVyIFNlc3Npb24gTWFuYWdlciBpZiBhbiBpbnN0YW5jZSBuZXZlciBnZXRzIGhlYWx0aHkuCiMKIyBUZXJyYWZvcm0gZmlsbHMgaW4gdGhlIHRlbXBsYXRlIHZhbHVlcyBiZWZvcmUgQVdTIHJlY2VpdmVzIHRoaXMgc2NyaXB0LiBFdmVyeXRoaW5nCiMgaGVyZSBpcyB2aXNpYmxlIHRvIGFueW9uZSB3aG8gY2FuIHJlYWQgdGhlIGxhdW5jaCB0ZW1wbGF0ZSwgc28gaXQgaG9sZHMgbm8gc2VjcmV0IHZhbHVlcy4gT25seQojIHNlY3JldCBuYW1lczsgdGhlIGFwcCBmZXRjaGVzIGl0cyBvd24gc2VjcmV0IGF0IHN0YXJ0dXAgd2l0aCB0aGUgaW5zdGFuY2Ugcm9sZS4Kc2V0IC1ldW8gcGlwZWZhaWwKCiMgVXAgdG8gMyB0cmllcywgMTAgcyBhcGFydCwgZm9yIGJvb3QtdGltZSBoaWNjdXBzIChwYWNrYWdlIG1pcnJvcnMsIG1ldGFkYXRhLCBFQ1IpLiBTdG9wcyB0aGUgc2NyaXB0IHdpdGggYQojIGNsZWFyIG1lc3NhZ2UgaW4gdGhlIGNsb3VkLWluaXQgbG9nIGlmIGFsbCB0aHJlZSBmYWlsLgpyZXRyeSgpIHsKICBmb3IgYXR0ZW1wdCBpbiAxIDIgMzsgZG8KICAgICIkQCIgJiYgcmV0dXJuIDAKICAgIFsgIiRhdHRlbXB0IiAtbHQgMyBdICYmIHNsZWVwIDEwCiAgZG9uZQogIGVjaG8gInVzZXIgZGF0YTogZmFpbGVkIGFmdGVyIDMgYXR0ZW1wdHM6ICQqIiA+JjIKICByZXR1cm4gMQp9CgojIC0tLS0gMS4gRG9ja2VyIC0tLS0KcmV0cnkgZG5mIGluc3RhbGwgLXkgZG9ja2VyCnN5c3RlbWN0bCBlbmFibGUgLS1ub3cgZG9ja2VyCgojIC0tLS0gMi4gV2hvIGFtIEk/IChJTURTdjI6IGdldCBhIHNob3J0LWxpdmVkIHRva2VuLCB0aGVuIGFzayB3aXRoIGl0KSAtLS0tCiMgLWYgbWFrZXMgY3VybCBmYWlsIG9uIGFuIEhUVFAgZXJyb3IgaW5zdGVhZCBvZiByZXR1cm5pbmcgdGhlIGVycm9yIHBhZ2UgYXMgaWYgaXQgd2VyZSB0aGUgYW5zd2VyLgpUT0tFTj0kKHJldHJ5IGN1cmwgLWZzUyAtWCBQVVQgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbGF0ZXN0L2FwaS90b2tlbiIgLUggIlgtYXdzLWVjMi1tZXRhZGF0YS10b2tlbi10dGwtc2Vjb25kczogMzAwIikKaW1kcygpIHsgcmV0cnkgY3VybCAtZnNTIC1IICJYLWF3cy1lYzItbWV0YWRhdGEtdG9rZW46ICRUT0tFTiIgImh0dHA6Ly8xNjkuMjU0LjE2OS4yNTQvbGF0ZXN0L21ldGEtZGF0YS8kMSI7IH0KUFJJVkFURV9JUD0kKGltZHMgbG9jYWwtaXB2NCkKSU5TVEFOQ0VfSUQ9JChpbWRzIGluc3RhbmNlLWlkKQoKIyAtLS0tIDMgYW5kIDQuIExvZyBpbiB0byBFQ1Igd2l0aCB0aGUgaW5zdGFuY2Ugcm9sZSBhbmQgcHVsbCB0aGUgaW1hZ2UgYnkgZGlnZXN0IC0tLS0KZWNyX3B1bGwoKSB7CiAgYXdzIGVjciBnZXQtbG9naW4tcGFzc3dvcmQgLS1yZWdpb24gInVzLWVhc3QtMSIgfCBkb2NrZXIgbG9naW4gLS11c2VybmFtZSBBV1MgLS1wYXNzd29yZC1zdGRpbiAiMDYxNzQ1NjY2NTY5LmRrci5lY3IudXMtZWFzdC0xLmFtYXpvbmF3cy5jb20iIFwKICAgICYmIGRvY2tlciBwdWxsICIwNjE3NDU2NjY1NjkuZGtyLmVjci51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS9pbmYyMDA2LWdycDIxLWFwcEBzaGEyNTY6ZmE3MmU5NDliNDdkZTljYjVjNjM3ODYwODA3MmNiM2IzNzY1MDNkZThkYzExYmJiMzRiOTg5NDBlYThjYjQ4MSIKfQpyZXRyeSBlY3JfcHVsbAoKIyAtLS0tIE5vbi1zZWNyZXQgc2V0dGluZ3Mgc2hhcmVkIGJ5IHRoZSB3ZWIgY29udGFpbmVyIGFuZCB0aGUgb25lLW9mZiBqb2JzIC0tLS0KaW5zdGFsbCAtZCAtbSAwNzU1IC9ldGMvaW5mMjAwNgpjYXQgPiAvZXRjL2luZjIwMDYvYXBwLmVudiA8PEVPRgpBUFBfUkVMRUFTRV9JRD1yZWxlYXNlLWMxOWQ1NDcKQVdTX1JFR0lPTj11cy1lYXN0LTEKREpBTkdPX0FMTE9XRURfSE9TVFM9c2hvcC1lYzIuZm91cnR5dHdvZmFjdG9ycy5tZQpESkFOR09fQ1NSRl9UUlVTVEVEX09SSUdJTlM9aHR0cHM6Ly9zaG9wLWVjMi5mb3VydHl0d29mYWN0b3JzLm1lCkRKQU5HT19FTlY9cHJvZHVjdGlvbgpESkFOR09fSFNUU19TRUNPTkRTPTM2MDAKREpBTkdPX1RSVVNUX1BST1hZPXRydWUKREpBTkdPX0hFQUxUSF9QUk9CRV9IT1NUPSRQUklWQVRFX0lQOjgwMDAKRU9GCmNobW9kIDA2NDQgL2V0Yy9pbmYyMDA2L2FwcC5lbnYKCiMgLS0tLSA1LiBIZWxwZXIgZm9yIHRoZSBvbmUtb2ZmIGpvYnMsIHJ1biBieSBoYW5kIG92ZXIgU2Vzc2lvbiBNYW5hZ2VyIC0tLS0KIyBXcml0dGVuIGJlZm9yZSB0aGUgd2ViIGNvbnRhaW5lciBzdGFydHMsIHNvIGl0IGV4aXN0cyBldmVuIGlmIHN0YXJ0aW5nIHRoZSB3ZWIgY29udGFpbmVyIGZhaWxzLgojICAgc3VkbyAvdXNyL2xvY2FsL2Jpbi9hcHAtam9iIGJvb3RzdHJhcCBweXRob24gdG9vbHMvZGJfYm9vdHN0cmFwLnB5CiMgICBzdWRvIC91c3IvbG9jYWwvYmluL2FwcC1qb2IgbWlncmF0aW9uIHB5dGhvbiBtYW5hZ2UucHkgbWlncmF0ZSAtLW5vaW5wdXQKIyAgIHN1ZG8gL3Vzci9sb2NhbC9iaW4vYXBwLWpvYiB3ZWIgcHl0aG9uIG1hbmFnZS5weSBjaGVja19kYXRhYmFzZQojIEVhY2ggcnVuIGlzIGEgdGhyb3dhd2F5IGNvbnRhaW5lciBob2xkaW5nIG9ubHkgdGhhdCBqb2IncyBzZWNyZXQgbmFtZS4KY2F0ID4gL3Vzci9sb2NhbC9iaW4vYXBwLWpvYiA8PEVPRgojIS9iaW4vYmFzaApzZXQgLWV1byBwaXBlZmFpbApqb2I9IlwkezE6LX0iOyBbIFwkIyAtZ3QgMCBdICYmIHNoaWZ0CmNhc2UgIlwkam9iIiBpbgogIHdlYnxtaWdyYXRpb258Ym9vdHN0cmFwKSA7OwogICopIGVjaG8gInVzYWdlOiBhcHAtam9iIHdlYnxtaWdyYXRpb258Ym9vdHN0cmFwIDxjb21tYW5kLi4uPiIgPiYyOyBleGl0IDIgOzsKZXNhYwpleGVjIGRvY2tlciBydW4gLS1ybSBcXAogIC0tZW52LWZpbGUgL2V0Yy9pbmYyMDA2L2FwcC5lbnYgXFwKICAtZSBBV1NfU0VDUkVUX0lEPSJpbmYyMDA2LWdycDIxL1wkam9iIiBcXAogIC0tbG9nLWRyaXZlciBhd3Nsb2dzIFxcCiAgLS1sb2ctb3B0IGF3c2xvZ3MtcmVnaW9uPSJ1cy1lYXN0LTEiIFxcCiAgLS1sb2ctb3B0IGF3c2xvZ3MtZ3JvdXA9Ii9pbmYyMDA2LWdycDIxLWVjMi9hcHAiIFxcCiAgLS1sb2ctb3B0IG1vZGU9YmxvY2tpbmcgXFwKICAtLWxvZy1vcHQgYXdzbG9ncy1zdHJlYW09ImpvYi1cJGpvYi0kSU5TVEFOQ0VfSUQtXCQoZGF0ZSAtdSArJVklbSVkVCVIJU0lU1opIiBcXAogICIwNjE3NDU2NjY1NjkuZGtyLmVjci51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS9pbmYyMDA2LWdycDIxLWFwcEBzaGEyNTY6ZmE3MmU5NDliNDdkZTljYjVjNjM3ODYwODA3MmNiM2IzNzY1MDNkZThkYzExYmJiMzRiOTg5NDBlYThjYjQ4MSIgIlwkQCIKRU9GCmNobW9kIDA3NTUgL3Vzci9sb2NhbC9iaW4vYXBwLWpvYgoKIyAtLS0tIDYuIFRoZSB3ZWIgY29udGFpbmVyIC0tLS0KIyAtLXJlc3RhcnQgdW5sZXNzLXN0b3BwZWQ6IERvY2tlciByZXN0YXJ0cyBpdCBhZnRlciBhIGNyYXNoICh3aXRoIGdyb3dpbmcgZGVsYXlzKSBhbmQgYWZ0ZXIgYSByZWJvb3QuCiMgVW50aWwgdGhlIGRhdGFiYXNlIGlzIGJvb3RzdHJhcHBlZCBhbmQgbWlncmF0ZWQsIGl0IGZhaWxzIGF0IHN0YXJ0dXAgYW5kIHJlc3RhcnRzOyB0aGF0IGlzIGV4cGVjdGVkLgojIEEgZmFpbGVkIHN0YXJ0IChmb3IgZXhhbXBsZSBjcmVhdGluZyB0aGUgbG9nIHN0cmVhbSkgY2FuIGxlYXZlIGEgc3RvcHBlZCBjb250YWluZXIgbmFtZWQgIndlYiIgYmVoaW5kOwojIHJlbW92ZSBpdCBiZWZvcmUgZWFjaCBhdHRlbXB0IHNvIHRoZSByZXRyeSBkb2VzIG5vdCBmYWlsIG9uIHRoZSBuYW1lLgpzdGFydF93ZWIoKSB7CiAgZG9ja2VyIHJtIC1mIHdlYiA+L2Rldi9udWxsIDI+JjEgfHwgdHJ1ZQogIGRvY2tlciBydW4gLWQgLS1uYW1lIHdlYiAtLXJlc3RhcnQgdW5sZXNzLXN0b3BwZWQgLXAgODAwMDo4MDAwIFwKICAtLWVudi1maWxlIC9ldGMvaW5mMjAwNi9hcHAuZW52IFwKICAtZSBBV1NfU0VDUkVUX0lEPSJpbmYyMDA2LWdycDIxL3dlYiIgXAogIC0tbG9nLWRyaXZlciBhd3Nsb2dzIFwKICAtLWxvZy1vcHQgYXdzbG9ncy1yZWdpb249InVzLWVhc3QtMSIgXAogIC0tbG9nLW9wdCBhd3Nsb2dzLWdyb3VwPSIvaW5mMjAwNi1ncnAyMS1lYzIvYXBwIiBcCiAgLS1sb2ctb3B0IG1vZGU9YmxvY2tpbmcgXAogIC0tbG9nLW9wdCBhd3Nsb2dzLXN0cmVhbT0id2ViLSRJTlNUQU5DRV9JRCIgXAogICAgIjA2MTc0NTY2NjU2OS5ka3IuZWNyLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tL2luZjIwMDYtZ3JwMjEtYXBwQHNoYTI1NjpmYTcyZTk0OWI0N2RlOWNiNWM2Mzc4NjA4MDcyY2IzYjM3NjUwM2RlOGRjMTFiYmIzNGI5ODk0MGVhOGNiNDgxIgp9CnJldHJ5IHN0YXJ0X3dlYgoKZWNobyAidXNlciBkYXRhIGZpbmlzaGVkOiB3ZWIgY29udGFpbmVyIHN0YXJ0ZWQgZnJvbSAwNjE3NDU2NjY1NjkuZGtyLmVjci51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS9pbmYyMDA2LWdycDIxLWFwcEBzaGEyNTY6ZmE3MmU5NDliNDdkZTljYjVjNjM3ODYwODA3MmNiM2IzNzY1MDNkZThkYzExYmJiMzRiOTg5NDBlYThjYjQ4MSIK" [90m-> null[0m[0m
+      [31m-[0m[0m vpc_security_group_ids               = [] [90m-> null[0m[0m
+        [90m# (7 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m block_device_mappings {
+          [31m-[0m[0m device_name  = "/dev/xvda" [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+
+          [31m-[0m[0m ebs {
+              [31m-[0m[0m delete_on_termination      = "true" [90m-> null[0m[0m
+              [31m-[0m[0m encrypted                  = "true" [90m-> null[0m[0m
+              [31m-[0m[0m iops                       = 0 [90m-> null[0m[0m
+              [31m-[0m[0m throughput                 = 0 [90m-> null[0m[0m
+              [31m-[0m[0m volume_initialization_rate = 0 [90m-> null[0m[0m
+              [31m-[0m[0m volume_size                = 16 [90m-> null[0m[0m
+              [31m-[0m[0m volume_type                = "gp3" [90m-> null[0m[0m
+                [90m# (2 unchanged attributes hidden)[0m[0m
+            }
+        }
+
+      [31m-[0m[0m iam_instance_profile {
+          [31m-[0m[0m arn  = "arn:aws:iam::<ACCOUNT>:instance-profile/LabInstanceProfile" [90m-> null[0m[0m
+            name = [90mnull[0m[0m
+        }
+
+      [31m-[0m[0m metadata_options {
+          [31m-[0m[0m http_endpoint               = "enabled" [90m-> null[0m[0m
+          [31m-[0m[0m http_put_response_hop_limit = 2 [90m-> null[0m[0m
+          [31m-[0m[0m http_tokens                 = "required" [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m monitoring {
+          [31m-[0m[0m enabled = true [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m network_interfaces {
+          [31m-[0m[0m associate_public_ip_address  = "true" [90m-> null[0m[0m
+          [31m-[0m[0m delete_on_termination        = "true" [90m-> null[0m[0m
+          [31m-[0m[0m device_index                 = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ena_queue_count              = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ipv4_address_count           = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ipv4_addresses               = [] [90m-> null[0m[0m
+          [31m-[0m[0m ipv4_prefix_count            = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ipv4_prefixes                = [] [90m-> null[0m[0m
+          [31m-[0m[0m ipv6_address_count           = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ipv6_addresses               = [] [90m-> null[0m[0m
+          [31m-[0m[0m ipv6_prefix_count            = 0 [90m-> null[0m[0m
+          [31m-[0m[0m ipv6_prefixes                = [] [90m-> null[0m[0m
+          [31m-[0m[0m network_card_index           = 0 [90m-> null[0m[0m
+          [31m-[0m[0m security_groups              = [
+              [31m-[0m[0m "sg-022114c7028ec94a5",
+            ] [90m-> null[0m[0m
+            [90m# (7 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m tag_specifications {
+          [31m-[0m[0m resource_type = "instance" [90m-> null[0m[0m
+          [31m-[0m[0m tags          = {
+              [31m-[0m[0m "Env"       = "evidence"
+              [31m-[0m[0m "ManagedBy" = "terraform"
+              [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-app"
+              [31m-[0m[0m "Project"   = "inf2006-grp21"
+              [31m-[0m[0m "Stack"     = "ec2"
+            } [90m-> null[0m[0m
+        }
+      [31m-[0m[0m tag_specifications {
+          [31m-[0m[0m resource_type = "volume" [90m-> null[0m[0m
+          [31m-[0m[0m tags          = {
+              [31m-[0m[0m "Env"       = "evidence"
+              [31m-[0m[0m "ManagedBy" = "terraform"
+              [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-app-root"
+              [31m-[0m[0m "Project"   = "inf2006-grp21"
+              [31m-[0m[0m "Stack"     = "ec2"
+            } [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_log_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_log_group" "app" {
+      [31m-[0m[0m arn                         = "arn:aws:logs:us-east-1:<ACCOUNT>:log-group:/inf2006-grp21-ec2/app" [90m-> null[0m[0m
+      [31m-[0m[0m deletion_protection_enabled = false [90m-> null[0m[0m
+      [31m-[0m[0m id                          = "/inf2006-grp21-ec2/app" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_class             = "STANDARD" [90m-> null[0m[0m
+      [31m-[0m[0m name                        = "/inf2006-grp21-ec2/app" [90m-> null[0m[0m
+      [31m-[0m[0m region                      = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m retention_in_days           = 7 [90m-> null[0m[0m
+      [31m-[0m[0m skip_destroy                = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                        = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-log-app"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                    = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-log-app"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "no_healthy_hosts" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "No healthy target behind the load balancer for 2 minutes: the shop is down" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-ec2-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-ec2-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "LessThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-ec2-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "HealthyHostCount" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Minimum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 1 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "breaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.target_5xx[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "target_5xx" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "The app returned more than 5 server errors in a minute, twice running" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-ec2-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-ec2-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "GreaterThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-ec2-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "HTTPCode_Target_5XX_Count" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Sum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 5 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "notBreaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "unhealthy_hosts" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "At least one target has failed its /health/ check for 2 minutes" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-ec2-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-ec2-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "GreaterThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-ec2-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "UnHealthyHostCount" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Maximum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 0 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "notBreaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_query_definition.problems_per_minute[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_query_definition" "problems_per_minute" {
+      [31m-[0m[0m arn                 = "arn:aws:logs:us-east-1:<ACCOUNT>:query-definition:5111ae2a-15c7-4b0a-b596-4bf2036c192a" [90m-> null[0m[0m
+      [31m-[0m[0m id                  = "5111ae2a-15c7-4b0a-b596-4bf2036c192a" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_names     = [
+          [31m-[0m[0m "/inf2006-grp21-ec2/app",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                = "inf2006-grp21-ec2/errors-and-warnings-per-minute" [90m-> null[0m[0m
+      [31m-[0m[0m query_definition_id = "5111ae2a-15c7-4b0a-b596-4bf2036c192a" [90m-> null[0m[0m
+      [31m-[0m[0m query_string        = <<-EOT
+            filter level in ["ERROR", "WARNING"]
+            | stats count(*) as events by bin(1m), level
+            | sort bin(1m) desc
+        EOT [90m-> null[0m[0m
+      [31m-[0m[0m region              = "us-east-1" [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_query_definition.recent_problems[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_query_definition" "recent_problems" {
+      [31m-[0m[0m arn                 = "arn:aws:logs:us-east-1:<ACCOUNT>:query-definition:5ea413df-a88f-45eb-90e2-0a6d2eeebffc" [90m-> null[0m[0m
+      [31m-[0m[0m id                  = "5ea413df-a88f-45eb-90e2-0a6d2eeebffc" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_names     = [
+          [31m-[0m[0m "/inf2006-grp21-ec2/app",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                = "inf2006-grp21-ec2/recent-errors-and-security-warnings" [90m-> null[0m[0m
+      [31m-[0m[0m query_definition_id = "5ea413df-a88f-45eb-90e2-0a6d2eeebffc" [90m-> null[0m[0m
+      [31m-[0m[0m query_string        = <<-EOT
+            fields @timestamp, level, logger, status, request_id, message
+            | filter level in ["ERROR", "WARNING"]
+            | sort @timestamp desc
+            | limit 50
+        EOT [90m-> null[0m[0m
+      [31m-[0m[0m region              = "us-east-1" [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_lb.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb" "app" {
+      [31m-[0m[0m arn                                                          = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m arn_suffix                                                   = "app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m client_keep_alive                                            = 3600 [90m-> null[0m[0m
+      [31m-[0m[0m desync_mitigation_mode                                       = "defensive" [90m-> null[0m[0m
+      [31m-[0m[0m dns_name                                                     = "inf2006-grp21-ec2-alb-675076404.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+      [31m-[0m[0m drop_invalid_header_fields                                   = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_cross_zone_load_balancing                             = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_deletion_protection                                   = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_http2                                                 = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_prefix_for_ipv6_source_nat                            = "off" [90m-> null[0m[0m
+      [31m-[0m[0m enable_tls_version_and_cipher_suite_headers                  = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_waf_fail_open                                         = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_xff_client_port                                       = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_zonal_shift                                           = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                                           = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m idle_timeout                                                 = 60 [90m-> null[0m[0m
+      [31m-[0m[0m internal                                                     = false [90m-> null[0m[0m
+      [31m-[0m[0m ip_address_type                                              = "ipv4" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_type                                           = "application" [90m-> null[0m[0m
+      [31m-[0m[0m name                                                         = "inf2006-grp21-ec2-alb" [90m-> null[0m[0m
+      [31m-[0m[0m preserve_host_header                                         = false [90m-> null[0m[0m
+      [31m-[0m[0m region                                                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_groups                                              = [
+          [31m-[0m[0m "sg-04f14bade0ca81162",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m subnets                                                      = [
+          [31m-[0m[0m "subnet-00a90504457c9cd4e",
+          [31m-[0m[0m "subnet-0455388ee1b027306",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                         = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-alb"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-alb"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                                                       = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+      [31m-[0m[0m xff_header_processing_mode                                   = "append" [90m-> null[0m[0m
+      [31m-[0m[0m zone_id                                                      = "Z35SXDOTRQ7X7K" [90m-> null[0m[0m
+        [90m# (3 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m access_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m connection_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m health_check_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m subnet_mapping {
+          [31m-[0m[0m subnet_id            = "subnet-00a90504457c9cd4e" [90m-> null[0m[0m
+            [90m# (4 unchanged attributes hidden)[0m[0m
+        }
+      [31m-[0m[0m subnet_mapping {
+          [31m-[0m[0m subnet_id            = "subnet-0455388ee1b027306" [90m-> null[0m[0m
+            [90m# (4 unchanged attributes hidden)[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_listener.http[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_listener" "http" {
+      [31m-[0m[0m arn                                                                 = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ec9b39e37eb966eb" [90m-> null[0m[0m
+      [31m-[0m[0m id                                                                  = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ec9b39e37eb966eb" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arn                                                   = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m port                                                                = 80 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                                                            = "HTTP" [90m-> null[0m[0m
+      [31m-[0m[0m region                                                              = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m routing_http_response_server_enabled                                = true [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                                = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                            = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+        [90m# (11 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m order            = 1 [90m-> null[0m[0m
+          [31m-[0m[0m type             = "redirect" [90m-> null[0m[0m
+            [90m# (1 unchanged attribute hidden)[0m[0m
+
+          [31m-[0m[0m redirect {
+              [31m-[0m[0m host        = "#{host}" [90m-> null[0m[0m
+              [31m-[0m[0m path        = "/#{path}" [90m-> null[0m[0m
+              [31m-[0m[0m port        = "443" [90m-> null[0m[0m
+              [31m-[0m[0m protocol    = "HTTPS" [90m-> null[0m[0m
+              [31m-[0m[0m query       = "#{query}" [90m-> null[0m[0m
+              [31m-[0m[0m status_code = "HTTP_301" [90m-> null[0m[0m
+            }
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_listener.https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_listener" "https" {
+      [31m-[0m[0m arn                                                                   = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ae4e3b7404d9d4c6" [90m-> null[0m[0m
+      [31m-[0m[0m certificate_arn                                                       = "arn:aws:acm:us-east-1:<ACCOUNT>:certificate/4907eb0b-a764-4083-b2e7-c22d67ddbbb7" [90m-> null[0m[0m
+      [31m-[0m[0m id                                                                    = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ae4e3b7404d9d4c6" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arn                                                     = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m port                                                                  = 443 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                                                              = "HTTPS" [90m-> null[0m[0m
+      [31m-[0m[0m region                                                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m routing_http_response_server_enabled                                  = true [90m-> null[0m[0m
+      [31m-[0m[0m ssl_policy                                                            = "ELBSecurityPolicy-TLS13-1-2-2021-06" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+        [90m# (18 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m order            = 1 [90m-> null[0m[0m
+          [31m-[0m[0m target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+          [31m-[0m[0m type             = "forward" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m mutual_authentication {
+          [31m-[0m[0m ignore_client_certificate_expiry = false [90m-> null[0m[0m
+          [31m-[0m[0m mode                             = "off" [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_target_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_target_group" "app" {
+      [31m-[0m[0m arn                                = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+      [31m-[0m[0m arn_suffix                         = "targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+      [31m-[0m[0m deregistration_delay               = "30" [90m-> null[0m[0m
+      [31m-[0m[0m id                                 = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+      [31m-[0m[0m ip_address_type                    = "ipv4" [90m-> null[0m[0m
+      [31m-[0m[0m lambda_multi_value_headers_enabled = false [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arns                 = [
+          [31m-[0m[0m "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_algorithm_type      = "round_robin" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_anomaly_mitigation  = "off" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_cross_zone_enabled  = "use_load_balancer_configuration" [90m-> null[0m[0m
+      [31m-[0m[0m name                               = "inf2006-grp21-ec2-tg" [90m-> null[0m[0m
+      [31m-[0m[0m port                               = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                           = "HTTP" [90m-> null[0m[0m
+      [31m-[0m[0m protocol_version                   = "HTTP1" [90m-> null[0m[0m
+      [31m-[0m[0m proxy_protocol_v2                  = false [90m-> null[0m[0m
+      [31m-[0m[0m region                             = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m slow_start                         = 0 [90m-> null[0m[0m
+      [31m-[0m[0m tags                               = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-tg"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                           = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-tg"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m target_control_port                = 0 [90m-> null[0m[0m
+      [31m-[0m[0m target_type                        = "instance" [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                             = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+
+      [31m-[0m[0m health_check {
+          [31m-[0m[0m enabled             = true [90m-> null[0m[0m
+          [31m-[0m[0m healthy_threshold   = 2 [90m-> null[0m[0m
+          [31m-[0m[0m interval            = 10 [90m-> null[0m[0m
+          [31m-[0m[0m matcher             = "200" [90m-> null[0m[0m
+          [31m-[0m[0m path                = "/health/" [90m-> null[0m[0m
+          [31m-[0m[0m port                = "traffic-port" [90m-> null[0m[0m
+          [31m-[0m[0m protocol            = "HTTP" [90m-> null[0m[0m
+          [31m-[0m[0m timeout             = 5 [90m-> null[0m[0m
+          [31m-[0m[0m unhealthy_threshold = 3 [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m stickiness {
+          [31m-[0m[0m cookie_duration = 86400 [90m-> null[0m[0m
+          [31m-[0m[0m enabled         = false [90m-> null[0m[0m
+          [31m-[0m[0m type            = "lb_cookie" [90m-> null[0m[0m
+            [90m# (1 unchanged attribute hidden)[0m[0m
+        }
+
+      [31m-[0m[0m target_failover {}
+
+      [31m-[0m[0m target_group_health {
+          [31m-[0m[0m dns_failover {
+              [31m-[0m[0m minimum_healthy_targets_count      = "1" [90m-> null[0m[0m
+              [31m-[0m[0m minimum_healthy_targets_percentage = "off" [90m-> null[0m[0m
+            }
+          [31m-[0m[0m unhealthy_state_routing {
+              [31m-[0m[0m minimum_healthy_targets_count      = 1 [90m-> null[0m[0m
+              [31m-[0m[0m minimum_healthy_targets_percentage = "off" [90m-> null[0m[0m
+            }
+        }
+
+      [31m-[0m[0m target_health_state {}
+    }
+
+[1m  # module.web_entry.aws_route53_record.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_route53_record" "app" {
+      [31m-[0m[0m fqdn                             = "shop-ec2.fourtytwofactors.me" [90m-> null[0m[0m
+      [31m-[0m[0m id                               = "Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A" [90m-> null[0m[0m
+      [31m-[0m[0m multivalue_answer_routing_policy = false [90m-> null[0m[0m
+      [31m-[0m[0m name                             = "shop-ec2.fourtytwofactors.me" [90m-> null[0m[0m
+      [31m-[0m[0m records                          = [] [90m-> null[0m[0m
+      [31m-[0m[0m ttl                              = 0 [90m-> null[0m[0m
+      [31m-[0m[0m type                             = "A" [90m-> null[0m[0m
+      [31m-[0m[0m zone_id                          = "Z09473223DWPUMU2OO4WR" [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m alias {
+          [31m-[0m[0m evaluate_target_health = true [90m-> null[0m[0m
+          [31m-[0m[0m name                   = "inf2006-grp21-ec2-alb-675076404.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+          [31m-[0m[0m zone_id                = "Z35SXDOTRQ7X7K" [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_security_group.alb[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_security_group" "alb" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group/sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "ALB: HTTPS and HTTP-redirect from the internet" [90m-> null[0m[0m
+      [31m-[0m[0m egress                 = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "Forward requests and health checks to the app"
+              [31m-[0m[0m from_port        = 8000
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-022114c7028ec94a5",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 8000
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m ingress                = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTP from the internet, only to redirect to HTTPS"
+              [31m-[0m[0m from_port        = 80
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 80
+            },
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTPS from the internet"
+              [31m-[0m[0m from_port        = 443
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 443
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                   = "inf2006-grp21-ec2-sg-alb" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id               = "<ACCOUNT>" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m revoke_rules_on_delete = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                   = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-sg-alb"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-sg-alb"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                 = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_security_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_security_group" "app" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group/sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "App compute: port 8000 from the ALB only" [90m-> null[0m[0m
+      [31m-[0m[0m egress                 = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTPS to AWS APIs (ECR, Secrets Manager, S3, CloudWatch, SSM) and OS packages"
+              [31m-[0m[0m from_port        = 443
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 443
+            },
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "PostgreSQL to RDS"
+              [31m-[0m[0m from_port        = 5432
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-03abb4562e4857842",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 5432
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m ingress                = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "Gunicorn, from the ALB only"
+              [31m-[0m[0m from_port        = 8000
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-04f14bade0ca81162",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 8000
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                   = "inf2006-grp21-ec2-sg-app" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id               = "<ACCOUNT>" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m revoke_rules_on_delete = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                   = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-sg-app"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-sg-app"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                 = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.alb_to_app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "alb_to_app" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0610a055a828f70c2" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "Forward requests and health checks to the app" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0610a055a828f70c2" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0610a055a828f70c2" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 8000 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.app_https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "app_https" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-053740a7f3ed73a08" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTPS to AWS APIs (ECR, Secrets Manager, S3, CloudWatch, SSM) and OS packages" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 443 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-053740a7f3ed73a08" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-053740a7f3ed73a08" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 443 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.app_to_db[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "app_to_db" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0e8eb56f9ec183553" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "PostgreSQL to RDS" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 5432 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0e8eb56f9ec183553" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-03abb4562e4857842" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0e8eb56f9ec183553" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 5432 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.alb_http[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0ca0c2511386dc120" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTP from the internet, only to redirect to HTTPS" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 80 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-0ca0c2511386dc120" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-0ca0c2511386dc120" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 80 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.alb_https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-03e2daa93b0676a39" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTPS from the internet" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 443 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-03e2daa93b0676a39" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-03e2daa93b0676a39" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 443 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-006aec444c86531d7" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "Gunicorn, from the ALB only" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-006aec444c86531d7" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-04f14bade0ca81162" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-006aec444c86531d7" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 8000 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.db_from_app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0169b1878c708a065" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "PostgreSQL from the ec2 stack app compute" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 5432 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0169b1878c708a065" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-022114c7028ec94a5" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-03abb4562e4857842" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0169b1878c708a065" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 5432 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_wafv2_web_acl.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_wafv2_web_acl" "app" {
+      [31m-[0m[0m arn                         = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf" [90m-> null[0m[0m
+      [31m-[0m[0m capacity                    = 6 [90m-> null[0m[0m
+      [31m-[0m[0m description                 = "Rate limit on POST /login/ per client IP" [90m-> null[0m[0m
+      [31m-[0m[0m id                          = "5705ef5f-9a49-4d87-bba9-892c527a32bf" [90m-> null[0m[0m
+      [31m-[0m[0m lock_token                  = "986fd89f-d7bb-4bea-b76c-8e6bf6942c4e" [90m-> null[0m[0m
+      [31m-[0m[0m name                        = "inf2006-grp21-ec2-waf" [90m-> null[0m[0m
+      [31m-[0m[0m region                      = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m scope                       = "REGIONAL" [90m-> null[0m[0m
+      [31m-[0m[0m tags                        = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-ec2-waf"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                    = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-ec2-waf"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "ec2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m token_domains               = [] [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m allow {
+            }
+        }
+
+      [31m-[0m[0m rule {
+          [31m-[0m[0m name     = "login-rate-limit" [90m-> null[0m[0m
+          [31m-[0m[0m priority = 1 [90m-> null[0m[0m
+
+          [31m-[0m[0m action {
+              [31m-[0m[0m count {
+                }
+            }
+
+          [31m-[0m[0m statement {
+              [31m-[0m[0m rate_based_statement {
+                  [31m-[0m[0m aggregate_key_type    = "IP" [90m-> null[0m[0m
+                  [31m-[0m[0m evaluation_window_sec = 300 [90m-> null[0m[0m
+                  [31m-[0m[0m limit                 = 20 [90m-> null[0m[0m
+
+                  [31m-[0m[0m scope_down_statement {
+                      [31m-[0m[0m and_statement {
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "/login/" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m uri_path {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "POST" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m method {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+          [31m-[0m[0m visibility_config {
+              [31m-[0m[0m cloudwatch_metrics_enabled = true [90m-> null[0m[0m
+              [31m-[0m[0m metric_name                = "inf2006-grp21-ec2-login-rate" [90m-> null[0m[0m
+              [31m-[0m[0m sampled_requests_enabled   = true [90m-> null[0m[0m
+            }
+        }
+
+      [31m-[0m[0m visibility_config {
+          [31m-[0m[0m cloudwatch_metrics_enabled = true [90m-> null[0m[0m
+          [31m-[0m[0m metric_name                = "inf2006-grp21-ec2-waf" [90m-> null[0m[0m
+          [31m-[0m[0m sampled_requests_enabled   = true [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_wafv2_web_acl_association.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_wafv2_web_acl_association" "app" {
+      [31m-[0m[0m id           = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m region       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m resource_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3" [90m-> null[0m[0m
+      [31m-[0m[0m web_acl_arn  = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf" [90m-> null[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 0 to change, 25 to destroy.
+
+Changes to Outputs:
+  [31m-[0m[0m alb_dns_name       = "inf2006-grp21-ec2-alb-675076404.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+  [31m-[0m[0m asg_name           = "inf2006-grp21-ec2-asg" [90m-> null[0m[0m
+  [31m-[0m[0m hostname           = "shop-ec2.fourtytwofactors.me" [90m-> null[0m[0m
+  [31m-[0m[0m image_digest       = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481" [90m-> null[0m[0m
+  [31m-[0m[0m log_group_name     = "/inf2006-grp21-ec2/app" [90m-> null[0m[0m
+  [31m-[0m[0m security_group_ids = {
+      [31m-[0m[0m alb = "sg-04f14bade0ca81162"
+      [31m-[0m[0m app = "sg-022114c7028ec94a5"
+    } [90m-> null[0m[0m
+  [31m-[0m[0m target_group_arn   = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d" [90m-> null[0m[0m
+  [31m-[0m[0m web_acl_name       = "inf2006-grp21-ec2-waf" [90m-> null[0m[0m
+[0m[1m
+Do you really want to destroy all resources?[0m
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  [1mEnter a value:[0m [0m
+[0m[1maws_autoscaling_policy.requests: Destroying... [id=inf2006-grp21-ec2-requests-per-target][0m[0m
+[0m[1maws_autoscaling_policy.requests: Destruction complete after 2s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Destroying... [id=sgr-0ca0c2511386dc120][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Destroying... [id=inf2006-grp21-ec2-target-5xx][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Destroying... [id=inf2006-grp21-ec2-no-healthy-hosts][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Destroying... [id=sgr-0e8eb56f9ec183553][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ec9b39e37eb966eb][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Destroying... [id=sgr-0169b1878c708a065][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Destroying... [id=sgr-006aec444c86531d7][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Destroying... [id=sgr-03e2daa93b0676a39][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Destroying... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ae4e3b7404d9d4c6][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Destroying... [id=5111ae2a-15c7-4b0a-b596-4bf2036c192a][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Destruction complete after 1s[0m
+[0m[1maws_autoscaling_group.app: Destroying... [id=inf2006-grp21-ec2-asg][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Destroying... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Destroying... [id=sgr-0610a055a828f70c2][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Destroying... [id=5ea413df-a88f-45eb-90e2-0a6d2eeebffc][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Destroying... [id=inf2006-grp21-ec2-unhealthy-hosts][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Destroying... [id=sgr-053740a7f3ed73a08][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Destruction complete after 0s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Destruction complete after 2s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Destroying... [id=5705ef5f-9a49-4d87-bba9-892c527a32bf][0m[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A, 00m10s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 00m10s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A, 00m20s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 00m20s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A, 00m30s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 00m30s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Destruction complete after 32s[0m
+[0m[1mmodule.web_entry.aws_lb.app: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 00m40s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_lb.app: Still destroying... [id=arn:aws:elasticloadbalancing:us-east-1:...inf2006-grp21-ec2-alb/988e5d6ebd75dca3, 00m10s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 00m50s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_lb.app: Still destroying... [id=arn:aws:elasticloadbalancing:us-east-1:...inf2006-grp21-ec2-alb/988e5d6ebd75dca3, 00m20s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 01m00s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_lb.app: Destruction complete after 29s[0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Destroying... [id=sg-04f14bade0ca81162][0m[0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Destruction complete after 1s[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 01m10s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 01m20s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 01m30s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Still destroying... [id=inf2006-grp21-ec2-asg, 01m40s elapsed][0m[0m
+[0m[1maws_autoscaling_group.app: Destruction complete after 1m44s[0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d][0m[0m
+[0m[1maws_launch_template.app: Destroying... [id=lt-004ae5d92cd5a84ac][0m[0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Destruction complete after 2s[0m
+[0m[1maws_launch_template.app: Destruction complete after 2s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Destroying... [id=/inf2006-grp21-ec2/app][0m[0m
+[0m[1mmodule.web_entry.aws_security_group.app: Destroying... [id=sg-022114c7028ec94a5][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_security_group.app: Destruction complete after 1s[0m
+[0m[1m[32m
+Destroy complete! Resources: 25 destroyed.[0m
+
+== Leftovers (each list should be empty) ==
+load balancers:
+instances:
+NAT gateways:
+Done. Still running by design: the database, hosted zone, certificate, registry and secrets (base/).
+# exit: 0  end_utc: 2026-10-08T18:53:56Z
