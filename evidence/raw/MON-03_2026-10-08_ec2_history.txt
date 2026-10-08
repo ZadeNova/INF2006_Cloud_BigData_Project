@@ -1,0 +1,28 @@
+# file: evidence/raw/MON-03_2026-10-08_ec2_history.txt
+# date_utc: 2026-10-08T17:50:05Z
+# commit: 4e06901
+# command: run aws cloudwatch describe-alarm-history --alarm-name inf2006-grp21-ec2-target-5xx --start-date 2026-10-08T17:47:16Z --query AlarmHistoryItems[].{time:Timestamp,type:HistoryItemType,summary:HistorySummary}
+$ aws cloudwatch describe-alarm-history --alarm-name inf2006-grp21-ec2-target-5xx --start-date 2026-10-08T17:47:16Z --query AlarmHistoryItems[].{time:Timestamp,type:HistoryItemType,summary:HistorySummary}
+[
+    {
+        "time": "2026-10-09T01:49:36.474000+08:00",
+        "type": "Action",
+        "summary": "Successfully executed action arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms"
+    },
+    {
+        "time": "2026-10-09T01:49:36.429000+08:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from ALARM to OK"
+    },
+    {
+        "time": "2026-10-09T01:48:18.001000+08:00",
+        "type": "Action",
+        "summary": "Successfully executed action arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms"
+    },
+    {
+        "time": "2026-10-09T01:48:17.946000+08:00",
+        "type": "StateUpdate",
+        "summary": "Alarm updated from OK to ALARM"
+    }
+]
+# exit: 0  end_utc: 2026-10-08T17:50:07Z

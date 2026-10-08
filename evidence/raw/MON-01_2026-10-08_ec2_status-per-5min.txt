@@ -1,0 +1,306 @@
+# file: evidence/raw/MON-01_2026-10-08_ec2_status-per-5min.txt
+# date_utc: 2026-10-08T17:52:44Z
+# commit: 4e06901
+# command: insights filter ispresent(status) | stats count(*) as requests by status, bin(5m) as window | sort window asc
+$ aws logs start-query --log-group-name /inf2006-grp21-ec2/app (from 2026-10-08T11:52:40Z to now)
+query: filter ispresent(status) | stats count(*) as requests by status, bin(5m) as window | sort window asc
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 15842.0,
+    "recordsScanned": 15875.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 4195890.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 57.0
+  },
+  "results": [
+    {
+      "status": "400",
+      "window": "2026-10-08 14:50:00.000",
+      "requests": "252"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 14:55:00.000",
+      "requests": "8"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 15:00:00.000",
+      "requests": "6"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 15:15:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "404",
+      "window": "2026-10-08 15:30:00.000",
+      "requests": "3"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 15:30:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 15:30:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 15:30:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 15:35:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 15:55:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 15:55:00.000",
+      "requests": "27"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 15:55:00.000",
+      "requests": "50"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 16:05:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:10:00.000",
+      "requests": "238"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:10:00.000",
+      "requests": "250"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:15:00.000",
+      "requests": "445"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:15:00.000",
+      "requests": "445"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:20:00.000",
+      "requests": "447"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:20:00.000",
+      "requests": "456"
+    },
+    {
+      "status": "301",
+      "window": "2026-10-08 16:20:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:25:00.000",
+      "requests": "446"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:25:00.000",
+      "requests": "446"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 16:30:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:30:00.000",
+      "requests": "445"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:30:00.000",
+      "requests": "445"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:35:00.000",
+      "requests": "178"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:35:00.000",
+      "requests": "183"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 16:40:00.000",
+      "requests": "6"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:45:00.000",
+      "requests": "30"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:45:00.000",
+      "requests": "10"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:50:00.000",
+      "requests": "1203"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 16:50:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:50:00.000",
+      "requests": "394"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 16:55:00.000",
+      "requests": "329"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 16:55:00.000",
+      "requests": "1671"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 16:55:00.000",
+      "requests": "4"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:00:00.000",
+      "requests": "450"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:00:00.000",
+      "requests": "1676"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:05:00.000",
+      "requests": "100"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:05:00.000",
+      "requests": "533"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:10:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:10:00.000",
+      "requests": "20"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:15:00.000",
+      "requests": "177"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:15:00.000",
+      "requests": "184"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:20:00.000",
+      "requests": "100"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:20:00.000",
+      "requests": "217"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:25:00.000",
+      "requests": "827"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:25:00.000",
+      "requests": "181"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:30:00.000",
+      "requests": "834"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:30:00.000",
+      "requests": "182"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-08 17:30:00.000",
+      "requests": "5"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:35:00.000",
+      "requests": "223"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:35:00.000",
+      "requests": "838"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:40:00.000",
+      "requests": "548"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:40:00.000",
+      "requests": "122"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-08 17:45:00.000",
+      "requests": "96"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-08 17:45:00.000",
+      "requests": "92"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-08T17:52:47Z

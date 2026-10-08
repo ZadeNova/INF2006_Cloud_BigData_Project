@@ -1,0 +1,11 @@
+# file: evidence/raw/MON-03_2026-10-08_ec2_return-to-ok.txt
+# date_utc: 2026-10-08T17:48:18Z
+# commit: 4e06901
+# command: alarm_wait_ok inf2006-grp21-ec2-target-5xx
+17:48:20  ALARM
+17:48:37  ALARM
+17:48:54  ALARM
+17:49:11  ALARM
+17:49:28  ALARM
+17:49:44  OK
+# exit: 0  end_utc: 2026-10-08T17:49:44Z

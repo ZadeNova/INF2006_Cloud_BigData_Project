@@ -1,0 +1,46 @@
+# file: evidence/raw/MON-03_2026-10-08_ec2_email-alarm.txt
+# date_utc: 2026-10-08T17:48:17Z (the alarm timestamp in the email; received 01:48 AM SGT, 2026-10-09)
+# source: the ALARM notification email received through the SNS topic subscription, transcribed by hand from the
+#         screenshot the operator supplied. Redactions: account number -> <ACCOUNT>, recipient address -> <EMAIL>,
+#         unsubscribe link removed (it carries the subscription ID).
+# matches: MON-03_2026-10-08_ec2_history.txt (OK -> ALARM at 17:48:17 UTC, then "Successfully executed action ... sns")
+
+From: AWS Notifications <no-reply@sns.amazonaws.com>
+To: <EMAIL>
+
+You are receiving this email because your Amazon CloudWatch Alarm "inf2006-grp21-ec2-target-5xx" in the US East (N. Virginia) region has entered the ALARM state, because "Evidence session: forced to test the alarm-to-email path" at "Thursday 08 October, 2026 17:48:17 UTC".
+
+View this alarm in the AWS Management Console:
+<CONSOLE-LINK-REMOVED> (region us-east-1, alarm inf2006-grp21-ec2-target-5xx)
+
+Alarm Details:
+- Name:                       inf2006-grp21-ec2-target-5xx
+- Description:                The app returned more than 5 server errors in a minute, twice running
+- State Change:               OK -> ALARM
+- Reason for State Change:    Evidence session: forced to test the alarm-to-email path
+- Timestamp:                  Thursday 08 October, 2026 17:48:17 UTC
+- AWS Account:                <ACCOUNT>
+- Alarm Arn:                  arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-ec2-target-5xx
+
+Threshold:
+- The alarm is in the ALARM state when the metric is GreaterThanThreshold 5.0 for at least 2 of the last 2 period(s) of 60 seconds.
+
+Monitored Metric:
+- MetricNamespace:                     AWS/ApplicationELB
+- MetricName:                          HTTPCode_Target_5XX_Count
+- Dimensions:                          [TargetGroup = targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d] [LoadBalancer = app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3]
+- Period:                              60 seconds
+- Statistic:                           Sum
+- Unit:                                not specified
+- TreatMissingData:                    notBreaching
+
+State Change Actions:
+- OK: [arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms]
+- ALARM: [arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms]
+- INSUFFICIENT_DATA:
+
+--
+If you wish to stop receiving notifications from this topic, please click or visit the link below to unsubscribe:
+<UNSUBSCRIBE-LINK-REMOVED>
+
+Please do not reply directly to this email. If you have any questions or comments regarding this email, please contact us at https://aws.amazon.com/support

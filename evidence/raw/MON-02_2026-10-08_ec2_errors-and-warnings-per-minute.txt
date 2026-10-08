@@ -1,0 +1,12 @@
+# file: evidence/raw/MON-02_2026-10-08_ec2_errors-and-warnings-per-minute.txt
+# date_utc: 2026-10-08T17:52:54Z
+# commit: 4e06901
+# command: saved_query errors-and-warnings-per-minute
+saved query: inf2006-grp21-ec2/errors-and-warnings-per-minute
+$ aws logs start-query --log-group-name /inf2006-grp21-ec2/app (from 2026-10-08T11:52:40Z to now)
+query: filter level in ["ERROR", "WARNING"]
+| stats count(*) as events by bin(1m), level
+| sort bin(1m) desc
+
+aws: [ERROR]: An error occurred (MalformedQueryException) when calling the StartQuery operation: unexpected symbol found ( at line 3 and position 10 (Service: AWSLogs; Status Code: 400; Error Code: MalformedQueryException; Request ID: 2763e9b3-d074-49b8-a08e-6a4ef51001fb; Proxy: null)
+# exit: 1  end_utc: 2026-10-08T17:52:57Z

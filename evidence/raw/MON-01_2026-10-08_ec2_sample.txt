@@ -1,0 +1,141 @@
+# file: evidence/raw/MON-01_2026-10-08_ec2_sample.txt
+# date_utc: 2026-10-08T17:52:40Z
+# commit: 4e06901
+# command: insights fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+$ aws logs start-query --log-group-name /inf2006-grp21-ec2/app (from 2026-10-08T11:52:40Z to now)
+query: fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 15891.0,
+    "recordsScanned": 15891.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 4196916.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 20.0
+  },
+  "results": [
+    {
+      "@timestamp": "2026-10-08 17:52:22.314",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "APPLIED. Left: load orders 0 | order lines 0 | cart lines 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfNx8xNzkxNDgxOTQyMzE0"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.275",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "  most ordered: Classic Brown Sneaker · US 8 | stock 11 -> 14",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfNh8xNzkxNDgxOTQyMjc1"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.274",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "  most ordered: Converse Chuck High · US 9.5 | stock 45 -> 48",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfNR8xNzkxNDgxOTQyMjc0"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.273",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "  most ordered: Air Jordan 1 High \"Bred\" · US 8.5 | stock 10 -> 13",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfNB8xNzkxNDgxOTQyMjcz"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.272",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "  most ordered: Air Jordan 1 High · US 9 | stock 50 -> 53",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfMx8xNzkxNDgxOTQyMjcy"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.271",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "  most ordered: Air Jordan 1 High · US 8.5 | stock 18 -> 21",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfMh8xNzkxNDgxOTQyMjcx"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.269",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "accounts: 2200 | load orders: 37 | order lines: 37 | units to put back: 37 | products: 22 | cart lines: 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfMR8xNzkxNDgxOTQyMjY5"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:22.224",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175220Z",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTk0Mh8xNzkxNDgxOTQyNDQ1HzMxMDAxMjY5MzQ5NjIzNjE0ODEfMB8xNzkxNDgxOTQyMjI0"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.194",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "  most ordered: Classic Brown Sneaker · US 8 | stock 11 -> 14",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfNh8xNzkxNDgxOTI3MTk0"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.194",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "DRY RUN: nothing was changed. Run again with --apply to do it.",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfNx8xNzkxNDgxOTI3MTk0"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.193",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "  most ordered: Air Jordan 1 High \"Bred\" · US 8.5 | stock 10 -> 13",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfNB8xNzkxNDgxOTI3MTkz"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.193",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "  most ordered: Converse Chuck High · US 9.5 | stock 45 -> 48",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfNR8xNzkxNDgxOTI3MTkz"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.191",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "  most ordered: Air Jordan 1 High · US 9 | stock 50 -> 53",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfMx8xNzkxNDgxOTI3MTkx"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.190",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "  most ordered: Air Jordan 1 High · US 8.5 | stock 18 -> 21",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfMh8xNzkxNDgxOTI3MTkw"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.188",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "accounts: 2200 | load orders: 37 | order lines: 37 | units to put back: 37 | products: 22 | cart lines: 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfMR8xNzkxNDgxOTI3MTg4"
+    },
+    {
+      "@timestamp": "2026-10-08 17:52:07.142",
+      "@logStream": "job-web-i-0375a1086e96bad06-20261008T175205Z",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWVjMi9hcHAfMTc5MTQ4MTkyNx8xNzkxNDgxOTI3MzI5HzExNjI5NjQ4NDY2MTkxOTM5NDIfMB8xNzkxNDgxOTI3MTQy"
+    },
+    {
+      "@timestamp": "2026-10-08 17:46:55.978",
+      "@logStream": "web-i-0e489a0e9d6bcae85",
+      "@message": "{\"ts\":\"2026-10-08T17:46:55.978+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"339231e520d943f8898bd3b070083d07\",\"method\":\"GET\",\"path\":\"/cart/\",\"status\":200,\"duration_ms\":24.11,\"user_id\":21198}",
+      "@ptr": "CqYBCm0KIzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1lYzIvYXBwEAAaJGYzMDJhMTE2LWMyOWQtNDE4MC1hZjcxLTMwYTAxZTQxY2U1YiIOCKiL8t+RNBCntJXlkTQ40v2Nn400QKiL8t+RNEgAEjUaGAIGqXYLbAAAAAA5lOSlAAasfWxgAAACwiABKL+RgOWRNDDqrIDlkTQ4F0CkL0jzJFDhGRAWGAE="
+    },
+    {
+      "@timestamp": "2026-10-08 17:46:55.948",
+      "@logStream": "web-i-0e489a0e9d6bcae85",
+      "@message": "{\"ts\":\"2026-10-08T17:46:55.948+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"557b1ef0ba14496ba424093c0ba4b347\",\"method\":\"POST\",\"path\":\"/login/\",\"status\":302,\"duration_ms\":700.75,\"user_id\":null}",
+      "@ptr": "CqYBCm0KIzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1lYzIvYXBwEAAaJGYzMDJhMTE2LWMyOWQtNDE4MC1hZjcxLTMwYTAxZTQxY2U1YiIOCKiL8t+RNBCntJXlkTQ40v2Nn400QKiL8t+RNEgAEjUaGAIGqXYLbAAAAAA5lOSlAAasfWxgAAACwiABKL+RgOWRNDDqrIDlkTQ4F0CkL0jzJFDhGRAVGAE="
+    },
+    {
+      "@timestamp": "2026-10-08 17:46:55.275",
+      "@logStream": "web-i-0e489a0e9d6bcae85",
+      "@message": "{\"ts\":\"2026-10-08T17:46:55.274+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"db9740cda5744ce188d4a96ce0b8bc2a\",\"method\":\"GET\",\"path\":\"/cart/\",\"status\":200,\"duration_ms\":23.63,\"user_id\":21197}",
+      "@ptr": "CqYBCm0KIzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1lYzIvYXBwEAAaJGYzMDJhMTE2LWMyOWQtNDE4MC1hZjcxLTMwYTAxZTQxY2U1YiIOCKiL8t+RNBCntJXlkTQ40v2Nn400QKiL8t+RNEgAEjUaGAIGqXYLbAAAAAA5lOSlAAasfWxgAAACwiABKL+RgOWRNDDqrIDlkTQ4F0CkL0jzJFDhGRAUGAE="
+    },
+    {
+      "@timestamp": "2026-10-08 17:46:55.269",
+      "@logStream": "web-i-0375a1086e96bad06",
+      "@message": "{\"ts\":\"2026-10-08T17:46:55.269+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"702b5382c8f045bd8186ad193f2fe6ed\",\"method\":\"GET\",\"path\":\"/cart/\",\"status\":200,\"duration_ms\":14.24,\"user_id\":21193}",
+      "@ptr": "CqYBCm0KIzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1lYzIvYXBwEAAaJGYzMDJhMTE2LWMyOWQtNDE4MC1hZjcxLTMwYTAxZTQxY2U1YiIOCKiL8t+RNBCntJXlkTQ40v2Nn400QKiL8t+RNEgAEjUaGAIGqXYLbAAAAAA5lOSlAAasfWxgAAACwiABKL+RgOWRNDDqrIDlkTQ4F0CkL0jzJFDhGRAOGAE="
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-08T17:52:44Z
