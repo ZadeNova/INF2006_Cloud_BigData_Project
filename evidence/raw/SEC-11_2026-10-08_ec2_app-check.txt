@@ -1,0 +1,13 @@
+# file: evidence/raw/SEC-11_2026-10-08_ec2_app-check.txt
+# date_utc: 2026-10-08T15:05:23Z
+# commit: 74d394a
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/jobs.sh ec2 check
+Instance: i-0e489a0e9d6bcae85
+
+== check_database ==
+{"database": "ok", "migrations": "applied"}
+
+check_database: ok
+
+Done: check
+# exit: 0  end_utc: 2026-10-08T15:05:43Z

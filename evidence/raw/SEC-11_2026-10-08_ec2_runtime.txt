@@ -1,0 +1,17 @@
+# file: evidence/raw/SEC-11_2026-10-08_ec2_runtime.txt
+# date_utc: 2026-10-08T15:05:10Z
+# commit: 74d394a
+# command: sec11_runtime
+$ aws ec2 describe-launch-template-versions --launch-template-name inf2006-grp21-ec2-lt --versions $Latest --query LaunchTemplateVersions[0].LaunchTemplateData.IamInstanceProfile
+{
+    "Arn": "arn:aws:iam::<ACCOUNT>:instance-profile/LabInstanceProfile"
+}
+$ (user data, decoded) lines naming a secret, password or key:
+6:# here is visible to anyone who can read the launch template, so it holds no secret values. Only
+7:# secret names; the app fetches its own secret at startup with the instance role.
+34:  aws ecr get-login-password --region "us-east-1" | docker login --username AWS --password-stdin "<ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com" \
+39:# ---- Non-secret settings shared by the web container and the one-off jobs ----
+58:# Each run is a throwaway container holding only that job's secret name.
+69:  -e AWS_SECRET_ID="inf2006-grp21/\$job" \\
+88:  -e AWS_SECRET_ID="inf2006-grp21/web" \
+# exit: 0  end_utc: 2026-10-08T15:05:14Z

@@ -1,0 +1,13 @@
+# file: evidence/raw/PRE_2026-10-08_slr.txt
+# date_utc: 2026-10-08T14:32:13Z
+# commit: 81c0e2a
+# command: pre_slr
+$ aws iam get-role --role-name AWSServiceRoleForECS --query Role.{name:RoleName,created:CreateDate} --output json
+
+aws: [ERROR]: An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name AWSServiceRoleForECS cannot be found.
+VERDICT: AWSServiceRoleForECS missing. AWS normally creates it on first use; if the fargate apply fails on it, try: aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com
+$ aws iam get-role --role-name AWSServiceRoleForApplicationAutoScaling_ECSService --query Role.{name:RoleName,created:CreateDate} --output json
+
+aws: [ERROR]: An error occurred (NoSuchEntity) when calling the GetRole operation: The role with name AWSServiceRoleForApplicationAutoScaling_ECSService cannot be found.
+VERDICT: AWSServiceRoleForApplicationAutoScaling_ECSService missing. AWS normally creates it on first use; if the fargate apply fails on it, try: aws iam create-service-linked-role --aws-service-name ecs.application-autoscaling.amazonaws.com
+# exit: 0  end_utc: 2026-10-08T14:32:16Z

@@ -1,0 +1,35 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_jobs.txt
+# date_utc: 2026-10-08T15:01:43Z
+# commit: 74d394a
+# command: bash -c src/infrastructure/scripts/jobs.sh ec2 migrate && src/infrastructure/scripts/jobs.sh ec2 check && src/infrastructure/scripts/smoke.sh ec2
+Instance: i-0e489a0e9d6bcae85
+
+== migrate ==
+Operations to perform:
+  Apply all migrations: accounts, auth, cart, catalogue, contenttypes, orders, reporting, sessions
+Running migrations:
+  No migrations to apply.
+
+migrate: ok
+
+Done: migrate
+Instance: i-0e489a0e9d6bcae85
+
+== check_database ==
+{"database": "ok", "migrations": "applied"}
+
+check_database: ok
+
+Done: check
+Smoke test: https://shop-ec2.fourtytwofactors.me
+PASS  /health/ returns 200
+PASS  HTTP redirects to HTTPS (301)
+PASS  certificate verifies (Verification: OK )
+PASS  /login/ returns 200
+PASS  /products/ lists products (12 distinct product links)
+PASS  header strict-transport-security present
+PASS  header x-content-type-options present
+PASS  header x-frame-options present
+
+All checks passed.
+# exit: 0  end_utc: 2026-10-08T15:02:29Z

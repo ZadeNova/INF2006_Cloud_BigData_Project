@@ -1,0 +1,24 @@
+# file: evidence/raw/SESSION_2026-10-08_ec2_ids.txt
+# date_utc: 2026-10-08T15:04:46Z
+# commit: 74d394a
+# command: ids
+$ terraform -chdir=/home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/ec2 output
+alb_dns_name = "inf2006-grp21-ec2-alb-675076404.us-east-1.elb.amazonaws.com"
+asg_name = "inf2006-grp21-ec2-asg"
+hostname = "shop-ec2.fourtytwofactors.me"
+image_digest = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481"
+log_group_name = "/inf2006-grp21-ec2/app"
+security_group_ids = {
+  "alb" = "sg-04f14bade0ca81162"
+  "app" = "sg-022114c7028ec94a5"
+}
+target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d"
+web_acl_name = "inf2006-grp21-ec2-waf"
+$ aws elbv2 describe-target-groups --target-group-arns arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d --query TargetGroups[0].{target_group:TargetGroupArn,load_balancers:LoadBalancerArns}
+{
+    "target_group": "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d",
+    "load_balancers": [
+        "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3"
+    ]
+}
+# exit: 0  end_utc: 2026-10-08T15:04:48Z

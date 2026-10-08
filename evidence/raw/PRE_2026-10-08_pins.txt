@@ -1,0 +1,7 @@
+# file: evidence/raw/PRE_2026-10-08_pins.txt
+# date_utc: 2026-10-08T14:32:21Z
+# commit: 81c0e2a
+# command: pre_pins
+ec2: no session pin file (defaults: 1/2/1, WAF count)
+fargate: no session pin file (defaults: 1/2/1, WAF count)
+# exit: 0  end_utc: 2026-10-08T14:32:21Z

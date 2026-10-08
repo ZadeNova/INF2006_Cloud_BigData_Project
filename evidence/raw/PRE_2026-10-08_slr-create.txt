@@ -1,0 +1,55 @@
+# file: evidence/raw/PRE_2026-10-08_slr-create.txt
+# date_utc: 2026-10-08T14:33:38Z
+# commit: 81c0e2a
+# command: bash -c aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com; aws iam create-service-linked-role --aws-service-name ecs.application-autoscaling.amazonaws.com
+{
+    "Role": {
+        "Path": "/aws-service-role/ecs.amazonaws.com/",
+        "RoleName": "AWSServiceRoleForECS",
+        "RoleId": "AROAQ4YCUDIE6P5MP33WD",
+        "Arn": "arn:aws:iam::<ACCOUNT>:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+        "CreateDate": "2026-10-08T14:33:40+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": [
+                        "sts:AssumeRole"
+                    ],
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": [
+                            "ecs.amazonaws.com"
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
+{
+    "Role": {
+        "Path": "/aws-service-role/ecs.application-autoscaling.amazonaws.com/",
+        "RoleName": "AWSServiceRoleForApplicationAutoScaling_ECSService",
+        "RoleId": "AROAQ4YCUDIEQP6CTVA6X",
+        "Arn": "arn:aws:iam::<ACCOUNT>:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService",
+        "CreateDate": "2026-10-08T14:33:42+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Action": [
+                        "sts:AssumeRole"
+                    ],
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Service": [
+                            "ecs.application-autoscaling.amazonaws.com"
+                        ]
+                    }
+                }
+            ]
+        }
+    }
+}
+# exit: 0  end_utc: 2026-10-08T14:33:42Z

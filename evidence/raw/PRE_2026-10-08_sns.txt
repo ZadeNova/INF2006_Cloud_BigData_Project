@@ -1,0 +1,14 @@
+# file: evidence/raw/PRE_2026-10-08_sns.txt
+# date_utc: 2026-10-08T14:32:18Z
+# commit: 81c0e2a
+# command: pre_sns
+$ aws sns list-subscriptions-by-topic --topic-arn arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms
+[
+    {
+        "protocol": "email",
+        "endpoint": "<EMAIL>",
+        "arn": "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms:0a7fd548-d804-4ed7-b634-35da8b56d7a5"
+    }
+]
+VERDICT: an email subscription is confirmed (MON-03 will send email)
+# exit: 0  end_utc: 2026-10-08T14:32:21Z

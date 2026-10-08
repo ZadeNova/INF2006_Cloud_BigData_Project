@@ -1,0 +1,61 @@
+{
+  "run_id": "LOAD-ec2-smoke-r1_2026-10-08",
+  "type": "smoke",
+  "variant": "ec2",
+  "level": null,
+  "repeat": 1,
+  "seed": 42,
+  "harness_version": "1.0.0",
+  "locust_version": "2.46.6",
+  "python": "3.14.7",
+  "git_commit": "74d394adfbfc95ce2a02711dedcffb8a14d891e0",
+  "git_dirty_harness": true,
+  "command_line": "run.py smoke --variant ec2 --base-url https://shop-ec2.fourtytwofactors.me --repeat 1 --location laptop --yes",
+  "locust_command": "/home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/tests/load/.venv/bin/python -m locust -f /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/tests/load/locustfile.py --headless --host https://shop-ec2.fourtytwofactors.me --csv /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/tests/load/out/LOAD-ec2-smoke-r1_2026-10-08/locust --csv-full-history --html /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/tests/load/out/LOAD-ec2-smoke-r1_2026-10-08/report.html --exit-code-on-error 0",
+  "base_url": "https://shop-ec2.fourtytwofactors.me",
+  "generator": {
+    "location": "laptop",
+    "instance_type": "unknown",
+    "clock_offset_ms": -1.564
+  },
+  "plan": {
+    "think": 3,
+    "mix": {
+      "shopper": 0.9,
+      "abandoner": 0.075,
+      "buyer": 0.025
+    },
+    "sequence": [
+      "buyer",
+      "abandoner",
+      "shopper"
+    ],
+    "stages": [
+      {
+        "duration": 75,
+        "users": 2,
+        "spawn_rate": 1
+      }
+    ],
+    "windows": [
+      {
+        "label": "all",
+        "start": 0,
+        "end": 75,
+        "users": 2
+      }
+    ],
+    "markers": {},
+    "abort": {},
+    "units": 0,
+    "warmup_s": 120,
+    "processes": 1
+  },
+  "planned_seconds": 75,
+  "started_utc": "2026-10-08T15:57:49.781Z",
+  "ended_utc": "2026-10-08T15:59:05.087Z",
+  "exit_code": 0,
+  "aborted": false,
+  "abort_reason": null,
+  "wall_seconds": 75.9
+}

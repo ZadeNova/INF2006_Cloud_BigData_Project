@@ -1,0 +1,66 @@
+# file: evidence/raw/PRE_2026-10-08_labrole.txt
+# date_utc: 2026-10-08T14:32:11Z
+# commit: 81c0e2a
+# command: pre_labrole
+$ aws iam get-role --role-name LabRole --query Role.AssumeRolePolicyDocument.Statement[].Principal
+[
+    {
+        "AWS": "arn:aws:iam::<ACCOUNT>:role/LabRole",
+        "Service": [
+            "deepracer.amazonaws.com",
+            "s3.amazonaws.com",
+            "states.amazonaws.com",
+            "eks-fargate-pods.amazonaws.com",
+            "scheduler.amazonaws.com",
+            "batch.amazonaws.com",
+            "cognito-idp.amazonaws.com",
+            "resource-groups.amazonaws.com",
+            "firehose.amazonaws.com",
+            "sagemaker.amazonaws.com",
+            "autoscaling.amazonaws.com",
+            "apigateway.amazonaws.com",
+            "kms.amazonaws.com",
+            "forecast.amazonaws.com",
+            "kinesisanalytics.amazonaws.com",
+            "elasticmapreduce.amazonaws.com",
+            "rds.amazonaws.com",
+            "athena.amazonaws.com",
+            "databrew.amazonaws.com",
+            "redshift.amazonaws.com",
+            "secretsmanager.amazonaws.com",
+            "codedeploy.amazonaws.com",
+            "dynamodb.amazonaws.com",
+            "ssm.amazonaws.com",
+            "sqs.amazonaws.com",
+            "application-autoscaling.amazonaws.com",
+            "sns.amazonaws.com",
+            "rekognition.amazonaws.com",
+            "kinesis.amazonaws.com",
+            "iotanalytics.amazonaws.com",
+            "elasticfilesystem.amazonaws.com",
+            "eks.amazonaws.com",
+            "ec2.application-autoscaling.amazonaws.com",
+            "elasticloadbalancing.amazonaws.com",
+            "ecs.amazonaws.com",
+            "cloudformation.amazonaws.com",
+            "cloudtrail.amazonaws.com",
+            "credentials.iot.amazonaws.com",
+            "logs.amazonaws.com",
+            "iotevents.amazonaws.com",
+            "codecommit.amazonaws.com",
+            "lambda.amazonaws.com",
+            "iot.amazonaws.com",
+            "ec2.amazonaws.com",
+            "glue.amazonaws.com",
+            "codewhisperer.amazonaws.com",
+            "servicecatalog.amazonaws.com",
+            "backup.amazonaws.com",
+            "events.amazonaws.com",
+            "pipes.amazonaws.com",
+            "ecs-tasks.amazonaws.com",
+            "elasticbeanstalk.amazonaws.com"
+        ]
+    }
+]
+VERDICT: LabRole trusts ecs-tasks.amazonaws.com (variant B can run)
+# exit: 0  end_utc: 2026-10-08T14:32:12Z

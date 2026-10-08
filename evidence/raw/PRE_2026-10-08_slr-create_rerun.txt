@@ -1,0 +1,9 @@
+# file: evidence/raw/PRE_2026-10-08_slr-create_rerun.txt
+# date_utc: 2026-10-08T14:34:59Z
+# commit: 81c0e2a
+# command: bash -c aws iam create-service-linked-role --aws-service-name ecs.amazonaws.com; aws iam create-service-linked-role --aws-service-name ecs.application-autoscaling.amazonaws.com
+
+aws: [ERROR]: An error occurred (InvalidInput) when calling the CreateServiceLinkedRole operation: Service role name AWSServiceRoleForECS has been taken in this account, please try a different suffix.
+
+aws: [ERROR]: An error occurred (InvalidInput) when calling the CreateServiceLinkedRole operation: Service role name AWSServiceRoleForApplicationAutoScaling_ECSService has been taken in this account, please try a different suffix.
+# exit: 254  end_utc: 2026-10-08T14:35:03Z

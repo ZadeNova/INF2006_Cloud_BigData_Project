@@ -1,0 +1,13 @@
+# file: evidence/raw/DATA-01_2026-10-08_aws_refresh.txt
+# date_utc: 2026-10-08T15:10:27Z
+# commit: 74d394a
+# command: src/infrastructure/scripts/jobs.sh ec2 refresh
+Instance: i-0e489a0e9d6bcae85
+
+== refresh_analytics ==
+Run d224f83d-b353-44a9-9d51-b06fbea43d81 completed: 41345 daily rows from 71079 order lines, business dates 2025-01-01 to 2026-01-01, cutoff 2026-01-01T16:00:00+00:00, pruned 0 old run(s), 3.1s.
+
+refresh_analytics: ok
+
+Done: refresh
+# exit: 0  end_utc: 2026-10-08T15:10:46Z

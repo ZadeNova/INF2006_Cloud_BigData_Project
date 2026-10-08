@@ -1,0 +1,6 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_up.txt
+# date_utc: 2026-10-08T14:36:48Z
+# commit: 81c0e2a
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/up.sh ec2
+Image for ec2: release-c19d547
+# exit: 2  end_utc: 2026-10-08T14:36:52Z

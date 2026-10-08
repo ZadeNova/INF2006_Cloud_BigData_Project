@@ -1,0 +1,29 @@
+# file: evidence/raw/SEC-10_2026-10-08_ec2_listeners.txt
+# date_utc: 2026-10-08T15:04:54Z
+# commit: 74d394a
+# command: sec10_listeners
+$ aws elbv2 describe-listeners --load-balancer-arn arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3 --query Listeners[].{port:Port,protocol:Protocol,tls_policy:SslPolicy,action:DefaultActions[0].Type,redirect:DefaultActions[0].RedirectConfig}
+[
+    {
+        "port": 443,
+        "protocol": "HTTPS",
+        "tls_policy": "ELBSecurityPolicy-TLS13-1-2-2021-06",
+        "action": "forward",
+        "redirect": null
+    },
+    {
+        "port": 80,
+        "protocol": "HTTP",
+        "tls_policy": null,
+        "action": "redirect",
+        "redirect": {
+            "Protocol": "HTTPS",
+            "Port": "443",
+            "Host": "#{host}",
+            "Path": "/#{path}",
+            "Query": "#{query}",
+            "StatusCode": "HTTP_301"
+        }
+    }
+]
+# exit: 0  end_utc: 2026-10-08T15:04:58Z

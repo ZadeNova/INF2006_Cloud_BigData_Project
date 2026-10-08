@@ -1,0 +1,9 @@
+# file: evidence/raw/PRE_2026-10-08_quota.txt
+# date_utc: 2026-10-08T14:32:16Z
+# commit: 81c0e2a
+# command: pre_quota
+$ aws service-quotas get-service-quota --service-code fargate --quota-code L-3032A538 --query Quota.{name:QuotaName,value:Value} --output json
+
+aws: [ERROR]: An error occurred (AccessDeniedException) when calling the GetServiceQuota operation: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: servicequotas:GetServiceQuota on resource: arn:aws:servicequotas:us-east-1:<ACCOUNT>:fargate/L-3032A538 because no identity-based policy allows the servicequotas:GetServiceQuota action
+VERDICT: quota not readable in the lab; the first pin to 2 tasks is the test
+# exit: 0  end_utc: 2026-10-08T14:32:18Z

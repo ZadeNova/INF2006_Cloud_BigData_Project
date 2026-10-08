@@ -1,0 +1,26 @@
+# file: evidence/raw/SEC-09_2026-10-08_ec2_s3.txt
+# date_utc: 2026-10-08T15:05:04Z
+# commit: 74d394a
+# command: sec09_s3
+$ aws s3api get-public-access-block --bucket inf2006-grp21-data-0cef92f9df44a244b871f9a143
+{
+    "PublicAccessBlockConfiguration": {
+        "BlockPublicAcls": true,
+        "IgnorePublicAcls": true,
+        "BlockPublicPolicy": true,
+        "RestrictPublicBuckets": true
+    }
+}
+$ aws s3api get-bucket-policy-status --bucket inf2006-grp21-data-0cef92f9df44a244b871f9a143
+{
+    "PolicyStatus": {
+        "IsPublic": false
+    }
+}
+anonymous list request:
+$ curl -s -o /dev/null -w HTTP %{http_code}\n --max-time 15 https://inf2006-grp21-data-0cef92f9df44a244b871f9a143.s3.amazonaws.com/
+HTTP 403
+anonymous object request:
+$ curl -s -o /dev/null -w HTTP %{http_code}\n --max-time 15 https://inf2006-grp21-data-0cef92f9df44a244b871f9a143.s3.amazonaws.com/imports/anything.csv
+HTTP 403
+# exit: 0  end_utc: 2026-10-08T15:05:10Z

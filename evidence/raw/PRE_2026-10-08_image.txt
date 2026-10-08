@@ -1,0 +1,16 @@
+# file: evidence/raw/PRE_2026-10-08_image.txt
+# date_utc: 2026-10-08T14:32:08Z
+# commit: 81c0e2a
+# command: pre_image
+image_tag in ec2/: release-c19d547   in fargate/: none, up.sh fargate copies the ec2 tag
+$ aws ecr describe-images --repository-name inf2006-grp21-app --image-ids imageTag=release-c19d547 --query imageDetails[0].{tags:imageTags,digest:imageDigest,pushed:imagePushedAt}
+{
+    "tags": [
+        "release-c19d547",
+        "c19d547"
+    ],
+    "digest": "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481",
+    "pushed": "2026-09-29T16:39:23.221000+08:00"
+}
+VERDICT: release-c19d547 is in ECR
+# exit: 0  end_utc: 2026-10-08T14:32:10Z
