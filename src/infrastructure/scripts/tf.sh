@@ -25,7 +25,7 @@ SHA="$(git -C "$INFRA" rev-parse --short HEAD)"
 # ADR-017: the two variants are compared on the same image. Release tags are immutable, so equal tags are the same bytes.
 # A deliberate difference (for example timing a rollout) needs ALLOW_IMAGE_MISMATCH=1.
 if { [ "$FOLDER" = ec2 ] || [ "$FOLDER" = fargate ]; } && [ "$ACTION" = plan ] && [ -z "${ALLOW_IMAGE_MISMATCH:-}" ]; then
-  tag_of() { sed -n 's/^image_tag *= *"\(.*\)".*/\1/p' "$INFRA/$1/image.auto.tfvars" 2>/dev/null; }
+  tag_of() { sed -n 's/^image_tag *= *"\(.*\)".*/\1/p' "$INFRA/$1/image.auto.tfvars" 2>/dev/null || true; }   # a stack with no image yet is not an error
   a="$(tag_of ec2)"; b="$(tag_of fargate)"
   [ -z "$a" ] || [ -z "$b" ] || [ "$a" = "$b" ] \
     || die "ec2 runs $a but fargate runs $b: the comparison needs the same image. Make them equal (copy one image.auto.tfvars over the other), or set ALLOW_IMAGE_MISMATCH=1 for a deliberate difference"
