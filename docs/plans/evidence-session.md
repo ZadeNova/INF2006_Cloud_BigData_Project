@@ -53,11 +53,11 @@
 | 1:20 | T1 | `$E ec2 pin 2 2 2 count`; wait for "Healthy", then 3 minutes |
 | 1:28 | | **RES-03b replace r1**, section 5. During its quiet 15 minutes after the kill, in T1: `$E ec2 alarm` (MON-03), then save the two emails as screenshots |
 | 1:50 | T1 | `$E ec2 pin 1 1 1 count`; wait, 3 minutes |
-| 1:57 | | **Saturation r1** (14 min, may stop early on its abort rule), section 5. Afterwards check `evidence/raw/LOAD-ec2-saturation-r1_<date>/cloudwatch/alb_healthy_hosts.csv` reads 1.0 and look at RDS CPU and the CPU credit balance |
+| 1:57 | | **Saturation r1** (20 min, may stop early on its abort rule), section 5. Afterwards check `evidence/raw/LOAD-ec2-saturation-r1_<date>/cloudwatch/alb_healthy_hosts.csv` reads 1.0 and look at RDS CPU and the CPU credit balance |
 | 2:25 | T1 | **Reset the database** (both variants share it; B must start from the same state): dry run `$E rec OPS_<date>_ec2_reset-dry bash -c 'cd tests/load && .venv/bin/python reset_state.py --target ec2'`, read the counts, then the same with `--apply` (name `..._reset-apply`). Every run must already be exported |
 | 2:27 | | **WAF test (SEC-17) skipped on A** because of the lab window; the WAF is one shared module, so it is run on B only (decided 9 October). Say so in the SEC-17 record |
 | 2:40 | T1 | `$E ec2 logs` (MON-01, MON-02, SEC-18). Check every run of today was exported. Then `$E ec2 down` (type `yes`; removes the pin file) |
-| 2:50 | | Done with A. If more than 60 minutes remain, a replace r2 fits before the WAF step; do the same on B later |
+| 2:50 | | Done with A. If more than 60 minutes remain, a replace r2 fits at the end; do the same on B later |
 
 ### Generator setup (T3, once per day)
 

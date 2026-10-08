@@ -72,6 +72,9 @@ def test_redaction():
     assert "123456789012" not in out and "<ACCOUNT>" in out
     assert "54.12.200.7" not in out and "<PUBLIC-IP>" in out
     assert "10.0.1.5" in out and "127.0.0.1" in out and "2.46.6" in out and "1790000000123" in out
+    # a metric value with exactly 12 decimals is a number, not an account id (the 9 October saturation export broke on this)
+    assert common.redact("1791484800.000,2026-10-08T18:40:00.000Z,3.141592653589") == "1791484800.000,2026-10-08T18:40:00.000Z,3.141592653589"
+    assert common.redact("account 123456789012.") == "account <ACCOUNT>."
 
 
 def test_percentiles():

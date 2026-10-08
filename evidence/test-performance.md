@@ -79,7 +79,7 @@ The plan's full matrix (three repeats of four ladder levels, saturation and Sing
 | Field | |
 |---|---|
 | Objective | Find the practical capacity (highest step meeting the limits) and the maximum throughput of one unit |
-| Setup | One unit, no think time, steps of 1, 2, 4, 8, 16, 32, 64, 128, 256 users for 120 s (first 30 s of each step discarded) |
+| Setup | One unit, no think time, steps of 1, 2, 4, 8, 16, 32, 64, 128, 256, 512 users for 120 s (first 30 s of each step discarded) |
 | Command / steps | `python run.py saturation --variant <ec2\|fargate> --base-url <host> --repeat <n> --location us-east-1` |
 | Expected result | Throughput rises then flattens; p95 and errors rise past the knee. Report capacity as page actions/s and as a multiple of 0.4 dynamic pages/s |
 | Actual result | |

@@ -102,7 +102,8 @@ def order_id_from_location(location):
 
 # --- redaction: nothing reaches evidence/raw without passing through this -----------------------------------
 
-_ACCOUNT_ID = re.compile(r"(?<!\d)\d{12}(?!\d)")
+# Not the 12 digits after a decimal point: a metric value such as 3.141592653589 is a number, not an account id.
+_ACCOUNT_ID = re.compile(r"(?<!\d)(?<!\d\.)\d{12}(?!\d)")
 _IPV4 = re.compile(r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])")
 
 

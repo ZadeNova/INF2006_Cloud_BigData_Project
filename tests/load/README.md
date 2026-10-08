@@ -62,7 +62,7 @@ Run these on the **generator** (`--location us-east-1`). `--repeat` is 1, 2, 3; 
 | Account setup (once, shared by both variants) | `python accounts.py create --base-url $LOAD_BASE_URL` | minutes | once |
 | RDS pilot | `python run.py pilot --variant ec2 --base-url $LOAD_BASE_URL --repeat 1 --location us-east-1` | about 8 min | 1, variant A |
 | Ladder | `python run.py ladder --level {1,10,100,1000} --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 12 to 15 min per level | 3 per level |
-| Saturation | `python run.py saturation --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | up to 18 min | 1 (3 if time) |
+| Saturation | `python run.py saturation --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | up to 20 min | 1 (3 if time) |
 | Scale-out | `python run.py scaleout --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 23 min | 3 |
 | Replacement | `python run.py replace --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 20 min | 3 |
 | Singapore latency | `python run.py singapore --variant ec2 --base-url $LOAD_BASE_URL --repeat 1 --location singapore-laptop` (**from the laptop**) | 12 min | 1 per variant |
@@ -101,7 +101,7 @@ python reset_state.py --target fargate --apply  # the same reset through variant
 
 Both targets reach the same shared database, so use `ec2` while A is up and `fargate` while B is up. **After B's campaign, A may already be taken down, so the final cleanup before the demo uses `--target fargate`** (dry run first, as always).
 
-It touches only accounts named `<prefix>-...` and only orders made by the web checkout; the accounts stay (both variants use them). Verified locally against Docker: after a smoke run (2 orders) the reset restored the stock fingerprint exactly, a second apply changes nothing, and a prefix with quotes is refused. **Not yet verified on AWS:** the SSM path and the Fargate path (the latter is checked only against botocore's stubbed models, and needs the fargate stack's outputs); always run the dry run first and check the counts match the runs you made. Order: all of A, then reset, then all of B, then reset again as the cleanup.
+It touches only accounts named `<prefix>-...` and only orders made by the web checkout; the accounts stay (both variants use them). Verified locally against Docker: after a smoke run (2 orders) the reset restored the stock fingerprint exactly, a second apply changes nothing, and a prefix with quotes is refused. **Verified on AWS on 8 October 2026 (variant A, over SSM):** two dry runs and applies (37 orders, then 274), each leaving 0 load orders, order lines and cart lines (`evidence/raw/OPS_2026-10-08_ec2_reset-*.txt`). **Not yet verified on AWS:** the Fargate path (checked only against botocore's stubbed models, and needs the fargate stack's outputs); always run the dry run first and check the counts match the runs you made. Order: all of A, then reset, then all of B, then reset again as the cleanup.
 
 ## After every run
 
