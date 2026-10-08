@@ -148,7 +148,7 @@ Faster, when you know the database is intact: `scripts/tf.sh ec2 plan`, `scripts
 aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator --query SecretString --output text
 ```
 
-**Fixed or free capacity.** Both stacks have `min_capacity`, `max_capacity` and `desired_capacity` (default 1, 2, 1). For a fixed-capacity load run set all three to the same number in `<stack>/terraform.tfvars` (git-ignored), re-run `up.sh` or `tf.sh plan`/`apply`, and clear them afterwards. An apply resets the count to these values ([ADR-013](../../docs/decisions/ADR-013-load-generator-stack-and-measurement-settings.md)).
+**Fixed or free capacity.** Both stacks have `min_capacity`, `max_capacity` and `desired_capacity` (default 1, 2, 1). For a fixed-capacity load run use `scripts/evidence.sh <stack> pin MIN MAX DESIRED count` (it writes the git-ignored `<stack>/session.auto.tfvars`, plans, applies and waits for the healthy count; `evidence.sh <stack> down` removes the file), or set the three in `<stack>/terraform.tfvars` by hand and clear them afterwards. An apply resets the count to these values ([ADR-013](../../docs/decisions/ADR-013-load-generator-stack-and-measurement-settings.md)).
 
 ## Stop a stack
 
@@ -227,6 +227,7 @@ All scripts are under `src/infrastructure/scripts/`, stop at the first error, an
 | `secrets.sh fill\|check` | complete or check the secrets (prints key names and match/DIFFER only) | `up.sh ec2` runs `fill`; `check` any time |
 | `secrets.sh master-in\|master-out` | used by `jobs.sh bootstrap`; do not run by hand | |
 | `push-image.sh [sha]` | build (only if the tag is missing), push, release-tag, record the digest for the stacks | per image change; `up.sh` runs it if no image is chosen |
+| `evidence.sh preflight`, `evidence.sh <ec2\|fargate> up\|security\|func\|pin\|alarm\|waf\|logs\|down` | records the cloud evidence identically for both variants: dated, redacted files in `evidence/raw/` (FUNC-03, SEC-09 to 11, 17, 18, MON-01 to 03); `pin MIN MAX DESIRED count\|block` sets capacity and WAF mode for load runs | evidence sessions, [runbook](../../docs/plans/evidence-session.md) |
 
 **Manual access** (debugging only; no SSH, no port 22):
 

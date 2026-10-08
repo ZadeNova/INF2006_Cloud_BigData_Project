@@ -6,6 +6,7 @@
 |---|---|---|---|---|---|---|
 | FUNC-01 | The automated account, catalogue, cart, checkout and order-history tests pass | Brief section 4 Application: a functioning web application with a meaningful user workflow and input validation | Local Docker | 2026-09-26 | `ee334cf` | PASS |
 | FUNC-02 | A person can complete the customer purchase flow and the operator product and dashboard steps in a browser | Brief section 5.2 test (1): functional workflow test | Local Docker | — | — | NOT RUN YET |
+| FUNC-03 | The same purchase flow works on the deployed shop, on variant A and on variant B, run identically | Brief section 5.2 test (1), on the cloud deployment | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026, before the run) |
 
 ## FUNC-01: Automated workflow tests
 
@@ -119,3 +120,48 @@ pytest_exit=0
 | Date | Commit | Environment | Status | Raw file |
 |---|---|---|---|---|
 | 2026-09-26 | `ee334cf` | Local Docker | PASS | [raw/FUNC-02_2026-09-26_setup.txt](raw/FUNC-02_2026-09-26_setup.txt) and the step-specific files listed above |
+
+## FUNC-03: Purchase flow on the deployed shop (variant A and variant B)
+
+**Objective:** Show that the customer workflow that FUNC-01 and FUNC-02 proved locally works on the AWS deployment, and works the same way on both architectures.
+
+**Threat/requirement:** Brief section 5.2 test (1), functional workflow test, on the cloud deployment.
+
+**Setup:** The stack under test is up (`scripts/evidence.sh <ec2|fargate> up`, smoke 8 of 8), both variants on the same image digest and the same RDS instance. The laptop has `tests/load/.venv` and `.env` loaded. The steps are identical on both variants; only the hostname differs (`shop-ec2` / `shop-fargate`). Procedure: [docs/plans/evidence-session.md](../docs/plans/evidence-session.md).
+
+**Command/steps:**
+
+Part 1, automated (both variants):
+
+```bash
+src/infrastructure/scripts/evidence.sh ec2 func        # then the same with fargate
+```
+
+It creates the test accounts through the normal `/register/` form (idempotent), runs the harness's `smoke` visit order for 75 s from the laptop (a buyer logs in, adds to cart and checks out; an abandoner adds and leaves; a shopper browses), exports the run and saves a per-action summary.
+
+Part 2, by hand in a browser (both variants), saving each screenshot as `evidence/raw/FUNC-03_<date>_<variant>_step<N>.png` with the account number, if visible, cropped out:
+
+| Step | Action | Expected result |
+|---|---|---|
+| 1 | Open `https://<host>/` | Redirects to the shoe catalogue over HTTPS (padlock shown) |
+| 2 | Register a new account at `/register/`, then log in | As FUNC-02 step 2: registration redirects to `/login/`; the login lands on the catalogue |
+| 3 | Add two products to the cart, then change one quantity | The cart shows both lines and the right subtotal |
+| 4 | Check out | A confirmation page with an order number and the same total |
+| 5 | Open `/orders/` | The new order is listed first |
+| 7 | Log in as `demo-operator` (password from the operator secret, copied to the clipboard, never into evidence) and open `/analytics/` | The dashboard renders with the refreshed figures |
+| 8 | As the customer, open `/analytics/` | 403 Forbidden |
+
+**Expected result:** Part 1: all three visit kinds complete; at least one order is placed; the summary shows `errors: 0` (a `stock_conflict` is counted apart and is not an error). Part 2: every step as in the table. The results are the same on both variants.
+
+**Actual result:** not run yet.
+
+| Variant | Part 1 (summary file) | Part 2 (screenshots) | Status |
+|---|---|---|---|
+| A (EC2) | | | |
+| B (Fargate) | | | |
+
+**Date/commit:** —
+
+**Artefact path:** `evidence/raw/LOAD-<variant>-smoke-r<n>_<date>/` (the exported run: request log, Locust statistics, `stack.json` with the image digest), `evidence/raw/FUNC-03_<date>_<variant>_summary.txt`, `evidence/raw/FUNC-03_<date>_<variant>_step<N>.png`.
+
+**Limitations:** Step 6 (operator deactivation) is not repeated on AWS: it changes the shared catalogue during the load campaign. The laptop is in Singapore, so the automated visit travels to us-east-1 and back; it proves the flow, not speed.

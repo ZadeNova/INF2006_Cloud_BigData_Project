@@ -16,12 +16,34 @@ Fill once per campaign; a change of any item means the affected runs are rerun o
 | Region | us-east-1 |
 | A: instance type; B: task size | c5.large (2 vCPU, 4 GiB); Fargate 2 vCPU / 4 GB |
 | Capacity during ladder and saturation | one unit (min = max = 1) |
+| Scale-out load step (`--users-high`) | 200 users, both variants |
 | WAF rule on `POST /login/` | count mode, limit 20 per 5 min per IP |
 | Load generator (type, region, clock offset) | |
 | Workload | 90% window shoppers, 7.5% cart abandoners, 2.5% buyers; 36 s think time; seed 42 |
 | Thresholds | p95 under 800 ms; p99 under 1.8 s (at least 1,000 samples); checkout p95 under 2 s; errors under 1% |
 | Comparison weights (locked 3 October 2026) | operational burden 25, replacement and error window 25, latency 20, cost 15, scale-out 10, capacity 5 |
 | Prices verified by (name, date) | |
+
+## Checklist before every recorded run (identical on both variants, review EVD-010)
+
+Read it aloud before each run; the run's own files record most of it (`run.json`, `stack.json`, `targets.jsonl`).
+
+1. Only the variant under test is up and taking load; the generator is the same instance for A and B.
+2. Capacity pinned for the run type with `evidence.sh <variant> pin` (ladder 1 1 1; replacement 2 2 2; scale-out 1 2 1), WAF `count`. `pin` waits for the healthy count; start the run **3 minutes** after it prints "Healthy".
+3. `aws_capture.py watch` started on the laptop **before** `run.py`, for every run type (not only scale-out and replacement), so every run has its exact healthy-target record.
+4. Lab credentials refreshed (`labcreds`) before every scale-out or replacement run; the session timer shows at least the run length plus 25 minutes.
+5. Carts reset from the previous run (`accounts.py reset-carts --from-run out/<previous run id>`).
+6. Scale-out always with `--users-high 200` (the default; fixed now because the pilot is not run first).
+7. The kill command typed and ready (`aws_capture.py kill --variant <v> --run-id <ID>`) before a replacement run starts.
+8. After the run: copy the run folder to the laptop and `aws_capture.py export` it **before** any further pin, apply or `down`.
+
+## Campaign 1 scope (decided 8 October 2026, after the readiness review)
+
+The plan's full matrix (three repeats of four ladder levels, saturation and Singapore on each variant, about 13 to 15 hours of lab time) does not fit the time left. Campaign 1 runs the same reduced set on both variants, in the same order: scale-out r1, replacement r1, ladder u100 r1, ladder u10 r1. Repeats (r2), saturation, Singapore and the 1,000-user RDS pilot are added only if time allows, always on both variants. Consequences, stated in the report:
+
+- With one repeat per condition the min-max tie rule cannot apply, so every A-against-B difference is labelled **indicative, n = 1**, and the weighted total is not quoted as a decision without a second repeat.
+- The RDS pilot gate (LOAD-01) is replaced by reading RDS CPU in the ladder u100 run on one unit; the database headroom at 1,000 users is not measured.
+- Costs are flagged unverified until `tests/load/prices.json` is checked against the AWS price pages.
 
 ## Cases
 

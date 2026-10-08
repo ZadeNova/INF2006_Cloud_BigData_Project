@@ -1,5 +1,7 @@
 # evidence/
 
+New here? [docs/GUIDE.md](../docs/GUIDE.md) explains the file names, how to check a claim and where AWS logs and metrics end up.
+
 Named, dated evidence artefacts cited by `project_manifest.yaml` and `report.pdf`. FUNC-01 and FUNC-02 have now been run on the `hermann-evidence` branch at the `origin/erfan/merge-quarantine` source. The AWS build started on 28 September 2026: its stage records are in [aws-build-runbook.md](aws-build-runbook.md). The deployed AWS test cases and the remaining local cases are still pending.
 
 Last covered commit: `ee334cf`

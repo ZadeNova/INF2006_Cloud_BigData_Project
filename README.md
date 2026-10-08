@@ -107,6 +107,7 @@ The delivered application must run locally without paid AWS access for marking. 
 
 | Document | Purpose |
 |---|---|
+| [**Project guide**](docs/GUIDE.md) | Start here if you are new: where the evidence is, how to check a claim, and what every shell and Python script does |
 | [Project scope](PROJECT_SCOPE_INF2006.md) | Requirements, phase dates, risks, rubric coverage and team roles |
 | [Implementation tracker](docs/IMPLEMENTATION_PLAN.md) | Current status, next tasks and blockers |
 | [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |

@@ -20,9 +20,11 @@
 | SEC-16 | Imported customers get unusable passwords | T17 personal data / account takeover | Local Docker | 2026-10-01 | `e6732ff` | PASS |
 | SEC-ALL rerun | The same 25 test IDs as the 26 September SEC-ALL, rerun on the current commit | T1–T8 | Local Docker | 2026-10-01 | `e6732ff` | PASS |
 | SCAN-01 to SCAN-07 | Secret scan, SAST, dependency audit, `check --deploy`, Dockerfile lint, image scan, IaC scan, with triage | T8, T11, supply chain | Local Docker (not CI) | 2026-10-01 | `e6732ff` | **Findings triaged; 4 open items**, see [security-scan-triage.md](security-scan-triage.md) |
-| SEC-09 | RDS and S3 are not publicly reachable | Cloud private data/storage controls | AWS | — | — | PLANNED |
-| SEC-10 | HTTPS is enforced | Cloud transport security | AWS | — | — | PLANNED |
-| SEC-11 | Runtime secrets come from Secrets Manager | Cloud secret handling | AWS | — | — | PLANNED |
+| SEC-09 | RDS and S3 are not publicly reachable; only the app may reach the database | Cloud private data/storage controls | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
+| SEC-10 | HTTPS is enforced with a TLS 1.2+ policy | Cloud transport security | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
+| SEC-11 | Runtime secrets come from Secrets Manager through the lab role, never from the launch template or task definition | Cloud secret handling | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
+| SEC-17 | The WAF rate rule blocks a password-guessing burst on `POST /login/` while browsing still works | T7 credential guessing, edge control | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
+| SEC-18 | No password, cookie, CSRF token or secret key in the CloudWatch logs after the session's traffic | T8 secrets in logs (SEC-08 on AWS) | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
 
 **Shared setup:** the web image was rebuilt with `docker compose build web` at merge-quarantine commit `ee334cf`. The local Docker `web` and `db` services were healthy. Each pytest command used its own disposable test database and no demo data. Git Bash on Windows ran with `MSYS_NO_PATHCONV=1` so `/app/tests/...` paths remained container paths.
 
@@ -322,8 +324,96 @@
 
 Seven tools, raw output and a finding-by-finding triage are in [security-scan-triage.md](security-scan-triage.md). Headline: no secret in git history or the tree (one false positive), no known vulnerable pinned Python dependency, no Dockerfile lint finding. Open items: 21 fixable Debian package findings in the image (needs a newer pinned base digest, a frozen change) and the infrastructure items listed there for the Terraform owner. These scans ran locally, not in CI.
 
-## SEC-09 to SEC-11: Cloud controls
+## SEC-09 to SEC-11, SEC-17, SEC-18: Cloud controls (variant A and variant B)
 
-**Status:** PLANNED. These require the AWS deployment and real resource names; no AWS commands were run by this evidence workflow.
+**Status:** PLANNED. The expected results below were written on 8 October 2026, before any cloud run, so they are predictions, not descriptions of output.
 
-**Verified by:**
+**Shared setup:** the stack under test is up on the pinned image digest. Every command runs through `src/infrastructure/scripts/evidence.sh`, identically for `ec2` and `fargate`. Each raw file records its UTC time, git commit, the exact AWS commands and the exit code, and is redacted (account IDs, public IPs, email addresses) before it is written. Procedure and order: [docs/plans/evidence-session.md](../docs/plans/evidence-session.md).
+
+### SEC-09: Database and storage are private
+
+**Objective:** Show that neither the database nor the bucket can be reached from the internet, and that only the application tier may connect to the database.
+
+**Command:** `src/infrastructure/scripts/evidence.sh <variant> security` (steps `SEC-09 RDS`, `SEC-09 security groups`, `SEC-09 S3`).
+
+**Expected result:**
+
+- RDS: `publicly_accessible: false`, `encrypted: true`, attached only to the `sg-db` group.
+- Security groups: `sg-db` allows 5432 only from the app security group (no CIDR range); the app group allows 8000 only from the ALB group (no port 22, no CIDR range); the ALB group allows 80 and 443 from anywhere.
+- S3: all four public-access-block settings `true`; no bucket policy, or `IsPublic: false`; anonymous list and object requests return HTTP 403.
+
+**Actual result:**
+
+| Variant | Result | Raw files | Status |
+|---|---|---|---|
+| A | | `raw/SEC-09_<date>_ec2_{rds,security-groups,s3}.txt` | |
+| B | | `raw/SEC-09_<date>_fargate_{rds,security-groups,s3}.txt` | |
+
+### SEC-10: HTTPS is enforced
+
+**Objective:** Show that the shop is served only over verified TLS and that plain HTTP is redirected.
+
+**Command:** `evidence.sh <variant> security` (steps `SEC-10 smoke`, `SEC-10 listeners`).
+
+**Expected result:** `smoke.sh` 8 of 8 PASS (HTTP 301 to `https://`, certificate verifies, TLS 1.2 or 1.3, HSTS, `X-Content-Type-Options` and `X-Frame-Options` present). Listeners: port 80 `redirect` to HTTPS; port 443 `HTTPS` with policy `ELBSecurityPolicy-TLS13-1-2-2021-06`.
+
+**Actual result:**
+
+| Variant | Result | Raw files | Status |
+|---|---|---|---|
+| A | | `raw/SEC-10_<date>_ec2_{smoke,listeners}.txt` | |
+| B | | `raw/SEC-10_<date>_fargate_{smoke,listeners}.txt` | |
+
+### SEC-11: Runtime secrets come from Secrets Manager
+
+**Objective:** Show that the running application gets its database password and Django key from Secrets Manager through the lab role, and that no secret value is stored in the launch template (A) or task definition (B).
+
+**Command:** `evidence.sh <variant> security` (steps `SEC-11 runtime`, `SEC-11 secrets match`, `SEC-11 the app reads them`).
+
+**Expected result:**
+
+- A: the launch template's instance profile is the lab profile; the decoded user data names only `AWS_SECRET_ID` (a secret's name), with no password or key value.
+- B: the task and execution roles are `LabRole`; the environment holds only non-secret settings and `AWS_SECRET_ID`; there is no `secrets` value in plain text.
+- `secrets.sh check`: every field `match`, key names only, no values.
+- `jobs.sh <variant> check`: the app, started with the secret, reports the database reachable and migrations applied.
+
+**Actual result:**
+
+| Variant | Result | Raw files | Status |
+|---|---|---|---|
+| A | | `raw/SEC-11_<date>_ec2_{runtime,secrets-check,app-check}.txt` | |
+| B | | `raw/SEC-11_<date>_fargate_{runtime,secrets-check,app-check}.txt` | |
+
+### SEC-17: WAF blocks a login burst
+
+**Objective:** Show that the edge rate rule on `POST /login/` (20 requests per 5 minutes per IP) blocks password guessing from one address in block mode, and that ordinary browsing is not affected.
+
+**Setup:** The stack is switched to block mode with `evidence.sh <variant> pin 1 1 1 block` (plan and apply recorded). This is the last test on a variant, because the load tests send hundreds of logins from one IP and run in count mode.
+
+**Command:** `evidence.sh <variant> waf`: one `POST /login/` every 3 s with a valid CSRF token and a wrong password for the non-existent user `waf-probe`, until 5 WAF blocks in a row or 80 attempts; then one `GET /products/`; then the WAF metrics and the sampled requests (request headers removed, because they carry cookies).
+
+**Expected result:** The first POSTs return HTTP 200 (Django shows the login form again). After more than 20 POSTs, within the rule's evaluation delay (about a minute, unverified), the POSTs return 403 with `Server: awselb/2.0`, which is the load balancer's WAF response and not Django's 403. `GET /products/` still returns 200. `BlockedRequests` is above 0 for the rule. The sampled requests show `Action: BLOCK` on `POST /login/`.
+
+**Actual result:**
+
+| Variant | Attempt of first block | Result | Raw files | Status |
+|---|---|---|---|---|
+| A | | | `raw/SEC-17_<date>_ec2_{burst,metrics,samples}.txt`, plan and apply in `raw/OPS_<date>_ec2_pin-1-1-1-block_*.txt` | |
+| B | | | `raw/SEC-17_<date>_fargate_{burst,metrics,samples}.txt`, `raw/OPS_<date>_fargate_pin-1-1-1-block_*.txt` | |
+
+**Limitation:** One source IP; a distributed guessing attack below 20 attempts per IP per 5 minutes is not stopped by this rule (stated in the threat model).
+
+### SEC-18: No secrets in the CloudWatch logs
+
+**Objective:** The cloud half of SEC-08: after the session's real traffic (registrations, logins, checkouts, the WAF burst with passwords in the form), the application logs in CloudWatch hold no secret value.
+
+**Command:** `evidence.sh <variant> logs` (steps `SEC-18 count` and `SEC-18 matches`): a Logs Insights search over the session window for `password`, `csrftoken`, `csrfmiddlewaretoken`, `sessionid` and `secret_key`, case-insensitive.
+
+**Expected result:** 0 matches. Any match is read line by line: a URL path or a log message that names a word without a value (for example a route name) is acceptable and is explained here; a value of any of them is a FAIL.
+
+**Actual result:**
+
+| Variant | Matches | Result | Raw files | Status |
+|---|---|---|---|---|
+| A | | | `raw/SEC-18_<date>_ec2_{count,matches}.txt` | |
+| B | | | `raw/SEC-18_<date>_fargate_{count,matches}.txt` | |
