@@ -16,6 +16,7 @@ Results are reported as **capacity per unit of compute** and as a **multiple of 
 | `aws_capture.py` | Laptop only: `watch` target health, `kill` replaces one unit gracefully, `cpu` records the CPU model, `export` CloudWatch/scaling data and redact |
 | `analyze.py` | Raw run folders to summary tables, timings, cost per 1,000 requests and weighted scores |
 | `selftest.py` | Checks of the harness's own logic (no network); `python selftest.py` |
+| `reset_state.py` | Laptop: puts the shop data back after load tests (removes load-test orders, returns their stock); dry run by default |
 | `common.py`, `prices.json` | Shared helpers; hourly prices (**unverified, see below**) |
 | `requirements.in` / `.txt` | Locust and boto3, pinned by exact version. Separate from the application's requirements on purpose |
 
@@ -88,6 +89,20 @@ python aws_capture.py cpu --variant fargate
 
 The run id is known in advance: it is printed by `run.py` at the confirmation prompt, before you answer.
 
+## Resetting the data (between variant A and variant B, and before the demo)
+
+Load runs create real orders and lower stock in the **shared** database. `reset_state.py` undoes exactly that, in one transaction, through the app's own `manage.py shell` (no backend edit). From the laptop with lab credentials, while variant A is up:
+
+```bash
+python reset_state.py --target ec2              # DRY RUN: prints the orders, units and products it would change
+python reset_state.py --target ec2 --apply      # does it; prints what is left (all zero)
+python reset_state.py --target fargate --apply  # the same reset through variant B's stack (a one-off ECS task)
+```
+
+Both targets reach the same shared database, so use `ec2` while A is up and `fargate` while B is up. **After B's campaign, A may already be taken down, so the final cleanup before the demo uses `--target fargate`** (dry run first, as always).
+
+It touches only accounts named `<prefix>-...` and only orders made by the web checkout; the accounts stay (both variants use them). Verified locally against Docker: after a smoke run (2 orders) the reset restored the stock fingerprint exactly, a second apply changes nothing, and a prefix with quotes is refused. **Not yet verified on AWS:** the SSM path and the Fargate path (the latter is checked only against botocore's stubbed models, and needs the fargate stack's outputs); always run the dry run first and check the counts match the runs you made. Order: all of A, then reset, then all of B, then reset again as the cleanup.
+
 ## After every run
 
 ```bash
@@ -127,6 +142,6 @@ Outcomes in the request log: `ok`; `stock_conflict` (a stock refusal, counted ap
 
 ## Verified locally and not yet verified
 
-Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 15 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
+Verified on 3 October 2026 against local Docker: account creation (idempotent), the whole visitor flow with CSRF and login, add to cart, checkout and order confirmation (2 orders created, 0 errors), the no-think-time mode, the automatic abort (exit code 3), cart reset, refusal of a foreign host, and the analysis (deterministic across reruns). `selftest.py` passes 16 checks, including `aws_capture.py` export, kill and target-health calls against botocore's stubbed service models, which validate every parameter name and type.
 
 **Not verified until the first AWS session:** every real AWS call and its permissions under the lab role; that metric names, dimensions and the WAF rule dimension exist as assumed; the generator instance and moving files through S3; Locust with `--processes 2` at 1,000 users and the 70% CPU limit; the ladder, saturation, scale-out and replacement schedules at full length; the p95 and capacity figures themselves; and the whole Fargate path.

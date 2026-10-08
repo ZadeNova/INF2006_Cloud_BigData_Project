@@ -227,6 +227,51 @@ def test_credit_flag():
             tmp, "LOAD-ec2-ladder-u10-none_x", "ec2", "ladder", 10, windows, 1, steady_rows(300, 100, 0), planned=300)))["flags"])
 
 
+def test_reset_code():
+    import base64
+    import reset_state
+    for apply, word in ((False, "False"), (True, "True")):
+        code = reset_state.build_code("loadtest", apply)
+        compile(code, "reset", "exec")
+        assert f'APPLY, PREFIX = {word}, "loadtest"' in code and "__APPLY__" not in code and "__PREFIX__" not in code
+    arg = reset_state.shell_argument(code)
+    encoded = arg.split("b64decode('")[1].split("')")[0]
+    assert base64.b64decode(encoded).decode() == code, "the code must survive the shell argument unchanged"
+    assert "'" not in encoded and '"' not in arg
+    try:
+        reset_state.build_code("x'); import os", False)
+        raise AssertionError("a prefix with quotes must be refused")
+    except SystemExit:
+        pass
+    # Fargate: a one-off task whose command carries the code; its log must show the DRY RUN or APPLIED line
+    import aws_capture
+    outputs = dict(cluster_name="c", task_definition_arn="arn:aws:ecs:us-east-1:123456789012:task-definition/t:1",
+                   subnet_ids=["subnet-a"], security_group_ids={"app": "sg-2"}, log_group_name="/g/app")
+    task = "arn:aws:ecs:us-east-1:123456789012:task/c/abc"
+    real_sleep, aws_capture.time.sleep = aws_capture.time.sleep, lambda s: None
+    try:
+        for log, ok in (("accounts: 8 | load orders: 2\nDRY RUN: nothing was changed.", True), ("Traceback ...", False)):
+            kf = stubbed_clients()
+            kf.stub("ecs").add_response("run_task", {"tasks": [{"taskArn": task}], "failures": []}, expected_params={
+                "cluster": "c", "taskDefinition": outputs["task_definition_arn"], "launchType": "FARGATE", "count": 1,
+                "networkConfiguration": {"awsvpcConfiguration": {"subnets": ["subnet-a"], "securityGroups": ["sg-2"], "assignPublicIp": "ENABLED"}},
+                "overrides": {"containerOverrides": [{"name": "web", "command": ["sh", "-c", f'python manage.py shell -c "{arg}"']}]}})
+            kf.stub("ecs").add_response("describe_tasks", {"tasks": [{"lastStatus": "STOPPED", "containers": [{"exitCode": 0}]}], "failures": []})
+            kf.stub("logs").add_response("get_log_events", {"events": [{"timestamp": 1, "message": log, "ingestionTime": 1}]},
+                                         expected_params={"logGroupName": "/g/app", "logStreamName": "web/web/abc"})
+            for stubber in kf.stubs.values():
+                stubber.activate()
+            try:
+                reset_state.run_fargate(code, kf, outputs)
+                assert ok
+            except SystemExit:
+                assert not ok, "a task that printed neither DRY RUN nor APPLIED must stop the command"
+            for stubber in kf.stubs.values():
+                stubber.assert_no_pending_responses()
+    finally:
+        aws_capture.time.sleep = real_sleep
+
+
 def test_score_pair():
     assert analyze.score_pair([100, 110], [105, 120], False) == (10.0, 10.0)  # ranges overlap: a tie
     a, b = analyze.score_pair([100, 101], [200, 202], False)

@@ -4,7 +4,7 @@
 
 **What the session produces:** the cloud evidence for the brief's four tests, identical on both variants: functional (FUNC-03), security (SEC-09, 10, 11, 17, 18), scalability and resilience (RES-03a, RES-03b, ladder u100 and u10), monitoring (MON-01 to MON-04). Expected results are already written in the evidence files; you fill in "Actual" afterwards (or hand the raw files to Claude).
 
-**Order:** A (EC2) completely, then B (Fargate) completely, each with the same steps in the same order, on the same generator.
+**Order:** A (EC2) completely, reset the database, then B (Fargate) completely, then reset again as the final cleanup; each variant has the same steps in the same order, on the same generator. The reset cannot cover CPU credits or cache of the database: state that in the report.
 
 ## 0. Before Start Lab (offline, about 20 minutes)
 
@@ -55,6 +55,7 @@
 | 1:50 | T1 | `$E ec2 pin 1 1 1 count`; wait, 3 minutes |
 | 1:57 | | **Ladder u100 r1**, section 5. Afterwards check `evidence/raw/LOAD-ec2-ladder-u100-r1_<date>/cloudwatch/alb_healthy_hosts.csv` reads 1.0 and look at RDS CPU |
 | 2:12 | | **Ladder u10 r1**, section 5 (no pin change) |
+| 2:25 | T1 | **Reset the database** (both variants share it; B must start from the same state): dry run `$E rec OPS_<date>_ec2_reset-dry bash -c 'cd tests/load && .venv/bin/python reset_state.py --target ec2'`, read the counts, then the same with `--apply` (name `..._reset-apply`). Every run must already be exported |
 | 2:27 | T1 | `$E ec2 pin 1 1 1 block`, then `$E ec2 waf` (SEC-17; about 10 minutes including a 3-minute metrics wait) |
 | 2:40 | T1 | `$E ec2 logs` (MON-01, MON-02, SEC-18). Check every run of today was exported. Then `$E ec2 down` (type `yes`; removes the pin file) |
 | 2:50 | | Done with A. If more than 60 minutes remain, a replace r2 fits before the WAF step; do the same on B later |
@@ -93,6 +94,7 @@ Same generator (if the lab stopped it, `aws ec2 start-instances --instance-ids <
 | Replace r1 | `$E fargate pin 2 2 2 count`, section 5; `$E fargate alarm` after the kill |
 | Ladder u100 r1, u10 r1 | `$E fargate pin 1 1 1 count`, section 5 twice |
 | WAF | `$E fargate pin 1 1 1 block`, `$E fargate waf` |
+| Reset | Before `down` (it runs through B's stack): dry run, then `--apply`, with `--target fargate`: `$E rec OPS_<date>_fargate_reset-apply bash -c 'cd tests/load && .venv/bin/python reset_state.py --target fargate --apply'`. This is the final cleanup before the demo |
 | Logs, down | `$E fargate logs`, then `$E fargate down` (budget 20 minutes: ENIs release slowly; rerun if it times out) |
 | Generator down | `src/infrastructure/scripts/down.sh loadgen` (or `$E rec OPS_<date>_loadgen_down src/infrastructure/scripts/down.sh loadgen`) |
 
