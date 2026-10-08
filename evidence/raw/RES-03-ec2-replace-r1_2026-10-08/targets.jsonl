@@ -1,0 +1,6 @@
+{"ts_utc": "2026-10-08T17:23:00.792Z", "healthy": 2, "total": 2, "states": {"i-00ad88ffb01cb28b9:8000": "healthy", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T17:29:39.845Z", "healthy": 1, "total": 2, "states": {"i-00ad88ffb01cb28b9:8000": "draining", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T17:30:01.066Z", "healthy": 1, "total": 3, "states": {"i-00ad88ffb01cb28b9:8000": "draining", "i-0375a1086e96bad06:8000": "initial", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T17:30:11.659Z", "healthy": 1, "total": 2, "states": {"i-0375a1086e96bad06:8000": "initial", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T17:30:22.267Z", "healthy": 1, "total": 2, "states": {"i-0375a1086e96bad06:8000": "unhealthy", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T17:31:31.734Z", "healthy": 2, "total": 2, "states": {"i-0375a1086e96bad06:8000": "healthy", "i-0e489a0e9d6bcae85:8000": "healthy"}}

@@ -1,0 +1,64 @@
+{
+  "run_id": "RES-03-ec2-replace-r1_2026-10-08",
+  "type": "replace",
+  "variant": "ec2",
+  "level": null,
+  "repeat": 1,
+  "seed": 42,
+  "harness_version": "1.0.0",
+  "locust_version": "2.46.6",
+  "python": "3.12.14",
+  "git_commit": "81c0e2ae46f73fb01081cb4f107e784948b68732",
+  "git_dirty_harness": false,
+  "command_line": "run.py replace --variant ec2 --base-url https://shop-ec2.fourtytwofactors.me --repeat 1 --location us-east-1",
+  "locust_command": "/home/ssm-user/inf2006/tests/load/.venv/bin/python -m locust -f /home/ssm-user/inf2006/tests/load/locustfile.py --headless --host https://shop-ec2.fourtytwofactors.me --csv /home/ssm-user/inf2006/tests/load/out/RES-03-ec2-replace-r1_2026-10-08/locust --csv-full-history --html /home/ssm-user/inf2006/tests/load/out/RES-03-ec2-replace-r1_2026-10-08/report.html --exit-code-on-error 0 --processes 2",
+  "base_url": "https://shop-ec2.fourtytwofactors.me",
+  "generator": {
+    "location": "us-east-1",
+    "instance_type": "c5.large",
+    "clock_offset_ms": -0.001
+  },
+  "plan": {
+    "think": 36,
+    "mix": {
+      "shopper": 0.9,
+      "abandoner": 0.075,
+      "buyer": 0.025
+    },
+    "sequence": null,
+    "stages": [
+      {
+        "duration": 1200,
+        "users": 100,
+        "spawn_rate": 2
+      }
+    ],
+    "windows": [
+      {
+        "label": "all",
+        "start": 0,
+        "end": 1200,
+        "users": 100
+      }
+    ],
+    "markers": {
+      "kill_at": 300
+    },
+    "abort": {
+      "after": 60,
+      "window": 120,
+      "err": 0.5,
+      "p95_ms": null
+    },
+    "units": 2,
+    "warmup_s": 120,
+    "processes": 2
+  },
+  "planned_seconds": 1200,
+  "started_utc": "2026-10-08T17:23:17.899Z",
+  "ended_utc": "2026-10-08T17:43:20.173Z",
+  "exit_code": 0,
+  "aborted": false,
+  "abort_reason": null,
+  "wall_seconds": 1204.3
+}

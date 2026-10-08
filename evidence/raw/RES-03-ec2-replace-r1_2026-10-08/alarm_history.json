@@ -1,0 +1,12 @@
+[
+  {
+    "Timestamp": "2026-10-08T17:23:51.782Z",
+    "AlarmName": "TargetTracking-inf2006-grp21-ec2-asg-AlarmLow-1f67a343-a60f-41c6-83ae-b20a41552ab2",
+    "HistorySummary": "Alarm updated from OK to ALARM"
+  },
+  {
+    "Timestamp": "2026-10-08T17:27:51.782Z",
+    "AlarmName": "TargetTracking-inf2006-grp21-ec2-asg-AlarmLow-1f67a343-a60f-41c6-83ae-b20a41552ab2",
+    "HistorySummary": "Alarm updated from ALARM to OK"
+  }
+]

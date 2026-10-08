@@ -1,0 +1,9 @@
+[
+  {
+    "Description": "Launching a new EC2 instance: i-00ad88ffb01cb28b9",
+    "StartTime": "2026-10-08T16:57:11.398Z",
+    "EndTime": "2026-10-08T17:01:16.000Z",
+    "Cause": "At 2026-10-08T16:57:07Z a monitor alarm TargetTracking-inf2006-grp21-ec2-asg-AlarmHigh-1df25db3-503b-4639-87a5-0e476bc22217 in state ALARM triggered policy inf2006-grp21-ec2-requests-per-target changing the desired capacity from 1 to 2.  At 2026-10-08T16:57:09Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 1 to 2.",
+    "StatusCode": "Successful"
+  }
+]

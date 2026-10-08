@@ -1,0 +1,18 @@
+{
+  "variant": "ec2",
+  "hostname": "shop-ec2.fourtytwofactors.me",
+  "image_digest": "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481",
+  "rds_class": "db.t4g.small",
+  "rds_engine_version": "17.9",
+  "rds_multi_az": false,
+  "min": 1,
+  "max": 2,
+  "desired": 2,
+  "instance_type": "c5.large",
+  "waf_login_action": "Count",
+  "waf_login_limit": 20,
+  "export_utc": "2026-10-08T17:14:21.520Z",
+  "window_start_utc": "2026-10-08T16:43:08.322Z",
+  "window_end_utc": "2026-10-08T17:16:09.994Z",
+  "export_warnings": []
+}

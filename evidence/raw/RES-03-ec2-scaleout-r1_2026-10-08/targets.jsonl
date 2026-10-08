@@ -1,0 +1,4 @@
+{"ts_utc": "2026-10-08T16:47:55.242Z", "healthy": 1, "total": 1, "states": {"i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T16:57:18.492Z", "healthy": 1, "total": 2, "states": {"i-00ad88ffb01cb28b9:8000": "initial", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T16:57:39.649Z", "healthy": 1, "total": 2, "states": {"i-00ad88ffb01cb28b9:8000": "unhealthy", "i-0e489a0e9d6bcae85:8000": "healthy"}}
+{"ts_utc": "2026-10-08T16:58:48.409Z", "healthy": 2, "total": 2, "states": {"i-00ad88ffb01cb28b9:8000": "healthy", "i-0e489a0e9d6bcae85:8000": "healthy"}}

@@ -1,0 +1,8 @@
+{
+  "ts_utc": "2026-10-08T17:29:37.913Z",
+  "api_returned_utc": "2026-10-08T17:29:38.928Z",
+  "variant": "ec2",
+  "unit_id": "i-00ad88ffb01cb28b9",
+  "units_before": 2,
+  "mode": "graceful"
+}

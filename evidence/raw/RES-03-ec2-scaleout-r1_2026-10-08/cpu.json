@@ -1,0 +1,6 @@
+{
+  "variant": "ec2",
+  "model": "Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz",
+  "vcpus": 2,
+  "ts_utc": "2026-10-08T16:42:18.918Z"
+}
