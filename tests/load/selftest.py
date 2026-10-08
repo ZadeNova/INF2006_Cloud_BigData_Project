@@ -89,7 +89,7 @@ def test_schedules():
     assert plan("pilot")["windows"][0]["users"] == 1000 and plan("singapore")["windows"][0]["users"] == 10
     s = plan("saturation")
     assert [w["users"] for w in s["windows"]] == run.SATURATION_STEPS and s["windows"][1]["start"] == 150
-    assert sum(x["duration"] for x in s["stages"]) == 7 * 120 and s["think"] == 0
+    assert sum(x["duration"] for x in s["stages"]) == len(run.SATURATION_STEPS) * 120 and s["think"] == 0
     assert sum(x["duration"] for x in plan("scaleout")["stages"]) == 1380 and plan("scaleout")["markers"]["step_up"] == 180
     assert plan("replace")["markers"]["kill_at"] == 300 and plan("smoke")["sequence"] == ["buyer", "abandoner", "shopper"]
     assert abs(sum(run.MIX.values()) - 1.0) < 1e-9

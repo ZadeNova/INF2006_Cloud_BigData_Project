@@ -39,10 +39,11 @@ Read it aloud before each run; the run's own files record most of it (`run.json`
 
 ## Campaign 1 scope (decided 8 October 2026, after the readiness review)
 
-The plan's full matrix (three repeats of four ladder levels, saturation and Singapore on each variant, about 13 to 15 hours of lab time) does not fit the time left. Campaign 1 runs the same reduced set on both variants, in the same order: scale-out r1, replacement r1, ladder u100 r1, ladder u10 r1. Repeats (r2), saturation, Singapore and the 1,000-user RDS pilot are added only if time allows, always on both variants. Consequences, stated in the report:
+The plan's full matrix (three repeats of four ladder levels, saturation and Singapore on each variant, about 13 to 15 hours of lab time) does not fit the time left. Campaign 1 runs the same reduced set on both variants, in the same order: scale-out r1, replacement r1, **saturation r1** (chosen on 9 October, with the lab window running out, in place of ladder u100 and u10: it finds one unit's capacity and failure point and gives p95 at every step, light load included). The ladder, repeats (r2), Singapore and the 1,000-user RDS pilot are added only if time allows, always on both variants. Consequences, stated in the report:
 
 - With one repeat per condition the min-max tie rule cannot apply, so every A-against-B difference is labelled **indicative, n = 1**, and the weighted total is not quoted as a decision without a second repeat.
-- The RDS pilot gate (LOAD-01) is replaced by reading RDS CPU in the ladder u100 run on one unit; the database headroom at 1,000 users is not measured.
+- The RDS pilot gate (LOAD-01) is replaced by reading RDS CPU in the saturation run on one unit; the database headroom at 1,000 users is not measured.
+- Without the ladder, the steady-state latency criterion is judged from the saturation steps (p95 at 1 to 16 users) and the scale-out run's light-load phase; there is no think-time latency at 10 and 100 users, and the report says so.
 - Costs are flagged unverified until `tests/load/prices.json` is checked against the AWS price pages.
 
 ## Cases
@@ -78,7 +79,7 @@ The plan's full matrix (three repeats of four ladder levels, saturation and Sing
 | Field | |
 |---|---|
 | Objective | Find the practical capacity (highest step meeting the limits) and the maximum throughput of one unit |
-| Setup | One unit, no think time, steps of 1, 2, 4, 8, 16, 32, 64 users for 120 s (first 30 s of each step discarded) |
+| Setup | One unit, no think time, steps of 1, 2, 4, 8, 16, 32, 64, 128, 256 users for 120 s (first 30 s of each step discarded) |
 | Command / steps | `python run.py saturation --variant <ec2\|fargate> --base-url <host> --repeat <n> --location us-east-1` |
 | Expected result | Throughput rises then flattens; p95 and errors rise past the knee. Report capacity as page actions/s and as a multiple of 0.4 dynamic pages/s |
 | Actual result | |

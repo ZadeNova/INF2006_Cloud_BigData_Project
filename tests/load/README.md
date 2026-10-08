@@ -62,7 +62,7 @@ Run these on the **generator** (`--location us-east-1`). `--repeat` is 1, 2, 3; 
 | Account setup (once, shared by both variants) | `python accounts.py create --base-url $LOAD_BASE_URL` | minutes | once |
 | RDS pilot | `python run.py pilot --variant ec2 --base-url $LOAD_BASE_URL --repeat 1 --location us-east-1` | about 8 min | 1, variant A |
 | Ladder | `python run.py ladder --level {1,10,100,1000} --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 12 to 15 min per level | 3 per level |
-| Saturation | `python run.py saturation --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | up to 14 min | 1 (3 if time) |
+| Saturation | `python run.py saturation --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | up to 18 min | 1 (3 if time) |
 | Scale-out | `python run.py scaleout --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 23 min | 3 |
 | Replacement | `python run.py replace --variant ec2 --base-url $LOAD_BASE_URL --repeat N --location us-east-1` | 20 min | 3 |
 | Singapore latency | `python run.py singapore --variant ec2 --base-url $LOAD_BASE_URL --repeat 1 --location singapore-laptop` (**from the laptop**) | 12 min | 1 per variant |

@@ -134,7 +134,7 @@ All parameters are recorded in the run metadata; lengths are identical for A and
 | `smoke` (local) | n/a | 2 users, 3 s pacing, fixed visit sequence buyer / abandoner / shopper (section 15) | 75 s | as needed |
 | `pilot` (RDS gate) | one unit | 1,000 users | as the ladder's 1,000 step | 1, on A only (not a comparison run) |
 | `ladder` | one unit | 1, 10, 100, 1,000 users; spawn 1, 1, 2, 5 users/s | ramp + 120 s warm-up + measure 600 s (levels 1, 10) or 300 s (100, 1,000) | 3 per level |
-| `saturation` | one unit | no think time; 1, 2, 4, 8, 16, 32, 64 users, 120 s per step (first 30 s of each step discarded); stops at the abort rule | up to 14 min | 1 (3 if time allows) |
+| `saturation` | one unit | no think time; 1, 2, 4, 8, 16, 32, 64, 128, 256 users, 120 s per step (first 30 s of each step discarded); stops at the abort rule | up to 14 min | 1 (3 if time allows) |
 | `scaleout` | autoscaling 1 to 2 | 10 users for 180 s, step to 200 users (set from the pilot), hold 900 s, back to 10 users for 300 s | 23 min plus returning to one unit | 3 (2 if time is short) |
 | `replace` | two units pinned | 100 users; the user kills one unit at 300 s; hold to 1,200 s | 20 min | 3 (2 if time is short) |
 | `singapore` | one unit | 10 users, from the laptop outside the region | as the ladder's 10 step | 1 per variant |
