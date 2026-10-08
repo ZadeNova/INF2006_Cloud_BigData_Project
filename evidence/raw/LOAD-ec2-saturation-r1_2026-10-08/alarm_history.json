@@ -1,0 +1,17 @@
+[
+  {
+    "Timestamp": "2026-10-08T18:24:51.782Z",
+    "AlarmName": "TargetTracking-inf2006-grp21-ec2-asg-AlarmLow-1f67a343-a60f-41c6-83ae-b20a41552ab2",
+    "HistorySummary": "Alarm updated from ALARM to OK"
+  },
+  {
+    "Timestamp": "2026-10-08T18:26:07.298Z",
+    "AlarmName": "TargetTracking-inf2006-grp21-ec2-asg-AlarmHigh-1df25db3-503b-4639-87a5-0e476bc22217",
+    "HistorySummary": "Alarm updated from OK to ALARM"
+  },
+  {
+    "Timestamp": "2026-10-08T18:44:07.298Z",
+    "AlarmName": "TargetTracking-inf2006-grp21-ec2-asg-AlarmHigh-1df25db3-503b-4639-87a5-0e476bc22217",
+    "HistorySummary": "Alarm updated from ALARM to OK"
+  }
+]
