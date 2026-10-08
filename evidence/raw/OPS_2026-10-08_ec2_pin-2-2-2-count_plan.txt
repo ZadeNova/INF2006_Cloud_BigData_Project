@@ -1,0 +1,69 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_pin-2-2-2-count_plan.txt
+# date_utc: 2026-10-08T17:18:07Z
+# commit: 4e06901
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh ec2 plan
+[32m[1mSuccess![0m The configuration is valid.
+[0m
+[0m[1mdata.terraform_remote_state.base: Reading...[0m[0m
+[0m[1mdata.terraform_remote_state.base: Read complete after 0s[0m
+[0m[1mdata.aws_ssm_parameter.al2023_ami: Reading...[0m[0m
+[0m[1mdata.aws_default_tags.current: Reading...[0m[0m
+[0m[1mdata.aws_iam_instance_profile.lab: Reading...[0m[0m
+[0m[1mdata.aws_ecr_image.app: Reading...[0m[0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Refreshing state... [id=sg-04f14bade0ca81162][0m
+[0m[1mmodule.web_entry.aws_security_group.app: Refreshing state... [id=sg-022114c7028ec94a5][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Refreshing state... [id=/inf2006-grp21-ec2/app][0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d][0m
+[0m[1mdata.aws_default_tags.current: Read complete after 0s [id=aws][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Refreshing state... [id=5705ef5f-9a49-4d87-bba9-892c527a32bf][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Refreshing state... [id=5ea413df-a88f-45eb-90e2-0a6d2eeebffc][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Refreshing state... [id=5111ae2a-15c7-4b0a-b596-4bf2036c192a][0m
+[0m[1mdata.aws_iam_instance_profile.lab: Read complete after 2s [id=AIPAQ4YCUDIEUFRTKYC67][0m
+[0m[1mdata.aws_ssm_parameter.al2023_ami: Read complete after 2s [id=/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-0e8eb56f9ec183553][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Refreshing state... [id=sgr-053740a7f3ed73a08][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-0169b1878c708a065][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Refreshing state... [id=sgr-0610a055a828f70c2][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Refreshing state... [id=sgr-0ca0c2511386dc120][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Refreshing state... [id=sgr-006aec444c86531d7][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Refreshing state... [id=sgr-03e2daa93b0676a39][0m
+[0m[1mmodule.web_entry.aws_lb.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m
+[0m[1mdata.aws_ecr_image.app: Read complete after 4s [id=sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481][0m
+[0m[1maws_launch_template.app: Refreshing state... [id=lt-004ae5d92cd5a84ac][0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Refreshing state... [id=Z09473223DWPUMU2OO4WR_shop-ec2.fourtytwofactors.me_A][0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ec9b39e37eb966eb][0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3/ae4e3b7404d9d4c6][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Refreshing state... [id=inf2006-grp21-ec2-target-5xx][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Refreshing state... [id=inf2006-grp21-ec2-no-healthy-hosts][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Refreshing state... [id=inf2006-grp21-ec2-unhealthy-hosts][0m
+[0m[1maws_autoscaling_group.app: Refreshing state... [id=inf2006-grp21-ec2-asg][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Refreshing state... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-ec2-waf/5705ef5f-9a49-4d87-bba9-892c527a32bf,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-ec2-alb/988e5d6ebd75dca3][0m
+[0m[1maws_autoscaling_policy.requests: Refreshing state... [id=inf2006-grp21-ec2-requests-per-target][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+
+Terraform will perform the following actions:
+
+[1m  # aws_autoscaling_group.app[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_autoscaling_group" "app" {
+        id                               = "inf2006-grp21-ec2-asg"
+      [33m~[0m[0m min_size                         = 1 [33m->[0m[0m 2
+        name                             = "inf2006-grp21-ec2-asg"
+        [90m# (31 unchanged attributes hidden)[0m[0m
+
+        [90m# (5 unchanged blocks hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 1 to change, 0 to destroy.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: ec2.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "ec2.tfplan"
+
+Plan saved from commit 4e06901. Review it, then: scripts/tf.sh ec2 apply
+# exit: 0  end_utc: 2026-10-08T17:18:27Z

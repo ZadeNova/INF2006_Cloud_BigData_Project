@@ -1,0 +1,25 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_pin-1-1-1-count_apply.txt
+# date_utc: 2026-10-08T18:02:32Z
+# commit: 4e06901
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh ec2 apply
+[0m[1maws_autoscaling_group.app: Modifying... [id=inf2006-grp21-ec2-asg][0m[0m
+[0m[1maws_autoscaling_group.app: Modifications complete after 6s [id=inf2006-grp21-ec2-asg][0m
+[0m[1m[32m
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0malb_dns_name = "inf2006-grp21-ec2-alb-675076404.us-east-1.elb.amazonaws.com"
+asg_name = "inf2006-grp21-ec2-asg"
+hostname = "shop-ec2.fourtytwofactors.me"
+image_digest = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481"
+log_group_name = "/inf2006-grp21-ec2/app"
+security_group_ids = {
+  "alb" = "sg-04f14bade0ca81162"
+  "app" = "sg-022114c7028ec94a5"
+}
+target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-ec2-tg/411c3f8c0218605d"
+web_acl_name = "inf2006-grp21-ec2-waf"
+State backed up as ec2/terraform.tfstate.2026-10-09-0202.4e06901.bak. Copy it off this laptop (it holds resource IDs and may hold sensitive values).
+Applied from commit 4e06901. Record it in evidence/aws-build-runbook.md.
+# exit: 0  end_utc: 2026-10-08T18:02:45Z

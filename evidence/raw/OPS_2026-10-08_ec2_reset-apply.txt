@@ -1,0 +1,17 @@
+# file: evidence/raw/OPS_2026-10-08_ec2_reset-apply.txt
+# date_utc: 2026-10-08T17:52:17Z
+# commit: 4e06901
+# command: bash -c cd tests/load && .venv/bin/python reset_state.py --target ec2 --apply
+APPLYING on ec2, accounts 'loadtest-*'
+
+Running on i-0375a1086e96bad06 through Systems Manager ...
+17 objects imported automatically (use -v 2 for details).
+
+accounts: 2200 | load orders: 37 | order lines: 37 | units to put back: 37 | products: 22 | cart lines: 0
+  most ordered: Air Jordan 1 High · US 8.5 | stock 18 -> 21
+  most ordered: Air Jordan 1 High · US 9 | stock 50 -> 53
+  most ordered: Air Jordan 1 High "Bred" · US 8.5 | stock 10 -> 13
+  most ordered: Converse Chuck High · US 9.5 | stock 45 -> 48
+  most ordered: Classic Brown Sneaker · US 8 | stock 11 -> 14
+APPLIED. Left: load orders 0 | order lines 0 | cart lines 0
+# exit: 0  end_utc: 2026-10-08T17:52:24Z
