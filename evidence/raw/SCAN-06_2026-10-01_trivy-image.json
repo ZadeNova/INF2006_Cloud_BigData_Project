@@ -255,7 +255,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian Adduser Developers \u003cadduser@packages.debian.org\u003e",
+          "Maintainer": "Debian Adduser Developers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -351,7 +351,7 @@
             "BSD-3-Clause",
             "MIT"
           ],
-          "Maintainer": "APT Development Team \u003cdeity@lists.debian.org\u003e",
+          "Maintainer": "APT Development Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -578,7 +578,7 @@
           "Licenses": [
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Santiago Vila \u003csanvila@debian.org\u003e",
+          "Maintainer": "Santiago Vila \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -633,7 +633,7 @@
             "GPL-2.0-only",
             "public-domain"
           ],
-          "Maintainer": "Colin Watson \u003ccjwatson@debian.org\u003e",
+          "Maintainer": "Colin Watson \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -693,7 +693,7 @@
             "MIT",
             "permissive"
           ],
-          "Maintainer": "Matthias Klose \u003cdoko@debian.org\u003e",
+          "Maintainer": "Matthias Klose \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -805,7 +805,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -855,7 +855,7 @@
             "GPL-2.0-only",
             "MPL-2.0"
           ],
-          "Maintainer": "Julien Cristau \u003cjcristau@debian.org\u003e",
+          "Maintainer": "Julien Cristau \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1060,7 +1060,7 @@
             "GFDL-1.3-no-invariants-only",
             "GFDL-1.3-only"
           ],
-          "Maintainer": "Michael Stone \u003cmstone@debian.org\u003e",
+          "Maintainer": "Michael Stone \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1355,7 +1355,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Andrej Shadura \u003candrewsh@debian.org\u003e",
+          "Maintainer": "Andrej Shadura \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1396,7 +1396,7 @@
           "Licenses": [
             "BSD-2-Clause"
           ],
-          "Maintainer": "Debconf Developers \u003cdebconf-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debconf Developers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1554,7 +1554,7 @@
           "Licenses": [
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Debian Release Team \u003cpackages@release.debian.org\u003e",
+          "Maintainer": "Debian Release Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1599,7 +1599,7 @@
             "public-domain",
             "SMAIL-GPL"
           ],
-          "Maintainer": "Clint Adams \u003cclint@debian.org\u003e",
+          "Maintainer": "Clint Adams \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1717,7 +1717,7 @@
             "GPL-2.0-only",
             "GFDL-1.3-only"
           ],
-          "Maintainer": "Santiago Vila \u003csanvila@debian.org\u003e",
+          "Maintainer": "Santiago Vila \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1793,7 +1793,7 @@
             "BSD-2-Clause",
             "public-domain-s-s-d"
           ],
-          "Maintainer": "Dpkg Developers \u003cdebian-dpkg@lists.debian.org\u003e",
+          "Maintainer": "Dpkg Developers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -1993,7 +1993,7 @@
             "Latex2e",
             "GPL-2+ with Texinfo exception"
           ],
-          "Maintainer": "Theodore Y. Ts'o \u003ctytso@mit.edu\u003e",
+          "Maintainer": "Theodore Y. Ts'o \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2102,7 +2102,7 @@
             "LGPL-2.0-only",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Andreas Metzler \u003cametzler@debian.org\u003e",
+          "Maintainer": "Andreas Metzler \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2190,7 +2190,7 @@
             "Artistic-2.0",
             "LGPL-2.0-or-later"
           ],
-          "Maintainer": "Debian GCC Maintainers \u003cdebian-gcc@lists.debian.org\u003e",
+          "Maintainer": "Debian GCC Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2233,7 +2233,7 @@
             "LGPL-3.0-only",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Debian GnuPG Maintainers \u003cpkg-gnupg-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuPG Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2275,7 +2275,7 @@
             "GPL-3.0-or-later",
             "GPL-3.0-only"
           ],
-          "Maintainer": "Anibal Monsalve Salazar \u003canibal@debian.org\u003e",
+          "Maintainer": "Anibal Monsalve Salazar \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2370,7 +2370,7 @@
             "GPL-3.0-only",
             "GFDL-3"
           ],
-          "Maintainer": "Milan Kupcevic \u003cmilan@debian.org\u003e",
+          "Maintainer": "Milan Kupcevic \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2428,7 +2428,7 @@
           "Licenses": [
             "GPL-2.0-only"
           ],
-          "Maintainer": "Michael Meskes \u003cmeskes@debian.org\u003e",
+          "Maintainer": "Michael Meskes \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2460,7 +2460,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian systemd Maintainers \u003cpkg-systemd-maintainers@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian systemd Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2510,7 +2510,7 @@
             "LGPL-2.0-or-later",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Guillem Jover \u003cguillem@debian.org\u003e",
+          "Maintainer": "Guillem Jover \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2547,7 +2547,7 @@
             "BSD-3-Clause",
             "MIT"
           ],
-          "Maintainer": "APT Development Team \u003cdeity@lists.debian.org\u003e",
+          "Maintainer": "APT Development Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2641,7 +2641,7 @@
             "LGPL-2.0-or-later",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Guillem Jover \u003cguillem@debian.org\u003e",
+          "Maintainer": "Guillem Jover \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2681,7 +2681,7 @@
             "LGPL-2.1-only",
             "GPL-1.0-only"
           ],
-          "Maintainer": "Laurent Bigonville \u003cbigon@debian.org\u003e",
+          "Maintainer": "Laurent Bigonville \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2717,7 +2717,7 @@
             "LGPL-2.1-only",
             "GPL-1.0-only"
           ],
-          "Maintainer": "Laurent Bigonville \u003cbigon@debian.org\u003e",
+          "Maintainer": "Laurent Bigonville \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2768,7 +2768,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2805,7 +2805,7 @@
             "BSD-3-Clause",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Anibal Monsalve Salazar \u003canibal@debian.org\u003e",
+          "Maintainer": "Anibal Monsalve Salazar \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2842,7 +2842,7 @@
             "LGPL-2.1-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "GNU Libc Maintainers \u003cdebian-glibc@lists.debian.org\u003e",
+          "Maintainer": "GNU Libc Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -2905,7 +2905,7 @@
             "LGPL-2.1-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "GNU Libc Maintainers \u003cdebian-glibc@lists.debian.org\u003e",
+          "Maintainer": "GNU Libc Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3224,7 +3224,7 @@
             "LGPL-2.1-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Håvard F. Aasen \u003chavard.f.aasen@pfft.no\u003e",
+          "Maintainer": "Håvard F. Aasen \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3265,7 +3265,7 @@
             "GPL-2.0-only",
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Christian Kastner \u003cckk@debian.org\u003e",
+          "Maintainer": "Christian Kastner \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3311,7 +3311,7 @@
             "Latex2e",
             "GPL-2+ with Texinfo exception"
           ],
-          "Maintainer": "Theodore Y. Ts'o \u003ctytso@mit.edu\u003e",
+          "Maintainer": "Theodore Y. Ts'o \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3345,7 +3345,7 @@
           "SrcVersion": "4.4.33",
           "SrcRelease": "2",
           "SrcEpoch": 1,
-          "Maintainer": "Marco d'Itri \u003cmd@linux.it\u003e",
+          "Maintainer": "Marco d'Itri \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3390,7 +3390,7 @@
             "GPL-3.0-only",
             "Zlib"
           ],
-          "Maintainer": "Bastian Germann \u003cbage@debian.org\u003e",
+          "Maintainer": "Bastian Germann \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3426,7 +3426,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian Install System Team \u003cdebian-boot@lists.debian.org\u003e",
+          "Maintainer": "Debian Install System Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3469,7 +3469,7 @@
             "Latex2e",
             "GPL-2+ with Texinfo exception"
           ],
-          "Maintainer": "Theodore Y. Ts'o \u003ctytso@mit.edu\u003e",
+          "Maintainer": "Theodore Y. Ts'o \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3511,7 +3511,7 @@
             "LGPL-2.1-or-later",
             "public-domain"
           ],
-          "Maintainer": "Debian GCC Maintainers \u003cdebian-gcc@lists.debian.org\u003e",
+          "Maintainer": "Debian GCC Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3542,7 +3542,7 @@
           "SrcName": "gcc-12",
           "SrcVersion": "12.2.0",
           "SrcRelease": "14+deb12u1",
-          "Maintainer": "Debian GCC Maintainers \u003cdebian-gcc@lists.debian.org\u003e",
+          "Maintainer": "Debian GCC Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3577,7 +3577,7 @@
             "LGPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian GnuTLS Maintainers \u003cpkg-gnutls-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuTLS Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3622,7 +3622,7 @@
             "GPL-3.0-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Nicolas Mora \u003cbabelouest@debian.org\u003e",
+          "Maintainer": "Nicolas Mora \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3665,7 +3665,7 @@
             "GPL-3.0-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "Debian Science Team \u003cdebian-science-maintainers@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian Science Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3713,7 +3713,7 @@
             "GPL-3.0-or-later",
             "BSD-3-Clause"
           ],
-          "Maintainer": "Debian GnuTLS Maintainers \u003cpkg-gnutls-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuTLS Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3783,7 +3783,7 @@
             "LGPL-2.1-only",
             "GPL-3.0-only"
           ],
-          "Maintainer": "Debian GnuPG Maintainers \u003cpkg-gnupg-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuPG Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3828,7 +3828,7 @@
             "GPL-2.0-only",
             "GAP"
           ],
-          "Maintainer": "Magnus Holmgren \u003cholmgren@debian.org\u003e",
+          "Maintainer": "Magnus Holmgren \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3871,7 +3871,7 @@
             "GPL-2.0-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "Debian Libidn team \u003chelp-libidn@gnu.org\u003e",
+          "Maintainer": "Debian Libidn team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3938,7 +3938,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Nobuhiro Iwamatsu \u003ciwamatsu@debian.org\u003e",
+          "Maintainer": "Nobuhiro Iwamatsu \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -3986,7 +3986,7 @@
             "PD-debian",
             "GPL-3.0-only"
           ],
-          "Maintainer": "Sebastian Andrzej Siewior \u003csebastian@breakpoint.cc\u003e",
+          "Maintainer": "Sebastian Andrzej Siewior \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4032,7 +4032,7 @@
             "public-domain-md5",
             "public-domain-sha1"
           ],
-          "Maintainer": "Guillem Jover \u003cguillem@debian.org\u003e",
+          "Maintainer": "Guillem Jover \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4081,7 +4081,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4116,7 +4116,7 @@
           "SrcName": "ncurses",
           "SrcVersion": "6.4",
           "SrcRelease": "4",
-          "Maintainer": "Craig Small \u003ccsmall@debian.org\u003e",
+          "Maintainer": "Craig Small \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4161,7 +4161,7 @@
             "GPL-2.0-only",
             "GAP"
           ],
-          "Maintainer": "Magnus Holmgren \u003cholmgren@debian.org\u003e",
+          "Maintainer": "Magnus Holmgren \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4205,7 +4205,7 @@
             "same-as-rest-of-p11kit",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Debian GnuTLS Maintainers \u003cpkg-gnutls-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuTLS Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4251,7 +4251,7 @@
             "public-domain",
             "Beerware"
           ],
-          "Maintainer": "Sam Hartman \u003chartmans@debian.org\u003e",
+          "Maintainer": "Sam Hartman \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4391,7 +4391,7 @@
             "public-domain",
             "Beerware"
           ],
-          "Maintainer": "Sam Hartman \u003chartmans@debian.org\u003e",
+          "Maintainer": "Sam Hartman \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4456,7 +4456,7 @@
             "public-domain",
             "Beerware"
           ],
-          "Maintainer": "Sam Hartman \u003chartmans@debian.org\u003e",
+          "Maintainer": "Sam Hartman \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4601,7 +4601,7 @@
             "public-domain",
             "Beerware"
           ],
-          "Maintainer": "Sam Hartman \u003chartmans@debian.org\u003e",
+          "Maintainer": "Sam Hartman \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4650,7 +4650,7 @@
             "BSD-2-Clause",
             "public-domain"
           ],
-          "Maintainer": "Matthew Vernon \u003cmatthew@debian.org\u003e",
+          "Maintainer": "Matthew Vernon \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4692,7 +4692,7 @@
             "GFDL-1.3-or-later",
             "ISC-no-attribution"
           ],
-          "Maintainer": "Matthias Klose \u003cdoko@debian.org\u003e",
+          "Maintainer": "Matthias Klose \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4734,7 +4734,7 @@
           "Licenses": [
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Kees Cook \u003ckees@debian.org\u003e",
+          "Maintainer": "Kees Cook \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4770,7 +4770,7 @@
             "LGPL-2.1-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian SELinux maintainers \u003cselinux-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian SELinux maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4807,7 +4807,7 @@
             "LGPL-2.0-or-later",
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Debian SELinux maintainers \u003cselinux-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian SELinux maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4840,7 +4840,7 @@
             "LGPL-2.0-or-later",
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Debian SELinux maintainers \u003cselinux-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian SELinux maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4884,7 +4884,7 @@
             "GPL-2.0-only",
             "GPL-2.0-or-later"
           ],
-          "Maintainer": "Debian SELinux maintainers \u003cselinux-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian SELinux maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4932,7 +4932,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -4970,7 +4970,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Laszlo Boszormenyi (GCS) \u003cgcs@debian.org\u003e",
+          "Maintainer": "Laszlo Boszormenyi (GCS) \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5016,7 +5016,7 @@
             "Latex2e",
             "GPL-2+ with Texinfo exception"
           ],
-          "Maintainer": "Theodore Y. Ts'o \u003ctytso@mit.edu\u003e",
+          "Maintainer": "Theodore Y. Ts'o \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5055,7 +5055,7 @@
             "GPL-1.0-or-later",
             "GPL-1.0-only"
           ],
-          "Maintainer": "Debian OpenSSL Team \u003cpkg-openssl-devel@alioth-lists.debian.net\u003e",
+          "Maintainer": "Debian OpenSSL Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5092,7 +5092,7 @@
           "SrcName": "gcc-12",
           "SrcVersion": "12.2.0",
           "SrcRelease": "14+deb12u1",
-          "Maintainer": "Debian GCC Maintainers \u003cdebian-gcc@lists.debian.org\u003e",
+          "Maintainer": "Debian GCC Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5138,7 +5138,7 @@
             "GPL-2.0-only",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Debian systemd Maintainers \u003cpkg-systemd-maintainers@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian systemd Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5181,7 +5181,7 @@
             "GPL-3.0-only",
             "GFDL-1.3-only"
           ],
-          "Maintainer": "Debian GnuTLS Maintainers \u003cpkg-gnutls-maint@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian GnuTLS Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5221,7 +5221,7 @@
             "X11",
             "BSD-3-Clause"
           ],
-          "Maintainer": "Craig Small \u003ccsmall@debian.org\u003e",
+          "Maintainer": "Craig Small \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5264,7 +5264,7 @@
             "GPL-2.0-only",
             "LGPL-2.1-only"
           ],
-          "Maintainer": "Debian systemd Maintainers \u003cpkg-systemd-maintainers@lists.alioth.debian.org\u003e",
+          "Maintainer": "Debian systemd Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5309,7 +5309,7 @@
             "GPL-2.0-only",
             "GFDL-1.2-only"
           ],
-          "Maintainer": "Jörg Frings-Fürst \u003cdebian@jff.email\u003e",
+          "Maintainer": "Jörg Frings-Fürst \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5358,7 +5358,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5394,7 +5394,7 @@
             "BSD-2-Clause",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Josue Ortega \u003cjosue@debian.org\u003e",
+          "Maintainer": "Josue Ortega \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5432,7 +5432,7 @@
             "Zlib",
             "MIT"
           ],
-          "Maintainer": "RPM packaging team \u003cteam+pkg-rpm@tracker.debian.org\u003e",
+          "Maintainer": "RPM packaging team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5473,7 +5473,7 @@
             "public-domain",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Shadow package maintainers \u003cpkg-shadow-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Shadow package maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5646,7 +5646,7 @@
             "Latex2e",
             "GPL-2+ with Texinfo exception"
           ],
-          "Maintainer": "Theodore Y. Ts'o \u003ctytso@mit.edu\u003e",
+          "Maintainer": "Theodore Y. Ts'o \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5684,7 +5684,7 @@
             "X11",
             "CC-BY-3.0"
           ],
-          "Maintainer": "Boyuan Yang \u003cbyang@debian.org\u003e",
+          "Maintainer": "Boyuan Yang \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5746,7 +5746,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5799,7 +5799,7 @@
             "X11",
             "BSD-3-Clause"
           ],
-          "Maintainer": "Craig Small \u003ccsmall@debian.org\u003e",
+          "Maintainer": "Craig Small \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5881,7 +5881,7 @@
             "X11",
             "BSD-3-Clause"
           ],
-          "Maintainer": "Craig Small \u003ccsmall@debian.org\u003e",
+          "Maintainer": "Craig Small \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5931,7 +5931,7 @@
           "Licenses": [
             "GPL-2.0-only"
           ],
-          "Maintainer": "Marco d'Itri \u003cmd@linux.it\u003e",
+          "Maintainer": "Marco d'Itri \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -5964,7 +5964,7 @@
             "GPL-1.0-or-later",
             "GPL-1.0-only"
           ],
-          "Maintainer": "Debian OpenSSL Team \u003cpkg-openssl-devel@alioth-lists.debian.net\u003e",
+          "Maintainer": "Debian OpenSSL Team \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -6208,7 +6208,7 @@
             "public-domain",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Shadow package maintainers \u003cpkg-shadow-devel@lists.alioth.debian.org\u003e",
+          "Maintainer": "Shadow package maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -6567,7 +6567,7 @@
             "HSIEH-DERIVATIVE",
             "HSIEH-BSD"
           ],
-          "Maintainer": "Niko Tyni \u003cntyni@debian.org\u003e",
+          "Maintainer": "Niko Tyni \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -7221,7 +7221,7 @@
             "GFDL-1.3-or-later",
             "ISC-no-attribution"
           ],
-          "Maintainer": "Matthias Klose \u003cdoko@debian.org\u003e",
+          "Maintainer": "Matthias Klose \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -7269,7 +7269,7 @@
             "BSL-1",
             "pcre"
           ],
-          "Maintainer": "Clint Adams \u003cclint@debian.org\u003e",
+          "Maintainer": "Clint Adams \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -7352,7 +7352,7 @@
             "GPL-3.0-only",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Debian sysvinit maintainers \u003cdebian-init-diversity@chiark.greenend.org.uk\u003e",
+          "Maintainer": "Debian sysvinit maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -7401,7 +7401,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Janos Lenart \u003cocsi@debian.org\u003e",
+          "Maintainer": "Janos Lenart \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -7482,7 +7482,7 @@
           "Licenses": [
             "public-domain"
           ],
-          "Maintainer": "GNU Libc Maintainers \u003cdebian-glibc@lists.debian.org\u003e",
+          "Maintainer": "GNU Libc Maintainers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -8417,7 +8417,7 @@
             "GPL-2.0-or-later",
             "GPL-2.0-only"
           ],
-          "Maintainer": "Marco d'Itri \u003cmd@linux.it\u003e",
+          "Maintainer": "Marco d'Itri \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -8461,7 +8461,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -8786,7 +8786,7 @@
             "LGPL-2.1-only",
             "LGPL-3.0-only"
           ],
-          "Maintainer": "util-linux packagers \u003cutil-linux@packages.debian.org\u003e",
+          "Maintainer": "util-linux packagers \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },
@@ -8838,7 +8838,7 @@
           "Licenses": [
             "Zlib"
           ],
-          "Maintainer": "Mark Brown \u003cbroonie@debian.org\u003e",
+          "Maintainer": "Mark Brown \u003c<EMAIL>\u003e",
           "Repository": {
             "Class": "official"
           },

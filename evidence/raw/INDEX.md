@@ -102,7 +102,7 @@ No run was rerun and none failed: each is the only attempt and [load-summary.md]
 | SCAN-03 | pip-audit on the application and analytics requirements | `SCAN-03_2026-10-01_pip-audit-src.json`, `SCAN-03_2026-10-01_pip-audit-analytics.json` |
 | SCAN-04 | Django `check --deploy` | `SCAN-04_2026-10-01_check-deploy.txt` |
 | SCAN-05 | hadolint on the Dockerfile | `SCAN-05_2026-10-01_hadolint.json` |
-| SCAN-06 | Trivy image scan | `SCAN-06_2026-10-01_trivy-image.json` |
+| SCAN-06 | Trivy image scan (97 third-party Debian package-maintainer email addresses in the report were redacted to `<EMAIL>` on 9 October 2026; the findings are unchanged) | `SCAN-06_2026-10-01_trivy-image.json` |
 | SCAN-07 | Trivy infrastructure-code scan | `SCAN-07_2026-10-01_trivy-iac.json` |
 
 Triage of all seven: [security-scan-triage.md](../security-scan-triage.md).
