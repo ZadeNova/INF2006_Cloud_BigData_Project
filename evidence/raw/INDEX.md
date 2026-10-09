@@ -97,7 +97,7 @@ No run was rerun and none failed: each is the only attempt and [load-summary.md]
 
 | Case | What it is | Authoritative file |
 |---|---|---|
-| SCAN-01 | gitleaks on git history and on the working tree (no secret; one false positive) | `SCAN-01_2026-10-01_gitleaks-history.json`, `SCAN-01_2026-10-01_gitleaks-tree.json` (the `.log` files are the tool output) |
+| SCAN-01 | gitleaks on git history and on the working tree (no secret; one false positive; a commit author email in the history report was redacted to `<EMAIL>` on 9 October 2026) | `SCAN-01_2026-10-01_gitleaks-history.json`, `SCAN-01_2026-10-01_gitleaks-tree.json` (the `.log` files are the tool output) |
 | SCAN-02 | bandit static analysis | `SCAN-02_2026-10-01_bandit.json` |
 | SCAN-03 | pip-audit on the application and analytics requirements | `SCAN-03_2026-10-01_pip-audit-src.json`, `SCAN-03_2026-10-01_pip-audit-analytics.json` |
 | SCAN-04 | Django `check --deploy` | `SCAN-04_2026-10-01_check-deploy.txt` |
