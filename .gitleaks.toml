@@ -1,4 +1,4 @@
-# gitleaks configuration: the default ruleset plus one recorded false positive.
+# gitleaks configuration: the default ruleset plus recorded false positives.
 # Every suppression needs a reason here and a row in evidence/security-scan-triage.md.
 [extend]
 useDefault = true
@@ -8,3 +8,27 @@ description = "SCAN-01: generic-api-key matched ordinary prose ('Authentication,
 condition = "AND"
 commits = ["51e4ec112db82d7fef7ca95423dda83b29507910"]
 paths = ['''evidence/test-security\.md''']
+
+[[allowlists]]
+description = "SCAN-01 follow-up: destroyed Fargate WebACL optimistic-lock metadata, not an authentication credential"
+condition = "AND"
+commits = ["0c8f910707b3a2bd6ec154043ddd0db73ede1f4d"]
+paths = ['''^evidence/raw/OPS_2026-10-09_fargate_down\.txt$''']
+
+[[allowlists]]
+description = "SCAN-01 follow-up: destroyed EC2 WebACL optimistic-lock metadata, not an authentication credential"
+condition = "AND"
+commits = ["33963c5a8edc25b1b29f2106744d192894e3e3b9"]
+paths = ['''^evidence/raw/OPS_2026-10-08_ec2_down\.txt$''']
+
+[[allowlists]]
+description = "SCAN-01 follow-up: ordinary prose quoted in the original false-positive triage"
+condition = "AND"
+commits = ["b1dc3d9783a74ed1b95fc6cac65fc873af8902ac"]
+paths = ['''^evidence/security-scan-triage\.md$''']
+
+[[allowlists]]
+description = "SCAN-01 follow-up: public Python image GPG signing-key fingerprint in Trivy metadata, not a private key"
+condition = "AND"
+commits = ["b1dc3d9783a74ed1b95fc6cac65fc873af8902ac"]
+paths = ['''^evidence/raw/SCAN-06_2026-10-01_trivy-image\.json$''']

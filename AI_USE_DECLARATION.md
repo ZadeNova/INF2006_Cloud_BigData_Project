@@ -1,13 +1,68 @@
 # AI Use Declaration
 
-For each AI tool or external baseline used, record:
+Group 21. This file declares every AI tool, external library, asset and dataset the project used,
+where it was used, how the team verified the result, and its licence. No external application
+template or another course's implementation was copied. The application is AI-assisted code written
+by the team, not an open-source baseline; third-party libraries, assets and data are listed below.
+The report summarises this declaration in sections 8 and 9. The dated records in the appendix give
+the detail behind the summary.
+
+## AI tools
+
+AI coding assistants were used extensively, as assistants for setting up the cloud infrastructure
+and local environment, writing and debugging code, writing tests, drafting documentation and
+reviewing changes. The team chose the problem, scope, architecture and dataset, made the design
+decisions, and approved a plan before each AI-assisted change.
 
 | Tool/source | Where used | Purpose | Verification performed | Licence/attribution |
 |---|---|---|---|---|
-| TODO | TODO | TODO | TODO | TODO |
+| OpenAI Codex, with `gpt-6-astra` and `gpt-5.6-luna` agents | Local Docker and PostgreSQL foundation, dataset import, operator dashboard, ML batch handoff and display, production runtime security (`src/`, `analytics/`, `tests/`, `docs/`) | Setting up the local environment, implementing and debugging backend features, writing tests; separate read-only agents as reviewers | Test suite and focused checks on each change; written review records in [docs/reviews/](docs/reviews/) | AI-assisted work, declared here |
+| Claude Code (Claude Opus 5, Opus 5.5, Sonnet 5) | AWS infrastructure in Terraform for both variants ([src/infrastructure/](src/infrastructure/)), load test harness ([tests/load/](tests/load/README.md)), ML hold-out evaluation and fixes (`analytics/`), catalogue and cart features, evidence records and documentation | Setting up the cloud infrastructure, debugging deployment, configuration and code issues, writing scripts and tests, drafting documentation and reviewing changes | Plans written before each change (`docs/plans/`); Terraform plans reviewed before apply; test suite; deployed tests on AWS recorded in [evidence/](evidence/README.md); database cross-checks | AI-assisted work, declared here; commits carry a `Co-Authored-By` trailer |
+| GitHub Copilot | First version of the optional ML customer segmentation workflow (24 September 2026) | Code assistance | Later reviewed and revised in the ML review rounds ([docs/reviews/ml-quality-evaluation.md](docs/reviews/ml-quality-evaluation.md)) | AI-assisted work, declared here |
+| Gemini (Google) | Dashboard description during the FUNC-02 browser walkthrough | Structuring a written description of what the dashboard showed | Each value cross-checked against the database (FUNC-02 step 7 in [evidence/test-functional.md](evidence/test-functional.md)) | AI-assisted wording |
 
-## Notes
-TODO: describe any open-source baseline or AI-assisted code the team started from, and the team's substantive modifications and decisions on top of it.
+AI output was not accepted as fact; it was accepted only through recorded gates. Each backend change
+was reviewed by a separate, read-only reviewer agent against the written contracts, with findings,
+fixes and re-reviews logged under [docs/reviews/](docs/reviews/). It was then checked by the
+automated tests, by deployed tests on AWS, by cross-checking results against the database, and by
+checking pages in the browser. Every result reported comes from a command whose raw output is saved
+under [evidence/raw/](evidence/raw/), not from an assistant's summary. Where an agent ran a check,
+the evidence says so and does not credit a human.
+
+## Libraries, assets and data
+
+| Source | Where used | Purpose | Verification performed | Licence/attribution |
+|---|---|---|---|---|
+| Django 5.2, Gunicorn, WhiteNoise, psycopg ([src/requirements.txt](src/requirements.txt)) | Web application | Framework and runtime | Versions pinned; test suite | Django BSD-3-Clause; Gunicorn MIT; WhiteNoise MIT; psycopg LGPL-3.0 |
+| PostgreSQL 17 and Docker Official Images | Local runtime and Amazon RDS | Database and containers | Image digests pinned; migrations and constraints exercised | PostgreSQL Licence; upstream image licences |
+| HTMX ([src/static/vendor/htmx/](src/static/vendor/htmx/LICENSE.md)) | Storefront and dashboard partials | Partial page updates | Vendored with recorded SHA-256 | Zero-Clause BSD |
+| Chart.js ([src/static/vendor/chartjs/](src/static/vendor/chartjs/LICENSE.md)) | Operator dashboard | Charts | Vendored with recorded SHA-256 | MIT |
+| model-viewer ([src/static/vendor/model-viewer/](src/static/vendor/model-viewer/LICENSE)) | Product pages | 3D shoe viewer | Vendored | Apache-2.0 |
+| 3D shoe models from Sketchfab ([src/static/models/CREDITS.md](src/static/models/CREDITS.md)) | Product pages | Product visuals, compressed and cut to a single shoe by the team | Credits recorded per file | Mostly CC BY 4.0; two CC BY-NC 4.0 (non-commercial course use); per-model authors in CREDITS.md |
+| Google Fonts (Archivo Black, Space Mono, Work Sans, Inter, Manrope, Pixelify Sans) | Site typography | Fonts | Loaded from Google Fonts | SIL Open Font License 1.1 |
+| pandas, NumPy, scikit-learn | [analytics/](analytics/README.md) | Analytics verification and customer segmentation | Versions pinned; tests and reproducible evaluation in [evidence/test-data-ai.md](evidence/test-data-ai.md) | BSD-3-Clause |
+| Locust | [tests/load/](tests/load/README.md) | Load generation | Version pinned | MIT |
+| Terraform and the AWS provider | [src/infrastructure/](src/infrastructure/) | Infrastructure as code | Plans and applies recorded in [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md) | Terraform BUSL-1.1; AWS provider MPL-2.0 |
+| Analytics Engineering, "Ecommerce Sales & Returns Dataset v1.0.0" | [data/](data/README.md), remapped to shoes | Synthetic source data | Checksums in `data/raw/checksums.txt`; import reconciliation | CC BY 4.0; notice in `data/raw/LICENSE.txt` |
+
+## Team decisions and modifications
+
+The team chose the problem, scope, architecture and dataset, and approved each plan before AI tools
+implemented it. Substantive team decisions include: remapping the dataset to a shoe shop with sizes;
+building two AWS compute variants from one shared module and choosing ECS Fargate from the measured
+results ([ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)); which review findings
+to fix and which to keep as documented limitations; the storefront redesign and 3D model choice;
+and reporting the finding that segments do not predict repurchase on this synthetic data as
+measured. Members reviewed AI output, ran the application and checked results against the evidence.
+
+**To confirm before submission (remove this paragraph once done):** add any other AI use (for
+example on the storefront redesign, dark mode, 3D model processing, branding, test write-ups or the
+report) to the table above and to report section 9; find the source and licence of
+`src/static/models/air-jordan-1-low-dior.glb` or remove that model.
+
+## Appendix: dated AI-use records
+
+The records below were written as the work happened and are kept unchanged.
 
 ## Foundation verification and attribution
 
