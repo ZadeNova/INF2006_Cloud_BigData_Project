@@ -76,7 +76,7 @@ resource "aws_cloudwatch_query_definition" "problems_per_minute" {
   log_group_names = [aws_cloudwatch_log_group.app.name]
   query_string    = <<-EOT
     filter level in ["ERROR", "WARNING"]
-    | stats count(*) as events by bin(1m), level
-    | sort bin(1m) desc
+    | stats count(*) as events by bin(1m) as minute, level
+    | sort minute desc
   EOT
 }

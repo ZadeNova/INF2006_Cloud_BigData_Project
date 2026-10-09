@@ -2,7 +2,7 @@
 
 Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`) in two variants that are compared: **A, EC2 with an Auto Scaling group**, and **B, containers on ECS Fargate**. Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-017), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md) and [fargate-variant.md](../../docs/plans/fargate-variant.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
 
-**Status (6 October 2026).** `base/` is applied and stays up. Variant A was applied and verified on 1 October: `https://shop-ec2.fourtytwofactors.me` served the shop, with `smoke.sh` passing 8 of 8. Since then the front door shared by both variants moved into a module (`modules/web-entry`), the Fargate stack (`fargate/`) and the load-generator stack (`loadgen/`) were written, and the scripts were extended. **All of that passed `terraform validate`.** Variant A and the load-generator stack were applied and used on 8 October (evidence in [evidence/README.md](../../evidence/README.md), the apply record in [aws-build-runbook.md](../../evidence/aws-build-runbook.md)); variant B (`fargate/`) is being measured on 9 October. `up.sh` stops at the `db_bootstrap` step when the database is already bootstrapped (open; run `jobs.sh <variant> migrate`, `check` and `smoke.sh` by hand afterwards). Between work sessions the stacks are torn down to save money.
+**Status (9 October 2026).** `base/` is applied and stays up. Variant A was applied and verified on 1 October: `https://shop-ec2.fourtytwofactors.me` served the shop, with `smoke.sh` passing 8 of 8. Since then the front door shared by both variants moved into a module (`modules/web-entry`), the Fargate stack (`fargate/`) and the load-generator stack (`loadgen/`) were written, and the scripts were extended. **All of that passed `terraform validate`.** Variant A and the load-generator stack were applied and used on 8 October (evidence in [evidence/README.md](../../evidence/README.md), the apply record in [aws-build-runbook.md](../../evidence/aws-build-runbook.md)); variant B (`fargate/`) was applied, measured and torn down on 9 October (the final architecture, [ADR-018](../../docs/decisions/ADR-018-final-architecture-ecs-fargate.md)). The earlier `up.sh` stop at `db_bootstrap` on an already-bootstrapped database is fixed in code (ADR-019, not re-run in AWS). Between work sessions the stacks are torn down to save money.
 
 ## Quick start
 
@@ -200,15 +200,16 @@ For a teammate's own lab account, or to reproduce the build. About 45 minutes, m
 
    Check delegation by hand if you like: `dig NS <domain> @a0.nic.me +norec | grep -A8 'AUTHORITY SECTION'` should show the AWS servers.
 
-3. **Start variant A** (builds and pushes the image, fills the secrets, bootstraps and migrates the database, creates the trainer login, imports the dataset built from `data/raw/` and checked against `data/derived/shoes/checksums.txt`, creates the operator, refreshes the analytics, smoke-tests):
-   ```bash
-   src/infrastructure/scripts/up.sh ec2
-   ```
-
-4. **Start variant B** when you want it:
+3. **Start variant B, the final architecture** (builds and pushes the image, fills the secrets, creates the stack with zero tasks, bootstraps and migrates the database, imports the dataset built from `data/raw/` and checked against `data/derived/shoes/checksums.txt`, creates the operator, refreshes the analytics, then starts one task and smoke-tests; no variant A needed, [ADR-019](../../docs/decisions/ADR-019-variant-b-sets-up-its-own-database.md)):
    ```bash
    src/infrastructure/scripts/up.sh fargate
    ```
+
+4. **Variant A** (the evaluated alternative) only if you want to reproduce the comparison:
+   ```bash
+   src/infrastructure/scripts/up.sh ec2
+   ```
+   If step 3 fails on your account, the order we actually ran is the fallback: `up.sh ec2` first (it sets up the database), then `up.sh fargate`.
 
 The recorded evidence used the image `release-c19d547` (digest `sha256:fa72e949...cb481`); a rebuild has a different digest, so record yours.
 

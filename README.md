@@ -90,7 +90,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS deployment is Terraform plus a few scripts in `src/infrastructure/`; **[src/infrastructure/README.md](src/infrastructure/README.md) has the exact commands** to bring variant A up and down, or to build everything in a new account (cloud steps need a Learner Lab account and cost money; marking does not need them).
+See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS deployment is Terraform plus a few scripts in `src/infrastructure/`; **[src/infrastructure/README.md](src/infrastructure/README.md) has the exact commands** to bring the final architecture (variant B, ECS Fargate, [ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)) up and down, and [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) says what you can reproduce at each level, what it costs and what has not been proven (cloud steps need a Learner Lab account and a domain and cost money; marking does not need them). To run the load test: [docs/RUN_LOADTEST.md](docs/RUN_LOADTEST.md).
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -124,6 +124,7 @@ The delivered application must run locally without paid AWS access for marking. 
 | Document | Purpose |
 |---|---|
 | [**Project guide**](docs/GUIDE.md) | Start here if you are new: where the evidence is, how to check a claim, and what every shell and Python script does |
+| [**Reproduce it**](docs/REPRODUCE_CLOUD.md) / [run the load test](docs/RUN_LOADTEST.md) | Offline, cloud (variant B) and load-test steps, costs, and what is proven |
 | [Project scope](PROJECT_SCOPE_INF2006.md) | Requirements, phase dates, risks, rubric coverage and team roles |
 | [Implementation tracker](docs/IMPLEMENTATION_PLAN.md) | Current status, next tasks and blockers |
 | [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |

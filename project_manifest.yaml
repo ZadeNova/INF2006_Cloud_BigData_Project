@@ -1,5 +1,5 @@
 project:
-  group_id: "21"
+  group_id: "G021"
   title: "42Factors: a small online shoe shop with a sales and inventory analytics dashboard, deployed and measured on AWS"
   problem_statement: "A small online shoe shop has two users with different problems. Customers need to register, browse sized products, keep a cart and place a simulated order that is never duplicated or oversold. The store operator needs an understandable view of sales trends and which sizes need replenishing. The project builds that shop (Django, PostgreSQL) on synthetic data and runs it on AWS, then measures how it scales and recovers. Two compute layouts for the same image and database were built and compared, EC2 behind an Auto Scaling group (variant A) and containers on ECS Fargate (variant B), one repeat each. Scope and requirements: PROJECT_SCOPE_INF2006.md section 1."
   cloud_provider: "AWS"
