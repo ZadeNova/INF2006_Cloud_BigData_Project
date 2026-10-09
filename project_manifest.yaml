@@ -1,8 +1,8 @@
 project:
   group_id: "21"
-  title: "" # TODO
-  problem_statement: "" # TODO
-  cloud_provider: "AWS | Azure | GCP | other" # TODO: pick one
+  title: "42Factors: a small online shoe shop with a sales and inventory analytics dashboard, deployed and measured on AWS"
+  problem_statement: "A small online shoe shop has two users with different problems. Customers need to register, browse sized products, keep a cart and place a simulated order that is never duplicated or oversold. The store operator needs an understandable view of sales trends and which sizes need replenishing. The project builds that shop (Django, PostgreSQL) on synthetic data and runs it on AWS, then measures how it scales and recovers. Two compute layouts for the same image and database were built and compared, EC2 behind an Auto Scaling group (variant A) and containers on ECS Fargate (variant B), one repeat each. Scope and requirements: PROJECT_SCOPE_INF2006.md section 1."
+  cloud_provider: "AWS"
   repository_commit: "" # optional commit hash, fill in near submission time
 
 team:
@@ -25,9 +25,22 @@ team:
 
 architecture:
   diagram: "evidence/architecture.png"
-  service_model: "" # e.g. IaaS / PaaS / SaaS and why
-  deployment_model: "" # e.g. public cloud, single-region, etc.
-  components: []
+  service_model: "Final architecture (docs/decisions/ADR-018-final-architecture-ecs-fargate.md): variant B, the application as a container on a managed compute platform (Amazon ECS on Fargate; the team owns the image, AWS owns the hosts). The database is PaaS (Amazon RDS PostgreSQL), and the edge, secrets, logging and alarms are managed services (ALB, WAF, ACM, Secrets Manager, CloudWatch, SNS). Variant A, EC2 instances in an Auto Scaling group (IaaS: we patch and size the hosts), was built from the same shared module and measured as the alternative; both run the same pinned container image and database. The shop itself is our own application, not a SaaS product. Why: the decision driver is a small team with no dedicated operator, and both variants served the measured load with zero errors (indicative, one repeat each: evidence/test-performance.md, evidence/load-summary.md). Other alternatives considered and not selected, with reasons, in docs/plans/aws-ecs-comparison.md and docs/decisions/ (for example ECS on EC2 dropped for time, Lambda not selected, CloudFront excluded, ElastiCache conditional)."
+  deployment_model: "Public cloud, single region (us-east-1), in an AWS Learner Lab account with the lab's LabRole (no custom IAM roles can be created). One VPC with public subnets for the load balancer and application tier and private subnets for the database; RDS is single-AZ (a budget compromise, not high availability). Infrastructure is Terraform in three states: base/ (network, RDS, DNS, certificate, registry, secrets, alarm topic; stays up), ec2/ and fargate/ (one variant each, created and destroyed per working session), plus loadgen/ for benchmarks. Public HTTPS at shop-ec2 / shop-fargate .fourtytwofactors.me. Budget and constraints: PROJECT_SCOPE_INF2006.md section 7."
+  components:
+    - "Browser (customer and operator) -> HTTPS only (ALB listener 443, TLS policy ELBSecurityPolicy-TLS13-1-2-2021-06; port 80 redirects)"
+    - "WAF web ACL (aws_wafv2_web_acl.app): rate-based rule on POST /login/, count mode in load tests, block mode tested on variant B (SEC-17)"
+    - "Application Load Balancer (aws_lb.app) with target group aws_lb_target_group.app and /health/ checks; ACM certificate (aws_acm_certificate.shop); Route 53 zone and alias records"
+    - "Variant A compute: aws_launch_template.app and aws_autoscaling_group.app (c5.large, 1 to 2 instances), target tracking on ALB requests per target (aws_autoscaling_policy.requests, 300 per minute)"
+    - "Variant B compute: aws_ecs_cluster.app, aws_ecs_task_definition.app and aws_ecs_service.app (Fargate, 2 vCPU / 4 GB, 1 to 2 tasks), Application Auto Scaling (aws_appautoscaling_target.app and aws_appautoscaling_policy.requests, same metric)"
+    - "Django 5 application in a container (Gunicorn, WhiteNoise for static files and 3D models, HTMX templates); same image digest on both variants; no sticky sessions"
+    - "Amazon RDS PostgreSQL 17 (aws_db_instance.main, db.t4g.small, single-AZ, private subnets, encrypted, TLS enforced): the only authoritative data store, holding sessions, carts, orders, imported dataset and analytics summaries"
+    - "S3 bucket (private, all public access blocked; dataset imports and load-test exports) and Amazon ECR repository (aws_ecr_repository.app, image pinned by digest)"
+    - "AWS Secrets Manager (aws_secretsmanager_secret.app: web, migration, trainer, bootstrap, operator): read at startup with role credentials, no secret values in launch template or task definition"
+    - "Security groups as trust boundaries: internet to ALB (80, 443), ALB to app (8000), app to database (5432) only; Systems Manager Session Manager for administration and one-off database jobs, no SSH"
+    - "Observability: CloudWatch Logs (one JSON line per request, 7-day retention), alarms unhealthy-hosts, no-healthy-hosts and target-5xx to an SNS email topic (aws_sns_topic.alarms), two saved Logs Insights queries, one-minute CloudWatch metrics exported by the load harness"
+    - "Offline analytics and machine learning in analytics/ (pandas, scikit-learn, outside the web image): analytics refresh in the app, independent verification, descriptive RFM customer segmentation loaded as a batch"
+    - "Load generator (loadgen/, aws_instance.loadgen, c5.large in us-east-1) running tests/load/ (Locust) against either variant"
 
 evidence:
   functional_test: "evidence/test-functional.md"
