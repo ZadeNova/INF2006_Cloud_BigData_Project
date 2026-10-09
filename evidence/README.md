@@ -19,7 +19,7 @@ New here? [docs/GUIDE.md](../docs/GUIDE.md) explains the file names, how to chec
 | The WAF block test (SEC-17) is run on B only, because the WAF is one shared module | SEC-17 |
 | FUNC-03 part 2 (browser steps) has no screenshots in `raw/` | FUNC-03 |
 | The scaling target (300 requests per target per minute) was set before any data and is a small fraction of the measured ceiling | RES-03a |
-| Prices in `tests/load/prices.json` are unverified | any cost figure |
+| Prices in `tests/load/prices.json` are list prices (checked 9 October 2026), not the lab's billed amounts | any cost figure |
 
 ## Index
 

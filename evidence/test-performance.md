@@ -27,7 +27,7 @@ No rerun or failed-attempt run folders exist: each run was run once and [load-su
 | Scaling target set before any data | 300 requests per target per minute is 5 requests per second, a small fraction (about 4 to 5 percent) of the measured ceilings of 118.8 (A) and 105.5 (B) requests per second; scale-out fired at 14.56 percent (A) and 14.04 percent (B) CPU at most. |
 | Different CPU models | A: Intel Xeon Platinum 8124M at 3.0 GHz. B: Intel Xeon Platinum 8259CL at 2.5 GHz (read from a one-off task; the tasks that served the load may differ). A possible contributing explanation for B's roughly 10 percent lower ceiling; not separable from the platform at n = 1. |
 | Generator in us-east-1, WAF in count mode for the runs, one source IP | Latency excludes the internet path to Singapore. The WAF block test (SEC-17) was run on B only, after its saturation run, because the WAF is one shared module. |
-| Prices unverified | `tests/load/prices.json` has `verified_by_user: false`; any cost per 1,000 requests is provisional. |
+| Prices are list prices | `tests/load/prices.json` was checked on 9 October 2026 and confirmed by the user (`verified_by_user: true`). They are on-demand list prices; the Learner Lab is billed in credits, and storage, data transfer, load-balancer capacity units and WAF requests are excluded. |
 
 ## Conditions common to every recorded run
 
@@ -48,7 +48,7 @@ Fill once per campaign; a change of any item means the affected runs are rerun o
 | CPU model of the serving unit | A: Intel Xeon Platinum 8124M @ 3.00 GHz; B: Intel Xeon Platinum 8259CL @ 2.50 GHz; 2 vCPU each | `raw/RES-03-ec2-scaleout-r1_2026-10-08/cpu.json` | `raw/RES-03-fargate-scaleout-r1_2026-10-09/cpu.json` |
 | Thresholds | p95 under 800 ms; p99 under 1.8 s (at least 1,000 samples); checkout p95 under 2 s; errors under 1% | applied by `analyze.py` | applied by `analyze.py` |
 | Comparison weights (locked 3 October 2026) | operational burden 25, replacement and error window 25, latency 20, cost 15, scale-out 10, capacity 5 | `WEIGHTS` in `tests/load/analyze.py` | `WEIGHTS` in `tests/load/analyze.py` |
-| Prices verified by (name, date) | **Not verified.** `tests/load/prices.json` has `verified_by_user: false` (list prices written 3 October 2026) | `tests/load/prices.json` | `tests/load/prices.json` |
+| Prices verified by (name, date) | **Verified by the user, 9 October 2026** against the AWS pricing pages (Fargate, load balancer, public IPv4) and public price trackers (c5.large, RDS db.t4g.small); `verified_by_user: true` | `tests/load/prices.json` | `tests/load/prices.json` |
 
 Three of the A run folders (smoke, scale-out, replacement) contain `<ACCOUNT>` in place of some averages in `locust_stats.csv`, `locust_stats_history.csv` and `report.html`: the redaction rule then mistook a 12-digit decimal fraction for an account number. Fixed in `tests/load/common.py` in commit `0276f52`; the saturation export on A and all B exports are clean. The request logs `requests-*.csv`, which `analyze.py` reads, are not affected; `raw/` was not edited.
 
@@ -72,7 +72,7 @@ The plan's full matrix (three repeats of four ladder levels, saturation and Sing
 - With one repeat per condition the min-max tie rule cannot apply, so every A-against-B difference is labelled **indicative, n = 1**, and the weighted total is not quoted as a decision without a second repeat.
 - The RDS pilot gate (LOAD-01) is replaced by reading RDS CPU in the saturation run on one unit; the database headroom at 1,000 users is not measured.
 - Without the ladder, the steady-state latency criterion is judged from the saturation steps (p95 at 1 to 16 users) and the scale-out run's light-load phase; there is no think-time latency at 10 and 100 users, and the report says so.
-- Costs are flagged unverified until `tests/load/prices.json` is checked against the AWS price pages.
+- Costs use list prices checked on 9 October 2026 (`tests/load/prices.json`); the lab's own closing balance (USD 9.8 of 50 used) is the real spend.
 
 ## Cases
 

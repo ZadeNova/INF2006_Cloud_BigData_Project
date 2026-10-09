@@ -22,7 +22,7 @@ import tarfile
 import zipfile
 from pathlib import Path
 
-EXCLUDE = set()   # AGENTS.md and CLAUDE.md are kept: the README links to them and the AI-use declaration refers to them
+EXCLUDE = {"docs/EVIDENCE_WRITER.md"}   # AGENTS.md and CLAUDE.md are kept: the README links to them and the AI-use declaration refers to them
 REQUIRED = ["README.md", "project_manifest.yaml", "report.pdf", "src", "data/DATA_DICTIONARY.md", "analytics/README.md",
             "evidence", "tests", "TEAM_CONTRIBUTIONS.md", "AI_USE_DECLARATION.md", "video_link.txt",
             "evidence/architecture.png", "evidence/test-functional.md", "evidence/test-security.md",

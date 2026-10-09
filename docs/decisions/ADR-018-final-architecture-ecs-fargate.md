@@ -20,7 +20,7 @@ The decision driver is the **operator**: a small shop with 1 to 3 engineers and 
 | Errors during replacement | 0 | 0 | RES-03 replace |
 | Practical capacity, one unit (page actions/s) | **46.5** | 44.0 | saturation |
 | Maximum throughput, one unit (requests/s) | **118.8** | 105.5 | saturation |
-| Price per unit-hour (list, unverified) | **$0.085** | $0.099 | `tests/load/prices.json` |
+| Price per unit-hour (list prices, checked 9 October 2026) | **$0.085** | $0.099 | `tests/load/prices.json` |
 | Price per 1,000 requests at the ceiling | **$0.00027** | $0.00035 | same |
 | Hosts to patch, AMI, SSM access | yes | **none** | design |
 

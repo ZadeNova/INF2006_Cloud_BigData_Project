@@ -27,7 +27,7 @@ Evidence: static read of the diff; `terraform show` of the saved `stage1.tfplan`
 
 | ID | Severity | Finding | Disposition |
 |---|---|---|---|
-| L1 | Low | S3 sub-resources ([storage.tf](../../src/infrastructure/storage.tf)) other than the policy configure the bucket in parallel; an `OperationAborted` error is possible, though the provider normally retries. | No change. If it occurs, re-run `apply`. |
+| L1 | Low | S3 sub-resources ([storage.tf](../../src/infrastructure/base/storage.tf)) other than the policy configure the bucket in parallel; an `OperationAborted` error is possible, though the provider normally retries. | No change. If it occurs, re-run `apply`. |
 | L2 | Low | `aws_ecr_repository.app` has no `Name` tag; the `ecr_repository_url` output description hardcodes `inf2006-grp21-app`. | Optional, cosmetic. |
 | L3 | Low | `sg-app` egress allows 443 only; package installs over HTTP (for example Ubuntu apt) would fail. Fine on Amazon Linux 2023. | Check when the stage 3 AMI is chosen. |
 | L4 | Low | `availability_zones` has no length validation (a short list fails loudly at plan). | Optional. |

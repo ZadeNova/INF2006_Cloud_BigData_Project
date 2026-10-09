@@ -5,7 +5,7 @@ Final architecture: variant B, ECS on Fargate ([ADR-018](decisions/ADR-018-final
 | Level | What you reproduce | You need | Cost |
 |---|---|---|---|
 | **1. Offline** | The application, its tests, the analytics, and the load-test tables from the recorded raw files | Docker, Python 3 | none |
-| **2. Cloud, variant B** | The deployed shop, built from the Terraform and scripts | An AWS Academy Learner Lab, a domain you control, the tools below | about USD 3.5 per day while running, plus about USD 1.2 per day for the shared base (list prices, unverified) |
+| **2. Cloud, variant B** | The deployed shop, built from the Terraform and scripts | An AWS Academy Learner Lab, a domain you control, the tools below | about USD 3.5 per day while running, plus about USD 1.2 per day for the shared base (list prices checked 9 October 2026) |
 | **3. Load test** | A run of the load harness against your own stack B | Level 2, plus one more small instance | about USD 0.1 per hour for the generator |
 
 ## Level 1: offline (no AWS)

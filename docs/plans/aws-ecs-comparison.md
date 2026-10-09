@@ -111,7 +111,7 @@ The 40 stage 1 resources move into `base/` with `terraform state mv`. `sg-alb`, 
 
 ## 6. What differs between the variants
 
-The A-versus-B table is recorded in the contract: [AWS_INFRASTRUCTURE.md, Variant B](../AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-designed-not-built). Summary: B runs an ECS task with no instance, scales with Application Auto Scaling on the same request-count metric, reads its probe host from the ECS metadata endpoint, runs jobs with `aws ecs run-task`, and uses the task role.
+The A-versus-B table is recorded in the contract: [AWS_INFRASTRUCTURE.md, Variant B](../AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-built-and-measured-the-final-architecture). Summary: B runs an ECS task with no instance, scales with Application Auto Scaling on the same request-count metric, reads its probe host from the ECS metadata endpoint, runs jobs with `aws ecs run-task`, and uses the task role.
 
 Both use LabRole (no IAM creation), the same ALB design and health check (`/health/`), no stickiness, the same Gunicorn settings and the same image digest. Fargate has its own vCPU quota that the lab will not let us read, so how far B can scale is learned at apply.
 
@@ -148,7 +148,7 @@ Scripts under `src/infrastructure/scripts/`, small and idempotent, written by W 
 | `evidence.sh <variant>` | Collect redacted outputs into `evidence/raw` | per run |
 | `down.sh <variant>` | Destroy the stack and confirm nothing billing remains | per run |
 
-To verify early: whether `LabRole` allows SSM `SendCommand` (fallback: a non-interactive session through the Session Manager plugin). Optional and not run: [`scripts/probe-lab-comparison.sh`](../../src/infrastructure/scripts/probe-lab-comparison.sh) (the professor confirmed Fargate, so `c5.large`, the RDS class and Multi-AZ are found out at plan and apply, with small fallbacks).
+To verify early: whether `LabRole` allows SSM `SendCommand` (fallback: a non-interactive session through the Session Manager plugin). Optional and not run: `scripts/probe-lab-comparison.sh` (since deleted; git history keeps it) (the professor confirmed Fargate, so `c5.large`, the RDS class and Multi-AZ are found out at plan and apply, with small fallbacks).
 
 ## 9. Schedule (about two working days)
 
@@ -183,7 +183,7 @@ A rough order of magnitude, to be verified against current pricing before each s
 - [ ] U confirms the SME scale assumption and the 3-minute session / 10% peak-hour parameters; find sources if possible.
 - [ ] U fixes the comparison weights before the first run.
 - [x] Lab permissions learned by apply (1 October): Route 53 zone creation, `c5.large`, `db.t4g.small`, SSM `SendCommand`, WAFv2 on an ALB, CloudWatch alarms and query definitions all allowed ([runbook](../../evidence/aws-build-runbook.md)).
-- [ ] Lab permissions still unknown: Multi-AZ, `LabRole` as an ECS task and execution role, a Fargate task pulling the ECR image, the Fargate vCPU quota. [`scripts/probe-lab-comparison.sh`](../../src/infrastructure/scripts/probe-lab-comparison.sh) answers these but was written for the retired single folder and needs a small update first. Each has a stated fallback.
+- [ ] Lab permissions still unknown: Multi-AZ, `LabRole` as an ECS task and execution role, a Fargate task pulling the ECR image, the Fargate vCPU quota. `scripts/probe-lab-comparison.sh` (since deleted; git history keeps it) answers these but was written for the retired single folder and needs a small update first. Each has a stated fallback.
 - [ ] Record a browser session (HAR) against the local build to count requests per visit, dynamic and static separately.
 - [ ] Per-stack log groups: done for `ec2/` (its own log group); confirm the same while writing `fargate/`.
 

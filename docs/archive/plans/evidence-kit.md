@@ -2,7 +2,7 @@
 
 Written 26 September 2026, branch `erfan/analytics`. Agreed with the user before writing.
 
-**Revised the same day (supersedes the design below):** no slash command, no `docs/evidence-kit/` folder, no `AGENTS.md` edit and no evidence skeletons written by the developer. Everything is one file, [docs/EVIDENCE_WRITER.md](../../EVIDENCE_WRITER.md), which overrides the developer workflow itself; the writer pastes a one-line prompt pointing to it. Everyone branches from `erfan/analytics`. The rules, case catalogue, file order and change map below carried over into that file.
+**Revised the same day (supersedes the design below):** no slash command, no `docs/evidence-kit/` folder, no `AGENTS.md` edit and no evidence skeletons written by the developer. Everything is one file, `docs/EVIDENCE_WRITER.md` (left out of the submission ZIP), which overrides the developer workflow itself; the writer pastes a one-line prompt pointing to it. Everyone branches from `erfan/analytics`. The rules, case catalogue, file order and change map below carried over into that file.
 
 ## Goal
 

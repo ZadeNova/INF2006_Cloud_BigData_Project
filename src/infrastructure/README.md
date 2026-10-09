@@ -305,6 +305,8 @@ Skip a `down.sh` for a stack that is already down (`status.sh` shows). `delete-o
 
 In order (plans: [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md) sections 7 and 9, [fargate-variant.md](../../docs/plans/fargate-variant.md)):
 
+> **Update (9 October 2026):** steps 1 to 3 were carried out on 8 October (variant A) and 9 October (variant B), at one repeat per condition ("indicative, n = 1") and not every item listed below; what was run is in [evidence/README.md](../../evidence/README.md). Both stacks are torn down; only `base/` remains. The Fargate database jobs and the fresh-database bring-up were tested offline only, not run in AWS.
+
 1. **Apply and verify both variants** (`up.sh ec2`, then `up.sh fargate`), record both in the runbook with the measured cost, then the independent review of the module, both stacks and the scripts.
 2. **Benchmark variant A.** The harness is in `tests/load/`; the generator runs in-region from `loadgen/`.
    - **RDS pilot:** one run at the 1,000-user step with RDS CPU, connections, memory and credits captured; size up once (`db.t4g.medium`) only if the database is the limit.

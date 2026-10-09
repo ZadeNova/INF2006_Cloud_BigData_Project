@@ -17,7 +17,7 @@ Results are reported as **capacity per unit of compute** and as a **multiple of 
 | `analyze.py` | Raw run folders to summary tables, timings, cost per 1,000 requests and weighted scores |
 | `selftest.py` | Checks of the harness's own logic (no network); `python selftest.py` |
 | `reset_state.py` | Laptop: puts the shop data back after load tests (removes load-test orders, returns their stock); dry run by default |
-| `common.py`, `prices.json` | Shared helpers; hourly prices (**unverified, see below**) |
+| `common.py`, `prices.json` | Shared helpers; hourly list prices (checked 9 October 2026) |
 | `requirements.in` / `.txt` | Locust and boto3, pinned by exact version. Separate from the application's requirements on purpose |
 
 ## One-time setup
@@ -31,7 +31,7 @@ cp .env.example .env                       # then edit: LOADTEST_PASSWORD, LOAD_
 set -a; . ./.env; set +a
 ```
 
-`.env` is git-ignored. Passwords and hostnames never go in the repository. **Verify `prices.json`** against the AWS price pages and set `"verified_by_user": true`; until then every cost figure is flagged as unverified.
+`.env` is git-ignored. Passwords and hostnames never go in the repository. `prices.json` holds on-demand list prices checked on 9 October 2026 (`"verified_by_user": true`); re-check them against the AWS price pages if you reuse the harness later.
 
 ## Verify locally (free, about 2 minutes)
 

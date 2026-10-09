@@ -152,7 +152,7 @@ Not a defect, but worth knowing: the scaling target of 300 requests per target p
 
 ### Cost
 
-Estimate at the list prices in `tests/load/prices.json` (written 3 October 2026, **not verified**; excludes storage, data transfer, load-balancer capacity units, WAF requests, CloudWatch and public IPv4 addresses). Variant A stack, 4.25 hours (14:38:50 to 18:53:56): first `c5.large` 4.25 h at USD 0.085 per hour, second `c5.large` about 1.1 h (16:57 to about 18:03), ALB 4.25 h at USD 0.0225 per hour, RDS `db.t4g.small` 4.25 h at USD 0.032 per hour, so about USD 0.7 in total, of which RDS runs all day regardless. Load generator: USD 0.085 per hour while up. The real figure is the difference between the lab balance at the start (USD 7.2 used) and at the end of both sessions (USD 9.8 used), which the owner read; it covers A, B and the base together.
+Estimate at the list prices in `tests/load/prices.json` (written 3 October 2026, **checked against the AWS pricing pages and price trackers and confirmed by the user on 9 October 2026**; excludes storage, data transfer, load-balancer capacity units, WAF requests, CloudWatch and public IPv4 addresses). Variant A stack, 4.25 hours (14:38:50 to 18:53:56): first `c5.large` 4.25 h at USD 0.085 per hour, second `c5.large` about 1.1 h (16:57 to about 18:03), ALB 4.25 h at USD 0.0225 per hour, RDS `db.t4g.small` 4.25 h at USD 0.032 per hour, so about USD 0.7 in total, of which RDS runs all day regardless. Load generator: USD 0.085 per hour while up. The real figure is the difference between the lab balance at the start (USD 7.2 used) and at the end of both sessions (USD 9.8 used), which the owner read; it covers A, B and the base together.
 
 ## Variant B: the evidence session (9 October 2026, UTC)
 

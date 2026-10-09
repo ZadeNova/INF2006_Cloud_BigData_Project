@@ -39,7 +39,7 @@ data/                                the dataset, the derived shoe dataset, DATA
 analytics/                           offline analysis and machine-learning scripts (section 6)
 tests/                               automated tests (pytest) and tests/load/, the load-test harness
 evidence/                            dated test records and their raw output (section 4)
-docs/                                contracts, decisions (docs/decisions/ADR-*), plans, and review logs
+docs/                                contracts, decisions (index: docs/decisions/README.md), plans, and review logs
 ```
 
 ## 4. Where the evidence is, and how to check a claim
