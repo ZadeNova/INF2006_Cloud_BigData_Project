@@ -4,7 +4,7 @@ Measures the 42Factors shop on variant A (EC2 + Auto Scaling group) and variant 
 
 Results are reported as **capacity per unit of compute** and as a **multiple of the assumed SME peak** (about 15 concurrent visitors, 0.4 dynamic pages/s). They are never a claim about how much traffic the shop needs.
 
-**Status (3 October 2026):** built and verified locally against Docker Compose. Not yet run on AWS: the load-generator instance, the Fargate stack and the pinning variables do not exist yet (plan section 10).
+**Status (9 October 2026):** built, verified locally against Docker Compose (`selftest.py`), and run against variant A on AWS on 8 October 2026 from a load-generator instance: scale-out, replacement, saturation (1 to 512 users) and the FUNC-03 smoke run, one repeat each, results in [evidence/load-summary.md](../../evidence/load-summary.md). The same runs were made on variant B on 9 October 2026. The ladder and the Singapore and pilot runs were not run.
 
 ## What is in this folder
 

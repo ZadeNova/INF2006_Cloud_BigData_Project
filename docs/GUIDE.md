@@ -2,7 +2,7 @@
 
 For team members and markers who open this project for the first time. No cloud account is needed to read the evidence or run the application; the cloud scripts are documented so you can see exactly what was done and repeat it if you have a Learner Lab account.
 
-**Status (8 October 2026):** the scripts below are all written. The cloud scripts (`evidence.sh`, the `fargate/` stack, the load harness against AWS) are first run on 8 October; this guide is updated with what happened once that evidence exists. The test records in `evidence/` say which cases have been run and which are still planned.
+**Status (9 October 2026):** the scripts below are all written. The cloud scripts (`evidence.sh`, the load harness against AWS) ran on variant A on 8 October and on variant B (the `fargate/` stack) on 9 October 2026. The current index of what was run, with results, is [evidence/README.md](../evidence/README.md). The test records in `evidence/` say which cases have been run and which are still planned.
 
 ## 1. Pick your path
 
@@ -52,7 +52,7 @@ Evidence has three layers. Every claim in the report points at one of them.
 | 2. Raw output | `evidence/raw/` | The unedited output each entry cites, with its date, commit and exact command in the first lines |
 | 3. Build record | `evidence/aws-build-runbook.md` | Dated entries for every AWS apply: what was built, from which commit, what failed, what it cost |
 
-The index of cases and their status is [evidence/README.md](../evidence/README.md). Status words: `PASS` (ran and matched the expectation written first), `FAIL` (kept and explained), `NOT RUN YET`, `PLANNED`.
+The index of cases and their status is [evidence/README.md](../evidence/README.md). Status words: `PASS` (ran and matched the expectation written first), `FAIL` (kept and explained), `PARTIAL` (part of the expectation met, the gap stated), `NOT RUN`.
 
 ### Reading a raw file name
 
@@ -115,7 +115,7 @@ All are in `src/infrastructure/scripts/` unless stated. Each prints a usage line
 | `push-image.sh [sha]` | Builds the application image only if its tag is missing, pushes it to the registry, adds a `release-<sha>` tag, and records the tag for the stacks |
 | `secrets.sh fill\|check` | Completes the secrets in Secrets Manager, or checks them. Prints key names and match/DIFFER only, never a value |
 | `jobs.sh ec2 <job>` | Runs one database job on the instance through Session Manager: `bootstrap` (roles), `migrate`, `trainer-sql`, `restart`, `check`, `import` (the dataset from S3), `operator` (the operator login), `refresh` (analytics), or `all` |
-| `jobs.sh fargate <job>` | The same for Fargate, as a one-off container task. Only `bootstrap`, `migrate`, `check` and `refresh`; the rest need tools the application image does not contain, so run them on variant A once |
+| `jobs.sh fargate <job>` | The same for Fargate, as a one-off container task: `bootstrap`, `migrate`, `check`, `import`, `operator`, `refresh`, or `all`. Only `trainer-sql` and `restart` stay on variant A (the trainer login serves the offline ML training, not the shop) |
 
 ### Evidence recording: `evidence.sh`
 

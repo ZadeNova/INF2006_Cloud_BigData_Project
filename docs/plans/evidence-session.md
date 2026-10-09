@@ -1,6 +1,6 @@
 # Runbook: the AWS evidence session (variant A and variant B, 8 October 2026)
 
-**Status (8 October 2026):** written after the readiness review ([evidence-session-readiness.md](../reviews/evidence-session-readiness.md)); not yet run. Follow it top to bottom. The user runs every command; nothing here needs Claude during the session. Times are a guide, the stop rules are not.
+**Status (9 October 2026):** variant A was run on 8 October (UTC) following this plan; variant B was run on 9 October. Results (side by side): [evidence/README.md](../../evidence/README.md). Departures from the plan as written: the ladder (u10, u100) was dropped and saturation (1 to 512 users) ran instead; the WAF block test (SEC-17) is run on B only; FUNC-03 part 2 (browser steps) has no screenshots; the first `up.sh ec2` stopped silently (fixed) and `db_bootstrap` failed on the existing database (open; the later jobs were run by hand); the first log queries were rerun after the saturation run. Follow it top to bottom. The user runs every command; nothing here needs Claude during the session. Times are a guide, the stop rules are not.
 
 **What the session produces:** the cloud evidence for the brief's four tests, identical on both variants: functional (FUNC-03), security (SEC-09, 10, 11, 17, 18), scalability and resilience (RES-03a, RES-03b, saturation), monitoring (MON-01 to MON-04). Expected results are already written in the evidence files; you fill in "Actual" afterwards (or hand the raw files to Claude).
 

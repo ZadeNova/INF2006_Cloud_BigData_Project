@@ -1,5 +1,19 @@
 # Security control test
 
+## Results at a glance
+
+Cloud cases (AWS: variant A on 8 October 2026, variant B on 9 October 2026, UTC; one run each). Local cases SEC-01 to SEC-08, SEC-12 to SEC-16 and SEC-ALL are all PASS (26 September and 1 October 2026) and are listed with their commits in the Summary table below; the scans are in [security-scan-triage.md](security-scan-triage.md). The A and B columns use the same wording on purpose.
+
+| Case | What it proves | Result on A (EC2) | Result on B (Fargate) | Date (UTC) | Key artefact A | Key artefact B |
+|---|---|---|---|---|---|---|
+| SEC-09 | The database and the storage bucket cannot be reached from the internet; only the app tier reaches the database | **PASS**: RDS not publicly accessible and encrypted; the database group admits port 5432 only from the app group; bucket public access fully blocked, anonymous list and object requests return HTTP 403 | **PASS**: the same RDS result; the database group admits port 5432 only from B's app group (`sg-0604681cf6bb68d4c`); bucket and anonymous requests as on A | A 2026-10-08; B 2026-10-09 | [raw/SEC-09_2026-10-08_ec2_security-groups.txt](raw/SEC-09_2026-10-08_ec2_security-groups.txt) | [raw/SEC-09_2026-10-09_fargate_security-groups.txt](raw/SEC-09_2026-10-09_fargate_security-groups.txt) |
+| SEC-10 | HTTPS is enforced with a TLS 1.2+ policy | **PASS**: `smoke.sh` 8 of 8; port 80 redirects (301) to HTTPS; port 443 uses `ELBSecurityPolicy-TLS13-1-2-2021-06` | **PASS**: `smoke.sh` 8 of 8; port 80 redirects (301) to HTTPS; port 443 uses `ELBSecurityPolicy-TLS13-1-2-2021-06` | A 2026-10-08; B 2026-10-09 | [raw/SEC-10_2026-10-08_ec2_listeners.txt](raw/SEC-10_2026-10-08_ec2_listeners.txt) | [raw/SEC-10_2026-10-09_fargate_listeners.txt](raw/SEC-10_2026-10-09_fargate_listeners.txt) |
+| SEC-11 | Runtime secrets come from Secrets Manager, not from the launch template or task definition | **PASS**: user data names only secret names; all four consistency checks `match`; the app reports database ok and migrations applied. The instance role is the lab's broad `LabRole` | **PASS**: the task definition holds only non-secret settings and `AWS_SECRET_ID` (`secrets: null`); all four checks `match`; the app reports database ok and migrations applied. Task and execution roles are the lab's broad `LabRole` | A 2026-10-08; B 2026-10-09 | [raw/SEC-11_2026-10-08_ec2_runtime.txt](raw/SEC-11_2026-10-08_ec2_runtime.txt) | [raw/SEC-11_2026-10-09_fargate_runtime.txt](raw/SEC-11_2026-10-09_fargate_runtime.txt) |
+| SEC-17 | The WAF blocks a login-guessing burst while browsing still works | **Not run on A, by decision**: the WAF is one shared module, so the block-mode test runs on B only | **PASS**: attempts 1 to 24 HTTP 200 from gunicorn, attempts 25 to 29 HTTP 403 from `awselb/2.0` (the load balancer), `GET /products/` still 200, `BlockedRequests` 5, 5 sampled `BLOCK` rows on `POST /login/` | A not run; B 2026-10-09 | none | [raw/SEC-17_2026-10-09_fargate_burst.txt](raw/SEC-17_2026-10-09_fargate_burst.txt) |
+| SEC-18 | No password, cookie, CSRF token or secret key in the CloudWatch logs | **PASS**: 0 matches in 88,044 log records | **PASS**: 0 matches in 77,326 log records (the window includes the SEC-17 burst with wrong passwords in the form) | A 2026-10-08; B 2026-10-09 | [raw/SEC-18_2026-10-08_ec2_count_rerun.txt](raw/SEC-18_2026-10-08_ec2_count_rerun.txt) | [raw/SEC-18_2026-10-09_fargate_count.txt](raw/SEC-18_2026-10-09_fargate_count.txt) |
+
+Reruns: `SEC-18` on A was run twice (the first at 17:52 UTC scanned 15,883 records before the saturation run; the `_rerun` scanned 88,044 and is cited). On B, `SEC-17_2026-10-09_fargate_samples.txt` is superseded by `SEC-17_2026-10-09_fargate_samples-burst.txt` (see SEC-17). All are kept in `raw/` and listed in [raw/INDEX.md](raw/INDEX.md).
+
 ## Summary
 
 | Case | Proves | Threat/requirement | Environment | Date | Commit | Status |
@@ -20,11 +34,11 @@
 | SEC-16 | Imported customers get unusable passwords | T17 personal data / account takeover | Local Docker | 2026-10-01 | `e6732ff` | PASS |
 | SEC-ALL rerun | The same 25 test IDs as the 26 September SEC-ALL, rerun on the current commit | T1–T8 | Local Docker | 2026-10-01 | `e6732ff` | PASS |
 | SCAN-01 to SCAN-07 | Secret scan, SAST, dependency audit, `check --deploy`, Dockerfile lint, image scan, IaC scan, with triage | T8, T11, supply chain | Local Docker (not CI) | 2026-10-01 | `e6732ff` | **Findings triaged; 4 open items**, see [security-scan-triage.md](security-scan-triage.md) |
-| SEC-09 | RDS and S3 are not publicly reachable; only the app may reach the database | Cloud private data/storage controls | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
-| SEC-10 | HTTPS is enforced with a TLS 1.2+ policy | Cloud transport security | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
-| SEC-11 | Runtime secrets come from Secrets Manager through the lab role, never from the launch template or task definition | Cloud secret handling | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
-| SEC-17 | The WAF rate rule blocks a password-guessing burst on `POST /login/` while browsing still works | T7 credential guessing, edge control | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
-| SEC-18 | No password, cookie, CSRF token or secret key in the CloudWatch logs after the session's traffic | T8 secrets in logs (SEC-08 on AWS) | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026) |
+| SEC-09 | RDS and S3 are not publicly reachable; only the app may reach the database | Cloud private data/storage controls | AWS, both variants | A 2026-10-08, B 2026-10-09 | `74d394a` (A), `33963c5` (B) | A PASS, B PASS |
+| SEC-10 | HTTPS is enforced with a TLS 1.2+ policy | Cloud transport security | AWS, both variants | A 2026-10-08, B 2026-10-09 | `74d394a` (A), `33963c5` (B) | A PASS, B PASS |
+| SEC-11 | Runtime secrets come from Secrets Manager through the lab role, never from the launch template or task definition | Cloud secret handling | AWS, both variants | A 2026-10-08, B 2026-10-09 | `74d394a` (A), `33963c5` (B) | A PASS, B PASS |
+| SEC-17 | The WAF rate rule blocks a password-guessing burst on `POST /login/` while browsing still works | T7 credential guessing, edge control | AWS, B only | 2026-10-09 | `e4bc928` | Not run on A by decision (shared WAF module); B PASS |
+| SEC-18 | No password, cookie, CSRF token or secret key in the CloudWatch logs after the session's traffic | T8 secrets in logs (SEC-08 on AWS) | AWS, both variants | A 2026-10-08, B 2026-10-09 | `3c910b8` (A, rerun), `e4bc928` (B) | A PASS, B PASS |
 
 **Shared setup:** the web image was rebuilt with `docker compose build web` at merge-quarantine commit `ee334cf`. The local Docker `web` and `db` services were healthy. Each pytest command used its own disposable test database and no demo data. Git Bash on Windows ran with `MSYS_NO_PATHCONV=1` so `/app/tests/...` paths remained container paths.
 
@@ -326,7 +340,7 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 ## SEC-09 to SEC-11, SEC-17, SEC-18: Cloud controls (variant A and variant B)
 
-**Status:** PLANNED. The expected results below were written on 8 October 2026, before any cloud run, so they are predictions, not descriptions of output.
+**Status (9 October 2026):** variant A was run on 8 October 2026 and variant B on 9 October 2026 (UTC). The expected results below were written on 8 October 2026, before any cloud run, and are unchanged. SEC-17 was run on B only.
 
 **Shared setup:** the stack under test is up on the pinned image digest. Every command runs through `src/infrastructure/scripts/evidence.sh`, identically for `ec2` and `fargate`. Each raw file records its UTC time, git commit, the exact AWS commands and the exit code, and is redacted (account IDs, public IPs, email addresses) before it is written. Procedure and order: [docs/plans/evidence-session.md](../docs/plans/evidence-session.md).
 
@@ -346,8 +360,8 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 | Variant | Result | Raw files | Status |
 |---|---|---|---|
-| A | | `raw/SEC-09_<date>_ec2_{rds,security-groups,s3}.txt` | |
-| B | | `raw/SEC-09_<date>_fargate_{rds,security-groups,s3}.txt` | |
+| A | RDS `inf2006-grp21-db`: `publicly_accessible: false`, `encrypted: true`, Multi-AZ off, one security group (`sg-03abb4562e4857842`, the database group). Security groups: the database group admits TCP 5432 only from the app group (no CIDR range); the app group admits TCP 8000 only from the load balancer group (no port 22, no CIDR range); the load balancer group admits 80 and 443 from `0.0.0.0/0`. S3 bucket: all four public-access-block settings `true`, policy status `IsPublic: false`, anonymous list request HTTP 403, anonymous object request HTTP 403. Every line matches the expectation. Limits: configuration read through the AWS API plus two anonymous HTTP requests from the laptop; no port scan of the database endpoint; outbound rules not examined | `raw/SEC-09_2026-10-08_ec2_rds.txt`, `raw/SEC-09_2026-10-08_ec2_security-groups.txt`, `raw/SEC-09_2026-10-08_ec2_s3.txt` (15:04:58 to 15:05:10 UTC, commit `74d394a`) | **PASS** |
+| B | RDS `inf2006-grp21-db`: `publicly_accessible: false`, `encrypted: true`, Multi-AZ off, one security group (`sg-03abb4562e4857842`, the database group). Security groups: the database group admits TCP 5432 only from B's app group (no CIDR range); B's app group admits TCP 8000 only from B's load balancer group (no port 22, no CIDR range); B's load balancer group admits 80 and 443 from `0.0.0.0/0`. S3 bucket: all four public-access-block settings `true`, `IsPublic: false`, anonymous list and object requests HTTP 403. Matches the expectation. Same limits as A | `raw/SEC-09_2026-10-09_fargate_rds.txt`, `raw/SEC-09_2026-10-09_fargate_security-groups.txt`, `raw/SEC-09_2026-10-09_fargate_s3.txt` (02:02:56 to 02:03:11 UTC, commit `33963c5`) | **PASS** |
 
 ### SEC-10: HTTPS is enforced
 
@@ -361,8 +375,8 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 | Variant | Result | Raw files | Status |
 |---|---|---|---|
-| A | | `raw/SEC-10_<date>_ec2_{smoke,listeners}.txt` | |
-| B | | `raw/SEC-10_<date>_fargate_{smoke,listeners}.txt` | |
+| A | `smoke.sh ec2`: 8 of 8 PASS (`/health/` 200, HTTP redirects to HTTPS with 301, certificate verifies, `/login/` 200, `/products/` lists 12 distinct products, `strict-transport-security`, `x-content-type-options`, `x-frame-options` present). Listeners: port 443 `HTTPS`, policy `ELBSecurityPolicy-TLS13-1-2-2021-06`, action forward; port 80 `HTTP`, action redirect to HTTPS 443 with `HTTP_301`. Matches the expectation. Limit: the TLS version is taken from the policy name, not from a handshake test | `raw/SEC-10_2026-10-08_ec2_smoke.txt`, `raw/SEC-10_2026-10-08_ec2_listeners.txt` (15:04:48 to 15:04:58 UTC, commit `74d394a`) | **PASS** |
+| B | `smoke.sh fargate`: 8 of 8 PASS (the same eight checks as on A). Listeners: port 443 `HTTPS`, policy `ELBSecurityPolicy-TLS13-1-2-2021-06`, forward; port 80 redirect to HTTPS 443 with `HTTP_301`. Matches the expectation. Same limit: the TLS version is taken from the policy name | `raw/SEC-10_2026-10-09_fargate_smoke.txt`, `raw/SEC-10_2026-10-09_fargate_listeners.txt` (02:02:47 to 02:02:56 UTC, commit `33963c5`) | **PASS** |
 
 ### SEC-11: Runtime secrets come from Secrets Manager
 
@@ -381,8 +395,8 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 | Variant | Result | Raw files | Status |
 |---|---|---|---|
-| A | | `raw/SEC-11_<date>_ec2_{runtime,secrets-check,app-check}.txt` | |
-| B | | `raw/SEC-11_<date>_fargate_{runtime,secrets-check,app-check}.txt` | |
+| A | Launch template instance profile is `LabInstanceProfile`. The decoded user data lines naming a secret, password or key hold only comments, the secret names `inf2006-grp21/web` and `inf2006-grp21/$job` as `AWS_SECRET_ID`, and the registry login (`aws ecr get-login-password | docker login --password-stdin`, a token made at boot, not stored). No password or key value. `secrets.sh check`: runtime login, migration login, signing key, host and db all `match`, key names only. `jobs.sh ec2 check`: `{"database": "ok", "migrations": "applied"}`. Matches the expectation. Limit: the instance runs as the lab's broad `LabRole` because the lab denies creating narrower roles, so the secret is read through a role that can read more than this one secret | `raw/SEC-11_2026-10-08_ec2_runtime.txt`, `raw/SEC-11_2026-10-08_ec2_secrets-check.txt`, `raw/SEC-11_2026-10-08_ec2_app-check.txt` (15:05:10 to 15:05:43 UTC, commit `74d394a`) | **PASS** |
+| B | Task and execution roles are `LabRole`. The task definition environment holds only non-secret settings (`APP_RELEASE_ID`, `DJANGO_ENV`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_HSTS_SECONDS`, `DJANGO_TRUST_PROXY`, `AWS_REGION`, `DJANGO_CSRF_TRUSTED_ORIGINS`) and `AWS_SECRET_ID` (`inf2006-grp21/web`); `secrets` is `null`. `secrets.sh check`: all four `match`. `jobs.sh fargate check` (a one-off task): `{"database": "ok", "migrations": "applied"}`. Matches the expectation. Same limit: the broad `LabRole` | `raw/SEC-11_2026-10-09_fargate_runtime.txt`, `raw/SEC-11_2026-10-09_fargate_secrets-check.txt`, `raw/SEC-11_2026-10-09_fargate_app-check.txt` (02:03:11 to 02:04:30 UTC, commit `33963c5`) | **PASS** |
 
 ### SEC-17: WAF blocks a login burst
 
@@ -398,8 +412,8 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 | Variant | Attempt of first block | Result | Raw files | Status |
 |---|---|---|---|---|
-| A | | | `raw/SEC-17_<date>_ec2_{burst,metrics,samples}.txt`, plan and apply in `raw/OPS_<date>_ec2_pin-1-1-1-block_*.txt` | |
-| B | | | `raw/SEC-17_<date>_fargate_{burst,metrics,samples}.txt`, `raw/OPS_<date>_fargate_pin-1-1-1-block_*.txt` | |
+| A | not run | **Not run on A, by decision (9 October 2026).** The WAF rule is one shared Terraform module (`modules/web-entry`), so the block test is run on B only and the result is stated to cover both. On A the WAF stayed in count mode: its login-rule `CountedRequests` metric recorded values during the scale-out and saturation runs (up to 69 in one minute in the saturation run) and `BlockedRequests` stayed empty, as count mode should (`cloudwatch/waf_login_counted.csv`, `waf_login_blocked.csv` in those run folders). That shows the rule exists and sees login requests, not that it blocks | none for A | not run |
+| B | attempt 25 | `POST /login/` with a valid CSRF token and a wrong password for `waf-probe`, every 3 s, from 06:54:17 UTC: **attempts 1 to 24 HTTP 200** (`server gunicorn`, Django showing the login form), **attempts 25 to 29 HTTP 403** (`server awselb/2.0`, the load balancer's WAF response, not Django's), the run stopped after 5 blocks in a row; then **`GET /products/` HTTP 200**. `BlockedRequests` for the rule `inf2006-grp21-fargate-login-rate`: sum 5 in the 06:56 UTC minute. Sampled requests for the burst window: 5 requests, all `Action: BLOCK`, `POST`, `/login/`, timestamps 06:56:19 to 06:56:38 UTC. Every item of the expectation is met; the first block came after 24 allowed attempts, within the rule's evaluation delay. Before the test the rule had been in count mode through the load runs (`CountedRequests` between 15 and 65 per minute from 14:29 to 14:43 SGT in the metrics file, which covers the saturation run) | `raw/SEC-17_2026-10-09_fargate_burst.txt`, `raw/SEC-17_2026-10-09_fargate_metrics.txt`, **`raw/SEC-17_2026-10-09_fargate_samples-burst.txt`** (authoritative; 06:49 to 07:03 UTC, commit `e4bc928`); block-mode plan and apply `raw/OPS_2026-10-09_fargate_pin-1-1-1-block_{plan,apply}.txt` | **PASS** |
 
 **Limitation:** One source IP; a distributed guessing attack below 20 attempts per IP per 5 minutes is not stopped by this rule (stated in the threat model).
 
@@ -415,5 +429,5 @@ Seven tools, raw output and a finding-by-finding triage are in [security-scan-tr
 
 | Variant | Matches | Result | Raw files | Status |
 |---|---|---|---|---|
-| A | | | `raw/SEC-18_<date>_ec2_{count,matches}.txt` | |
-| B | | | `raw/SEC-18_<date>_fargate_{count,matches}.txt` | |
+| A | 0 | Both searches `Complete`, 0 matches over 88,044 scanned records (log group `/inf2006-grp21-ec2/app`, window 12:51 to 18:51 UTC, covering the stack's whole life). Traffic in the window: smoke, scale-out, replacement and saturation runs (logins and checkouts), the database jobs and the 400 rejections. The first run (17:52 UTC, 15,883 records) also found 0. Limits: the SEC-17 burst with wrong passwords in the form was not run on A, and the application does not log request bodies, headers or query strings by design (SEC-15), so this confirms that design under real traffic rather than discovering a leak that a log-everything setup would have had | `raw/SEC-18_2026-10-08_ec2_count_rerun.txt`, `raw/SEC-18_2026-10-08_ec2_matches_rerun.txt` (first run: the same names without `_rerun`) | **PASS** |
+| B | 0 | Both searches `Complete`, 0 matches over 77,326 scanned records (window ending 07:11 UTC, covering the whole B stack including the SEC-17 burst with wrong passwords in the form, and the load runs). Same limit: the application does not log request bodies, headers or query strings by design (SEC-15). A single run; no rerun was needed | `raw/SEC-18_2026-10-09_fargate_count.txt`, `raw/SEC-18_2026-10-09_fargate_matches.txt` | **PASS** |

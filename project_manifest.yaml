@@ -1,5 +1,5 @@
 project:
-  group_id: "Gxxx" # TODO: set your assigned group id
+  group_id: "21"
   title: "" # TODO
   problem_statement: "" # TODO
   cloud_provider: "AWS | Azure | GCP | other" # TODO: pick one
@@ -7,9 +7,21 @@ project:
 
 team:
   members:
-    - name: ""
-      student_id: ""
-      role: ""
+    - name: "LIM CHEE LONG"
+      student_id: "2500584"
+      role: "Assistant Cloud + Backend"
+    - name: "MOHAMMED SYAHFARIZ BIN EFFENDY"
+      student_id: "2500717"
+      role: "Testing of the Application, UIUX, Report"
+    - name: "MUHAMMAD ERFAN BIN MOHAN"
+      student_id: "2500722"
+      role: "Cloud Lead + Backend + Load testing"
+    - name: "JUN KEAT LIM"
+      student_id: "2501004"
+      role: "Report + UIUX"
+    - name: "PHUA KIA WEN HERMANN"
+      student_id: "2501300"
+      role: "Testing of the Application, Report"
 
 architecture:
   diagram: "evidence/architecture.png"
@@ -39,7 +51,7 @@ data_ai:
 
 security:
   threat_control_map: "evidence/threat-control-map.md"
-  secrets_handling: "Local: src/tools/init_env.py generates random secrets into the git-ignored src/.env without printing them. Production: the database credentials and Django signing key are read from AWS Secrets Manager at startup using role credentials only, with no plaintext or static-credential fallback (src/config/secrets.py; docs/AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary). Not yet verified on AWS."
+  secrets_handling: "Local: src/tools/init_env.py generates random secrets into the git-ignored src/.env without printing them. Production: the database credentials and Django signing key are read from AWS Secrets Manager at startup using role credentials only, with no plaintext or static-credential fallback (src/config/secrets.py; docs/AWS_INFRASTRUCTURE.md#secrets-manager-startup-and-alb-boundary). Verified on AWS variants A and B: evidence/test-security.md SEC-11 and SEC-18, 2026-10-08 and 2026-10-09."
 
 run:
   prerequisites:
@@ -67,7 +79,48 @@ local_release:
   local_image: "inf2006-phase6-final"
   local_image_id: "sha256:db198bc83e76aa59e4070568c5d39685da7471d95cc5086c62af888f133c2907"
   hosted_ci: "unverified for this revision"
-  aws_integration: "unverified; docs/AWS_INFRASTRUCTURE.md joint integration checklist"
-  load: "unrun; supported workload not yet implemented"
+  aws_integration: "variants A and B verified on 2026-10-08 and 2026-10-09 (evidence/test-security.md SEC-09, SEC-10, SEC-11, SEC-18, and SEC-17 on B only; evidence/test-functional.md FUNC-03 part 1)"
+  load: "variants A (2026-10-08) and B (2026-10-09) measured, one repeat per condition (evidence/test-resilience.md, evidence/test-performance.md, evidence/load-summary.md; raw index evidence/raw/INDEX.md)"
   submission_gap: "evidence/architecture.png remains absent; original project/team placeholders still require human completion"
   status: "Phase 6 local implementation and independent review clear on 2026-09-26; later changes (shoe catalogue from merge 0442665 onward) await their logged independent review; hosted/deployed/submission gates remain open"
+
+# Extra field (not part of the brief's required structure): which repository paths prove each marking criterion.
+# Explained, with what each path shows, in README.md#rubric-to-evidence-map. evidence/README.md is the current index
+# of every test case; evidence/raw/ holds the unedited output behind each claim (supporting proof, not a reading list).
+rubric_evidence_map:
+  index: "evidence/README.md"
+  problem_framing_and_architecture: # 15 marks; evidence/architecture.png is not yet supplied
+    - "PROJECT_SCOPE_INF2006.md"
+    - "docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md"
+    - "docs/ARCHITECTURE.md"
+    - "docs/decisions/"
+  cloud_implementation: # 20 marks
+    - "src/infrastructure/"
+    - "evidence/aws-build-runbook.md"
+    - "evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt"
+    - "evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt"
+  cloud_data_and_analytics_ai: # 20 marks
+    - "evidence/test-data-ai.md"
+    - "data/README.md"
+    - "analytics/README.md"
+    - "evidence/raw/DATA-01_2026-10-08_aws_refresh.txt"
+  security: # 15 marks
+    - "evidence/test-security.md"
+    - "evidence/threat-control-map.md"
+    - "evidence/security-scan-triage.md"
+    - "docs/SECURITY.md"
+  scalability_resilience_operations: # 15 marks; variant A measured 2026-10-08 and variant B 2026-10-09, one repeat each (n = 1)
+    - "evidence/test-resilience.md"
+    - "evidence/test-performance.md"
+    - "evidence/load-summary.md"
+    - "evidence/monitoring.md"
+  engineering_and_reproducibility: # 10 marks
+    - "docs/GUIDE.md"
+    - "src/README.md"
+    - "tests/README.md"
+    - "tests/load/README.md"
+  team: # 5 marks
+    - "TEAM_CONTRIBUTIONS.md"
+    - "AI_USE_DECLARATION.md"
+    - "docs/reviews/"
+    - "docs/IMPLEMENTATION_PLAN.md"

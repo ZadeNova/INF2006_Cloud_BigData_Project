@@ -7,7 +7,7 @@ Status (3 October 2026): `base/` and variant A (`ec2/`) were applied and verifie
 ## Flows and responsibilities
 
 - Browser -> HTTPS ALB -> Django/Gunicorn containers in EC2 ASG -> private RDS PostgreSQL.
-- Variant B (designed, not built): Browser -> HTTPS ALB -> Django/Gunicorn container as an ECS Fargate task -> the same private RDS PostgreSQL. Only the compute layer differs; see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-designed-not-built).
+- Variant B (measured on 9 October 2026): Browser -> HTTPS ALB -> Django/Gunicorn container as an ECS Fargate task -> the same private RDS PostgreSQL. Only the compute layer differs; see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-designed-not-built).
 - Django renders templates and HTMX fragments. WhiteNoise serves packaged, versioned static assets. No independent frontend service.
 - Private S3 -> authorised validation/import command -> PostgreSQL -> aggregation command -> summary tables -> protected dashboard.
 - CloudWatch collects sanitised logs and infrastructure metrics; SNS alarm notifications and a regional WAF (one rate-based rule on `POST /login/`) are applied on variant A; CloudTrail is the account's default event history. Their behaviour under failure and attack is not yet evidenced.

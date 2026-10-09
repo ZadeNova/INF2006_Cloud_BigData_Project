@@ -105,6 +105,94 @@ Lab balance: to be read from the Learner Lab page and added here. Running now: R
 
 Not yet done: the WAF block-mode test, any alarm firing, a scale-out, a recovery test and the Logs Insights export; these are the evidence runs.
 
+## Variant A: the evidence session (8 October 2026, UTC)
+
+Run by the owner from the laptop with `scripts/evidence.sh`; raw output in `raw/` (names below). The load generator was a `c5.large` in us-east-1 (Session Manager shell, `tmux`). Image `release-c19d547`, digest `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481`, unchanged from stage 1. Results and interpretation are in [test-performance.md](test-performance.md), [test-security.md](test-security.md), [monitoring.md](monitoring.md) and [load-summary.md](load-summary.md); this entry is the build and operations record.
+
+**Lab balance at start:** USD 7.2 of USD 50 used. **Lab balance at end of both sessions (A on 8 October, B on 9 October):** USD 9.8 of USD 50 used, read by the owner from the Learner Lab page. The increase of about USD 2.6 covers the A and B sessions together, including the shared base's daily cost; it is not split between the sessions.
+
+### What ran, with times
+
+| Time (UTC) | Step | Commit | Result | Raw file |
+|---|---|---|---|---|
+| 14:32 to 14:35 | Preflight: image in the registry, `LabRole` trust, Fargate quota, service-linked roles, alarm email | `81c0e2a` | Image present. `LabRole` trusts `ecs-tasks.amazonaws.com`. The Fargate quota **cannot be read** (`AccessDenied`). The ECS service-linked roles were missing; `create-service-linked-role` created both (14:33:40 and 14:33:42); a second attempt at 14:35 failed harmlessly with "already taken". Alarm email subscription confirmed | `PRE_2026-10-08_*.txt` |
+| 14:36:48 | `up.sh ec2`, first attempt | `81c0e2a` | **Stopped silently after 4 s, exit 2** (defect 1) | `OPS_2026-10-08_ec2_up.txt` |
+| 14:38:50 to 14:52:22 | `up.sh ec2` after the fix (13 min 32 s including plan review, typing `yes`, apply and the first jobs) | `74d394a` | Plan 25 to add; **apply complete, 25 added**. Slowest resources: ALB 2 min 16 s, Route 53 record 33 s, Auto Scaling group 23 s. Secrets checks all `match`. Then `db_bootstrap` **failed**, exit 1 (defect 2) | `OPS_2026-10-08_ec2_up_rerun.txt` |
+| 15:01:43 to 15:02:29 | `jobs.sh ec2 migrate`, `check`, then `smoke.sh` by hand (46 s) | `74d394a` | migrate ok; `{"database": "ok", "migrations": "applied"}`; smoke 8 of 8 | `OPS_2026-10-08_ec2_jobs.txt` |
+| 15:04:46 to 15:05:43 | Security evidence and resource IDs | `74d394a` | SEC-09, SEC-10, SEC-11 PASS | `SEC-09_*`, `SEC-10_*`, `SEC-11_*`, `SESSION_2026-10-08_ec2_ids.txt` |
+| 15:10:27 | Analytics refresh | `74d394a` | 41,345 daily rows from 71,079 lines, 3.1 s | `DATA-01_2026-10-08_aws_refresh.txt` |
+| 15:57:49 to 15:59:19 | FUNC-03 part 1 (75 s smoke run, summary) | `74d394a` | 2 orders, 0 errors | `FUNC-03_2026-10-08_ec2_summary.txt`, `LOAD-ec2-smoke-r1_2026-10-08/` |
+| 16:48:08 to 17:11:10 | RES-03a scale-out (23 min) | `81c0e2a` | Alarm 299 s after the step, healthy 460 s after the step | `RES-03-ec2-scaleout-r1_2026-10-08/` |
+| 17:18:07 to 17:19:06 | Pin to 2 / 2 / 2 (plan 20 s, apply 11 s) | `4e06901` | Plan: 1 to change (`min_size` 1 to 2; the group was still at 2 after the scale-out) | `OPS_2026-10-08_ec2_pin-2-2-2-count_{plan,apply}.txt` |
+| 17:23:18 to 17:43:20 | RES-03b replacement (20 min); graceful removal at 17:29:37.9 | `81c0e2a` | Two healthy again after 114 s, 0 errors | `RES-03-ec2-replace-r1_2026-10-08/` |
+| 17:48 to 17:50 | MON-03 forced alarm, history | `4e06901` | ALARM and OK with SNS actions; ALARM email received | `MON-03_2026-10-08_ec2_*.txt` |
+| 17:52:01 to 17:52:24 | Database state reset 1 (dry run, then apply) | `4e06901` | 37 load orders removed and stock restored; left 0 orders, 0 lines, 0 carts | `OPS_2026-10-08_ec2_reset-{dry,apply}.txt` |
+| 17:52:44 to 17:53:06 | First log queries (MON-01, MON-02, SEC-18) | `4e06901` | Taken before the saturation run; superseded by the 18:51 reruns | `MON-01_*`, `MON-02_*`, `SEC-18_*` without `_rerun` |
+| 17:59:08 to 18:02:45 | Pin to 1 / 1 / 1 (plan 18 s, apply 13 s) | `4e06901` | Desired 2 to 1, max 2 to 1, min 2 to 1 | `OPS_2026-10-08_ec2_pin-1-1-1-count_{plan,apply}.txt` |
+| 18:20:58 to 18:41:00 | LOAD-03 saturation (20 min), 1 to 512 users | `81c0e2a` (dirty) | Practical capacity 16 users; maximum 118.8 requests/s; 0 errors | `LOAD-ec2-saturation-r1_2026-10-08/` |
+| 18:49:54 to 18:50:12 | Database state reset 2 | `3c910b8` | 274 load orders removed and stock restored; left 0 | `OPS_2026-10-08_ec2_reset-{dry2,apply2}.txt` |
+| 18:51:18 to 18:51:34 | Log queries rerun over the whole session | `3c910b8` | MON-01 sample and status table ok; MON-02 query 2 fails (defect 4); SEC-18 0 matches | `MON-01_*_rerun`, `MON-02_*_rerun`, `SEC-18_*_rerun` |
+| 18:51:45 to 18:53:56 | `down.sh ec2` (2 min 11 s; the Auto Scaling group alone took 1 min 44 s) | `3c910b8` | **25 destroyed.** Leftover lists (load balancers, instances, NAT gateways) empty. `base/` left running | `OPS_2026-10-08_ec2_down.txt` |
+
+From the first preflight to the end of `down`: 4 hours 22 minutes. The loadgen stack's own start and stop were not recorded by `evidence.sh` (no `OPS_*_loadgen_*` file); its times, and whether it was torn down, are for the owner to add. Terraform state backups written by `tf.sh` (`ec2/terraform.tfstate.*.bak`) hold resource IDs and must stay off the repository.
+
+### Defects found during the session
+
+| # | Defect | Effect | Status |
+|---|---|---|---|
+| 1 | `tf.sh` exited silently with status 2 when the other variant's stack had no image tag yet (variant B had none) | The first `up.sh ec2` stopped after 4 s with no message | **Fixed** in `74d394a` (`src/infrastructure/scripts/tf.sh`); rerun succeeded two minutes later |
+| 2 | `db_bootstrap` cannot be repeated on an existing database: it refuses a database that already has the roles and ownership (`FAIL: unsafe bootstrap configuration, existing privileges/ownership, or database operation`) | `up.sh` stopped with exit 1 at the bootstrap step because the database was already bootstrapped; the migrate, check and smoke steps after it did not run and were done by hand | **Open.** Work-around used: `jobs.sh ec2 migrate`, `check` and `smoke.sh` by hand. A fix would belong in `up.sh` (skip bootstrap when the database exists), not in the frozen application code |
+| 3 | The log and metric redaction rule rewrote any 12 digits after a decimal point as `<ACCOUNT>`, so a 12-decimal metric value was mangled | `locust_stats.csv`, `locust_stats_history.csv` and `report.html` of the smoke, scale-out and replacement exports show `<ACCOUNT>` inside some averages; request logs unaffected | **Fixed** in `tests/load/common.py` (`0276f52`, with a self-test); the three exported folders were not edited |
+| 4 | The saved query `errors-and-warnings-per-minute` in `modules/web-entry/alarms.tf` (lines 79 to 80) is rejected by Logs Insights (`MalformedQueryException`) | MON-02 query 2 cannot run; the same module serves variant B | **Open** (Terraform change not made in the documentation pass) |
+| 5 | The saturation steps up to 512 were edited into `run.py` on the generator, so the run records `git_dirty_harness: true` | Provenance of that run needs the explanation in this file | Committed afterwards in `0276f52` |
+| 6 | No scale-in in the scale-out run: the 5-minute low phase ended before the group scaled in | The scale-in part of the RES-03a expectation is unmet | Reported, not rerun |
+| 7 | The first `evidence.sh` log queries ran at 17:52, before the saturation run | Their window missed the saturation traffic | Rerun at 18:51; both sets kept |
+
+Not a defect, but worth knowing: the scaling target of 300 requests per target per minute is about 4 percent of the measured one-unit ceiling and was set before any data (see [test-resilience.md](test-resilience.md)).
+
+### Cost
+
+Estimate at the list prices in `tests/load/prices.json` (written 3 October 2026, **not verified**; excludes storage, data transfer, load-balancer capacity units, WAF requests, CloudWatch and public IPv4 addresses). Variant A stack, 4.25 hours (14:38:50 to 18:53:56): first `c5.large` 4.25 h at USD 0.085 per hour, second `c5.large` about 1.1 h (16:57 to about 18:03), ALB 4.25 h at USD 0.0225 per hour, RDS `db.t4g.small` 4.25 h at USD 0.032 per hour, so about USD 0.7 in total, of which RDS runs all day regardless. Load generator: USD 0.085 per hour while up. The real figure is the difference between the lab balance at the start (USD 7.2 used) and at the end of both sessions (USD 9.8 used), which the owner read; it covers A, B and the base together.
+
+## Variant B: the evidence session (9 October 2026, UTC)
+
+Run by the owner from the laptop with `scripts/evidence.sh`, the same way as variant A; raw output in `raw/` (index: [raw/INDEX.md](raw/INDEX.md)). Same image digest `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481`, same RDS, same generator type (`c5.large`, us-east-1). Results are in the same test records as A, in side-by-side columns: [test-performance.md](test-performance.md), [test-security.md](test-security.md), [monitoring.md](monitoring.md), [test-resilience.md](test-resilience.md), [load-summary.md](load-summary.md). Lab balance: see the A entry above (one reading for both sessions).
+
+### What ran, with times
+
+| Time (UTC) | Step | Commit | Result | Raw file |
+|---|---|---|---|---|
+| 01:53:18 to 02:01:51 | `up.sh fargate` (8 min 33 s including plan review, typing `yes`, apply and the first job) | `33963c5` | Plan 27 to add; **apply complete, 27 added, 0 failed**. Slowest resources: ALB 2 min 16 s, ECS service 1 min 30 s. `jobs fargate check` ok; smoke 8 of 8. No bootstrap step ran, so defect 2 of the A entry did not occur | `OPS_2026-10-09_fargate_up.txt` |
+| 02:02:43 to 02:04:30 | Resource IDs, SEC-10, SEC-09, SEC-11 (the app check is a one-off task, 68 s) | `33963c5` | SEC-09, SEC-10, SEC-11 PASS | `SESSION_2026-10-09_fargate_ids.txt`, `SEC-09_*`, `SEC-10_*`, `SEC-11_*` |
+| 02:04:53 to 02:06:21 | FUNC-03 part 1 (75 s smoke run, summary) | `33963c5` | 2 orders, 0 errors | `FUNC-03_2026-10-09_fargate_summary.txt`, `LOAD-fargate-smoke-r1_2026-10-09/` |
+| 02:07:58 | CPU model of the Fargate hardware (one-off task) | | Intel Xeon Platinum 8259CL @ 2.50 GHz | `RES-03-fargate-scaleout-r1_2026-10-09/cpu.json` |
+| 02:27:15 to 02:50:17 | RES-03a scale-out (23 min) | `81c0e2a` (dirty) | Alarm 305 s after the step, healthy 407 s after the step | `RES-03-fargate-scaleout-r1_2026-10-09/` |
+| 02:59:07 | Pin to 2 / 2 / 2, first plan | `33963c5` | **Failed attempt, exit 1**: `tf.sh` refused to plan with an uncommitted change in `src/infrastructure` (the guard worked as designed); the change was committed as `e4bc928` and the plan rerun | `OPS_2026-10-09_fargate_pin-2-2-2-count_plan.txt` |
+| 03:03:08 | The scale-out task is stopped (scale-in) | | Seen in the service events printed at 03:10 | `SESSION_2026-10-09_fargate_service-events.txt` |
+| 03:04:04 to 03:08:07 | Pin to 2 / 2 / 2: plan rerun (20 s), apply (61 s, which waits for the service to be steady) | `e4bc928` | 2 changes | `OPS_2026-10-09_fargate_pin-2-2-2-count_plan_rerun.txt`, `…_apply.txt` |
+| 03:12:27 to 03:32:29 | RES-03b replacement (20 min); graceful stop at 03:17:34.5 | `81c0e2a` (dirty) | Two healthy again after 50 s, 0 errors | `RES-03-fargate-replace-r1_2026-10-09/` |
+| 04:11:15 to 04:13:23 | MON-03 forced alarm, history | `e4bc928` | ALARM and OK with SNS actions; OK email received | `MON-03_2026-10-09_fargate_*.txt` |
+| 06:07:35 | Pin to 1 / 1 / 1, first plan | `e4bc928` | **Failed attempt, exit 1**: AccessDenied errors reading the lab role, registry, ECS, load balancer, log group, security groups and WAF, each with "an explicit deny in an identity-based policy: `voc-cancel-cred`". That policy name suggests the lab session's credentials had been cancelled (an inference from the name); the plan began about three hours after the replacement run. Rerun after the credentials were refreshed | `OPS_2026-10-09_fargate_pin-1-1-1-count_plan.txt` |
+| 06:17:53 to 06:19:43 | Pin to 1 / 1 / 1: plan rerun (19 s), apply (16 s) | `e4bc928` | 2 changes | `OPS_2026-10-09_fargate_pin-1-1-1-count_plan_rerun.txt`, `…_apply.txt` |
+| 06:23:24 to 06:43:26 | LOAD-03 saturation (20 min), 1 to 512 users | `81c0e2a` (dirty) | Practical capacity 8 users; maximum 105.5 requests/s; 0 errors; at 512 users the task failed health checks twice and ECS replaced it | `LOAD-fargate-saturation-r1_2026-10-09/` |
+| 06:45:52 to 06:48:13 | Database state reset 1 (dry run, then apply) | `e4bc928` | 299 load orders removed and stock restored; left 0 | `OPS_2026-10-09_fargate_reset-{dry,apply}.txt` |
+| 06:49:14 to 06:49:53 | Pin to block mode (plan 19 s, apply 11 s) | `e4bc928` | 1 changed (the WAF rule action) | `OPS_2026-10-09_fargate_pin-1-1-1-block_{plan,apply}.txt` |
+| 06:54:14 to 07:02:56 | SEC-17 WAF burst, metrics, sampled requests | `e4bc928` | Attempts 1 to 24 HTTP 200, 25 to 29 HTTP 403 from the load balancer, browsing 200; `BlockedRequests` 5 | `SEC-17_2026-10-09_fargate_*.txt` |
+| 07:06:03 to 07:10:19 | Database state reset 2 (dry run, then apply) | `e4bc928` | Nothing left to remove | `OPS_2026-10-09_fargate_reset-{dry,apply}_rerun.txt` |
+| 07:11:14 to 07:11:39 | Log queries (MON-01, MON-02, SEC-18) | `e4bc928` | MON-02 query 2 fails as on A; SEC-18 0 matches in 77,326 records | `MON-01_2026-10-09_*`, `MON-02_2026-10-09_*`, `SEC-18_2026-10-09_*` |
+| 07:14:26 to 07:18:55 | `down.sh fargate` (4 min 29 s; the ECS service alone took 2 min 36 s) | `e4bc928` | **27 destroyed.** Leftover lists (load balancers, instances, NAT gateways) empty. `base/` left running | `OPS_2026-10-09_fargate_down.txt` |
+
+From `up` to the end of `down`: 5 hours 25 minutes. Two tasks were pinned from the apply at 03:08:07 to the apply at 06:19:43. As for A, the loadgen stack's own start and stop are not in an `OPS_*` file, and the owner cannot confirm the times afterwards, so the generator's running hours (and its cost, USD 0.085 per hour at the unverified list price) are not stated.
+
+### Defects and observations from the B session
+
+| # | Item | Effect | Status |
+|---|---|---|---|
+| 1 | MON-02 query 2 (`errors-and-warnings-per-minute`) is malformed (`modules/web-entry/alarms.tf` lines 79 to 80), as predicted for the shared module | Cannot run on B either | **Open** (same as A) |
+| 2 | First capacity-pin plans failed twice: uncommitted infrastructure change (guard working), then AccessDenied errors (lab credentials cancelled, by the policy name) | Each rerun succeeded | Kept as failed attempts; no action |
+| 3 | At 512 users the single task failed load-balancer health checks twice and ECS replaced it (`ecs_events.json` 06:43:30 UTC) | The run's request log still shows 0 errors; the replacement registered after the run ended | Observation, not a defect; A showed a shorter health dip with no replacement |
+| 4 | The shop data was reset after, not between, B's runs | B's saturation run started with the orders of its earlier runs present (299 load orders at the first reset) | Stated as a limit in [test-performance.md](test-performance.md) |
+
 ## Procedures
 
 Carried forward from the retired stage guides (archived under `docs/archive/`). Commands run from `src/infrastructure/` unless stated; lab credentials must be exported first.

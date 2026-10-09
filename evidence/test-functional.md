@@ -1,12 +1,23 @@
 # Functional workflow test
 
+## Results at a glance
+
+| Case | What it proves | Result on A (EC2) | Result on B (Fargate) | Date | Key artefact A | Key artefact B |
+|---|---|---|---|---|---|---|
+| FUNC-01 | The automated account, catalogue, cart, checkout and order-history tests pass (local) | **PASS** (93 passed) | not applicable (local) | 2026-09-26 | [raw/FUNC-01_2026-09-26.txt](raw/FUNC-01_2026-09-26.txt) | — |
+| FUNC-02 | A person completes the purchase flow and the operator steps in a browser (local) | **PASS**, human observation plus read-only database and log checks | not applicable (local) | 2026-09-26 | [raw/FUNC-02_2026-09-26_setup.txt](raw/FUNC-02_2026-09-26_setup.txt) and the step files in its section | — |
+| FUNC-03 part 1 | The same visit order (login, add to cart, check out, order page) works on the deployed shop over HTTPS | **PASS**: buyer, abandoner and shopper visits ran, 2 orders placed, `errors: 0` | **PASS**: buyer, abandoner and shopper visits ran, 2 orders placed, `errors: 0` | A 2026-10-08; B 2026-10-09 | [raw/FUNC-03_2026-10-08_ec2_summary.txt](raw/FUNC-03_2026-10-08_ec2_summary.txt) | [raw/FUNC-03_2026-10-09_fargate_summary.txt](raw/FUNC-03_2026-10-09_fargate_summary.txt) |
+| FUNC-03 part 2 (browser steps) | A person completes the same flow in a browser on the deployed shop | **No evidence in `raw/`.** No `FUNC-03_*_step<N>.png` file exists; what was done is to be stated by the team (see the FUNC-03 section) | **No evidence in `raw/`.** The same | | | |
+
+Reruns and failed attempts: none for FUNC-03 on either variant. FUNC-02 has `_rerun` and `-fixed` files in `raw/` from its setup; the section below names the authoritative ones.
+
 ## Summary
 
 | Case | Proves | Threat/requirement | Environment | Date | Commit | Status |
 |---|---|---|---|---|---|---|
 | FUNC-01 | The automated account, catalogue, cart, checkout and order-history tests pass | Brief section 4 Application: a functioning web application with a meaningful user workflow and input validation | Local Docker | 2026-09-26 | `ee334cf` | PASS |
-| FUNC-02 | A person can complete the customer purchase flow and the operator product and dashboard steps in a browser | Brief section 5.2 test (1): functional workflow test | Local Docker | — | — | NOT RUN YET |
-| FUNC-03 | The same purchase flow works on the deployed shop, on variant A and on variant B, run identically | Brief section 5.2 test (1), on the cloud deployment | AWS, both variants | — | — | PLANNED (expected results fixed 8 October 2026, before the run) |
+| FUNC-02 | A person can complete the customer purchase flow and the operator product and dashboard steps in a browser | Brief section 5.2 test (1): functional workflow test | Local Docker | 2026-09-26 | `ee334cf` | PASS (see the FUNC-02 section and its run history) |
+| FUNC-03 | The same purchase flow works on the deployed shop, on variant A and on variant B, run identically | Brief section 5.2 test (1), on the cloud deployment | AWS, both variants | A 2026-10-08, B 2026-10-09 | `74d394a` (A), `33963c5` (B) | Part 1 PASS on A and B; part 2 no evidence on either (expected results fixed 8 October 2026, before the run) |
 
 ## FUNC-01: Automated workflow tests
 
@@ -49,7 +60,7 @@ pytest_exit=0
 
 **Date/commit:** 2026-09-26, `ee334cf`
 
-**Limitations/follow-up:** Local Docker only. FUNC-02 still needs the human browser walkthrough on this same merge-quarantine source. The test database is created and removed by pytest; the demo database used for FUNC-02 is separate.
+**Limitations/follow-up:** Local Docker only. (FUNC-02, the human browser walkthrough on this same source, was done later the same day; see its section.) The test database is created and removed by pytest; the demo database used for FUNC-02 is separate.
 
 **Verified by:**
 
@@ -153,15 +164,17 @@ Part 2, by hand in a browser (both variants), saving each screenshot as `evidenc
 
 **Expected result:** Part 1: all three visit kinds complete; at least one order is placed; the summary shows `errors: 0` (a `stock_conflict` is counted apart and is not an error). Part 2: every step as in the table. The results are the same on both variants.
 
-**Actual result:** not run yet.
+**Actual result:**
 
 | Variant | Part 1 (summary file) | Part 2 (screenshots) | Status |
 |---|---|---|---|
-| A (EC2) | | | |
-| B (Fargate) | | | |
+| A (EC2) | All three visit kinds ran (`kind` column of `requests-70357.csv`: buyer, abandoner, shopper). **2 orders placed** (`GET /orders/[id]/` 2, `POST /checkout/` 2 in `locust_stats.csv`). 99 requests counted by `analyze.py`, **0 errors**, 0 stock conflicts. The summary file lists 104 rows and `errors: 0`; the extra 5 rows are `late` markers, which record that a visit action started later than its think-time slot (the laptop is in Singapore); they are not failed requests. Over HTTPS at `shop-ec2.fourtytwofactors.me`, image digest `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481` | **No step screenshots are in `evidence/raw/`.** The team states here what was done: ____ | Part 1 **PASS**. Part 2 not evidenced |
+| B (Fargate) | All three visit kinds ran (`kind` column of `requests-287933.csv`: buyer, abandoner, shopper). **2 orders placed** (`GET /orders/[id]/` 2, `POST /checkout/` 2 in `locust_stats.csv`). 104 requests counted by `analyze.py`, **0 errors**, 0 stock conflicts. The summary file lists 107 rows and `errors: 0`; the extra 3 rows are `late` markers (not failed requests). Over HTTPS at `shop-fargate.fourtytwofactors.me`, the same image digest as A | **No step screenshots are in `evidence/raw/`.** The team states here what was done: ____ | Part 1 **PASS**. Part 2 not evidenced |
 
-**Date/commit:** —
+**Date/commit:** A: 2026-10-08, run 15:57:49 to 15:59:05 UTC; summary written 15:59:19 UTC at commit `74d394a`; `run.json` records `git_dirty_harness: true`. B: 2026-10-09, run 02:04:53 to 02:06:09 UTC; summary written 02:06:21 UTC at commit `33963c5`; `run.json` also records `git_dirty_harness: true` (uncommitted changes in `tests/load/` on the laptop).
 
-**Artefact path:** `evidence/raw/LOAD-<variant>-smoke-r<n>_<date>/` (the exported run: request log, Locust statistics, `stack.json` with the image digest), `evidence/raw/FUNC-03_<date>_<variant>_summary.txt`, `evidence/raw/FUNC-03_<date>_<variant>_step<N>.png`.
+**Artefact path:** `evidence/raw/FUNC-03_2026-10-08_ec2_summary.txt` (per-action summary); the exported run `evidence/raw/LOAD-ec2-smoke-r1_2026-10-08/` (request log, Locust statistics, `stack.json` with the image digest, `run.json`). Part 2 would be `evidence/raw/FUNC-03_<date>_ec2_step<N>.png`: none exist. Variant B: `evidence/raw/FUNC-03_2026-10-09_fargate_summary.txt` and the exported run `evidence/raw/LOAD-fargate-smoke-r1_2026-10-09/`.
+
+**Limits of part 1:** it is a harness visit, not a person; 2 virtual users for 75 s; it proves the flow works over the real HTTPS endpoint, not speed. Three Locust summary files in the A run folder show `<ACCOUNT>` in place of some averages (a redaction defect, fixed in commit `0276f52`; see [test-performance.md](test-performance.md#conditions-common-to-every-recorded-run)); the request log and the summary file are unaffected.
 
 **Limitations:** Step 6 (operator deactivation) is not repeated on AWS: it changes the shared catalogue during the load campaign. The laptop is in Singapore, so the automated visit travels to us-east-1 and back; it proves the flow, not speed.

@@ -1,4 +1,21 @@
-# Data/analytics validation — 22 September 2026
+# Data and analytics/AI evidence
+
+## Results at a glance
+
+| Case | What it proves | Result | Date | Key artefact |
+|---|---|---|---|---|
+| DATA-01 (shoe dataset, local) | The production analytics refresh equals an independent pandas recomputation of the same raw tables | **PASS**: 41,345 expected and persisted daily rows, 0 mismatches in rows, units, sales amounts and coverage flags, maximum monetary difference 0.00 | 2026-09-26 | [raw/DATA-01_2026-09-26_verify.txt](raw/DATA-01_2026-09-26_verify.txt) |
+| DATA-01 (original raw dataset, local) | The same check on the first dataset | **PASS** (earlier record, kept; not rerun) | 2026-09-22 | section "Actual execution" below |
+| DATA-01 AWS refresh (variant A) | The same refresh job runs on the deployed shop against RDS | **PASS against its expectation** (a run id with 41,345 daily rows from 71,079 lines): the job ran and gave the same counts as the local verified run. **Not independently verified on AWS**: the pandas check is local only | 2026-10-08 | [raw/DATA-01_2026-10-08_aws_refresh.txt](raw/DATA-01_2026-10-08_aws_refresh.txt) |
+| DATA-02 (ML segmentation, local) | Customer segmentation trains, imports strictly and shows on the operator dashboard | **PASS**: adopted recipe `log_rfm_aov`, k = 2, silhouette 0.2743, 19,766 customers, dashboard returned 200 | 2026-09-26 | [raw/DATA-02_2026-09-26_m03-train-load.txt](raw/DATA-02_2026-09-26_m03-train-load.txt) |
+| DATA-02 hold-out and stability (local) | Whether the segments are stable and predict later purchases | **Evaluation ran; the result is negative and stated as measured**: the segments show no repurchase difference on this synthetic data (no predictive claim) | 2026-09-26 | [raw/DATA-02_2026-09-26_holdout.txt](raw/DATA-02_2026-09-26_holdout.txt), [ml-holdout-evaluation.json](ml-holdout-evaluation.json) |
+| DATA-02 on AWS | Segmentation trained and loaded on the deployed shop | **Not run** (the segmentation is an offline batch job; no AWS training or load was done) | | |
+
+Variant B shares the same database and image, so a B refresh would repeat the A result; it is not planned as a separate case. Everything above except the AWS row is local Docker.
+
+The sections below are the dated working records, oldest first, with the AWS refresh last.
+
+## Data/analytics validation — 22 September 2026
 
 Phase 3 on `CL/Analytics`, clean starting base `4704cc89c3a70af4d82a91d3543aff999fcff28d`.
 Review status: [independent review log](../docs/reviews/analytics-phase3.md).
@@ -620,3 +637,29 @@ silhouette 0.2743 and both segments (`raw/DATA-02_2026-09-26_m03-dashboard.txt`,
 cut). The earlier DATA-02 records today describe the previous `log_frequency` recipe and remain as
 history. Cleanup removed the `inf2006-ml-m03` containers, network and volume; label listings were
 empty afterwards.
+
+## AWS refresh — 8 October 2026
+
+**Objective:** Show that the analytics refresh, the job behind the operator dashboard, runs on the deployed system (EC2 variant A, application image `sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481`, RDS PostgreSQL 17.9) and produces the figures already verified locally.
+
+**Setup:** Variant A up after the 8 October session start. The RDS database holds the shoe dataset imported on 1 October 2026 (200 products, 20,000 customers, 100,000 orders, 237,537 lines, 0 rejected; [aws-build-runbook.md](aws-build-runbook.md)). The `reset_state.py` runs of 8 October remove only the load-test accounts' orders and carts, not the dataset.
+
+**Command:** `src/infrastructure/scripts/jobs.sh ec2 refresh` (runs `refresh_analytics` in the application container on the instance, through Session Manager).
+
+**Expected result** (fixed before the run in [docs/reviews/evidence-session-readiness.md](../docs/reviews/evidence-session-readiness.md), table row "DATA on AWS"): a refresh run id with 41,345 daily rows from 71,079 lines, as in the 1 October runbook.
+
+**Actual result (matches the expectation):** run `d224f83d-b353-44a9-9d51-b06fbea43d81` completed: **41,345 daily rows from 71,079 order lines**, business dates 2025-01-01 to 2026-01-01, cutoff `2026-01-01T16:00:00+00:00`, pruned 0 old runs, 3.1 s, exit 0.
+
+| Figure | Local verified run (DATA-01, 26 Sep) | AWS refresh (8 Oct) |
+|---|---|---|
+| Daily rows | 41,345 | 41,345 |
+| Completed order lines | 71,079 | 71,079 |
+| Business dates | 2025-01-01 to 2026-01-01 | 2025-01-01 to 2026-01-01 |
+| Duration | 1.1 s | 3.1 s |
+| Independent pandas check (`verify_refresh.py`) | PASS, 0 mismatches | **not run on AWS** |
+
+The same counts were recorded on the first refresh on AWS on 1 October 2026 (run `5d191a3b`, 41,345 rows from 71,079 lines, 3.0 s; [aws-build-runbook.md](aws-build-runbook.md)).
+
+**Date/commit:** 2026-10-08, 15:10 UTC, commit `74d394a`. **Artefact path:** `evidence/raw/DATA-01_2026-10-08_aws_refresh.txt`.
+
+**Limitations:** Equal counts show the job ran on the deployed database and read the same data; they do not show that every figure is right on AWS, because the independent recomputation needs the local verification setup (`analytics/verify_refresh.py` against a disposable database with pandas) and was not run against RDS. The dashboard itself was not opened on AWS in any recorded case (FUNC-03 part 2 has no screenshots). The ML segmentation was not trained or loaded on AWS.
