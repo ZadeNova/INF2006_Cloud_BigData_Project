@@ -6,6 +6,8 @@ For team members and markers who open this project for the first time. No cloud 
 
 ## 1. Pick your path
 
+Installing the tools on a new machine (Windows, macOS, Linux) and the offline run, with measured timings: [SETUP.md](SETUP.md).
+
 | You are | You want | Start here |
 |---|---|---|
 | A marker with only Docker | Run the shop and its tests on your machine | [Section 2](#2-run-it-on-your-machine-no-cloud-account-needed) |

@@ -2,3 +2,5 @@
 data/raw/*.csv -text
 # Linux container startup scripts require LF shebangs on Windows checkouts.
 src/docker/*.sh text eol=lf
+# Every shell script runs under bash (Linux, macOS, WSL); keep LF endings on Windows checkouts too.
+*.sh text eol=lf

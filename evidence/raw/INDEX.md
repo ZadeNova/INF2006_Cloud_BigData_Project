@@ -129,3 +129,9 @@ Triage of all seven: [security-scan-triage.md](../security-scan-triage.md).
 | MON-03 | The same on B; OK email transcription | 2026-10-09 | B | `MON-03_2026-10-09_fargate_history.txt` | `…_fargate_force.txt`, `…_fargate_return-to-ok.txt`, `…_fargate_email-ok.txt` (hand transcription, clipped) |
 
 MON-04 (detection under real load) has no files of its own: it is `alarm_history.json` and `scaling_activities.json` (A) or `ecs_events.json` (B) inside the RES-03 scale-out folders.
+
+## Reproducibility
+
+| Case | What | File |
+|---|---|---|
+| REPRO-01 | Clean clone at `4dbee24`, path A of `docs/SETUP.md`, timed step by step (Linux, 9 October 2026): 497 tests passed, analytics 22 passed in the Python 3.13 container, `analyze.py` output identical to `evidence/load-summary.md` | `REPRO-01_2026-10-09_linux_clean-clone.txt` (authoritative) |

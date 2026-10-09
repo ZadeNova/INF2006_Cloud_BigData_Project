@@ -1,0 +1,161 @@
+# file: evidence/raw/REPRO-01_2026-10-09_linux_clean-clone.txt
+# date_utc: 2026-10-09T10:57:06Z
+# commit: 4dbee24
+# command: a fresh git clone, then path A of docs/SETUP.md step by step (isolated compose project inf2006-rehearsal, APP_PORT=8001, so the operator's own local stack was not touched)
+# who: run by the coordinating Claude session on the team lead's Linux laptop (Fedora 43, Docker 29.6.2, host Python 3.14.7). Base images were already present, so download time is not included.
+# redaction: scratch directory paths replaced by <SCRATCH>, the local repository path by <REPO>
+# result: all steps pass except the host analytics venv (the pinned pandas 2.3.2 has no Python 3.14 wheels); the same analytics steps then pass in the python:3.13 container (second part below). docs/SETUP.md now uses the container.
+
+date_utc: 2026-10-09T10:57:06Z  host: Linux 7.2.8-100.fc43.x86_64  docker: Docker version 29.6.2, build 1.fc43  python: Python 3.14.7
+
+=== clone
+$ git clone -q <REPO> repo
+--- exit=0 seconds=0
+commit: 4dbee24
+
+=== init_env
+$ python3 src/tools/init_env.py
+Created local .env; secrets were not printed.
+--- exit=0 seconds=0
+
+=== build (no cache)
+$ docker compose build --no-cache
+#14 DONE 0.0s
+
+#15 [web] resolving provenance for metadata file
+#15 DONE 0.0s
+ Image inf2006-foundation-app Built 
+ Image inf2006-foundation-app Built 
+--- exit=0 seconds=17
+
+=== up
+$ docker compose up -d --wait --wait-timeout 180
+ Container inf2006-rehearsal-web-1 Waiting 
+ Container inf2006-rehearsal-migrate-1 Waiting 
+ Container inf2006-rehearsal-db-1 Waiting 
+ Container inf2006-rehearsal-migrate-1 Exited 
+ Container inf2006-rehearsal-db-1 Healthy 
+ Container inf2006-rehearsal-web-1 Healthy 
+--- exit=0 seconds=11
+
+=== check_database
+$ docker compose run --rm web python manage.py check_database
+ Container inf2006-rehearsal-migrate-1 Waiting 
+ Container inf2006-rehearsal-db-1 Healthy 
+ Container inf2006-rehearsal-migrate-1 Exited 
+ Container inf2006-rehearsal-web-run-543d99a04495 Creating 
+ Container inf2006-rehearsal-web-run-543d99a04495 Created 
+{"database": "ok", "migrations": "applied"}
+--- exit=0 seconds=3
+
+=== pytest (full)
+$ docker compose run --rm web pytest -q -p no:cacheprovider /app/tests
+........................................................................ [ 57%]
+........................................................................ [ 71%]
+........................................................................ [ 85%]
+............................ssssss.ss................................... [ 99%]
+.                                                                        [100%]
+497 passed, 8 skipped in 20.25s
+--- exit=0 seconds=24
+
+=== build dataset
+$ python3 analytics/build_shoe_dataset.py
+aa564464d95a344e055c95dc96380dbdb4d3055112d56385a829b9863d499f98  customers.csv
+5d1383208a7ce8dfc5ada0cd52c4342538a0ab70ebe0bb1d8dde3374fb11a60f  products.csv
+684b8dc1ae13833cfb59d53fda880d78151ab4f868716fbdb1947fb03ddc5751  orders.csv
+8ee89e69a06aea47d8d198fd94aba3a37f6bf289d3e3b45132f47f77df969e3e  order_items.csv
+aadbd35d9a74833d8973c1fb05061f63cc31e2fea02237204e4eed09117aa220  product_map.csv
+--- exit=0 seconds=4
+
+=== import_dataset
+$ docker compose run --rm web python manage.py import_dataset --source /app/data/derived/shoes --namespace synthetic/shoes/revision-a/demo/v1
+order_items: created=237537 unchanged=0
+inventory_versions: created=1 unchanged=0
+inventory_snapshots: created=200 unchanged=0
+cancelled: orders=2976 source_total=5269426.23 net_lines=4877923.53 application_lines=5035593.21
+completed: orders=89114 source_total=162473698.29 net_lines=150403823.29 application_lines=155404646.85
+refunded: orders=7910 source_total=14208137.53 net_lines=13152415.83 application_lines=13599180.11
+--- exit=0 seconds=25
+
+=== seed_demo
+$ docker compose run --rm web python manage.py seed_demo --no-products
+ Container inf2006-rehearsal-db-1 Healthy 
+ Container inf2006-rehearsal-migrate-1 Exited 
+ Container inf2006-rehearsal-web-run-c7bd21873aa9 Creating 
+ Container inf2006-rehearsal-web-run-c7bd21873aa9 Created 
+Created 0 demo product(s); 0 already existed.
+Created demo-operator account with a fresh password.
+--- exit=0 seconds=3
+
+=== refresh
+$ docker compose run --rm web python manage.py refresh_analytics --as-of 2026-01-02
+ Container inf2006-rehearsal-migrate-1 Waiting 
+ Container inf2006-rehearsal-db-1 Healthy 
+ Container inf2006-rehearsal-migrate-1 Exited 
+ Container inf2006-rehearsal-web-run-cdf33dc14a58 Creating 
+ Container inf2006-rehearsal-web-run-cdf33dc14a58 Created 
+Run 38a2da57-78dd-4080-897c-a1fe03d55551 completed: 41345 daily rows from 71079 order lines, business dates 2025-01-01 to 2026-01-01, cutoff 2026-01-01T16:00:00+00:00, pruned 0 old run(s), 0.9s.
+--- exit=0 seconds=4
+
+=== shop responds
+$ curl -fsS -o /dev/null -w %{http_code} %{time_total}s\n http://127.0.0.1:8001/products/
+200 0.041738s
+--- exit=0 seconds=0
+
+=== analytics venv
+$ bash -c python3 -m venv .venv-a && .venv-a/bin/pip install -q -r analytics/requirements.txt
+
+× Encountered error while generating package metadata.
+╰─> See above for output.
+
+note: This is an issue with the package mentioned above, not pip.
+hint: See above for details.
+--- exit=1 seconds=6
+
+=== profile_dataset
+$ .venv-a/bin/python analytics/profile_dataset.py --source data/raw
+Traceback (most recent call last):
+  File "<SCRATCH>/reh/clone.ysmwwk/repo/analytics/profile_dataset.py", line 7, in <module>
+    import pandas as pd
+ModuleNotFoundError: No module named 'pandas'
+--- exit=1 seconds=0
+
+=== analytics tests
+$ .venv-a/bin/python -m pytest -q analytics/tests
+<SCRATCH>/reh/clone.ysmwwk/repo/.venv-a/bin/python: No module named pytest
+--- exit=1 seconds=0
+
+=== load selftest
+$ bash -c cd tests/load && python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt && .venv/bin/python selftest.py | tail -2
+
+[notice] A new release of pip is available: 25.1.1 -> 26.2.1
+[notice] To update, run: <SCRATCH>/reh/clone.ysmwwk/repo/tests/load/.venv/bin/python3 -m pip install --upgrade pip
+PASS  test_score_pair
+PASS  test_stack_validity
+--- exit=0 seconds=7
+
+=== load analyze
+$ bash -c cd tests/load && .venv/bin/python analyze.py --raw ../../evidence/raw --out <SCRATCH>/rehearsal-summary.md && diff -q <SCRATCH>/rehearsal-summary.md ../../evidence/load-summary.md && echo IDENTICAL
+Wrote <SCRATCH>/rehearsal-summary.md
+IDENTICAL
+--- exit=0 seconds=1
+
+=== down
+$ docker compose down -v
+ Container inf2006-rehearsal-db-1 Removing 
+ Container inf2006-rehearsal-db-1 Removed 
+ Volume inf2006-rehearsal_postgres_data Removing 
+ Network inf2006-rehearsal_default Removing 
+ Volume inf2006-rehearsal_postgres_data Removed 
+ Network inf2006-rehearsal_default Removed 
+--- exit=0 seconds=1
+
+clone dir: <SCRATCH>/reh/clone.ysmwwk
+
+=== analytics in python:3.13-slim-bookworm (digest-pinned, as CI), run in the same clone
+$ docker run --rm -v "$PWD:/work:z" -w /work -e PYTHONDONTWRITEBYTECODE=1 -e OMP_NUM_THREADS=1 python:3.13-slim-bookworm@sha256:ed86c822... sh -c "pip install -q -r analytics/requirements.txt pytest==9.1.1 iniconfig==2.3.0 packaging==26.3 pluggy==1.6.0 Pygments==2.21.0 && python analytics/profile_dataset.py --source data/raw && python -m pytest -q -c /dev/null -p no:cacheprovider analytics/tests/test_segment_customers.py analytics/tests/test_evaluate_holdout.py"
+/work/data/PROFILE.md: integrity PASS; dataset acceptance requires a documented manual decision
+......................                                                   [100%]
+22 passed in 0.87s
+--- exit=0 seconds=21
+(a first attempt with --mount type=bind failed with 'Permission denied' on this SELinux host; :z relabelling fixed it)

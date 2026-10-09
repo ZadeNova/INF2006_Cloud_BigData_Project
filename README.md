@@ -21,6 +21,7 @@ The repository is large because it keeps its working history. You do not need mo
 3. [evidence/README.md](evidence/README.md): the single evidence index. The five test records it points to ([functional](evidence/test-functional.md), [security](evidence/test-security.md), [data/AI](evidence/test-data-ai.md), [resilience](evidence/test-resilience.md), [monitoring](evidence/monitoring.md)) each open with a "Results at a glance" table.
 4. [docs/decisions/ADR-018-final-architecture-ecs-fargate.md](docs/decisions/ADR-018-final-architecture-ecs-fargate.md): why the final architecture is variant B, with the alternatives.
 5. [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md): what you can run offline (Docker only) and what has and has not been proven.
+6. **New to the project or setting up a machine?** [docs/SETUP.md](docs/SETUP.md) installs every tool on Windows, macOS or Linux and runs everything offline in about 10 minutes once the tools exist.
 
 Everything else is supporting detail: `evidence/raw/` is unedited command output (indexed by [evidence/raw/INDEX.md](evidence/raw/INDEX.md)); `docs/reviews/` and `docs/archive/` are the review and planning trail that [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md) cites as verification; `src/` and `tests/` are the application, infrastructure and tests.
 
@@ -76,6 +77,10 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 
 ## Technology and architecture
 
+![Architecture of the final system (variant B, ECS on Fargate)](evidence/architecture.png)
+
+The diagram's labels are the Terraform resource names; [evidence/architecture.md](evidence/architecture.md) is the text version, mapping every label to its file and its test evidence.
+
 | Area | Selection |
 |---|---|
 | Backend | Django |
@@ -102,7 +107,7 @@ See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRA
 
 ## Getting started
 
-See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS deployment is Terraform plus a few scripts in `src/infrastructure/`; **[src/infrastructure/README.md](src/infrastructure/README.md) has the exact commands** to bring the final architecture (variant B, ECS Fargate, [ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)) up and down, and [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) says what you can reproduce at each level, what it costs and what has not been proven (cloud steps need a Learner Lab account and a domain and cost money; marking does not need them). To run the load test: [docs/RUN_LOADTEST.md](docs/RUN_LOADTEST.md).
+**From a blank computer (Windows, macOS, Linux): [docs/SETUP.md](docs/SETUP.md)** installs Git, Docker, Python and, optionally, the cloud tools, and lists measured timings. See [the Docker quickstart](src/README.md) for local configuration, startup, tests and the management commands (`seed_demo`, `import_dataset`, `refresh_analytics`, `snapshot_inventory`, `check_database`). A marker needs only Docker: the local run, tests and analytics need no AWS access. The AWS deployment is Terraform plus a few scripts in `src/infrastructure/`; **[src/infrastructure/README.md](src/infrastructure/README.md) has the exact commands** to bring the final architecture (variant B, ECS Fargate, [ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)) up and down, and [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) says what you can reproduce at each level, what it costs and what has not been proven (cloud steps need a Learner Lab account and a domain and cost money; marking does not need them). To run the load test: [docs/RUN_LOADTEST.md](docs/RUN_LOADTEST.md).
 
 With Docker Desktop running, use standard Compose commands from the repository root. On a fresh clone, first generate local secrets once (existing configuration is preserved):
 
@@ -173,7 +178,7 @@ TEAM_CONTRIBUTIONS.md         Contribution record
 AI_USE_DECLARATION.md         Tools, verification, licences and attribution
 ```
 
-The final `report.pdf` and `evidence/architecture.png` are delivery outputs and are not in the repository yet.
+`evidence/architecture.png` (with its text version `evidence/architecture.md`) is in the repository; `report.pdf` is added at submission time.
 
 ## Current limitations and continuation
 
