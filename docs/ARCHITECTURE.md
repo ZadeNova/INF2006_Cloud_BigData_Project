@@ -1,6 +1,8 @@
 # Architecture contract
 
-> **Sprint note (1 October 2026):** this document describes variant A (EC2 + Auto Scaling group). Variant B (ECS on Fargate) was measured against it, and the final architecture is variant B ([ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)). Until the post-sprint documentation sync, [docs/plans/aws-ecs-comparison.md](plans/aws-ecs-comparison.md) governs where they differ.
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
+> **Note (updated 9 October 2026):** this document describes both variants: A (EC2 + Auto Scaling group, the evaluated alternative) and B (ECS on Fargate). The final architecture is variant B ([ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)).
 
 Status (3 October 2026): `base/` and variant A (`ec2/`) were applied and verified on 1 October 2026 and the `ec2/` stack is torn down between work sessions; variant B (`fargate/`) was applied and measured on 9 October 2026 and, like variant A (8 October), is torn down; only `base/` remains. Load, scaling and recovery results (one repeat each, indicative, n = 1) are in the [evidence index](../evidence/README.md) ([runbook](../evidence/aws-build-runbook.md), [how to run it](../src/infrastructure/README.md)). Read the [scope](../PROJECT_SCOPE_INF2006.md).
 
@@ -29,7 +31,7 @@ If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded
 
 - One Django deployment reduces integration work compared with a separate SPA/API.
 - Managed RDS demonstrates cloud persistence; local Docker PostgreSQL supports reproducibility and INF2003.
-- ALB/ASG provide measurable app scaling; ECS on Fargate is being built and measured against it, and the primary architecture is chosen from the load results ([plan](plans/aws-ecs-comparison.md)). Queues/microservices are outside baseline.
+- The final architecture is variant B (ECS on Fargate, [ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)); the ALB/ASG variant A was measured against it as the evaluated alternative ([plan](plans/aws-ecs-comparison.md)). Queues/microservices are outside baseline.
 - CloudFront omitted for current workload/budget; private S3 retained for datasets and exports.
 - Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([comparison plan](plans/aws-ecs-comparison.md), [decisions](decisions/)).
 

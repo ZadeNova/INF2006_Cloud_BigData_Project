@@ -1,5 +1,7 @@
 # Plan: EC2 + ASG (A) compared with ECS on Fargate (B)
 
+> **Decision made: ADR-018.** Final architecture: variant B (ECS on Fargate). Variant A (EC2) = evaluated alternative.
+
 Part of [aws-terraform.md](../archive/plans/aws-terraform.md), which this plan supersedes where they differ (layout, ownership, RDS size, stage order). Written and consolidated 1 October 2026.
 
 **Status (3 October 2026):** plan agreed with the user and in execution. **Done on 1 October:** the state migration, `base/` (RDS, zone, certificate, ECR, secrets, alarm topic), the scripts, and variant A (`ec2/`) with its database jobs, scaling, alarms and WAF, verified (`smoke.sh` 8 of 8) and then torn down; `base/` stays up. See the [runbook](../../evidence/aws-build-runbook.md). **Not done:** `fargate/` (not written), the Fargate lab checks, the load harness ([load-harness.md](load-harness.md), draft), the comparison weights, and every load, scaling, recovery and monitoring run. The rules below were written before the build and still apply to the remaining work.

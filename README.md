@@ -1,5 +1,7 @@
 # INF2006: E-Commerce Core with Sales and Inventory Analytics
 
+> Final architecture: variant B, Amazon ECS on Fargate (ADR-018). Variant A (EC2 + Auto Scaling group) is the evaluated alternative, measured on 8 October 2026 and kept for the comparison; it is not the deployed design.
+
 A small ecommerce service for customers to browse products, manage a cart and place simulated orders, with an operator dashboard that explains sales trends and inventory replenishment needs. The project demonstrates secure AWS deployment, persistent cloud data, reproducible analytics, and measured scaling and recovery.
 
 **Status (9 October 2026):** the shop (42Factors, a small online shoe shop: Django, PostgreSQL, HTMX) runs locally in Docker and on AWS. Registration/login, the shoe catalogue with sizes, persistent cart, idempotent checkout, order history, the imported dataset, the analytics refresh, the operator dashboard and the descriptive customer segmentation are implemented; earlier work was independently reviewed as recorded in [docs/reviews/](docs/reviews/), and the latest changes (shoe catalogue onward) are awaiting their logged independent review.
@@ -29,27 +31,27 @@ Everything else is supporting detail: `evidence/raw/` is unedited command output
 
 Each marking criterion, with the repository paths that prove it (the same map is in `project_manifest.yaml` under `rubric_evidence_map`). Every test record opens with a "Results at a glance" table; `evidence/raw/` holds the unedited output behind each claim and is supporting proof, not a reading list ([evidence/raw/INDEX.md](evidence/raw/INDEX.md) lists it by case, and each run folder has a `README.md`).
 
-| Criterion (marks) | Where to look | What it shows |
-|---|---|---|
-| Problem framing and architecture (15) | [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); [docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md](docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md); [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); [docs/decisions/](docs/decisions/) (ADR-001 to ADR-019) | The problem, scope, components, trust boundaries and final architecture decision. A draft diagram is at `evidence/architecture.png`; final team approval and report insertion remain |
-| Cloud implementation (20) | [src/infrastructure/](src/infrastructure/README.md) (Terraform: `base/`, `ec2/`, `fargate/`, `modules/`); [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md); [evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt](evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt); [evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt](evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt) | What is built (25 resources applied on variant A in one `up`), how, when, what failed, and the live shop passing 8 of 8 outside-in checks |
-| Cloud data and analytics/AI (20) | [evidence/test-data-ai.md](evidence/test-data-ai.md); [data/README.md](data/README.md); [analytics/](analytics/README.md); [evidence/raw/DATA-01_2026-10-08_aws_refresh.txt](evidence/raw/DATA-01_2026-10-08_aws_refresh.txt) | Dataset provenance, the analytics refresh checked independently (0 mismatches, local), the segmentation and its hold-out result (no predictive claim), and the refresh run on the deployed database |
-| Security (15) | [evidence/test-security.md](evidence/test-security.md); [evidence/threat-control-map.md](evidence/threat-control-map.md); [evidence/security-scan-triage.md](evidence/security-scan-triage.md); [docs/SECURITY.md](docs/SECURITY.md) | 19 threats mapped to controls and tests, local cases SEC-01 to SEC-16 PASS, cloud cases SEC-09/10/11/18 PASS on variant A, seven scans triaged with 4 open findings; the WAF block test SEC-17 runs on variant B only |
-| Scalability, resilience and operations (15) | [evidence/test-resilience.md](evidence/test-resilience.md) with [evidence/test-performance.md](evidence/test-performance.md); [evidence/load-summary.md](evidence/load-summary.md); [evidence/monitoring.md](evidence/monitoring.md); [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md) | Scale-out, replacement and saturation measured on A and on B side by side (n = 1 each), alarm and log evidence, timed up/down, defects and cost; the limits are listed at the top of each file |
-| Engineering and reproducibility (10) | [docs/GUIDE.md](docs/GUIDE.md); [src/README.md](src/README.md); [tests/README.md](tests/README.md); [tests/load/README.md](tests/load/README.md) | Run the shop and its tests with Docker only; every script explained; the load harness and its offline analysis (`analyze.py`, `selftest.py`) |
-| Team (5) | [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md); [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md); [docs/reviews/](docs/reviews/); [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md) | Who did what, AI use and its verification, independent review logs, and the status history |
+| Criterion (marks)                           | Where to look                                                                                                                                                                                                                                                                                                                                                        | What it shows                                                                                                                                                                                                         |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Problem framing and architecture (15)       | [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); [docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md](docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md); [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); [docs/decisions/](docs/decisions/) (ADR-001 to ADR-017)                                                                                                                    | The problem, the scope, the components and trust boundaries, and why each AWS choice was made. `evidence/architecture.png` is **not yet supplied**                                                                    |
+| Cloud implementation (20)                   | [src/infrastructure/](src/infrastructure/README.md) (Terraform: `base/`, `ec2/`, `fargate/`, `modules/`); [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md); [evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt](evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt); [evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt](evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt) | What is built (25 resources applied on variant A in one `up`), how, when, what failed, and the live shop passing 8 of 8 outside-in checks                                                                             |
+| Cloud data and analytics/AI (20)            | [evidence/test-data-ai.md](evidence/test-data-ai.md); [data/README.md](data/README.md); [analytics/](analytics/README.md); [evidence/raw/DATA-01_2026-10-08_aws_refresh.txt](evidence/raw/DATA-01_2026-10-08_aws_refresh.txt)                                                                                                                                        | Dataset provenance, the analytics refresh checked independently (0 mismatches, local), the segmentation and its hold-out result (no predictive claim), and the refresh run on the deployed database                   |
+| Security (15)                               | [evidence/test-security.md](evidence/test-security.md); [evidence/threat-control-map.md](evidence/threat-control-map.md); [evidence/security-scan-triage.md](evidence/security-scan-triage.md); [docs/SECURITY.md](docs/SECURITY.md)                                                                                                                                 | 19 threats mapped to controls and tests, local cases SEC-01 to SEC-16 PASS, cloud cases SEC-09/10/11/18 PASS on variant A, seven scans triaged with 4 open findings; the WAF block test SEC-17 runs on variant B only |
+| Scalability, resilience and operations (15) | [evidence/test-resilience.md](evidence/test-resilience.md) with [evidence/test-performance.md](evidence/test-performance.md); [evidence/load-summary.md](evidence/load-summary.md); [evidence/monitoring.md](evidence/monitoring.md); [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md)                                                                 | Scale-out, replacement and saturation measured on A and on B side by side (n = 1 each), alarm and log evidence, timed up/down, defects and cost; the limits are listed at the top of each file                        |
+| Engineering and reproducibility (10)        | [docs/GUIDE.md](docs/GUIDE.md); [src/README.md](src/README.md); [tests/README.md](tests/README.md); [tests/load/README.md](tests/load/README.md)                                                                                                                                                                                                                     | Run the shop and its tests with Docker only; every script explained; the load harness and its offline analysis (`analyze.py`, `selftest.py`)                                                                          |
+| Team (5)                                    | [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md); [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md); [docs/reviews/](docs/reviews/); [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)                                                                                                                                                                           | Who did what, AI use and its verification, independent review logs, and the status history                                                                                                                            |
 
 ## Team members
 
 Group 21. Roles as stated by the team; keep consistent with the manifest and [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md).
 
-| Name | Student ID | Role |
-|---|---|---|
-| LIM CHEE LONG | 2500584 | Assistant Cloud + Backend |
-| MOHAMMED SYAHFARIZ BIN EFFENDY | 2500717 | Testing of the Application, UIUX, Report |
-| MUHAMMAD ERFAN BIN MOHAN | 2500722 | Cloud Lead + Backend + Load testing |
-| JUN KEAT LIM | 2501004 | Report + UIUX |
-| PHUA KIA WEN HERMANN | 2501300 | Testing of the Application, Report |
+| Name                           | Student ID | Role                                     |
+| ------------------------------ | ---------- | ---------------------------------------- |
+| LIM CHEE LONG                  | 2500584    | Assistant Cloud + Backend                |
+| MOHAMMED SYAHFARIZ BIN EFFENDY | 2500717    | Testing of the Application, UIUX, Report |
+| MUHAMMAD ERFAN BIN MOHAN       | 2500722    | Cloud Lead + Backend + Load testing      |
+| JUN KEAT LIM                   | 2501004    | Report + UIUX                            |
+| PHUA KIA WEN HERMANN           | 2501300    | Testing of the Application, Report       |
 
 ## Features
 
@@ -81,16 +83,16 @@ Generate missing stock snapshots, lead times and demo account/cart fixtures sepa
 
 The diagram's labels are the Terraform resource names; [evidence/architecture.md](evidence/architecture.md) is the text version, mapping every label to its file and its test evidence.
 
-| Area | Selection |
-|---|---|
-| Backend | Django |
-| Frontend | Django templates, HTML/CSS, HTMX and minimal JavaScript |
-| Database | PostgreSQL in Docker locally; Amazon RDS on AWS |
-| Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose |
-| Analytics | Django management commands/SQL; pandas where useful |
-| Infrastructure | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, Secrets Manager; ECS on Fargate is variant B, measured on 9 October 2026 |
-| Access and secrets | IAM roles and selected Secrets Manager; unavailable access blocks deployment |
-| Verification | pytest/pytest-django, Locust and documented workflow/recovery tests |
+| Area                  | Selection                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend               | Django                                                                                                                                                               |
+| Frontend              | Django templates, HTML/CSS, HTMX and minimal JavaScript                                                                                                              |
+| Database              | PostgreSQL in Docker locally; Amazon RDS on AWS                                                                                                                      |
+| Serving and packaging | Gunicorn, WhiteNoise, Docker and Docker Compose                                                                                                                      |
+| Analytics             | Django management commands/SQL; pandas where useful                                                                                                                  |
+| Infrastructure        | Terraform, EC2, ALB, Auto Scaling Group, private S3, CloudWatch, ECR, SNS, CloudTrail, WAF, Secrets Manager; ECS on Fargate is variant B, measured on 9 October 2026 |
+| Access and secrets    | IAM roles and selected Secrets Manager; unavailable access blocks deployment                                                                                         |
+| Verification          | pytest/pytest-django, Locust and documented workflow/recovery tests                                                                                                  |
 
 ```text
 Browser -> HTTPS ALB -> Django containers in EC2 Auto Scaling Group -> private RDS
@@ -101,7 +103,7 @@ Private S3 -> validated dataset import -> RDS -> analytics summaries -> operator
 CloudWatch <- sanitised application logs and infrastructure metrics
 ```
 
-Application instances share database sessions and carts; no sticky sessions. Baseline autoscaling uses ALB request count per target. A labelled draft architecture image, including trust boundaries, is at `evidence/architecture.png`; final team approval and report insertion remain.
+Application instances share database sessions and carts; no sticky sessions. Baseline autoscaling uses ALB request count per target. The final labelled architecture image, including trust boundaries, is at [evidence/architecture.png](evidence/architecture.png), with its text version in [evidence/architecture.md](evidence/architecture.md).
 
 See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRASTRUCTURE.md) for boundaries, deployment gates and trade-offs. RDS Single-AZ and one-instance normal operation are budget compromises; they do not provide uninterrupted availability. Failure demonstrations require two healthy application instances.
 
@@ -138,19 +140,19 @@ The delivered application must run locally without paid AWS access for marking. 
 
 ## Documentation index
 
-| Document | Purpose |
-|---|---|
-| [**Project guide**](docs/GUIDE.md) | Start here if you are new: where the evidence is, how to check a claim, and what every shell and Python script does |
-| [**Reproduce it**](docs/REPRODUCE_CLOUD.md) / [run the load test](docs/RUN_LOADTEST.md) | Offline, cloud (variant B) and load-test steps, costs, and what is proven |
-| [Project scope](PROJECT_SCOPE_INF2006.md) | Requirements, phase dates, risks, rubric coverage and team roles |
-| [Implementation tracker](docs/IMPLEMENTATION_PLAN.md) | Current status, next tasks and blockers |
-| [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md) | Visual direction, pages, interactions and accessibility |
-| [Schema](docs/SCHEMA.md) / [API](docs/API.md) | Data constraints, checkout semantics and route contracts |
-| [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md) | Provenance, import behaviour, metrics and validation |
-| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [AWS comparison plan](docs/plans/aws-ecs-comparison.md) | Component responsibilities, AWS contract and operations, and the EC2 versus Fargate plan with its decisions |
-| [Security](docs/SECURITY.md) / [testing](docs/TESTING.md) | Controls, verification and evidence requirements |
-| [Development](docs/DEVELOPMENT.md) | Coding workflow, Git conventions and independent review gate |
-| [Planning review](docs/reviews/planning-suite-review.md) | Outstanding contract clarifications and resolution record |
+| Document                                                                                                                                      | Purpose                                                                                                             |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| [**Project guide**](docs/GUIDE.md)                                                                                                            | Start here if you are new: where the evidence is, how to check a claim, and what every shell and Python script does |
+| [**Reproduce it**](docs/REPRODUCE_CLOUD.md) / [run the load test](docs/RUN_LOADTEST.md)                                                       | Offline, cloud (variant B) and load-test steps, costs, and what is proven                                           |
+| [Project scope](PROJECT_SCOPE_INF2006.md)                                                                                                     | Requirements, phase dates, risks, rubric coverage and team roles                                                    |
+| [Implementation tracker](docs/IMPLEMENTATION_PLAN.md)                                                                                         | Current status, next tasks and blockers                                                                             |
+| [Design reference](DESIGN.md) / [frontend contract](docs/FRONTEND.md)                                                                         | Visual direction, pages, interactions and accessibility                                                             |
+| [Schema](docs/SCHEMA.md) / [API](docs/API.md)                                                                                                 | Data constraints, checkout semantics and route contracts                                                            |
+| [Data pipeline](docs/DATA_PIPELINE.md) / [analytics](docs/ANALYTICS.md)                                                                       | Provenance, import behaviour, metrics and validation                                                                |
+| [Architecture](docs/ARCHITECTURE.md) / [infrastructure](docs/AWS_INFRASTRUCTURE.md) / [AWS comparison plan](docs/plans/aws-ecs-comparison.md) | Component responsibilities, AWS contract and operations, and the EC2 versus Fargate plan with its decisions         |
+| [Security](docs/SECURITY.md) / [testing](docs/TESTING.md)                                                                                     | Controls, verification and evidence requirements                                                                    |
+| [Development](docs/DEVELOPMENT.md)                                                                                                            | Coding workflow, Git conventions and independent review gate                                                        |
+| [Planning review](docs/reviews/planning-suite-review.md)                                                                                      | Outstanding contract clarifications and resolution record                                                           |
 
 Backend implementation uses Astra Low and an independent diff review by Astra Medium or a fresh-session Claude Opus 5.5 ([review gate](docs/DEVELOPMENT.md#backend-review-gate)). Low fixes logged findings; a repeated unresolved issue after its fix attempt stops the task for user-controlled escalation. Frontend work uses Luna Max. Detailed assignment and targeted-reading rules are in AGENTS.md.
 

@@ -1,6 +1,8 @@
 # AWS infrastructure contract
 
-> **Sprint note (1 October 2026):** this document describes variant A (EC2 + Auto Scaling group). Variant B (ECS on Fargate) was applied and measured on 9 October 2026 for a comparison, alongside variant A on 8 October; the final architecture is variant B, recorded in [ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md) (index: [docs/decisions/](decisions/README.md)). Until the post-sprint documentation sync, [docs/plans/aws-ecs-comparison.md](plans/aws-ecs-comparison.md) governs where they differ.
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
+> **Note (updated 9 October 2026):** this document describes both variants: A (EC2 + Auto Scaling group, the evaluated alternative, measured on 8 October) and B (ECS on Fargate, measured on 9 October). The final architecture is variant B, recorded in [ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md) (index: [docs/decisions/](decisions/README.md)).
 
 **Which AWS file owns what.** Link to the owner rather than copy.
 
@@ -55,7 +57,7 @@ Status (6 October 2026, written before the first apply; see the note above for t
 
 **Unknown until tried.** Whether `LabRole` can act as an ECS task and execution role, whether a Fargate task can pull the ECR image and write to CloudWatch, and how far the vCPU quota lets B scale. The user reports the lab does not block Fargate or Application Auto Scaling (not recorded from output); the first apply of `fargate/` was the test (the probe script was retired). The 8 October preflight did record that `LabRole` trusts `ecs-tasks.amazonaws.com` and that the Fargate vCPU quota is not readable in the lab (`evidence/raw/PRE_2026-10-08_labrole.txt`, `PRE_2026-10-08_quota.txt`); whether B applies and scales is the 9 October result. The unmeasured question of whether a difference comes from ECS or from Fargate is stated in the report from the design, because ECS on EC2 was dropped for time.
 
-**Acceptance for B** (same as A, plan section 10): the task is healthy behind its ALB over HTTPS at its own hostname, no port 22, running from the recorded digest, logs arriving in CloudWatch, and the database jobs pass as the runtime login. Then the load runs, which decide the primary architecture.
+**Acceptance for B** (same as A, plan section 10): the task is healthy behind its ALB over HTTPS at its own hostname, no port 22, running from the recorded digest, logs arriving in CloudWatch, and the database jobs pass as the runtime login. Then the load runs, which informed the final architecture (variant B, ADR-018).
 
 ## Early gates and deployment
 

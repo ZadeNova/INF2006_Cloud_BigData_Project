@@ -1,5 +1,7 @@
 # evidence/
 
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 The single current index of the evidence. **Start with the five test records** (`test-functional.md`, `test-security.md`, `test-data-ai.md`, `test-resilience.md` with `test-performance.md`, and `monitoring.md`): each opens with a "Results at a glance" table (case, what it proves, result, date, one key file) and gives the full objective, setup, command, expected, actual, date and artefact path below it. **`raw/` is supporting proof**: the unedited command output those records cite (447 files, 296 of them inside eight run folders). Nobody is expected to read it in bulk: [raw/INDEX.md](raw/INDEX.md) lists every case and run folder once, with its authoritative file and a note on every superseded or failed attempt, and each run folder has a short `README.md` naming its key files and how to reproduce its numbers.
 
 New here? [docs/GUIDE.md](../docs/GUIDE.md) explains the file names, how to check a claim, and where AWS logs and metrics end up. The mapping from the marking criteria to these files is in [README.md](../README.md#rubric-to-evidence-map) and in `project_manifest.yaml` (`rubric_evidence_map`).

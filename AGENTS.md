@@ -2,6 +2,8 @@
 
 Shared repository guidance for coding agents. Keep durable constraints here and current tasks in the implementation tracker. Tool-specific entry files should point here rather than maintain competing instructions. Model assignments apply where the tool supports the named models; report a capability mismatch instead of silently substituting.
 
+> **Which stack to work on.** Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 ## Current phase: backend freeze (decided by the user, 1 October 2026)
 
 **The backend is frozen. Remaining work is AWS infrastructure, testing and evidence.** This applies to every agent and overrides any task-level instruction to add or improve backend behaviour. It tightens the scope's "no new features after 1 October" ([scope section 10](PROJECT_SCOPE_INF2006.md#10-delivery-phases-and-four-week-timeline)); the scope still owns the dates.

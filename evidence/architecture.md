@@ -37,6 +37,7 @@ flowchart LR
     end
 
     subgraph VPC["VPC aws_vpc.main, 2 AZs"]
+      igw["Internet gateway<br/>aws_internet_gateway.main"]
       subgraph TB2["TRUST BOUNDARY 2: Public subnets"]
         alb["Application Load Balancer<br/>aws_lb.app, sg-alb 443 and 80<br/>aws_lb_target_group.app, /health/"]
         fargate["ECS Fargate service and tasks<br/>aws_ecs_cluster.app, aws_ecs_service.app<br/>aws_ecs_task_definition.app<br/>Django, Gunicorn, WhiteNoise, port 8000<br/>public IP, sg-app 8000 from sg-alb only"]
@@ -64,7 +65,7 @@ flowchart LR
   end
 
   users -->|"DNS lookup"| route53
-  users ==>|"HTTPS 443, port 80 redirects"| alb
+  users ==>|"HTTPS 443, port 80 redirects"| igw
   route53 ---|"alias A record"| alb
   acm --- alb
   waf --- alb
@@ -89,8 +90,9 @@ flowchart LR
   laptop -->|"docker push"| ecr
   fargate -->|"pull image by digest"| ecr
   laptop -->|"aws ecs run-task"| jobs
+  igw ==> alb
 
-  linkStyle 0,1,5,6 stroke:#1f5fbf,stroke-width:3px
+  linkStyle 0,1,5,6,26 stroke:#1f5fbf,stroke-width:3px
   linkStyle 2,3,4,12 stroke:#777777,stroke-width:2px
   linkStyle 7,8,9,10,11 stroke:#1a8a3a,stroke-width:3px
   linkStyle 13,14,15 stroke:#7b3fa0,stroke-width:2px
@@ -108,11 +110,12 @@ Paths under "Terraform" are relative to `src/infrastructure/`. "Evidence" files 
 |---|---|---|---|---|
 | Browser | none (client) | none | [FUNC-03 B purchase flow](raw/FUNC-03_2026-10-09_fargate_summary.txt) (2 orders, 0 errors) | 1 |
 | Route 53 `aws_route53_zone.main`, `aws_route53_record.app` (alias A record) | Route 53 | `base/dns.tf`; `modules/web-entry/alb.tf` (`aws_route53_record.app`, hostname `shop-fargate.<domain>` from `base/certificate.tf` `shop_hostnames`) | [SEC-10 smoke](raw/SEC-10_2026-10-09_fargate_smoke.txt) (HTTPS request to the hostname) | 3 |
-| ACM certificate `aws_acm_certificate.shop` | AWS Certificate Manager | `base/certificate.tf` (also `aws_route53_record.cert_validation`, `aws_acm_certificate_validation.shop`) | [SEC-10 listeners](raw/SEC-10_2026-10-09_fargate_listeners.txt) | 3 |
+| ACM certificate `aws_acm_certificate.shop` | AWS Certificate Manager | `base/certificate.tf` (also `aws_route53_record.cert_validation`, the DNS validation records in the Route 53 zone, and `aws_acm_certificate_validation.shop`) | [SEC-10 listeners](raw/SEC-10_2026-10-09_fargate_listeners.txt) | 3 |
 | WAF web ACL `aws_wafv2_web_acl.app` | AWS WAF (regional) | `modules/web-entry/waf.tf` (rule `login-rate-limit`; `aws_wafv2_web_acl_association.app` attaches it to the ALB) | [SEC-17 burst](raw/SEC-17_2026-10-09_fargate_burst.txt), [metrics](raw/SEC-17_2026-10-09_fargate_metrics.txt) (block mode; count is the default) | 2 |
 | Application Load Balancer `aws_lb.app`, `aws_lb_target_group.app`, listeners 443 and 80 | Elastic Load Balancing | `modules/web-entry/alb.tf` (`aws_lb_listener.http` redirects 301; `aws_lb_listener.https` TLS policy `ELBSecurityPolicy-TLS13-1-2-2021-06`) | [SEC-10 listeners](raw/SEC-10_2026-10-09_fargate_listeners.txt); health check in [RES-03b replacement](raw/RES-03-fargate-replace-r1_2026-10-09/) | 3 |
 | `sg-alb`, `sg-app`, `sg-db` | EC2 security groups | `aws_security_group.alb`, `aws_security_group.app` and their rules (`alb_https`, `alb_http`, `alb_to_app`, `app_from_alb`, `app_https`, `app_to_db`, `db_from_app`) in `modules/web-entry/security_groups.tf`; `aws_security_group.db` in `base/security_groups.tf` | [SEC-09 security groups](raw/SEC-09_2026-10-09_fargate_security-groups.txt) | 10 |
-| Public subnets, private data subnets, `aws_internet_gateway.main` | VPC | `base/network.tf` | [Runbook stage 1 acceptance](aws-build-runbook.md#acceptance) (subnets in two AZs); [SEC-09 RDS](raw/SEC-09_2026-10-09_fargate_rds.txt) (not public) | 10 |
+| Public subnets, private data subnets | VPC | `base/network.tf` (`aws_subnet.public`, `aws_subnet.private`, route tables) | [Runbook stage 1 acceptance](aws-build-runbook.md#acceptance) (subnets in two AZs); [SEC-09 RDS](raw/SEC-09_2026-10-09_fargate_rds.txt) (not public) | 10 |
+| Internet gateway `aws_internet_gateway.main` | VPC (internet gateway) | `base/network.tf:11`; the public route table sends `0.0.0.0/0` to it, the private one has only the local route | Indirect only: [SEC-10 smoke](raw/SEC-10_2026-10-09_fargate_smoke.txt) reaches the ALB from the internet; no case inspects the gateway itself | 10 |
 | ECS Fargate service and tasks `aws_ecs_cluster.app`, `aws_ecs_service.app`, `aws_ecs_task_definition.app` | Amazon ECS on AWS Fargate | `fargate/ecs.tf`; `fargate/web_entry.tf`; `fargate/data.tf` | [FUNC-03 B](raw/FUNC-03_2026-10-09_fargate_summary.txt); [session IDs](raw/SESSION_2026-10-09_fargate_ids.txt); [service events](raw/SESSION_2026-10-09_fargate_service-events.txt); [up record](raw/OPS_2026-10-09_fargate_up.txt); [saturation run](raw/LOAD-fargate-saturation-r1_2026-10-09/) | 5 |
 | Container web (Django, Gunicorn, WhiteNoise) | runs on Fargate | `container_definitions` in `fargate/ecs.tf`; image from `src/Dockerfile` (frozen) | [FUNC-03 B](raw/FUNC-03_2026-10-09_fargate_summary.txt); [test-functional.md](test-functional.md) | 6 |
 | Application Auto Scaling `aws_appautoscaling_target.app`, `_policy.requests` | Application Auto Scaling | `fargate/scaling.tf` | [RES-03a scale-out](raw/RES-03-fargate-scaleout-r1_2026-10-09/) ([alarm history](raw/RES-03-fargate-scaleout-r1_2026-10-09/alarm_history.json)); [test-resilience.md](test-resilience.md) | 5 |
@@ -122,7 +125,7 @@ Paths under "Terraform" are relative to `src/infrastructure/`. "Evidence" files 
 | AWS Secrets Manager `aws_secretsmanager_secret.app` | AWS Secrets Manager | `base/secrets.tf` (five secrets; the values are written by `scripts/secrets.sh` with `put-secret-value`, never through Terraform state); RDS master secret from `manage_master_user_password` in `base/database.tf` | [SEC-11 runtime](raw/SEC-11_2026-10-09_fargate_runtime.txt), [secrets check](raw/SEC-11_2026-10-09_fargate_secrets-check.txt); [SEC-18 no secrets in logs](raw/SEC-18_2026-10-09_fargate_count.txt) | 9 |
 | Amazon S3 bucket (private) `data.aws_s3_bucket.main` | Amazon S3 | `base/storage.tf` (the bucket is created by CLI, see the runbook; the security settings are Terraform) | [SEC-09 S3](raw/SEC-09_2026-10-09_fargate_s3.txt) (public access blocked, anonymous 403) | 8 |
 | CloudWatch Logs `aws_cloudwatch_log_group.app` (and `.db`) | Amazon CloudWatch Logs | `modules/web-entry/logs.tf`; `base/database.tf` (`aws_cloudwatch_log_group.db`); `awslogs` driver in `fargate/ecs.tf` (the web tasks and the one-off job tasks write to the same group) | [MON-01](raw/MON-01_2026-10-09_fargate_status-per-5min.txt); [SEC-18](raw/SEC-18_2026-10-09_fargate_count.txt) | 11 |
-| CloudWatch alarms `unhealthy_hosts`, `no_healthy_hosts`, `target_5xx` | Amazon CloudWatch | `modules/web-entry/alarms.tf` | [MON-03](raw/MON-03_2026-10-09_fargate_history.txt); [MON-04](raw/RES-03-fargate-scaleout-r1_2026-10-09/alarm_history.json) | 11 |
+| CloudWatch alarms `unhealthy_hosts`, `no_healthy_hosts`, `target_5xx`, plus the two scaling alarms that Application Auto Scaling creates (not Terraform resources) | Amazon CloudWatch | `modules/web-entry/alarms.tf` | [MON-03](raw/MON-03_2026-10-09_fargate_history.txt); [MON-04](raw/RES-03-fargate-scaleout-r1_2026-10-09/alarm_history.json) | 11 |
 | Logs Insights saved queries `recent_problems`, `problems_per_minute` | CloudWatch Logs Insights | `modules/web-entry/alarms.tf` (`aws_cloudwatch_query_definition`) | [MON-02](raw/MON-02_2026-10-09_fargate_recent-errors-and-security-warnings.txt): **one of two works**, `problems_per_minute` is rejected as malformed ([open defect](monitoring.md)) | 11 |
 | Amazon SNS `aws_sns_topic.alarms`, subscription `alarm_email` | Amazon SNS | `base/monitoring.tf` | [MON-03 B history](raw/MON-03_2026-10-09_fargate_history.txt) (both SNS actions) and [OK email](raw/MON-03_2026-10-09_fargate_email-ok.txt); the ALARM email is recorded on A only ([monitoring.md](monitoring.md#mon-03-an-alarm-reaches-the-operator-by-email), MON-03 PARTIAL on both) | 11 |
 | Load generator `aws_instance.loadgen` | Amazon EC2 (benchmark only) | `loadgen/main.tf`; harness in `tests/load/` | [saturation run](raw/LOAD-fargate-saturation-r1_2026-10-09/); [load-summary.md](load-summary.md) | 13 |
@@ -134,7 +137,7 @@ Paths under "Terraform" are relative to `src/infrastructure/`. "Evidence" files 
 
 | Colour | From to | What flows | Source |
 |---|---|---|---|
-| Blue | Browser to Route 53; Browser to ALB | DNS lookup, then HTTPS 443; port 80 answers with a 301 to 443. The Route 53 alias A record is an attachment (grey), not a traffic path | `alb.tf` |
+| Blue | Browser to Route 53; Browser to the internet gateway to ALB | DNS lookup, then HTTPS 443 through `aws_internet_gateway.main`; port 80 answers with a 301 to 443. The Route 53 alias A record is an attachment (grey), not a traffic path | `alb.tf` |
 | Blue | ALB to Fargate tasks | HTTP 8000 and `/health/` checks (interval 10 s, healthy 2, unhealthy 3) | `alb.tf` (`health_check`), `app_from_alb` |
 | Blue | Load generator to ALB | HTTPS 443 benchmark traffic against the stack under test | `loadgen/main.tf` |
 | Green | Fargate tasks to RDS | PostgreSQL 5432, TLS `verify-full` (sessions, carts, orders, dataset, analytics summaries) | `app_to_db`, `db_from_app`; `src/config/database.py` |
@@ -153,7 +156,7 @@ Read directly from the files named above; nothing was run against AWS.
 - WAF is attached to the ALB only (`aws_wafv2_web_acl_association.app`, `waf.tf:84`). Its one rule counts by default and blocks when `waf_login_action = "block"`. Its metrics go to CloudWatch; no alarm is defined on them.
 - The web tasks read Secrets Manager (`AWS_SECRET_ID` is `inf2006-grp21/web`); the web tasks do not read S3. Only the one-off `import` job reads the bucket. Browsers never read S3 (product images and `.glb` models are static files in the image).
 - The three `aws_cloudwatch_metric_alarm` resources (all on `AWS/ApplicationELB`) send to the one SNS topic from `base/`. The scaling alarms are created by Application Auto Scaling and are not Terraform resources.
-- Not drawn on purpose: the `loadgen/` stack's own security group, Systems Manager (variant A only), CloudTrail (the account's default event history, not Terraform), the Namecheap name-server delegation outside AWS, the ECR lifecycle policy, the ACM validation records, the S3 bucket policy (summarised as "TLS-only" in the S3 box) and the unused default security group.
+- Not drawn on purpose: the `loadgen/` stack's own security group, Systems Manager (variant A, and the load generator's shell), the load generator's use of S3 to receive the test harness, CloudTrail (the account's default event history, not Terraform), the Namecheap name-server delegation outside AWS, the ECR lifecycle policy, the ACM validation records, the S3 bucket policy (summarised as "TLS-only" in the S3 box) and the unused default security group.
 - No EventBridge, ElastiCache or NAT gateway exists in `src/infrastructure/` (searched), so none is drawn.
 - CIDR ranges, the hosted-zone name servers, the account ID, resource IDs and the bucket name are left out.
 

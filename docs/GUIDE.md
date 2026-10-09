@@ -1,5 +1,7 @@
 # Project guide: what is where, and what every script does
 
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 For team members and markers who open this project for the first time. No cloud account is needed to read the evidence or run the application; the cloud scripts are documented so you can see exactly what was done and repeat it if you have a Learner Lab account.
 
 **Status (9 October 2026):** the scripts below are all written. The cloud scripts (`evidence.sh`, the load harness against AWS) ran on variant A on 8 October and on variant B (the `fargate/` stack) on 9 October 2026. The current index of what was run, with results, is [evidence/README.md](../evidence/README.md). The test records in `evidence/` say which cases have been run and which are still planned.

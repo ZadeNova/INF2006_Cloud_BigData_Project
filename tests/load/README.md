@@ -1,5 +1,7 @@
 # Load-testing harness (Locust)
 
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 Measures the 42Factors shop on variant A (EC2 + Auto Scaling group) and variant B (ECS on Fargate) with the same workload, so the two can be compared fairly, and produces the scale-out and replacement evidence. Plan, decisions, thresholds and weights: [docs/plans/load-harness.md](../../docs/plans/load-harness.md). Results go in [evidence/test-performance.md](../../evidence/test-performance.md).
 
 Results are reported as **capacity per unit of compute** and as a **multiple of the assumed SME peak** (about 15 concurrent visitors, 0.4 dynamic pages/s). They are never a claim about how much traffic the shop needs.

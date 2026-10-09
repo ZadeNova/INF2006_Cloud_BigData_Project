@@ -1,5 +1,7 @@
 # INF2006 Project Scope: E-Commerce Core with Sales and Inventory Analytics
 
+> Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 **Status:** Agreed planning baseline, 11 September 2026  
 **Team:** Five members  
 **Deadline:** Sunday, 11 October 2026, 11:59 PM, Singapore time  

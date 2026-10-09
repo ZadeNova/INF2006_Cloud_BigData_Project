@@ -4,6 +4,8 @@
 Read it before making changes and follow its conventions, architecture,
 and constraints.
 
+> **Which stack to work on.** Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
+
 ## Operating Modes
 
 The user can explicitly choose between two modes.

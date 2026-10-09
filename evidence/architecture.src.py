@@ -144,7 +144,7 @@ zone(2600, 610, 3520, 1670, Z3, "#f1f9f4", "TRUST BOUNDARY 3", "aws_subnet.priva
      "#22543d", sub_at_bottom=True)
 d.text((2624, 654), "Private data subnets, 2 AZs", font=F_ZSUB, fill="#22543d")
 zone(660, 1810, 3520, 2430, Z4, "#f3f8fd", "TRUST BOUNDARY 4", "AWS-managed services")
-d.text((684, 2386), "Reached over HTTPS 443 on public endpoints (sg-app egress 443); no NAT gateway", font=F_ZSUB, fill="#444444")
+d.text((684, 2386), "Reached over HTTPS 443 on public endpoints, through the internet gateway (tasks have public IPs; sg-app egress 443); no NAT gateway", font=F_ZSUB, fill="#444444")
 
 # ------------------------------------------------------------------ zone 1
 browser = box(80, 300, 460, [("b", "Browser"), ("n", "customer and operator"), ("i", "manifest component 1")],
@@ -161,7 +161,7 @@ mailbox = box(80, 2290, 460, [("b", "Operator mailbox"), ("n", "alarm email (ALA
 # ------------------------------------------------------------------ top band (zone 4: edge and scaling)
 route53 = box(690, 330, 480, [("b", "Route 53"), ("n", "aws_route53_zone.main"), ("n", "aws_route53_record.app (alias)"),
                               ("n", "shop-fargate.fourtytwofactors.me")])
-acm = box(1210, 330, 470, [("b", "ACM certificate"), ("n", "aws_acm_certificate.shop"), ("n", "for the 443 listener, DNS-validated")])
+acm = box(1210, 330, 470, [("b", "ACM certificate"), ("n", "aws_acm_certificate.shop"), ("n", "443 listener; validated by"), ("n", "Route 53 CNAME records")])
 waf = box(1720, 330, 700, [("b", "WAF web ACL"), ("n", "aws_wafv2_web_acl.app, attached to ALB"),
                            ("n", "rule login-rate-limit: POST /login/"), ("n", "count by default, block tested (SEC-17)"),
                            ("n", "CloudWatch metrics only, no alarm")])
@@ -169,10 +169,11 @@ appscale = box(2460, 330, 1020, [("b", "Application Auto Scaling"), ("n", "aws_a
                                  ("n", "ALBRequestCountPerTarget, 300 per target per minute")])
 
 # ------------------------------------------------------------------ zone 2 (public subnets)
-alb = box(700, 760, 640, [("b", "Application Load Balancer"), ("n", "aws_lb.app (manifest component 3)"),
-                          ("n", "sg-alb: 443 and 80 from the internet"), ("n", "listener 443: TLS 1.2/1.3 policy"),
+alb = box(860, 760, 540, [("b", "Application Load Balancer"), ("n", "aws_lb.app (manifest component 3)"),
+                          ("n", "sg-alb: 443/80 from the internet"), ("n", "listener 443: TLS 1.2/1.3 policy"),
                           ("n", "listener 80: 301 redirect to 443"), ("n", "aws_lb_target_group.app: ip, 8000,"),
                           ("n", "health check /health/")], "#fff6e0", "#8a5a00")
+igw = box(600, 790, 210, [("b", "IGW"), ("n", "aws_internet"), ("n", "_gateway.main")], "#eef2f6", "#455a64", width=4)
 fargate = box(1620, 760, 760, [("b", "ECS Fargate service and tasks"), ("n", "aws_ecs_cluster.app · aws_ecs_service.app"),
                                ("n", "aws_ecs_task_definition.app, 1 to 2 tasks"), ("n", "2 vCPU / 4 GB, public IP, no sticky sessions"),
                                ("n", "container web: Django 5, Gunicorn, WhiteNoise"),
@@ -209,7 +210,7 @@ logs = box(2620, YA, 860, [("b", "CloudWatch Logs"), ("n", "aws_cloudwatch_log_g
 sns = box(700, YB, 530, [("b", "Amazon SNS (component 11)"), ("n", "aws_sns_topic.alarms"),
                          ("n", "+ aws_sns_topic_subscription"), ("n", ".alarm_email")])
 alarms = box(1330, YB, 610, [("b", "CloudWatch alarms"), ("n", "aws_cloudwatch_metric_alarm:"),
-                             ("n", "unhealthy_hosts, no_healthy_hosts,"), ("n", "target_5xx (all on ALB metrics)")])
+                             ("n", "unhealthy_hosts, no_healthy_hosts,"), ("n", "target_5xx + 2 scaling alarms (MON-04)")])
 insights = box(2620, YB, 860, [("b", "Logs Insights saved queries"), ("n", "aws_cloudwatch_query_definition:"),
                                ("n", "recent_problems, problems_per_minute"),
                                ("n", "MON-02: 1 of the 2 queries works")])
@@ -220,13 +221,14 @@ for i, t in enumerate(("Manifest component 10: security groups", "as trust bound
 # ------------------------------------------------------------------ user traffic (blue)
 arrow([right(browser, 400), left(route53, 400)], BLUE, 5)
 label(615, 355, "DNS", BLUE, center=True)
-arrow([(310, browser[3]), (310, 860), left(alb, 860)], BLUE, 9)
+arrow([(310, browser[3]), (310, 860), left(igw, 860)], BLUE, 9)
+arrow([right(igw, 860), left(alb, 860)], BLUE, 9)
 label(335, 790, "HTTPS 443\n(80 redirects)", BLUE, True)
 arrow([bot(route53, 1100), top(alb, 1100)], GREY, 4, head="none")
 label(1115, 700, "alias A record", "#444444")
 arrow([right(alb, 860), left(fargate, 860)], BLUE, 9)
-label(1480, 770, "HTTP 8000\n+ /health/", BLUE, True, center=True)
-label(1480, 885, "sg-app: only\nfrom sg-alb", BLUE, False, center=True)
+label(1510, 770, "HTTP 8000\n+ /health/", BLUE, True, center=True)
+label(1510, 885, "sg-app: only\nfrom sg-alb", BLUE, False, center=True)
 arrow([top(loadgen, 960), bot(alb, 960)], BLUE, 5)
 label(980, 1050, "HTTPS 443 (benchmark)", BLUE)
 # configuration attachments (grey, no head)
@@ -301,8 +303,8 @@ for col, wd, t, dashed, head in ((BLUE, 8, "user traffic", False, "solid"), (GRE
     x += 92 + int(d.textlength(t, font=F_E)) + 30
 d.text((60, 2610), "Arrows point from the caller to the service it calls. Thick arrows: the main request path. Grey lines without heads: "
        "attachments (Route 53 alias, certificate, web ACL). sg-alb, sg-app and sg-db are the security groups that enforce the boundaries.", font=F_E, fill="#444444")
-d.text((60, 2646), "Dashed box and dashed arrow: variant A, built and measured, not part of the final flow. CloudTrail (the account's default "
-       "event history, not Terraform) is not drawn.", font=F_E, fill="#444444")
+d.text((60, 2646), "Dashed box and dashed arrow: variant A, built and measured, not part of the final flow. Not drawn: CloudTrail (account default event history), "
+       "Namecheap name-server delegation, Systems Manager (variant A and the load generator).", font=F_E, fill="#444444")
 
 img.save(OUT, dpi=(300, 300))
 print(OUT, img.size)

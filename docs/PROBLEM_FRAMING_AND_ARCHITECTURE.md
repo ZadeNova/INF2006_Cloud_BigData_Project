@@ -108,7 +108,7 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
 
 ### Service-model justification (report §3 material)
 
-> **Sprint note (1 October 2026):** the rejection of ECS on Fargate under D5 below was argued from the design, not measured. It is being replaced by a measured EC2-versus-Fargate comparison ([plan](plans/aws-ecs-comparison.md)). Keep drivers D1 to D5; rewrite the Fargate paragraph and the summary matrix from the data once the runs are done.
+> **Sprint note (1 October 2026):** the rejection of ECS on Fargate under D5 below was argued from the design, not measured. It was replaced by a measured EC2-versus-Fargate comparison ([plan](plans/aws-ecs-comparison.md)), and the final architecture is variant B, ECS on Fargate ([ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)). The "Chosen" EC2 wording below is the design-stage choice (variant A, the evaluated alternative) and has not been rewritten from the data; the Fargate paragraph and the summary matrix are still the pre-measurement text.
 
 Structure: state the decision drivers first, each traced to the story, then test every option
 against them. The choice then follows from the requirements instead of being defended after the
@@ -124,7 +124,7 @@ fact.
 | **D4. Every security boundary is explicit and auditable,** because the shop holds customer accounts and order history. | Threat-control map; trust boundaries on the diagram |
 | **D5. Cost and complexity proportionate to one deployable run by a small business,** with a path to grow. | One Django service, one database |
 
-**Chosen: EC2 in an Auto Scaling group behind an ALB.** Replaceable instances running one container
+**Design-stage choice (superseded by ADR-018): EC2 in an Auto Scaling group behind an ALB.** Replaceable instances running one container
 image (D3), a fixed ceiling of instances and Gunicorn workers (D1), a scaling signal chosen for the
 workload (ALBRequestCountPerTarget, because requests are the load that matters), and security groups
 chaining ALB → app:8000 → RDS:5432 as explicit resources (D4).
@@ -176,7 +176,7 @@ stops being right is part of the argument.
 
 | | D1 bounded DB concurrency | D2 always on, with bursts | D3 replaceable instances | D4 explicit boundaries | D5 proportionate |
 |---|---|---|---|---|---|
-| **EC2 + ASG (chosen)** | ✓ | ✓ | ✓ | ✓ | ✓ |
+| **EC2 + ASG (design-stage choice)** | ✓ | ✓ | ✓ | ✓ | ✓ |
 | Elastic Beanstalk | ✓ | ✓ | ✓ | ~ generated | ✓ |
 | ECS on Fargate | ✓ | ✓ | ✓ | ✓ | ~ orchestration unused |
 | EKS | ✓ | ✓ | ✓ | ✓ | ✗ fixed control-plane cost |
