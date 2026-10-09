@@ -1,0 +1,20 @@
+# file: evidence/raw/SEC-18_2026-10-09_fargate_count.txt
+# date_utc: 2026-10-09T07:11:31Z
+# commit: e4bc928
+# command: insights filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | stats count(*) as matches
+$ aws logs start-query --log-group-name /inf2006-grp21-fargate/app (from 2026-10-09T01:11:14Z to now)
+query: filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | stats count(*) as matches
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 0.0,
+    "recordsScanned": 77326.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 20350145.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 0.0
+  },
+  "results": []
+}
+# exit: 0  end_utc: 2026-10-09T07:11:35Z

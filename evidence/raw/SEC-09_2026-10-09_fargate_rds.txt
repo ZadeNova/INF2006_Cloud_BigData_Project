@@ -1,0 +1,19 @@
+# file: evidence/raw/SEC-09_2026-10-09_fargate_rds.txt
+# date_utc: 2026-10-09T02:02:56Z
+# commit: 33963c5
+# command: sec09_rds
+$ aws rds describe-db-instances --query DBInstances[?starts_with(DBInstanceIdentifier, 'inf2006-grp21')].{id:DBInstanceIdentifier,publicly_accessible:PubliclyAccessible,encrypted:StorageEncrypted,multi_az:MultiAZ,class:DBInstanceClass,engine:EngineVersion,security_groups:VpcSecurityGroups[].VpcSecurityGroupId}
+[
+    {
+        "id": "inf2006-grp21-db",
+        "publicly_accessible": false,
+        "encrypted": true,
+        "multi_az": false,
+        "class": "db.t4g.small",
+        "engine": "17.9",
+        "security_groups": [
+            "sg-03abb4562e4857842"
+        ]
+    }
+]
+# exit: 0  end_utc: 2026-10-09T02:02:59Z

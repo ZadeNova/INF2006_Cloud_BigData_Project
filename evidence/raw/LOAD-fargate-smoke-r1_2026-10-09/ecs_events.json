@@ -1,0 +1,14 @@
+[
+  {
+    "createdAt": "2026-10-09T02:00:02.627Z",
+    "message": "(service inf2006-grp21-fargate-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T02:00:13.539Z",
+    "message": "(service inf2006-grp21-fargate-service) (deployment ecs-svc/4477481556090360168) deployment completed."
+  },
+  {
+    "createdAt": "2026-10-09T02:00:13.540Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  }
+]

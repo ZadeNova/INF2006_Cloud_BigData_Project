@@ -1,0 +1,22 @@
+# file: evidence/raw/MON-03_2026-10-09_fargate_email-ok.txt
+# date_utc: 2026-10-09T04:12:44Z (the alarm timestamp in the email; received 12:12 PM SGT)
+# source: the ALARM -> OK notification email received through the SNS topic subscription, transcribed by hand from
+#         the screenshot the operator supplied. The mail client clipped the end of the message in the screenshot, so
+#         only the visible part is transcribed. Redactions: recipient address -> <EMAIL>.
+# matches: MON-03_2026-10-09_fargate_history.txt (ALARM -> OK at 04:12:44 UTC, then "Successfully executed action ... sns")
+
+From: AWS Notifications <no-reply@sns.amazonaws.com>
+To: <EMAIL>
+
+You are receiving this email because your Amazon CloudWatch Alarm "inf2006-grp21-fargate-target-5xx" in the US East (N. Virginia) region has entered the OK state, because "Threshold Crossed: no datapoints were received for 2 periods and 2 missing datapoints were treated as [NonBreaching]." at "Friday 09 October, 2026 04:12:44 UTC".
+
+View this alarm in the AWS Management Console:
+<CONSOLE-LINK-REMOVED> (region us-east-1, alarm inf2006-grp21-fargate-target-5xx)
+
+Alarm Details:
+- Name:                       inf2006-grp21-fargate-target-5xx
+- Description:                The app returned more than 5 server errors in a minute, twice running
+- State Change:               ALARM -> OK
+- Reason for State Change:    Threshold Crossed: no datapoints were received for 2 periods and 2 missing datapoints were treated as [NonBreaching].
+- Timestamp:                  Friday 09 October, 2026 04:12:44 UTC
+[remainder of the message clipped in the screenshot]

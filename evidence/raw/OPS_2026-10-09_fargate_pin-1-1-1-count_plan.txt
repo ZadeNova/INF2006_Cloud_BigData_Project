@@ -1,0 +1,84 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_pin-1-1-1-count_plan.txt
+# date_utc: 2026-10-09T06:07:35Z
+# commit: e4bc928
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh fargate plan
+[32m[1mSuccess![0m The configuration is valid.
+[0m
+[0m[1mdata.terraform_remote_state.base: Reading...[0m[0m
+[0m[1mdata.terraform_remote_state.base: Read complete after 0s[0m
+[0m[1mdata.aws_ecr_image.app: Reading...[0m[0m
+[0m[1mdata.aws_iam_role.lab: Reading...[0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Refreshing state... [id=/inf2006-grp21-fargate/app][0m
+[0m[1maws_ecs_cluster.app: Refreshing state... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster][0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Refreshing state... [id=sg-023baa0b88cf46edd][0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2][0m
+[0m[1mmodule.web_entry.aws_security_group.app: Refreshing state... [id=sg-0604681cf6bb68d4c][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Refreshing state... [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m
+
+[0m[1m[31mPlanning failed.[0m[1m Terraform encountered an error while generating this plan.[0m
+
+[0m[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading IAM Role (LabRole): operation error IAM: GetRole, https response error StatusCode: 403, RequestID: a4ec17c5-bcb4-4a6a-9cfc-cf6932b41d10, api error AccessDenied: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: iam:GetRole on resource: role LabRole with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred. Go to https://us-east-1.console.aws.amazon.com/iam/home?region=us-east-1#/authorization-details/2q57mjbnqb8zrhi3s0a24fj40 for complete details, or call the GetRequestAuthorizationDetails API with the following authorization id: 2q57mjbnqb8zrhi3s0a24fj40[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with data.aws_iam_role.lab,
+[31m│[0m [0m  on data.tf line 18, in data "aws_iam_role" "lab":
+[31m│[0m [0m  18: data "aws_iam_role" "lab" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading ECR Images: operation error ECR: DescribeImages, https response error StatusCode: 400, RequestID: 87354205-99c1-4c80-acc8-f6afb915e2f1, api error AccessDeniedException: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: ecr:DescribeImages on resource: arn:aws:ecr:us-east-1:<ACCOUNT>:repository/inf2006-grp21-app with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with data.aws_ecr_image.app,
+[31m│[0m [0m  on data.tf line 23, in data "aws_ecr_image" "app":
+[31m│[0m [0m  23: data "aws_ecr_image" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading ECS Cluster (arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster): operation error ECS: DescribeClusters, https response error StatusCode: 400, RequestID: 4d0b5b01-c1f5-467f-8b16-70d89d1c0760, AccessDeniedException: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: ecs:DescribeClusters on resource: arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with aws_ecs_cluster.app,
+[31m│[0m [0m  on ecs.tf line 21, in resource "aws_ecs_cluster" "app":
+[31m│[0m [0m  21: resource "aws_ecs_cluster" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading ELBv2 Target Group (arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2): operation error Elastic Load Balancing v2: DescribeTargetGroups, https response error StatusCode: 403, RequestID: 3d3114d7-13be-47c5-878f-905840eb06f5, api error AccessDenied: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: elasticloadbalancing:DescribeTargetGroups with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.web_entry.aws_lb_target_group.app,
+[31m│[0m [0m  on ../modules/web-entry/alb.tf line 16, in resource "aws_lb_target_group" "app":
+[31m│[0m [0m  16: resource "aws_lb_target_group" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading CloudWatch Logs Log Group (/inf2006-grp21-fargate/app): listing CloudWatch Logs Log Groups: operation error CloudWatch Logs: DescribeLogGroups, https response error StatusCode: 400, RequestID: 08b63ff0-ee6a-4a96-a42b-fe9b8212bdcb, api error AccessDeniedException: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: logs:DescribeLogGroups on resource: arn:aws:logs:us-east-1:<ACCOUNT>:log-group::log-stream: with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.web_entry.aws_cloudwatch_log_group.app,
+[31m│[0m [0m  on ../modules/web-entry/logs.tf line 3, in resource "aws_cloudwatch_log_group" "app":
+[31m│[0m [0m   3: resource "aws_cloudwatch_log_group" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading Security Group (sg-023baa0b88cf46edd): operation error EC2: DescribeSecurityGroups, https response error StatusCode: 403, RequestID: 97018041-2b57-4fc6-a46a-333f983d6211, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: ec2:DescribeSecurityGroups with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.web_entry.aws_security_group.alb,
+[31m│[0m [0m  on ../modules/web-entry/security_groups.tf line 6, in resource "aws_security_group" "alb":
+[31m│[0m [0m   6: resource "aws_security_group" "alb" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading Security Group (sg-0604681cf6bb68d4c): operation error EC2: DescribeSecurityGroups, https response error StatusCode: 403, RequestID: ab0a8cbf-07a0-402f-be6e-590e46009e04, api error UnauthorizedOperation: You are not authorized to perform this operation. User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: ec2:DescribeSecurityGroups with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.web_entry.aws_security_group.app,
+[31m│[0m [0m  on ../modules/web-entry/security_groups.tf line 14, in resource "aws_security_group" "app":
+[31m│[0m [0m  14: resource "aws_security_group" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+[31m╷[0m[0m
+[31m│[0m [0m[1m[31mError: [0m[0m[1mreading WAFv2 WebACL (93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d): operation error WAFV2: GetWebACL, https response error StatusCode: 400, RequestID: e784e3d9-d03e-48e3-9543-b4c7702f8ba6, api error AccessDeniedException: User: arn:aws:sts::<ACCOUNT>:assumed-role/voclabs/user5416466=<EMAIL> is not authorized to perform: wafv2:GetWebACL on resource: arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d with an explicit deny in an identity-based policy: arn:aws:iam::<ACCOUNT>:policy/voc-cancel-cred[0m
+[31m│[0m [0m
+[31m│[0m [0m[0m  with module.web_entry.aws_wafv2_web_acl.app,
+[31m│[0m [0m  on ../modules/web-entry/waf.tf line 4, in resource "aws_wafv2_web_acl" "app":
+[31m│[0m [0m   4: resource "aws_wafv2_web_acl" "app" [4m{[0m[0m
+[31m│[0m [0m
+[31m╵[0m[0m
+# exit: 1  end_utc: 2026-10-09T06:07:49Z

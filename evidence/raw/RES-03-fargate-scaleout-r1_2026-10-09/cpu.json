@@ -1,0 +1,6 @@
+{
+  "variant": "fargate",
+  "model": "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz",
+  "vcpus": 2,
+  "ts_utc": "2026-10-09T02:07:58.977Z"
+}

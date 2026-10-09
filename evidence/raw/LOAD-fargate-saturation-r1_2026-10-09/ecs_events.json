@@ -1,0 +1,42 @@
+[
+  {
+    "createdAt": "2026-10-09T06:19:39.902Z",
+    "message": "(service inf2006-grp21-fargate-service) has stopped 1 running tasks: (task f49c1b51169c4580a67427b25c116442)."
+  },
+  {
+    "createdAt": "2026-10-09T06:19:49.523Z",
+    "message": "(service inf2006-grp21-fargate-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T06:19:49.532Z",
+    "message": "(service inf2006-grp21-fargate-service, taskSet ecs-svc/4477481556090360168) has begun draining connections on 1 tasks."
+  },
+  {
+    "createdAt": "2026-10-09T06:19:49.608Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  },
+  {
+    "createdAt": "2026-10-09T06:43:30.814Z",
+    "message": "(service inf2006-grp21-fargate-service) has started 1 tasks: (task 460c4d2589f7406bbbf0cc9054484151). Amazon ECS replaced 1 tasks due to an unhealthy status."
+  },
+  {
+    "createdAt": "2026-10-09T06:44:08.674Z",
+    "message": "(service inf2006-grp21-fargate-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T06:44:54.650Z",
+    "message": "(service inf2006-grp21-fargate-service) has stopped 1 running tasks: (task eef3118446e9462db6ee38b2fea7c567)."
+  },
+  {
+    "createdAt": "2026-10-09T06:45:04.691Z",
+    "message": "(service inf2006-grp21-fargate-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T06:45:04.697Z",
+    "message": "(service inf2006-grp21-fargate-service, taskSet ecs-svc/4477481556090360168) has begun draining connections on 1 tasks."
+  },
+  {
+    "createdAt": "2026-10-09T06:45:04.777Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  }
+]

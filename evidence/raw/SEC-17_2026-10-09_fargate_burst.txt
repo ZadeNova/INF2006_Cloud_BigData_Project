@@ -1,0 +1,37 @@
+# file: evidence/raw/SEC-17_2026-10-09_fargate_burst.txt
+# date_utc: 2026-10-09T06:54:14Z
+# commit: e4bc928
+# command: waf_burst
+POST /login/ with a valid CSRF token and a wrong password for user waf-probe, every 3 s, until 5 WAF blocks in a row or 80 attempts.
+WAF block = status 403 with 'Server: awselb/2.0' (the load balancer). A Django refusal would carry 'Server: gunicorn'.
+06:54:17  attempt  1  HTTP 200  server gunicorn
+06:54:22  attempt  2  HTTP 200  server gunicorn
+06:54:27  attempt  3  HTTP 200  server gunicorn
+06:54:32  attempt  4  HTTP 200  server gunicorn
+06:54:37  attempt  5  HTTP 200  server gunicorn
+06:54:42  attempt  6  HTTP 200  server gunicorn
+06:54:47  attempt  7  HTTP 200  server gunicorn
+06:54:52  attempt  8  HTTP 200  server gunicorn
+06:54:57  attempt  9  HTTP 200  server gunicorn
+06:55:03  attempt 10  HTTP 200  server gunicorn
+06:55:08  attempt 11  HTTP 200  server gunicorn
+06:55:14  attempt 12  HTTP 200  server gunicorn
+06:55:19  attempt 13  HTTP 200  server gunicorn
+06:55:24  attempt 14  HTTP 200  server gunicorn
+06:55:29  attempt 15  HTTP 200  server gunicorn
+06:55:34  attempt 16  HTTP 200  server gunicorn
+06:55:38  attempt 17  HTTP 200  server gunicorn
+06:55:44  attempt 18  HTTP 200  server gunicorn
+06:55:49  attempt 19  HTTP 200  server gunicorn
+06:55:54  attempt 20  HTTP 200  server gunicorn
+06:56:00  attempt 21  HTTP 200  server gunicorn
+06:56:04  attempt 22  HTTP 200  server gunicorn
+06:56:09  attempt 23  HTTP 200  server gunicorn
+06:56:14  attempt 24  HTTP 200  server gunicorn
+06:56:19  attempt 25  HTTP 403  server awselb/2.0
+06:56:24  attempt 26  HTTP 403  server awselb/2.0
+06:56:29  attempt 27  HTTP 403  server awselb/2.0
+06:56:34  attempt 28  HTTP 403  server awselb/2.0
+06:56:39  attempt 29  HTTP 403  server awselb/2.0
+browsing while the login is blocked: GET /products/ -> HTTP 200
+# exit: 0  end_utc: 2026-10-09T06:56:40Z

@@ -1,0 +1,16 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_reset-apply.txt
+# date_utc: 2026-10-09T06:47:05Z
+# commit: e4bc928
+# command: bash -c cd tests/load && .venv/bin/python reset_state.py --target fargate --apply
+APPLYING on fargate, accounts 'loadtest-*'
+
+Running a one-off task in cluster inf2006-grp21-fargate-cluster (a minute or two) ...
+17 objects imported automatically (use -v 2 for details).
+accounts: 2200 | load orders: 299 | order lines: 299 | units to put back: 301 | products: 69 | cart lines: 439
+  most ordered: FILA Chunky Sneaker · US 11 | stock 12 -> 25
+  most ordered: Adidas Runner "Core Black" · US 10.5 | stock 26 -> 38
+  most ordered: Air Jordan 1 High "Bred" · US 9 | stock 9 -> 19
+  most ordered: Adidas Runner "Core Black" · US 7 | stock 102 -> 112
+  most ordered: Converse Chuck High · US 9 | stock 25 -> 35
+APPLIED. Left: load orders 0 | order lines 0 | cart lines 0
+# exit: 0  end_utc: 2026-10-09T06:48:13Z

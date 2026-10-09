@@ -1,0 +1,39 @@
+# file: evidence/raw/FUNC-03_2026-10-09_fargate_summary.txt
+# date_utc: 2026-10-09T02:06:21Z
+# commit: 33963c5
+# command: func_summary /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/evidence/raw/LOAD-fargate-smoke-r1_2026-10-09
+107 requests in LOAD-fargate-smoke-r1_2026-10-09
+visit        action                 outcome         count
+1            cart                   ok              2
+1            cart_add               ok              4
+1            checkout_place         ok              2
+1            checkout_review        ok              1
+1            detail                 ok              2
+1            home                   ok              14
+1            login                  ok              4
+1            login_form             ok              2
+2            cart                   ok              1
+2            cart_add               ok              2
+2            detail                 late            1
+2            detail                 ok              4
+2            home                   ok              14
+2            list                   ok              1
+2            login                  ok              2
+2            login_form             ok              1
+3            cart                   ok              1
+3            cart_add               ok              2
+3            checkout_place         ok              2
+3            checkout_review        ok              1
+3            detail                 late            1
+3            detail                 ok              4
+3            home                   ok              14
+3            list                   ok              1
+3            login                  ok              2
+3            login_form             ok              1
+4            detail                 late            1
+4            detail                 ok              2
+4            home                   ok              14
+4            login                  ok              2
+4            login_form             ok              2
+errors: 0
+# exit: 0  end_utc: 2026-10-09T02:06:22Z

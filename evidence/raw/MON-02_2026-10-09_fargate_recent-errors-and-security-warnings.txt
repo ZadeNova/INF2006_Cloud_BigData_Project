@@ -1,0 +1,475 @@
+# file: evidence/raw/MON-02_2026-10-09_fargate_recent-errors-and-security-warnings.txt
+# date_utc: 2026-10-09T07:11:21Z
+# commit: e4bc928
+# command: saved_query recent-errors-and-security-warnings
+saved query: inf2006-grp21-fargate/recent-errors-and-security-warnings
+$ aws logs start-query --log-group-name /inf2006-grp21-fargate/app (from 2026-10-09T01:11:14Z to now)
+query: fields @timestamp, level, logger, status, request_id, message
+| filter level in ["ERROR", "WARNING"]
+| sort @timestamp desc
+| limit 50
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 181.0,
+    "recordsScanned": 2664.0,
+    "estimatedRecordsSkipped": 74662.0,
+    "bytesScanned": 719578.0,
+    "estimatedBytesSkipped": 19630567.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 50.0
+  },
+  "results": [
+    {
+      "@timestamp": "2026-10-09 06:57:11.518",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "87097d0e726742cfb3ca4675e07a8884",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqbrlwYAAAABUCStoQAGrIkCYAAABGIgASjers77kTQw3q7O+5E0OAJA9gRI+RxQxxAgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 06:41:53.521",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "3989138a4c67458a814fdfc90b94725b",
+      "message": "Django security rejection",
+      "@ptr": "CrABCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI5GhgCBqcXUZwAAAAEeRJ4XAAGrIjJ0AAABsIgASig6ZT7kTQwuMSb+5E0OK0LQP2pF0jJ/QRQsO4EIAIQ7gYYAQ=="
+    },
+    {
+      "@timestamp": "2026-10-09 05:33:31.473",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "56b541336cce4e0fa92dce769e4b31ba",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcGnbAAAAAAcCxVAQAGrIfIkAAAAAIgASjR+5v5kTQw0fub+ZE0OAJA9wRI+xxQyRAgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 05:14:16.267",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "b0a447537a554fd0b34381f6ab05f962",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg2kfkAAGrId9kAAABaIgASjLutX4kTQwy7rV+JE0OAJA6wRI8BxQvhAgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:28:56.452",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "fdee8d5470584c2dba72cd24c637c31c",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcGnbAAAAAAcBtGPAAGrIbYMAAAAAIgASiOqK/3kTQwhLqv95E0OARA2glI/R1QyxEgAhACGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:28:54.634",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "a55e66eb215e468099d1a07f4b32d414",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkf5YrgAGrIbRUAAAAnIgASjqq6/3kTQw66uv95E0OAJA7ARI6BxQthAgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:28:54.158",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "82f993c720f6426dbebe1545a8edc964",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcGnbAAAAAAcBtGPAAGrIbYMAAAAAIgASiOqK/3kTQwhLqv95E0OARA2glI/R1QyxEgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:10:22.842",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "694bd99f29f5407aa778cd3747fd78c7",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkfRghwAGrIaOQAAAAnIgASj6vev2kTQw+r3r9pE0OAJA6gRI5hxQtBAgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.839",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "f317d61532c646418edef64f128bd3d3",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQTBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.596",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "1e9e192084a0417ea60db704d111f43e",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQNBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.413",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "c888e166c06749f18a4b8a96167e2a45",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQShgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.291",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "786000b9f50e443fad68a42c422de2a2",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQMhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.216",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "62881c662ea741c2acdd71c6a65ea1c6",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQSBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:41.169",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "9e802a427e114e88aef034c5e43f9b84",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQMBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.641",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "49fb9168e1b5449fabc778e7de4ceffe",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQRhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.565",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "2b1fbfa8073e48049945a03df8764156",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQLhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.530",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "b7a6bfc97f294e48a2341deb11151fee",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQRBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.500",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "4222e35b22d44b9aab1f3680f9b94037",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQLBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.244",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "73c00fd63f7447b892500cffd275c016",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQQhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.181",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "58d530c2f21a460f9136ce351deac9d9",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQKhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.132",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "1ebd2113bea1493e938aaf530e08a0ce",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQQBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:39.060",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "4f08c009d7fd441ebcea0d7d6314d59b",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQKBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.995",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "6ae9b10faffb41d5b9000d079a8acea9",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQPhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.918",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "83dbc339251540009272cc40664b1339",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQJhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.732",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "687a64f0b5504e698a36c284412ac436",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQPBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.700",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "8b6740bfa3bf421bb17ae725233b37bb",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQJBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.650",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "5affb1e84041410794df6c54b2310043",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAMGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:38.599",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "75375e4853fd4871872186ba6907e2c8",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqcGnbAAAAAAcBSN7AAGrIZ2oAAAAAIgASjc0dT2kTQw/NPW9pE0ODZA0IUBSOIvUK0jIAIQIhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.681",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "a1013604591344e187cc26120ffb856e",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAKGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.619",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "28bb31717416492a8d9ae93cb327eaa5",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAoGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.544",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "be036be456504cb7b24bc21321f3b4a9",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAIGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.482",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "2c69e8e39d0147689c896869e2a97e13",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAmGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.414",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "56e06625320c40d08d7810f47f1c3021",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAGGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.234",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "b71cb35ff2324957ba4093112525c0f2",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAkGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.171",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "6a39de8135dd415fa0ba586546fedf7f",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAEGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:37.133",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "99a6c279def2412b9f4853dc2dbc9ab0",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAiGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:35.576",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "adcc21f26a6c40cb9e3b89e6ccc7431e",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhACGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:34.734",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "ec4cdfcc4527470b87913f08892df69d",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAgGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:33.085",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "ad321e9898054ec6a1429a5af3c80188",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkfEIKAAGrIZ4IAAAAnIgASjfgdT2kTQwvZHW9pE0OCpA92dIpy1Q8SAgAhAoGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:31.481",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "fa20af7e6e58411ba3c0b8ce583776db",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkfEIKAAGrIZ4IAAAAnIgASjfgdT2kTQwvZHW9pE0OCpA92dIpy1Q8SAgAhAmGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:31.152",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "08cd9930fd094088a451954aae3b8deb",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcTNIoAAAAAg1TDewAGrIZ7QAAABaIgASipstT2kTQw87TW9pE0OCpAsGhIpC1Q7yAgAhAeGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:30.931",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "8240c2a4f22b477696efe6189bf90655",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkfEIKAAGrIZ4IAAAAnIgASjfgdT2kTQwvZHW9pE0OCpA92dIpy1Q8SAgAhAkGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:27.457",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "85e54a486e1f4564a09a8767c69e2bd1",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqaYZXAAGrIZ8YAAABfIgASjB5dX2kTQw+rzW9pE0OA5AgSNI7iNQuhcgAhAAGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:27.329",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "f5c1994bcca5463c9ace4f0723e53a81",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqoCFjcAAAAAkfEIKAAGrIZ4IAAAAnIgASjfgdT2kTQwvZHW9pE0OCpA92dIpy1Q8SAgAhAiGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:23.447",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "e99740e9b10c4454b5691204bfdee77e",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQOhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:23.282",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "49cca60bc5c44415b31a995ffc8a5e85",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQOBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:23.017",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "4f8a1a86f3c740b2918925b1e5ec6888",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqpcZKYAAAAAKHsjvgAGrIZ3kAAABmIgASiq+dL2kTQw6cLV9pE0OBRA7jFIwyVQjxkgAhATGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:22.935",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "b11f683f27aa45688df3c979a8978c37",
+      "message": "Django security rejection",
+      "@ptr": "CqwBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqpcZKYAAAAAKHsjvgAGrIZ3kAAABmIgASiq+dL2kTQw6cLV9pE0OBRA7jFIwyVQjxkgAhASGAE="
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:22.858",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "8ceab5fd5b9b43ba97af261a6379e239",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQNhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 04:04:21.300",
+      "level": "ERROR",
+      "logger": "django.security.DisallowedHost",
+      "status": "400",
+      "request_id": "329cb52057ca4318adac2c31fd6f006d",
+      "message": "Django security rejection",
+      "@ptr": "Cq0BCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQ37KC/JE0OIedm7KNNEDWqv/ykTRIABI2GhgCBqxS5W4AAAAAy+jv+AAGrIZ3EAAABOIgASjvsdT2kTQw79XW9pE0OE5A2MABSKw3UPQqIAIQNBgB"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-09T07:11:27Z

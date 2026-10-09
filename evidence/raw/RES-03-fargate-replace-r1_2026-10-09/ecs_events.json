@@ -1,0 +1,30 @@
+[
+  {
+    "createdAt": "2026-10-09T03:07:53.400Z",
+    "message": "(service inf2006-grp21-fargate-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T03:08:02.462Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  },
+  {
+    "createdAt": "2026-10-09T03:17:50.534Z",
+    "message": "(service inf2006-grp21-fargate-service) deregistered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T03:17:50.542Z",
+    "message": "(service inf2006-grp21-fargate-service, taskSet ecs-svc/4477481556090360168) has begun draining connections on 1 tasks."
+  },
+  {
+    "createdAt": "2026-10-09T03:17:51.426Z",
+    "message": "(service inf2006-grp21-fargate-service) has started 1 tasks: (task f49c1b51169c4580a67427b25c116442)."
+  },
+  {
+    "createdAt": "2026-10-09T03:18:19.821Z",
+    "message": "(service inf2006-grp21-fargate-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T03:18:29.042Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  }
+]

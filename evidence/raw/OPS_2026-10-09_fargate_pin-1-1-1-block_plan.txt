@@ -1,0 +1,186 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_pin-1-1-1-block_plan.txt
+# date_utc: 2026-10-09T06:49:14Z
+# commit: e4bc928
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh fargate plan
+[32m[1mSuccess![0m The configuration is valid.
+[0m
+[0m[1mdata.terraform_remote_state.base: Reading...[0m[0m
+[0m[1mdata.terraform_remote_state.base: Read complete after 0s[0m
+[0m[1mdata.aws_iam_role.lab: Reading...[0m[0m
+[0m[1mdata.aws_ecr_image.app: Reading...[0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Refreshing state... [id=/inf2006-grp21-fargate/app][0m
+[0m[1maws_ecs_cluster.app: Refreshing state... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster][0m
+[0m[1mmodule.web_entry.aws_security_group.app: Refreshing state... [id=sg-0604681cf6bb68d4c][0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Refreshing state... [id=sg-023baa0b88cf46edd][0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Refreshing state... [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m
+[0m[1mdata.aws_iam_role.lab: Read complete after 1s [id=LabRole][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Refreshing state... [id=sgr-0fe0da13e06e924a2][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Refreshing state... [id=sgr-0b138355d6bc3bfa4][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Refreshing state... [id=sgr-09bc8c90a74360d26][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Refreshing state... [id=sgr-0e8861fbc3b0aab6e][0m
+[0m[1mmodule.web_entry.aws_lb.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-0417ca4b723d98bd0][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Refreshing state... [id=sgr-0dab8f7876da722a7][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-0ec772b46b7119907][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Refreshing state... [id=f3571ada-ac5c-437f-8044-1a7d67ce3f6b][0m
+[0m[1mdata.aws_ecr_image.app: Read complete after 2s [id=sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Refreshing state... [id=f74ca6df-882a-4868-addb-214bdecb7f45][0m
+[0m[1maws_ecs_task_definition.app: Refreshing state... [id=inf2006-grp21-fargate-app][0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Refreshing state... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Refreshing state... [id=inf2006-grp21-fargate-no-healthy-hosts][0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/fce661f7b9af3ae6][0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/ee558c39805dab92][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Refreshing state... [id=inf2006-grp21-fargate-unhealthy-hosts][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Refreshing state... [id=inf2006-grp21-fargate-target-5xx][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Refreshing state... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m
+[0m[1maws_ecs_service.app: Refreshing state... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m
+[0m[1maws_appautoscaling_target.app: Refreshing state... [id=service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m
+[0m[1maws_appautoscaling_policy.requests: Refreshing state... [id=inf2006-grp21-fargate-requests-per-target][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [33m~[0m update in-place[0m
+
+Terraform will perform the following actions:
+
+[1m  # module.web_entry.aws_wafv2_web_acl.app[0m will be updated in-place
+[0m  [33m~[0m[0m resource "aws_wafv2_web_acl" "app" {
+        id                          = "93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d"
+        name                        = "inf2006-grp21-fargate-waf"
+        tags                        = {
+            "Name" = "inf2006-grp21-fargate-waf"
+        }
+        [90m# (10 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m rule {
+          [31m-[0m[0m name     = "login-rate-limit" [90m-> null[0m[0m
+          [31m-[0m[0m priority = 1 [90m-> null[0m[0m
+
+          [31m-[0m[0m action {
+              [31m-[0m[0m count {
+                }
+            }
+
+          [31m-[0m[0m statement {
+              [31m-[0m[0m rate_based_statement {
+                  [31m-[0m[0m aggregate_key_type    = "IP" [90m-> null[0m[0m
+                  [31m-[0m[0m evaluation_window_sec = 300 [90m-> null[0m[0m
+                  [31m-[0m[0m limit                 = 20 [90m-> null[0m[0m
+
+                  [31m-[0m[0m scope_down_statement {
+                      [31m-[0m[0m and_statement {
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "/login/" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m uri_path {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "POST" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m method {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+          [31m-[0m[0m visibility_config {
+              [31m-[0m[0m cloudwatch_metrics_enabled = true [90m-> null[0m[0m
+              [31m-[0m[0m metric_name                = "inf2006-grp21-fargate-login-rate" [90m-> null[0m[0m
+              [31m-[0m[0m sampled_requests_enabled   = true [90m-> null[0m[0m
+            }
+        }
+      [32m+[0m[0m rule {
+          [32m+[0m[0m name     = "login-rate-limit"
+          [32m+[0m[0m priority = 1
+
+          [32m+[0m[0m action {
+              [32m+[0m[0m block {
+                }
+            }
+
+          [32m+[0m[0m statement {
+              [32m+[0m[0m rate_based_statement {
+                  [32m+[0m[0m aggregate_key_type    = "IP"
+                  [32m+[0m[0m evaluation_window_sec = 300
+                  [32m+[0m[0m limit                 = 20
+
+                  [32m+[0m[0m scope_down_statement {
+                      [32m+[0m[0m and_statement {
+                          [32m+[0m[0m statement {
+                              [32m+[0m[0m byte_match_statement {
+                                  [32m+[0m[0m positional_constraint = "EXACTLY"
+                                  [32m+[0m[0m search_string         = "/login/"
+
+                                  [32m+[0m[0m field_to_match {
+                                      [32m+[0m[0m uri_path {}
+                                    }
+
+                                  [32m+[0m[0m text_transformation {
+                                      [32m+[0m[0m priority = 0
+                                      [32m+[0m[0m type     = "NONE"
+                                    }
+                                }
+                            }
+                          [32m+[0m[0m statement {
+                              [32m+[0m[0m byte_match_statement {
+                                  [32m+[0m[0m positional_constraint = "EXACTLY"
+                                  [32m+[0m[0m search_string         = "POST"
+
+                                  [32m+[0m[0m field_to_match {
+                                      [32m+[0m[0m method {}
+                                    }
+
+                                  [32m+[0m[0m text_transformation {
+                                      [32m+[0m[0m priority = 0
+                                      [32m+[0m[0m type     = "NONE"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+          [32m+[0m[0m visibility_config {
+              [32m+[0m[0m cloudwatch_metrics_enabled = true
+              [32m+[0m[0m metric_name                = "inf2006-grp21-fargate-login-rate"
+              [32m+[0m[0m sampled_requests_enabled   = true
+            }
+        }
+
+        [90m# (2 unchanged blocks hidden)[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 1 to change, 0 to destroy.
+[90m
+─────────────────────────────────────────────────────────────────────────────[0m
+
+Saved the plan to: fargate.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "fargate.tfplan"
+
+Plan saved from commit e4bc928. Review it, then: scripts/tf.sh fargate apply
+# exit: 0  end_utc: 2026-10-09T06:49:33Z

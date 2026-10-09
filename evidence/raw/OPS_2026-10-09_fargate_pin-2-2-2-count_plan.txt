@@ -1,0 +1,6 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_pin-2-2-2-count_plan.txt
+# date_utc: 2026-10-09T02:59:07Z
+# commit: 33963c5
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh fargate plan
+STOP: uncommitted changes in src/infrastructure; commit first
+# exit: 1  end_utc: 2026-10-09T02:59:09Z

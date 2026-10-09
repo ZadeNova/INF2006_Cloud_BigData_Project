@@ -1,0 +1,19 @@
+{
+  "variant": "fargate",
+  "hostname": "shop-fargate.fourtytwofactors.me",
+  "image_digest": "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481",
+  "rds_class": "db.t4g.small",
+  "rds_engine_version": "17.9",
+  "rds_multi_az": false,
+  "desired": 1,
+  "task_cpu": "2048",
+  "task_memory_mb": "4096",
+  "min": 1,
+  "max": 1,
+  "waf_login_action": "Count",
+  "waf_login_limit": 20,
+  "export_utc": "2026-10-09T06:45:14.885Z",
+  "window_start_utc": "2026-10-09T06:18:23.999Z",
+  "window_end_utc": "2026-10-09T06:48:26.106Z",
+  "export_warnings": []
+}

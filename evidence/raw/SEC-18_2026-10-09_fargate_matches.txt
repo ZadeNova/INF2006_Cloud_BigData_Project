@@ -1,0 +1,20 @@
+# file: evidence/raw/SEC-18_2026-10-09_fargate_matches.txt
+# date_utc: 2026-10-09T07:11:35Z
+# commit: e4bc928
+# command: insights fields @timestamp, @message | filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | limit 20
+$ aws logs start-query --log-group-name /inf2006-grp21-fargate/app (from 2026-10-09T01:11:14Z to now)
+query: fields @timestamp, @message | filter @message like /(?i)(password|csrftoken|csrfmiddlewaretoken|sessionid|secret_key)/ | limit 20
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 0.0,
+    "recordsScanned": 77326.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 20350145.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 0.0
+  },
+  "results": []
+}
+# exit: 0  end_utc: 2026-10-09T07:11:39Z

@@ -1,0 +1,46 @@
+# file: evidence/raw/SEC-17_2026-10-09_fargate_samples-burst.txt
+# date_utc: 2026-10-09T07:02:56Z
+# commit: e4bc928
+# command: bash /home/nova/evidence-scratch/waf-blocks.sh
+$ aws wafv2 list-web-acls --scope REGIONAL   (select inf2006-grp21-fargate-waf)
+$ aws wafv2 get-sampled-requests --rule-metric-name inf2006-grp21-fargate-login-rate --time-window 2026-10-09T06:50:56Z to 2026-10-09T07:02:56Z --max-items 500 (request headers removed)
+{
+  "PopulationSize": 5,
+  "sampled": 5,
+  "by_action": {
+    "BLOCK": 5
+  },
+  "blocked": [
+    {
+      "Timestamp": "2026-10-09T14:56:29.124000+08:00",
+      "Action": "BLOCK",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:56:34.133000+08:00",
+      "Action": "BLOCK",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:56:19.438000+08:00",
+      "Action": "BLOCK",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:56:24.459000+08:00",
+      "Action": "BLOCK",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:56:38.850000+08:00",
+      "Action": "BLOCK",
+      "Method": "POST",
+      "URI": "/login/"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-09T07:03:00Z

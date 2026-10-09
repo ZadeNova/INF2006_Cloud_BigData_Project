@@ -1,0 +1,331 @@
+# file: evidence/raw/MON-01_2026-10-09_fargate_status-per-5min.txt
+# date_utc: 2026-10-09T07:11:18Z
+# commit: e4bc928
+# command: insights filter ispresent(status) | stats count(*) as requests by status, bin(5m) as window | sort window asc
+$ aws logs start-query --log-group-name /inf2006-grp21-fargate/app (from 2026-10-09T01:11:14Z to now)
+query: filter ispresent(status) | stats count(*) as requests by status, bin(5m) as window | sort window asc
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 77252.0,
+    "recordsScanned": 77326.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 20350145.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 62.0
+  },
+  "results": [
+    {
+      "status": "302",
+      "window": "2026-10-09 02:00:00.000",
+      "requests": "14"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:00:00.000",
+      "requests": "37"
+    },
+    {
+      "status": "404",
+      "window": "2026-10-09 02:00:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:05:00.000",
+      "requests": "43"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:05:00.000",
+      "requests": "18"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 02:15:00.000",
+      "requests": "6"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 02:20:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "404",
+      "window": "2026-10-09 02:25:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:25:00.000",
+      "requests": "45"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:25:00.000",
+      "requests": "12"
+    },
+    {
+      "status": "404",
+      "window": "2026-10-09 02:30:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:30:00.000",
+      "requests": "1484"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:30:00.000",
+      "requests": "439"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:35:00.000",
+      "requests": "1668"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 02:35:00.000",
+      "requests": "4"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:35:00.000",
+      "requests": "406"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 02:40:00.000",
+      "requests": "4"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:40:00.000",
+      "requests": "366"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:40:00.000",
+      "requests": "1664"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:45:00.000",
+      "requests": "271"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 02:45:00.000",
+      "requests": "58"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 02:50:00.000",
+      "requests": "3"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 02:50:00.000",
+      "requests": "8"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 03:10:00.000",
+      "requests": "104"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 03:10:00.000",
+      "requests": "353"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 03:10:00.000",
+      "requests": "4"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 03:15:00.000",
+      "requests": "831"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 03:15:00.000",
+      "requests": "233"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 03:20:00.000",
+      "requests": "836"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 03:20:00.000",
+      "requests": "165"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 03:25:00.000",
+      "requests": "195"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 03:25:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 03:25:00.000",
+      "requests": "833"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 03:30:00.000",
+      "requests": "412"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 03:30:00.000",
+      "requests": "4"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 03:30:00.000",
+      "requests": "111"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 03:50:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 03:55:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 04:00:00.000",
+      "requests": "306"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 04:10:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 04:10:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 04:10:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 04:25:00.000",
+      "requests": "6"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 05:10:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 05:30:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:20:00.000",
+      "requests": "2743"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:20:00.000",
+      "requests": "666"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:25:00.000",
+      "requests": "13025"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:25:00.000",
+      "requests": "3209"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:30:00.000",
+      "requests": "3252"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:30:00.000",
+      "requests": "13042"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:35:00.000",
+      "requests": "3544"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:35:00.000",
+      "requests": "14218"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:40:00.000",
+      "requests": "10039"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 06:40:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:40:00.000",
+      "requests": "2488"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:50:00.000",
+      "requests": "19"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:50:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "200",
+      "window": "2026-10-09 06:55:00.000",
+      "requests": "37"
+    },
+    {
+      "status": "400",
+      "window": "2026-10-09 06:55:00.000",
+      "requests": "2"
+    },
+    {
+      "status": "404",
+      "window": "2026-10-09 06:55:00.000",
+      "requests": "1"
+    },
+    {
+      "status": "302",
+      "window": "2026-10-09 06:55:00.000",
+      "requests": "1"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-09T07:11:21Z

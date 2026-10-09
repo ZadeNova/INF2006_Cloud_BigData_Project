@@ -1,0 +1,141 @@
+# file: evidence/raw/MON-01_2026-10-09_fargate_sample.txt
+# date_utc: 2026-10-09T07:11:14Z
+# commit: e4bc928
+# command: insights fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+$ aws logs start-query --log-group-name /inf2006-grp21-fargate/app (from 2026-10-09T01:11:14Z to now)
+query: fields @timestamp, @logStream, @message | sort @timestamp desc | limit 20
+{
+  "status": "Complete",
+  "statistics": {
+    "recordsMatched": 77329.0,
+    "recordsScanned": 77329.0,
+    "estimatedRecordsSkipped": 0.0,
+    "bytesScanned": 20350455.0,
+    "estimatedBytesSkipped": 0.0,
+    "logGroupsScanned": 1.0,
+    "resultCount": 20.0
+  },
+  "results": [
+    {
+      "@timestamp": "2026-10-09 07:09:46.495",
+      "@logStream": "web/web/d89dc287937d48468897039782377ea3",
+      "@message": "APPLIED. Left: load orders 0 | order lines 0 | cart lines 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWZhcmdhdGUvYXBwHzE3OTE1Mjk3ODkfMTc5MTUyOTc4OTk4NR84MTg1MTkzMDkyNDgzNzg3NjEyHzIfMTc5MTUyOTc4NjQ5NQ=="
+    },
+    {
+      "@timestamp": "2026-10-09 07:09:46.477",
+      "@logStream": "web/web/d89dc287937d48468897039782377ea3",
+      "@message": "accounts: 2200 | load orders: 0 | order lines: 0 | units to put back: 0 | products: 0 | cart lines: 0",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWZhcmdhdGUvYXBwHzE3OTE1Mjk3ODkfMTc5MTUyOTc4OTk4NR84MTg1MTkzMDkyNDgzNzg3NjEyHzEfMTc5MTUyOTc4NjQ3Nw=="
+    },
+    {
+      "@timestamp": "2026-10-09 07:09:46.422",
+      "@logStream": "web/web/d89dc287937d48468897039782377ea3",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "hotstore:MDYxNzQ1NjY2NTY5Oi9pbmYyMDA2LWdycDIxLWZhcmdhdGUvYXBwHzE3OTE1Mjk3ODkfMTc5MTUyOTc4OTk4NR84MTg1MTkzMDkyNDgzNzg3NjEyHzAfMTc5MTUyOTc4NjQyMg=="
+    },
+    {
+      "@timestamp": "2026-10-09 07:06:30.759",
+      "@logStream": "web/web/e3b538eb485044859fdfc6236e276616",
+      "@message": "accounts: 2200 | load orders: 0 | order lines: 0 | units to put back: 0 | products: 0 | cart lines: 0",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcXUZwAAAAEeRfisgAGrIkkEAAABsIgASi3v/D7kTQw57/w+5E0OANAuQJI7RFQqQkQARgB"
+    },
+    {
+      "@timestamp": "2026-10-09 07:06:30.759",
+      "@logStream": "web/web/e3b538eb485044859fdfc6236e276616",
+      "@message": "DRY RUN: nothing was changed. Run again with --apply to do it.",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcXUZwAAAAEeRfisgAGrIkkEAAABsIgASi3v/D7kTQw57/w+5E0OANAuQJI7RFQqQkQAhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 07:06:30.711",
+      "@logStream": "web/web/e3b538eb485044859fdfc6236e276616",
+      "@message": "17 objects imported automatically (use -v 2 for details).",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqcXUZwAAAAEeRfisgAGrIkkEAAABsIgASi3v/D7kTQw57/w+5E0OANAuQJI7RFQqQkQABgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:57:11.518",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:57:11.518+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"87097d0e726742cfb3ca4675e07a8884\",\"method\":\"GET\",\"path\":\"/favicon.ico\",\"status\":400,\"duration_ms\":0.97,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqbrlwYAAAABUCStoQAGrIkCYAAABGIgASjers77kTQw3q7O+5E0OAJA9gRI+RxQxxAQARgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:57:11.518",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:57:11.518+00:00\",\"level\":\"ERROR\",\"logger\":\"django.security.DisallowedHost\",\"message\":\"Django security rejection\",\"status\":400,\"request_id\":\"87097d0e726742cfb3ca4675e07a8884\",\"exception\":\"DisallowedHost\",\"frames\":[\"handlers/exception.py:55 inner\",\"config/middleware.py:32 __call__\",\"http/request.py:203 get_host\"]}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqbrlwYAAAABUCStoQAGrIkCYAAABGIgASjers77kTQw3q7O+5E0OAJA9gRI+RxQxxAQABgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:39.816",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:39.816+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"ea12935002fb4b8dbbce5ff488c1d7d0\",\"method\":\"GET\",\"path\":\"/products/\",\"status\":200,\"duration_ms\":41.71,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqpcZKYAAAAAKKOTxgAGrIj+EAAABmIgASj1hcn7kTQwiLfM+5E0OANAkwZIhhlQnQ4QAhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:37.985",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:37.985+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"3ec7c8f1fb51454693e0f9146ca3bb68\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.1,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQCRgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:33.014",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:33.014+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"7e116d52e1e84fd58fffc0a451950848\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.07,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqerKEQAGrIkBkAAABfIgASiT3cv7kTQw9oHM+5E0OAJAiARI/BdQkw0QARgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:28.307",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:28.306+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"19ff447da72a4fff837c8c82c08faaf5\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.08,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqd3VB8AAAAAqerKEQAGrIkBkAAABfIgASiT3cv7kTQw9oHM+5E0OAJAiARI/BdQkw0QABgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:23.409",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:23.409+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"4c209b691d7248659d0d29170cfa338f\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.19,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQCBgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:18.635",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:18.635+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"6d51ce14da2b4ada99e9566a0e1894c9\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.15,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqpcZKYAAAAAKKOTxgAGrIj+EAAABmIgASj1hcn7kTQwiLfM+5E0OANAkwZIhhlQnQ4QARgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:14.774",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:14.774+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"1ddec1857e8549448a0b7706bb723408\",\"method\":\"POST\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":241.28,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQBxgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:13.663",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:13.663+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"0e3be92c01be4009af298074e570a186\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.1,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQBhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:09.618",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:09.618+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"9bed57f4b45c4a16af1fb2d618c9aa44\",\"method\":\"POST\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":244.11,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqbrlwYAAAABUCQPXwAGrIj70AAABGIgASjDj8b7kTQwksvK+5E0OARAlghIvxlQ1g4QAxgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:08.545",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:08.545+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"52b20fc009e34de088e29fc54ce0ec63\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.12,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqbrlwYAAAABUCQPXwAGrIj70AAABGIgASjDj8b7kTQwksvK+5E0OARAlghIvxlQ1g4QAhgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:04.701",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:04.701+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"769d58063ec34b39a5908a5bfa5db1c0\",\"method\":\"POST\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":243.54,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQBRgB"
+    },
+    {
+      "@timestamp": "2026-10-09 06:56:03.675",
+      "@logStream": "web/web/460c4d2589f7406bbbf0cc9054484151",
+      "@message": "{\"ts\":\"2026-10-09T06:56:03.675+00:00\",\"level\":\"INFO\",\"logger\":\"northstar.request\",\"message\":\"request\",\"request_id\":\"8161e3c85a274059a8ce87982431260e\",\"method\":\"GET\",\"path\":\"/login/\",\"status\":200,\"duration_ms\":2.05,\"user_id\":null}",
+      "@ptr": "CqoBCnEKJzA2MTc0NTY2NjU2OTovaW5mMjAwNi1ncnAyMS1mYXJnYXRlL2FwcBAAGiRmZWJlNDQ5Mi1hMzE2LTQ4ZDEtOWYyZi0wMzVkZjY0Yjk4ZDkiDgjWqv/ykTQQt+yB/JE0OIedm7KNNEDWqv/ykTRIABI1GhgCBqxS5W4AAAAAzE94hwAGrIj9sAAABOIgASj9o8n7kTQw4ajM+5E0OApAshRIwB1Q1hIQBBgB"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-09T07:11:17Z

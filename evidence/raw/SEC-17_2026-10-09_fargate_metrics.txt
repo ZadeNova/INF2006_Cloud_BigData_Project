@@ -1,0 +1,75 @@
+# file: evidence/raw/SEC-17_2026-10-09_fargate_metrics.txt
+# date_utc: 2026-10-09T06:59:40Z
+# commit: e4bc928
+# command: waf_metrics
+$ aws cloudwatch get-metric-statistics --namespace AWS/WAFV2 --metric-name BlockedRequests --dimensions Name=WebACL,Value=inf2006-grp21-fargate-waf Name=Rule,Value=inf2006-grp21-fargate-login-rate Name=Region,Value=us-east-1 --start-time 2026-10-09T06:29:40Z --end-time 2026-10-09T06:59:40Z --period 60 --statistics Sum --query sort_by(Datapoints,&Timestamp)[].{time:Timestamp,sum:Sum}
+[
+    {
+        "time": "2026-10-09T14:56:00+08:00",
+        "sum": 5.0
+    }
+]
+$ aws cloudwatch get-metric-statistics --namespace AWS/WAFV2 --metric-name CountedRequests --dimensions Name=WebACL,Value=inf2006-grp21-fargate-waf Name=Rule,Value=inf2006-grp21-fargate-login-rate Name=Region,Value=us-east-1 --start-time 2026-10-09T06:29:42Z --end-time 2026-10-09T06:59:42Z --period 60 --statistics Sum --query sort_by(Datapoints,&Timestamp)[].{time:Timestamp,sum:Sum}
+[
+    {
+        "time": "2026-10-09T14:29:00+08:00",
+        "sum": 55.0
+    },
+    {
+        "time": "2026-10-09T14:30:00+08:00",
+        "sum": 54.0
+    },
+    {
+        "time": "2026-10-09T14:31:00+08:00",
+        "sum": 49.0
+    },
+    {
+        "time": "2026-10-09T14:32:00+08:00",
+        "sum": 57.0
+    },
+    {
+        "time": "2026-10-09T14:33:00+08:00",
+        "sum": 56.0
+    },
+    {
+        "time": "2026-10-09T14:34:00+08:00",
+        "sum": 57.0
+    },
+    {
+        "time": "2026-10-09T14:35:00+08:00",
+        "sum": 53.0
+    },
+    {
+        "time": "2026-10-09T14:36:00+08:00",
+        "sum": 52.0
+    },
+    {
+        "time": "2026-10-09T14:37:00+08:00",
+        "sum": 56.0
+    },
+    {
+        "time": "2026-10-09T14:38:00+08:00",
+        "sum": 50.0
+    },
+    {
+        "time": "2026-10-09T14:39:00+08:00",
+        "sum": 48.0
+    },
+    {
+        "time": "2026-10-09T14:40:00+08:00",
+        "sum": 53.0
+    },
+    {
+        "time": "2026-10-09T14:41:00+08:00",
+        "sum": 65.0
+    },
+    {
+        "time": "2026-10-09T14:42:00+08:00",
+        "sum": 41.0
+    },
+    {
+        "time": "2026-10-09T14:43:00+08:00",
+        "sum": 15.0
+    }
+]
+# exit: 0  end_utc: 2026-10-09T06:59:43Z

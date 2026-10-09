@@ -1,0 +1,13 @@
+# file: evidence/raw/SEC-11_2026-10-09_fargate_app-check.txt
+# date_utc: 2026-10-09T02:03:22Z
+# commit: 33963c5
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/jobs.sh fargate check
+Cluster: inf2006-grp21-fargate-cluster
+
+== check_database ==
+Task 764fa3e7cf1843eb93efc78393dbb197 started; waiting for it to finish (a minute or two) ...
+{"database": "ok", "migrations": "applied"}
+check_database: ok
+
+Done: check
+# exit: 0  end_utc: 2026-10-09T02:04:30Z

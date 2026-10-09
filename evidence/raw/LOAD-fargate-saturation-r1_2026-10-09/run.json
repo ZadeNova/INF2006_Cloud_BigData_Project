@@ -1,0 +1,161 @@
+{
+  "run_id": "LOAD-fargate-saturation-r1_2026-10-09",
+  "type": "saturation",
+  "variant": "fargate",
+  "level": null,
+  "repeat": 1,
+  "seed": 42,
+  "harness_version": "1.0.0",
+  "locust_version": "2.46.6",
+  "python": "3.12.14",
+  "git_commit": "81c0e2ae46f73fb01081cb4f107e784948b68732",
+  "git_dirty_harness": true,
+  "command_line": "run.py saturation --variant fargate --base-url https://shop-fargate.fourtytwofactors.me --repeat 1 --location us-east-1",
+  "locust_command": "/home/ssm-user/inf2006/tests/load/.venv/bin/python -m locust -f /home/ssm-user/inf2006/tests/load/locustfile.py --headless --host https://shop-fargate.fourtytwofactors.me --csv /home/ssm-user/inf2006/tests/load/out/LOAD-fargate-saturation-r1_2026-10-09/locust --csv-full-history --html /home/ssm-user/inf2006/tests/load/out/LOAD-fargate-saturation-r1_2026-10-09/report.html --exit-code-on-error 0 --processes 2",
+  "base_url": "https://shop-fargate.fourtytwofactors.me",
+  "generator": {
+    "location": "us-east-1",
+    "instance_type": "c5.large",
+    "clock_offset_ms": 0.0
+  },
+  "plan": {
+    "think": 0,
+    "mix": {
+      "shopper": 0.9,
+      "abandoner": 0.075,
+      "buyer": 0.025
+    },
+    "sequence": null,
+    "stages": [
+      {
+        "duration": 120,
+        "users": 1,
+        "spawn_rate": 10
+      },
+      {
+        "duration": 120,
+        "users": 2,
+        "spawn_rate": 10
+      },
+      {
+        "duration": 120,
+        "users": 4,
+        "spawn_rate": 10
+      },
+      {
+        "duration": 120,
+        "users": 8,
+        "spawn_rate": 10
+      },
+      {
+        "duration": 120,
+        "users": 16,
+        "spawn_rate": 16
+      },
+      {
+        "duration": 120,
+        "users": 32,
+        "spawn_rate": 32
+      },
+      {
+        "duration": 120,
+        "users": 64,
+        "spawn_rate": 64
+      },
+      {
+        "duration": 120,
+        "users": 128,
+        "spawn_rate": 128
+      },
+      {
+        "duration": 120,
+        "users": 256,
+        "spawn_rate": 256
+      },
+      {
+        "duration": 120,
+        "users": 512,
+        "spawn_rate": 512
+      }
+    ],
+    "windows": [
+      {
+        "label": "u1",
+        "start": 30,
+        "end": 120,
+        "users": 1
+      },
+      {
+        "label": "u2",
+        "start": 150,
+        "end": 240,
+        "users": 2
+      },
+      {
+        "label": "u4",
+        "start": 270,
+        "end": 360,
+        "users": 4
+      },
+      {
+        "label": "u8",
+        "start": 390,
+        "end": 480,
+        "users": 8
+      },
+      {
+        "label": "u16",
+        "start": 510,
+        "end": 600,
+        "users": 16
+      },
+      {
+        "label": "u32",
+        "start": 630,
+        "end": 720,
+        "users": 32
+      },
+      {
+        "label": "u64",
+        "start": 750,
+        "end": 840,
+        "users": 64
+      },
+      {
+        "label": "u128",
+        "start": 870,
+        "end": 960,
+        "users": 128
+      },
+      {
+        "label": "u256",
+        "start": 990,
+        "end": 1080,
+        "users": 256
+      },
+      {
+        "label": "u512",
+        "start": 1110,
+        "end": 1200,
+        "users": 512
+      }
+    ],
+    "markers": {},
+    "abort": {
+      "after": 60,
+      "window": 60,
+      "err": 0.2,
+      "p95_ms": 10000
+    },
+    "units": 1,
+    "warmup_s": 120,
+    "processes": 2
+  },
+  "planned_seconds": 1200,
+  "started_utc": "2026-10-09T06:23:23.999Z",
+  "ended_utc": "2026-10-09T06:43:26.106Z",
+  "exit_code": 0,
+  "aborted": false,
+  "abort_reason": null,
+  "wall_seconds": 1204.5
+}

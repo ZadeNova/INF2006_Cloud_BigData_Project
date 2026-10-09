@@ -1,0 +1,12 @@
+[
+  {
+    "Timestamp": "2026-10-09T02:03:11.154Z",
+    "AlarmName": "inf2006-grp21-fargate-no-healthy-hosts",
+    "HistorySummary": "Alarm updated from ALARM to OK"
+  },
+  {
+    "Timestamp": "2026-10-09T02:03:20.719Z",
+    "AlarmName": "TargetTracking-service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service-AlarmHigh-733b1b74-562c-42e9-8516-dc529e5819ea",
+    "HistorySummary": "Alarm updated from INSUFFICIENT_DATA to OK"
+  }
+]

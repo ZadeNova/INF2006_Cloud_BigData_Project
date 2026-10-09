@@ -1,0 +1,11 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_reset-dry_rerun.txt
+# date_utc: 2026-10-09T07:06:03Z
+# commit: e4bc928
+# command: bash -c cd tests/load && .venv/bin/python reset_state.py --target fargate
+DRY RUN on fargate, accounts 'loadtest-*'
+
+Running a one-off task in cluster inf2006-grp21-fargate-cluster (a minute or two) ...
+17 objects imported automatically (use -v 2 for details).
+accounts: 2200 | load orders: 0 | order lines: 0 | units to put back: 0 | products: 0 | cart lines: 0
+DRY RUN: nothing was changed. Run again with --apply to do it.
+# exit: 0  end_utc: 2026-10-09T07:07:05Z

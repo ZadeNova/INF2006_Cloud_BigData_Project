@@ -1,0 +1,63 @@
+# file: evidence/raw/SEC-09_2026-10-09_fargate_security-groups.txt
+# date_utc: 2026-10-09T02:02:59Z
+# commit: 33963c5
+# command: sec09_security_groups
+alb=sg-023baa0b88cf46edd  app=sg-0604681cf6bb68d4c  db=sg-03abb4562e4857842
+$ aws ec2 describe-security-groups --group-ids sg-023baa0b88cf46edd sg-0604681cf6bb68d4c sg-03abb4562e4857842 --query SecurityGroups[].{name:GroupName,id:GroupId,inbound:IpPermissions[].{from_port:FromPort,to_port:ToPort,protocol:IpProtocol,cidr:IpRanges[].CidrIp,from_groups:UserIdGroupPairs[].GroupId}}
+[
+    {
+        "name": "inf2006-grp21-fargate-sg-alb",
+        "id": "sg-023baa0b88cf46edd",
+        "inbound": [
+            {
+                "from_port": 80,
+                "to_port": 80,
+                "protocol": "tcp",
+                "cidr": [
+                    "0.0.0.0/0"
+                ],
+                "from_groups": []
+            },
+            {
+                "from_port": 443,
+                "to_port": 443,
+                "protocol": "tcp",
+                "cidr": [
+                    "0.0.0.0/0"
+                ],
+                "from_groups": []
+            }
+        ]
+    },
+    {
+        "name": "inf2006-grp21-sg-db",
+        "id": "sg-03abb4562e4857842",
+        "inbound": [
+            {
+                "from_port": 5432,
+                "to_port": 5432,
+                "protocol": "tcp",
+                "cidr": [],
+                "from_groups": [
+                    "sg-0604681cf6bb68d4c"
+                ]
+            }
+        ]
+    },
+    {
+        "name": "inf2006-grp21-fargate-sg-app",
+        "id": "sg-0604681cf6bb68d4c",
+        "inbound": [
+            {
+                "from_port": 8000,
+                "to_port": 8000,
+                "protocol": "tcp",
+                "cidr": [],
+                "from_groups": [
+                    "sg-023baa0b88cf46edd"
+                ]
+            }
+        ]
+    }
+]
+# exit: 0  end_utc: 2026-10-09T02:03:03Z

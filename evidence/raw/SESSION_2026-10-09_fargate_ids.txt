@@ -1,0 +1,30 @@
+# file: evidence/raw/SESSION_2026-10-09_fargate_ids.txt
+# date_utc: 2026-10-09T02:02:43Z
+# commit: 33963c5
+# command: ids
+$ terraform -chdir=/home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/fargate output
+alb_dns_name = "inf2006-grp21-fargate-alb-2048941486.us-east-1.elb.amazonaws.com"
+cluster_name = "inf2006-grp21-fargate-cluster"
+hostname = "shop-fargate.fourtytwofactors.me"
+image_digest = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481"
+log_group_name = "/inf2006-grp21-fargate/app"
+security_group_ids = {
+  "alb" = "sg-023baa0b88cf46edd"
+  "app" = "sg-0604681cf6bb68d4c"
+}
+service_name = "inf2006-grp21-fargate-service"
+subnet_ids = [
+  "subnet-00a90504457c9cd4e",
+  "subnet-0455388ee1b027306",
+]
+target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2"
+task_definition_arn = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app:1"
+web_acl_name = "inf2006-grp21-fargate-waf"
+$ aws elbv2 describe-target-groups --target-group-arns arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2 --query TargetGroups[0].{target_group:TargetGroupArn,load_balancers:LoadBalancerArns}
+{
+    "target_group": "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2",
+    "load_balancers": [
+        "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a"
+    ]
+}
+# exit: 0  end_utc: 2026-10-09T02:02:47Z

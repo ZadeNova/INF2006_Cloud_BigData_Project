@@ -1,0 +1,1183 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_down.txt
+# date_utc: 2026-10-09T07:14:26Z
+# commit: e4bc928
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/down.sh fargate
+[0m[1mdata.terraform_remote_state.base: Reading...[0m[0m
+[0m[1mdata.terraform_remote_state.base: Read complete after 0s[0m
+[0m[1mdata.aws_iam_role.lab: Reading...[0m[0m
+[0m[1mdata.aws_ecr_image.app: Reading...[0m[0m
+[0m[1maws_ecs_cluster.app: Refreshing state... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Refreshing state... [id=/inf2006-grp21-fargate/app][0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Refreshing state... [id=sg-023baa0b88cf46edd][0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2][0m
+[0m[1mmodule.web_entry.aws_security_group.app: Refreshing state... [id=sg-0604681cf6bb68d4c][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Refreshing state... [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m
+[0m[1mdata.aws_iam_role.lab: Read complete after 1s [id=LabRole][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Refreshing state... [id=sgr-0fe0da13e06e924a2][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Refreshing state... [id=sgr-0b138355d6bc3bfa4][0m
+[0m[1mmodule.web_entry.aws_lb.app: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Refreshing state... [id=f3571ada-ac5c-437f-8044-1a7d67ce3f6b][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Refreshing state... [id=f74ca6df-882a-4868-addb-214bdecb7f45][0m
+[0m[1mdata.aws_ecr_image.app: Read complete after 1s [id=sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481][0m
+[0m[1maws_ecs_task_definition.app: Refreshing state... [id=inf2006-grp21-fargate-app][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Refreshing state... [id=sgr-0417ca4b723d98bd0][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Refreshing state... [id=sgr-0dab8f7876da722a7][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Refreshing state... [id=sgr-0e8861fbc3b0aab6e][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Refreshing state... [id=sgr-0ec772b46b7119907][0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Refreshing state... [id=sgr-09bc8c90a74360d26][0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Refreshing state... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A][0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/fce661f7b9af3ae6][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Refreshing state... [id=inf2006-grp21-fargate-unhealthy-hosts][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Refreshing state... [id=inf2006-grp21-fargate-no-healthy-hosts][0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Refreshing state... [id=inf2006-grp21-fargate-target-5xx][0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Refreshing state... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/ee558c39805dab92][0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Refreshing state... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m
+[0m[1maws_ecs_service.app: Refreshing state... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m
+[0m[1maws_appautoscaling_target.app: Refreshing state... [id=service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m
+[0m[1maws_appautoscaling_policy.requests: Refreshing state... [id=inf2006-grp21-fargate-requests-per-target][0m
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  [31m-[0m destroy[0m
+
+Terraform will perform the following actions:
+
+[1m  # aws_appautoscaling_policy.requests[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_appautoscaling_policy" "requests" {
+      [31m-[0m[0m alarm_arns         = [
+          [31m-[0m[0m "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:TargetTracking-service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service-AlarmHigh-733b1b74-562c-42e9-8516-dc529e5819ea",
+          [31m-[0m[0m "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:TargetTracking-service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service-AlarmLow-f001eb75-82f0-43bc-9e02-e9723903eb8e",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m arn                = "arn:aws:autoscaling:us-east-1:<ACCOUNT>:scalingPolicy:6629d1a9-5a68-48e0-b982-9213c8393b3a:resource/ecs/service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service:policyName/inf2006-grp21-fargate-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m id                 = "inf2006-grp21-fargate-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m name               = "inf2006-grp21-fargate-requests-per-target" [90m-> null[0m[0m
+      [31m-[0m[0m policy_type        = "TargetTrackingScaling" [90m-> null[0m[0m
+      [31m-[0m[0m region             = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m resource_id        = "service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m scalable_dimension = "ecs:service:DesiredCount" [90m-> null[0m[0m
+      [31m-[0m[0m service_namespace  = "ecs" [90m-> null[0m[0m
+
+      [31m-[0m[0m target_tracking_scaling_policy_configuration {
+          [31m-[0m[0m disable_scale_in   = false [90m-> null[0m[0m
+          [31m-[0m[0m scale_in_cooldown  = 300 [90m-> null[0m[0m
+          [31m-[0m[0m scale_out_cooldown = 300 [90m-> null[0m[0m
+          [31m-[0m[0m target_value       = 300 [90m-> null[0m[0m
+
+          [31m-[0m[0m predefined_metric_specification {
+              [31m-[0m[0m predefined_metric_type = "ALBRequestCountPerTarget" [90m-> null[0m[0m
+              [31m-[0m[0m resource_label         = "app/inf2006-grp21-fargate-alb/d6176765f700338a/targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+            }
+        }
+    }
+
+[1m  # aws_appautoscaling_target.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_appautoscaling_target" "app" {
+      [31m-[0m[0m arn                = "arn:aws:application-autoscaling:us-east-1:<ACCOUNT>:scalable-target/0ec56629d1a95a6848e0b9829213c8393b3a" [90m-> null[0m[0m
+      [31m-[0m[0m id                 = "service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m max_capacity       = 1 [90m-> null[0m[0m
+      [31m-[0m[0m min_capacity       = 1 [90m-> null[0m[0m
+      [31m-[0m[0m region             = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m resource_id        = "service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m role_arn           = "arn:aws:iam::<ACCOUNT>:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService" [90m-> null[0m[0m
+      [31m-[0m[0m scalable_dimension = "ecs:service:DesiredCount" [90m-> null[0m[0m
+      [31m-[0m[0m service_namespace  = "ecs" [90m-> null[0m[0m
+      [31m-[0m[0m tags               = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all           = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+
+      [31m-[0m[0m suspended_state {
+          [31m-[0m[0m dynamic_scaling_in_suspended  = false [90m-> null[0m[0m
+          [31m-[0m[0m dynamic_scaling_out_suspended = false [90m-> null[0m[0m
+          [31m-[0m[0m scheduled_scaling_suspended   = false [90m-> null[0m[0m
+        }
+    }
+
+[1m  # aws_ecs_cluster.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_ecs_cluster" "app" {
+      [31m-[0m[0m arn      = "arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster" [90m-> null[0m[0m
+      [31m-[0m[0m id       = "arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster" [90m-> null[0m[0m
+      [31m-[0m[0m name     = "inf2006-grp21-fargate-cluster" [90m-> null[0m[0m
+      [31m-[0m[0m region   = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m tags     = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-cluster"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-cluster"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+
+      [31m-[0m[0m setting {
+          [31m-[0m[0m name  = "containerInsights" [90m-> null[0m[0m
+          [31m-[0m[0m value = "disabled" [90m-> null[0m[0m
+        }
+    }
+
+[1m  # aws_ecs_service.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_ecs_service" "app" {
+      [31m-[0m[0m arn                                = "arn:aws:ecs:us-east-1:<ACCOUNT>:service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m availability_zone_rebalancing      = "ENABLED" [90m-> null[0m[0m
+      [31m-[0m[0m cluster                            = "arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster" [90m-> null[0m[0m
+      [31m-[0m[0m deployment_maximum_percent         = 200 [90m-> null[0m[0m
+      [31m-[0m[0m deployment_minimum_healthy_percent = 100 [90m-> null[0m[0m
+      [31m-[0m[0m desired_count                      = 1 [90m-> null[0m[0m
+      [31m-[0m[0m enable_ecs_managed_tags            = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_execute_command             = false [90m-> null[0m[0m
+      [31m-[0m[0m health_check_grace_period_seconds  = 120 [90m-> null[0m[0m
+      [31m-[0m[0m iam_role                           = "/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS" [90m-> null[0m[0m
+      [31m-[0m[0m id                                 = "arn:aws:ecs:us-east-1:<ACCOUNT>:service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m launch_type                        = "FARGATE" [90m-> null[0m[0m
+      [31m-[0m[0m name                               = "inf2006-grp21-fargate-service" [90m-> null[0m[0m
+      [31m-[0m[0m platform_version                   = "LATEST" [90m-> null[0m[0m
+      [31m-[0m[0m propagate_tags                     = "NONE" [90m-> null[0m[0m
+      [31m-[0m[0m region                             = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m scheduling_strategy                = "REPLICA" [90m-> null[0m[0m
+      [31m-[0m[0m tags                               = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-service"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                           = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-service"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m task_definition                    = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app:1" [90m-> null[0m[0m
+      [31m-[0m[0m triggers                           = {} [90m-> null[0m[0m
+      [31m-[0m[0m wait_for_steady_state              = true [90m-> null[0m[0m
+
+      [31m-[0m[0m deployment_circuit_breaker {
+          [31m-[0m[0m enable   = true [90m-> null[0m[0m
+          [31m-[0m[0m rollback = true [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m deployment_configuration {
+          [31m-[0m[0m bake_time_in_minutes = "0" [90m-> null[0m[0m
+          [31m-[0m[0m strategy             = "ROLLING" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m deployment_controller {
+          [31m-[0m[0m type = "ECS" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m load_balancer {
+          [31m-[0m[0m container_name   = "web" [90m-> null[0m[0m
+          [31m-[0m[0m container_port   = 8000 [90m-> null[0m[0m
+          [31m-[0m[0m target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+            [90m# (1 unchanged attribute hidden)[0m[0m
+        }
+
+      [31m-[0m[0m network_configuration {
+          [31m-[0m[0m assign_public_ip = true [90m-> null[0m[0m
+          [31m-[0m[0m security_groups  = [
+              [31m-[0m[0m "sg-0604681cf6bb68d4c",
+            ] [90m-> null[0m[0m
+          [31m-[0m[0m subnets          = [
+              [31m-[0m[0m "subnet-00a90504457c9cd4e",
+              [31m-[0m[0m "subnet-0455388ee1b027306",
+            ] [90m-> null[0m[0m
+        }
+    }
+
+[1m  # aws_ecs_task_definition.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_ecs_task_definition" "app" {
+      [31m-[0m[0m arn                      = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app:1" [90m-> null[0m[0m
+      [31m-[0m[0m arn_without_revision     = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app" [90m-> null[0m[0m
+      [31m-[0m[0m container_definitions    = jsonencode(
+            [
+              [31m-[0m[0m {
+                  [31m-[0m[0m command          = [
+                      [31m-[0m[0m "sh",
+                      [31m-[0m[0m "-c",
+                      [31m-[0m[0m <<-EOT
+                            set -eu
+                            IP=$(python -c 'import json, os, urllib.request as u; print(json.load(u.urlopen(os.environ["ECS_CONTAINER_METADATA_URI_V4"], timeout=5))["Networks"][0]["IPv4Addresses"][0])')
+                            export DJANGO_HEALTH_PROBE_HOST="$IP:8000"
+                            exec gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 30 --error-logfile - --no-control-socket
+                        EOT,
+                    ]
+                  [31m-[0m[0m environment      = [
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "APP_RELEASE_ID"
+                          [31m-[0m[0m value = "release-c19d547"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "AWS_REGION"
+                          [31m-[0m[0m value = "us-east-1"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "AWS_SECRET_ID"
+                          [31m-[0m[0m value = "inf2006-grp21/web"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "DJANGO_ALLOWED_HOSTS"
+                          [31m-[0m[0m value = "shop-fargate.fourtytwofactors.me"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "DJANGO_CSRF_TRUSTED_ORIGINS"
+                          [31m-[0m[0m value = "https://shop-fargate.fourtytwofactors.me"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "DJANGO_ENV"
+                          [31m-[0m[0m value = "production"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "DJANGO_HSTS_SECONDS"
+                          [31m-[0m[0m value = "3600"
+                        },
+                      [31m-[0m[0m {
+                          [31m-[0m[0m name  = "DJANGO_TRUST_PROXY"
+                          [31m-[0m[0m value = "true"
+                        },
+                    ]
+                  [31m-[0m[0m essential        = true
+                  [31m-[0m[0m image            = "<ACCOUNT>.dkr.ecr.us-east-1.amazonaws.com/inf2006-grp21-app@sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481"
+                  [31m-[0m[0m logConfiguration = {
+                      [31m-[0m[0m logDriver = "awslogs"
+                      [31m-[0m[0m options   = {
+                          [31m-[0m[0m awslogs-group         = "/inf2006-grp21-fargate/app"
+                          [31m-[0m[0m awslogs-region        = "us-east-1"
+                          [31m-[0m[0m awslogs-stream-prefix = "web"
+                          [31m-[0m[0m mode                  = "blocking"
+                        }
+                    }
+                  [31m-[0m[0m mountPoints      = []
+                  [31m-[0m[0m name             = "web"
+                  [31m-[0m[0m portMappings     = [
+                      [31m-[0m[0m {
+                          [31m-[0m[0m containerPort = 8000
+                          [31m-[0m[0m hostPort      = 8000
+                          [31m-[0m[0m protocol      = "tcp"
+                        },
+                    ]
+                  [31m-[0m[0m stopTimeout      = 30
+                  [31m-[0m[0m systemControls   = []
+                  [31m-[0m[0m volumesFrom      = []
+                },
+            ]
+        ) [90m-> null[0m[0m
+      [31m-[0m[0m cpu                      = "2048" [90m-> null[0m[0m
+      [31m-[0m[0m enable_fault_injection   = false [90m-> null[0m[0m
+      [31m-[0m[0m execution_role_arn       = "arn:aws:iam::<ACCOUNT>:role/LabRole" [90m-> null[0m[0m
+      [31m-[0m[0m family                   = "inf2006-grp21-fargate-app" [90m-> null[0m[0m
+      [31m-[0m[0m id                       = "inf2006-grp21-fargate-app" [90m-> null[0m[0m
+      [31m-[0m[0m memory                   = "4096" [90m-> null[0m[0m
+      [31m-[0m[0m network_mode             = "awsvpc" [90m-> null[0m[0m
+      [31m-[0m[0m region                   = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m requires_compatibilities = [
+          [31m-[0m[0m "FARGATE",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m revision                 = 1 [90m-> null[0m[0m
+      [31m-[0m[0m skip_destroy             = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                     = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-app"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                 = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-app"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m task_role_arn            = "arn:aws:iam::<ACCOUNT>:role/LabRole" [90m-> null[0m[0m
+      [31m-[0m[0m track_latest             = false [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m runtime_platform {
+          [31m-[0m[0m cpu_architecture        = "X86_64" [90m-> null[0m[0m
+          [31m-[0m[0m operating_system_family = "LINUX" [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_log_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_log_group" "app" {
+      [31m-[0m[0m arn                         = "arn:aws:logs:us-east-1:<ACCOUNT>:log-group:/inf2006-grp21-fargate/app" [90m-> null[0m[0m
+      [31m-[0m[0m deletion_protection_enabled = false [90m-> null[0m[0m
+      [31m-[0m[0m id                          = "/inf2006-grp21-fargate/app" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_class             = "STANDARD" [90m-> null[0m[0m
+      [31m-[0m[0m name                        = "/inf2006-grp21-fargate/app" [90m-> null[0m[0m
+      [31m-[0m[0m region                      = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m retention_in_days           = 7 [90m-> null[0m[0m
+      [31m-[0m[0m skip_destroy                = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                        = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-log-app"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                    = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-log-app"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "no_healthy_hosts" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "No healthy target behind the load balancer for 2 minutes: the shop is down" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-fargate-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-fargate-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "LessThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-fargate-alb/d6176765f700338a"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-fargate-no-healthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "HealthyHostCount" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Minimum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 1 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "breaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.target_5xx[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "target_5xx" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "The app returned more than 5 server errors in a minute, twice running" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-fargate-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-fargate-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "GreaterThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-fargate-alb/d6176765f700338a"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-fargate-target-5xx" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "HTTPCode_Target_5XX_Count" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Sum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 5 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "notBreaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_metric_alarm" "unhealthy_hosts" {
+      [31m-[0m[0m actions_enabled                       = true [90m-> null[0m[0m
+      [31m-[0m[0m alarm_actions                         = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m alarm_description                     = "At least one target has failed its /health/ check for 2 minutes" [90m-> null[0m[0m
+      [31m-[0m[0m alarm_name                            = "inf2006-grp21-fargate-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m arn                                   = "arn:aws:cloudwatch:us-east-1:<ACCOUNT>:alarm:inf2006-grp21-fargate-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m comparison_operator                   = "GreaterThanThreshold" [90m-> null[0m[0m
+      [31m-[0m[0m datapoints_to_alarm                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m dimensions                            = {
+          [31m-[0m[0m "LoadBalancer" = "app/inf2006-grp21-fargate-alb/d6176765f700338a"
+          [31m-[0m[0m "TargetGroup"  = "targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_interval                   = 0 [90m-> null[0m[0m
+      [31m-[0m[0m evaluation_periods                    = 2 [90m-> null[0m[0m
+      [31m-[0m[0m id                                    = "inf2006-grp21-fargate-unhealthy-hosts" [90m-> null[0m[0m
+      [31m-[0m[0m insufficient_data_actions             = [] [90m-> null[0m[0m
+      [31m-[0m[0m metric_name                           = "UnHealthyHostCount" [90m-> null[0m[0m
+      [31m-[0m[0m namespace                             = "AWS/ApplicationELB" [90m-> null[0m[0m
+      [31m-[0m[0m ok_actions                            = [
+          [31m-[0m[0m "arn:aws:sns:us-east-1:<ACCOUNT>:inf2006-grp21-alarms",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m period                                = 60 [90m-> null[0m[0m
+      [31m-[0m[0m region                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m statistic                             = "Maximum" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m threshold                             = 0 [90m-> null[0m[0m
+      [31m-[0m[0m treat_missing_data                    = "notBreaching" [90m-> null[0m[0m
+        [90m# (4 unchanged attributes hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_query_definition.problems_per_minute[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_query_definition" "problems_per_minute" {
+      [31m-[0m[0m arn                 = "arn:aws:logs:us-east-1:<ACCOUNT>:query-definition:f3571ada-ac5c-437f-8044-1a7d67ce3f6b" [90m-> null[0m[0m
+      [31m-[0m[0m id                  = "f3571ada-ac5c-437f-8044-1a7d67ce3f6b" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_names     = [
+          [31m-[0m[0m "/inf2006-grp21-fargate/app",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                = "inf2006-grp21-fargate/errors-and-warnings-per-minute" [90m-> null[0m[0m
+      [31m-[0m[0m query_definition_id = "f3571ada-ac5c-437f-8044-1a7d67ce3f6b" [90m-> null[0m[0m
+      [31m-[0m[0m query_string        = <<-EOT
+            filter level in ["ERROR", "WARNING"]
+            | stats count(*) as events by bin(1m), level
+            | sort bin(1m) desc
+        EOT [90m-> null[0m[0m
+      [31m-[0m[0m region              = "us-east-1" [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_cloudwatch_query_definition.recent_problems[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_cloudwatch_query_definition" "recent_problems" {
+      [31m-[0m[0m arn                 = "arn:aws:logs:us-east-1:<ACCOUNT>:query-definition:f74ca6df-882a-4868-addb-214bdecb7f45" [90m-> null[0m[0m
+      [31m-[0m[0m id                  = "f74ca6df-882a-4868-addb-214bdecb7f45" [90m-> null[0m[0m
+      [31m-[0m[0m log_group_names     = [
+          [31m-[0m[0m "/inf2006-grp21-fargate/app",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                = "inf2006-grp21-fargate/recent-errors-and-security-warnings" [90m-> null[0m[0m
+      [31m-[0m[0m query_definition_id = "f74ca6df-882a-4868-addb-214bdecb7f45" [90m-> null[0m[0m
+      [31m-[0m[0m query_string        = <<-EOT
+            fields @timestamp, level, logger, status, request_id, message
+            | filter level in ["ERROR", "WARNING"]
+            | sort @timestamp desc
+            | limit 50
+        EOT [90m-> null[0m[0m
+      [31m-[0m[0m region              = "us-east-1" [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_lb.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb" "app" {
+      [31m-[0m[0m arn                                                          = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m arn_suffix                                                   = "app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m client_keep_alive                                            = 3600 [90m-> null[0m[0m
+      [31m-[0m[0m desync_mitigation_mode                                       = "defensive" [90m-> null[0m[0m
+      [31m-[0m[0m dns_name                                                     = "inf2006-grp21-fargate-alb-2048941486.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+      [31m-[0m[0m drop_invalid_header_fields                                   = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_cross_zone_load_balancing                             = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_deletion_protection                                   = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_http2                                                 = true [90m-> null[0m[0m
+      [31m-[0m[0m enable_prefix_for_ipv6_source_nat                            = "off" [90m-> null[0m[0m
+      [31m-[0m[0m enable_tls_version_and_cipher_suite_headers                  = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_waf_fail_open                                         = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_xff_client_port                                       = false [90m-> null[0m[0m
+      [31m-[0m[0m enable_zonal_shift                                           = false [90m-> null[0m[0m
+      [31m-[0m[0m id                                                           = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m idle_timeout                                                 = 60 [90m-> null[0m[0m
+      [31m-[0m[0m internal                                                     = false [90m-> null[0m[0m
+      [31m-[0m[0m ip_address_type                                              = "ipv4" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_type                                           = "application" [90m-> null[0m[0m
+      [31m-[0m[0m name                                                         = "inf2006-grp21-fargate-alb" [90m-> null[0m[0m
+      [31m-[0m[0m preserve_host_header                                         = false [90m-> null[0m[0m
+      [31m-[0m[0m region                                                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_groups                                              = [
+          [31m-[0m[0m "sg-023baa0b88cf46edd",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m subnets                                                      = [
+          [31m-[0m[0m "subnet-00a90504457c9cd4e",
+          [31m-[0m[0m "subnet-0455388ee1b027306",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                         = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-alb"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-alb"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                                                       = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+      [31m-[0m[0m xff_header_processing_mode                                   = "append" [90m-> null[0m[0m
+      [31m-[0m[0m zone_id                                                      = "Z35SXDOTRQ7X7K" [90m-> null[0m[0m
+        [90m# (3 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m access_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m connection_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m health_check_logs {
+          [31m-[0m[0m enabled = false [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+
+      [31m-[0m[0m subnet_mapping {
+          [31m-[0m[0m subnet_id            = "subnet-00a90504457c9cd4e" [90m-> null[0m[0m
+            [90m# (4 unchanged attributes hidden)[0m[0m
+        }
+      [31m-[0m[0m subnet_mapping {
+          [31m-[0m[0m subnet_id            = "subnet-0455388ee1b027306" [90m-> null[0m[0m
+            [90m# (4 unchanged attributes hidden)[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_listener.http[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_listener" "http" {
+      [31m-[0m[0m arn                                                                 = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/fce661f7b9af3ae6" [90m-> null[0m[0m
+      [31m-[0m[0m id                                                                  = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/fce661f7b9af3ae6" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arn                                                   = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m port                                                                = 80 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                                                            = "HTTP" [90m-> null[0m[0m
+      [31m-[0m[0m region                                                              = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m routing_http_response_server_enabled                                = true [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                                = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                            = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+        [90m# (11 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m order            = 1 [90m-> null[0m[0m
+          [31m-[0m[0m type             = "redirect" [90m-> null[0m[0m
+            [90m# (1 unchanged attribute hidden)[0m[0m
+
+          [31m-[0m[0m redirect {
+              [31m-[0m[0m host        = "#{host}" [90m-> null[0m[0m
+              [31m-[0m[0m path        = "/#{path}" [90m-> null[0m[0m
+              [31m-[0m[0m port        = "443" [90m-> null[0m[0m
+              [31m-[0m[0m protocol    = "HTTPS" [90m-> null[0m[0m
+              [31m-[0m[0m query       = "#{query}" [90m-> null[0m[0m
+              [31m-[0m[0m status_code = "HTTP_301" [90m-> null[0m[0m
+            }
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_listener.https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_listener" "https" {
+      [31m-[0m[0m arn                                                                   = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/ee558c39805dab92" [90m-> null[0m[0m
+      [31m-[0m[0m certificate_arn                                                       = "arn:aws:acm:us-east-1:<ACCOUNT>:certificate/4907eb0b-a764-4083-b2e7-c22d67ddbbb7" [90m-> null[0m[0m
+      [31m-[0m[0m id                                                                    = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/ee558c39805dab92" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arn                                                     = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m port                                                                  = 443 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                                                              = "HTTPS" [90m-> null[0m[0m
+      [31m-[0m[0m region                                                                = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m routing_http_response_server_enabled                                  = true [90m-> null[0m[0m
+      [31m-[0m[0m ssl_policy                                                            = "ELBSecurityPolicy-TLS13-1-2-2021-06" [90m-> null[0m[0m
+      [31m-[0m[0m tags                                                                  = {} [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                                                              = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+        [90m# (18 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m order            = 1 [90m-> null[0m[0m
+          [31m-[0m[0m target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+          [31m-[0m[0m type             = "forward" [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m mutual_authentication {
+          [31m-[0m[0m ignore_client_certificate_expiry = false [90m-> null[0m[0m
+          [31m-[0m[0m mode                             = "off" [90m-> null[0m[0m
+            [90m# (2 unchanged attributes hidden)[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_lb_target_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_lb_target_group" "app" {
+      [31m-[0m[0m arn                                = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+      [31m-[0m[0m arn_suffix                         = "targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+      [31m-[0m[0m deregistration_delay               = "30" [90m-> null[0m[0m
+      [31m-[0m[0m id                                 = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+      [31m-[0m[0m ip_address_type                    = "ipv4" [90m-> null[0m[0m
+      [31m-[0m[0m lambda_multi_value_headers_enabled = false [90m-> null[0m[0m
+      [31m-[0m[0m load_balancer_arns                 = [
+          [31m-[0m[0m "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a",
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_algorithm_type      = "round_robin" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_anomaly_mitigation  = "off" [90m-> null[0m[0m
+      [31m-[0m[0m load_balancing_cross_zone_enabled  = "use_load_balancer_configuration" [90m-> null[0m[0m
+      [31m-[0m[0m name                               = "inf2006-grp21-fargate-tg" [90m-> null[0m[0m
+      [31m-[0m[0m port                               = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m protocol                           = "HTTP" [90m-> null[0m[0m
+      [31m-[0m[0m protocol_version                   = "HTTP1" [90m-> null[0m[0m
+      [31m-[0m[0m proxy_protocol_v2                  = false [90m-> null[0m[0m
+      [31m-[0m[0m region                             = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m slow_start                         = 0 [90m-> null[0m[0m
+      [31m-[0m[0m tags                               = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-tg"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                           = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-tg"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m target_control_port                = 0 [90m-> null[0m[0m
+      [31m-[0m[0m target_type                        = "ip" [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                             = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+
+      [31m-[0m[0m health_check {
+          [31m-[0m[0m enabled             = true [90m-> null[0m[0m
+          [31m-[0m[0m healthy_threshold   = 2 [90m-> null[0m[0m
+          [31m-[0m[0m interval            = 10 [90m-> null[0m[0m
+          [31m-[0m[0m matcher             = "200" [90m-> null[0m[0m
+          [31m-[0m[0m path                = "/health/" [90m-> null[0m[0m
+          [31m-[0m[0m port                = "traffic-port" [90m-> null[0m[0m
+          [31m-[0m[0m protocol            = "HTTP" [90m-> null[0m[0m
+          [31m-[0m[0m timeout             = 5 [90m-> null[0m[0m
+          [31m-[0m[0m unhealthy_threshold = 3 [90m-> null[0m[0m
+        }
+
+      [31m-[0m[0m stickiness {
+          [31m-[0m[0m cookie_duration = 86400 [90m-> null[0m[0m
+          [31m-[0m[0m enabled         = false [90m-> null[0m[0m
+          [31m-[0m[0m type            = "lb_cookie" [90m-> null[0m[0m
+            [90m# (1 unchanged attribute hidden)[0m[0m
+        }
+
+      [31m-[0m[0m target_failover {}
+
+      [31m-[0m[0m target_group_health {
+          [31m-[0m[0m dns_failover {
+              [31m-[0m[0m minimum_healthy_targets_count      = "1" [90m-> null[0m[0m
+              [31m-[0m[0m minimum_healthy_targets_percentage = "off" [90m-> null[0m[0m
+            }
+          [31m-[0m[0m unhealthy_state_routing {
+              [31m-[0m[0m minimum_healthy_targets_count      = 1 [90m-> null[0m[0m
+              [31m-[0m[0m minimum_healthy_targets_percentage = "off" [90m-> null[0m[0m
+            }
+        }
+
+      [31m-[0m[0m target_health_state {}
+    }
+
+[1m  # module.web_entry.aws_route53_record.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_route53_record" "app" {
+      [31m-[0m[0m fqdn                             = "shop-fargate.fourtytwofactors.me" [90m-> null[0m[0m
+      [31m-[0m[0m id                               = "Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A" [90m-> null[0m[0m
+      [31m-[0m[0m multivalue_answer_routing_policy = false [90m-> null[0m[0m
+      [31m-[0m[0m name                             = "shop-fargate.fourtytwofactors.me" [90m-> null[0m[0m
+      [31m-[0m[0m records                          = [] [90m-> null[0m[0m
+      [31m-[0m[0m ttl                              = 0 [90m-> null[0m[0m
+      [31m-[0m[0m type                             = "A" [90m-> null[0m[0m
+      [31m-[0m[0m zone_id                          = "Z09473223DWPUMU2OO4WR" [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m alias {
+          [31m-[0m[0m evaluate_target_health = true [90m-> null[0m[0m
+          [31m-[0m[0m name                   = "inf2006-grp21-fargate-alb-2048941486.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+          [31m-[0m[0m zone_id                = "Z35SXDOTRQ7X7K" [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_security_group.alb[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_security_group" "alb" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group/sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "ALB: HTTPS and HTTP-redirect from the internet" [90m-> null[0m[0m
+      [31m-[0m[0m egress                 = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "Forward requests and health checks to the app"
+              [31m-[0m[0m from_port        = 8000
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-0604681cf6bb68d4c",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 8000
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m ingress                = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTP from the internet, only to redirect to HTTPS"
+              [31m-[0m[0m from_port        = 80
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 80
+            },
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTPS from the internet"
+              [31m-[0m[0m from_port        = 443
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 443
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                   = "inf2006-grp21-fargate-sg-alb" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id               = "<ACCOUNT>" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m revoke_rules_on_delete = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                   = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-sg-alb"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-sg-alb"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                 = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_security_group.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_security_group" "app" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group/sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "App compute: port 8000 from the ALB only" [90m-> null[0m[0m
+      [31m-[0m[0m egress                 = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = [
+                  [31m-[0m[0m "0.0.0.0/0",
+                ]
+              [31m-[0m[0m description      = "HTTPS to AWS APIs (ECR, Secrets Manager, S3, CloudWatch, SSM) and OS packages"
+              [31m-[0m[0m from_port        = 443
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = []
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 443
+            },
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "PostgreSQL to RDS"
+              [31m-[0m[0m from_port        = 5432
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-03abb4562e4857842",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 5432
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m ingress                = [
+          [31m-[0m[0m {
+              [31m-[0m[0m cidr_blocks      = []
+              [31m-[0m[0m description      = "Gunicorn, from the ALB only"
+              [31m-[0m[0m from_port        = 8000
+              [31m-[0m[0m ipv6_cidr_blocks = []
+              [31m-[0m[0m prefix_list_ids  = []
+              [31m-[0m[0m protocol         = "tcp"
+              [31m-[0m[0m security_groups  = [
+                  [31m-[0m[0m "sg-023baa0b88cf46edd",
+                ]
+              [31m-[0m[0m self             = false
+              [31m-[0m[0m to_port          = 8000
+            },
+        ] [90m-> null[0m[0m
+      [31m-[0m[0m name                   = "inf2006-grp21-fargate-sg-app" [90m-> null[0m[0m
+      [31m-[0m[0m owner_id               = "<ACCOUNT>" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m revoke_rules_on_delete = false [90m-> null[0m[0m
+      [31m-[0m[0m tags                   = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-sg-app"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-sg-app"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m vpc_id                 = "vpc-084549ccf3908abaa" [90m-> null[0m[0m
+        [90m# (1 unchanged attribute hidden)[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.alb_to_app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "alb_to_app" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-09bc8c90a74360d26" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "Forward requests and health checks to the app" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-09bc8c90a74360d26" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-09bc8c90a74360d26" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 8000 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.app_https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "app_https" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0dab8f7876da722a7" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTPS to AWS APIs (ECR, Secrets Manager, S3, CloudWatch, SSM) and OS packages" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 443 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-0dab8f7876da722a7" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-0dab8f7876da722a7" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 443 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_egress_rule.app_to_db[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_egress_rule" "app_to_db" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0417ca4b723d98bd0" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "PostgreSQL to RDS" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 5432 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0417ca4b723d98bd0" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-03abb4562e4857842" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0417ca4b723d98bd0" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 5432 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.alb_http[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "alb_http" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0b138355d6bc3bfa4" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTP from the internet, only to redirect to HTTPS" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 80 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-0b138355d6bc3bfa4" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-0b138355d6bc3bfa4" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 80 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.alb_https[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "alb_https" {
+      [31m-[0m[0m arn                    = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0fe0da13e06e924a2" [90m-> null[0m[0m
+      [31m-[0m[0m cidr_ipv4              = "0.0.0.0/0" [90m-> null[0m[0m
+      [31m-[0m[0m description            = "HTTPS from the internet" [90m-> null[0m[0m
+      [31m-[0m[0m from_port              = 443 [90m-> null[0m[0m
+      [31m-[0m[0m id                     = "sgr-0fe0da13e06e924a2" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol            = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m region                 = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id      = "sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id = "sgr-0fe0da13e06e924a2" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all               = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                = 443 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "app_from_alb" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0e8861fbc3b0aab6e" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "Gunicorn, from the ALB only" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 8000 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0e8861fbc3b0aab6e" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-023baa0b88cf46edd" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0e8861fbc3b0aab6e" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 8000 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_vpc_security_group_ingress_rule.db_from_app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_vpc_security_group_ingress_rule" "db_from_app" {
+      [31m-[0m[0m arn                          = "arn:aws:ec2:us-east-1:<ACCOUNT>:security-group-rule/sgr-0ec772b46b7119907" [90m-> null[0m[0m
+      [31m-[0m[0m description                  = "PostgreSQL from the fargate stack app compute" [90m-> null[0m[0m
+      [31m-[0m[0m from_port                    = 5432 [90m-> null[0m[0m
+      [31m-[0m[0m id                           = "sgr-0ec772b46b7119907" [90m-> null[0m[0m
+      [31m-[0m[0m ip_protocol                  = "tcp" [90m-> null[0m[0m
+      [31m-[0m[0m referenced_security_group_id = "sg-0604681cf6bb68d4c" [90m-> null[0m[0m
+      [31m-[0m[0m region                       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_id            = "sg-03abb4562e4857842" [90m-> null[0m[0m
+      [31m-[0m[0m security_group_rule_id       = "sgr-0ec772b46b7119907" [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                     = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m to_port                      = 5432 [90m-> null[0m[0m
+    }
+
+[1m  # module.web_entry.aws_wafv2_web_acl.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_wafv2_web_acl" "app" {
+      [31m-[0m[0m arn                         = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d" [90m-> null[0m[0m
+      [31m-[0m[0m capacity                    = 6 [90m-> null[0m[0m
+      [31m-[0m[0m description                 = "Rate limit on POST /login/ per client IP" [90m-> null[0m[0m
+      [31m-[0m[0m id                          = "93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d" [90m-> null[0m[0m
+      [31m-[0m[0m lock_token                  = "22230303-0596-43bb-9db5-562207e73611" [90m-> null[0m[0m
+      [31m-[0m[0m name                        = "inf2006-grp21-fargate-waf" [90m-> null[0m[0m
+      [31m-[0m[0m region                      = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m scope                       = "REGIONAL" [90m-> null[0m[0m
+      [31m-[0m[0m tags                        = {
+          [31m-[0m[0m "Name" = "inf2006-grp21-fargate-waf"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m tags_all                    = {
+          [31m-[0m[0m "Env"       = "evidence"
+          [31m-[0m[0m "ManagedBy" = "terraform"
+          [31m-[0m[0m "Name"      = "inf2006-grp21-fargate-waf"
+          [31m-[0m[0m "Project"   = "inf2006-grp21"
+          [31m-[0m[0m "Stack"     = "fargate"
+        } [90m-> null[0m[0m
+      [31m-[0m[0m token_domains               = [] [90m-> null[0m[0m
+        [90m# (2 unchanged attributes hidden)[0m[0m
+
+      [31m-[0m[0m default_action {
+          [31m-[0m[0m allow {
+            }
+        }
+
+      [31m-[0m[0m rule {
+          [31m-[0m[0m name     = "login-rate-limit" [90m-> null[0m[0m
+          [31m-[0m[0m priority = 1 [90m-> null[0m[0m
+
+          [31m-[0m[0m action {
+              [31m-[0m[0m block {
+                }
+            }
+
+          [31m-[0m[0m statement {
+              [31m-[0m[0m rate_based_statement {
+                  [31m-[0m[0m aggregate_key_type    = "IP" [90m-> null[0m[0m
+                  [31m-[0m[0m evaluation_window_sec = 300 [90m-> null[0m[0m
+                  [31m-[0m[0m limit                 = 20 [90m-> null[0m[0m
+
+                  [31m-[0m[0m scope_down_statement {
+                      [31m-[0m[0m and_statement {
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "/login/" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m uri_path {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                          [31m-[0m[0m statement {
+                              [31m-[0m[0m byte_match_statement {
+                                  [31m-[0m[0m positional_constraint = "EXACTLY" [90m-> null[0m[0m
+                                  [31m-[0m[0m search_string         = "POST" [90m-> null[0m[0m
+
+                                  [31m-[0m[0m field_to_match {
+                                      [31m-[0m[0m method {}
+                                    }
+
+                                  [31m-[0m[0m text_transformation {
+                                      [31m-[0m[0m priority = 0 [90m-> null[0m[0m
+                                      [31m-[0m[0m type     = "NONE" [90m-> null[0m[0m
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+          [31m-[0m[0m visibility_config {
+              [31m-[0m[0m cloudwatch_metrics_enabled = true [90m-> null[0m[0m
+              [31m-[0m[0m metric_name                = "inf2006-grp21-fargate-login-rate" [90m-> null[0m[0m
+              [31m-[0m[0m sampled_requests_enabled   = true [90m-> null[0m[0m
+            }
+        }
+
+      [31m-[0m[0m visibility_config {
+          [31m-[0m[0m cloudwatch_metrics_enabled = true [90m-> null[0m[0m
+          [31m-[0m[0m metric_name                = "inf2006-grp21-fargate-waf" [90m-> null[0m[0m
+          [31m-[0m[0m sampled_requests_enabled   = true [90m-> null[0m[0m
+        }
+    }
+
+[1m  # module.web_entry.aws_wafv2_web_acl_association.app[0m will be [1m[31mdestroyed[0m
+[0m  [31m-[0m[0m resource "aws_wafv2_web_acl_association" "app" {
+      [31m-[0m[0m id           = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m region       = "us-east-1" [90m-> null[0m[0m
+      [31m-[0m[0m resource_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a" [90m-> null[0m[0m
+      [31m-[0m[0m web_acl_arn  = "arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d" [90m-> null[0m[0m
+    }
+
+[1mPlan:[0m [0m0 to add, 0 to change, 27 to destroy.
+
+Changes to Outputs:
+  [31m-[0m[0m alb_dns_name        = "inf2006-grp21-fargate-alb-2048941486.us-east-1.elb.amazonaws.com" [90m-> null[0m[0m
+  [31m-[0m[0m cluster_name        = "inf2006-grp21-fargate-cluster" [90m-> null[0m[0m
+  [31m-[0m[0m hostname            = "shop-fargate.fourtytwofactors.me" [90m-> null[0m[0m
+  [31m-[0m[0m image_digest        = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481" [90m-> null[0m[0m
+  [31m-[0m[0m log_group_name      = "/inf2006-grp21-fargate/app" [90m-> null[0m[0m
+  [31m-[0m[0m security_group_ids  = {
+      [31m-[0m[0m alb = "sg-023baa0b88cf46edd"
+      [31m-[0m[0m app = "sg-0604681cf6bb68d4c"
+    } [90m-> null[0m[0m
+  [31m-[0m[0m service_name        = "inf2006-grp21-fargate-service" [90m-> null[0m[0m
+  [31m-[0m[0m subnet_ids          = [
+      [31m-[0m[0m "subnet-00a90504457c9cd4e",
+      [31m-[0m[0m "subnet-0455388ee1b027306",
+    ] [90m-> null[0m[0m
+  [31m-[0m[0m target_group_arn    = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2" [90m-> null[0m[0m
+  [31m-[0m[0m task_definition_arn = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app:1" [90m-> null[0m[0m
+  [31m-[0m[0m web_acl_name        = "inf2006-grp21-fargate-waf" [90m-> null[0m[0m
+[0m[1m
+Do you really want to destroy all resources?[0m
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  [1mEnter a value:[0m [0m
+[0m[1maws_appautoscaling_policy.requests: Destroying... [id=inf2006-grp21-fargate-requests-per-target][0m[0m
+[0m[1maws_appautoscaling_policy.requests: Destruction complete after 1s[0m
+[0m[1maws_appautoscaling_target.app: Destroying... [id=service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m[0m
+[0m[1maws_appautoscaling_target.app: Destruction complete after 1s[0m
+[0m[1maws_ecs_service.app: Destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:service/inf2006-grp21-fargate-cluster/inf2006-grp21-fargate-service][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 00m10s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 00m20s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 00m30s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 00m40s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 00m50s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m00s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m10s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m20s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m30s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m40s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 01m50s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 02m00s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 02m10s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 02m20s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Still destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:serv...-cluster/inf2006-grp21-fargate-service, 02m30s elapsed][0m[0m
+[0m[1maws_ecs_service.app: Destruction complete after 2m36s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Destroying... [id=sgr-0417ca4b723d98bd0][0m[0m
+[0m[1maws_ecs_cluster.app: Destroying... [id=arn:aws:ecs:us-east-1:<ACCOUNT>:cluster/inf2006-grp21-fargate-cluster][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Destroying... [id=f74ca6df-882a-4868-addb-214bdecb7f45][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Destroying... [id=sgr-0ec772b46b7119907][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Destroying... [id=sgr-0e8861fbc3b0aab6e][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Destroying... [id=sgr-09bc8c90a74360d26][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Destroying... [id=sgr-0dab8f7876da722a7][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Destroying... [id=inf2006-grp21-fargate-unhealthy-hosts][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/ee558c39805dab92][0m[0m
+[0m[1maws_ecs_task_definition.app: Destroying... [id=inf2006-grp21-fargate-app][0m[0m
+[0m[1maws_ecs_task_definition.app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Destroying... [id=sgr-0fe0da13e06e924a2][0m[0m
+[0m[1maws_ecs_cluster.app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Destroying... [id=f3571ada-ac5c-437f-8044-1a7d67ce3f6b][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.recent_problems: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Destroying... [id=sgr-0b138355d6bc3bfa4][0m[0m
+[0m[1mmodule.web_entry.aws_lb_listener.https: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Destroying... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.unhealthy_hosts: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Destroying... [id=inf2006-grp21-fargate-target-5xx][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.app_from_alb: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_to_db: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Destroying... [id=arn:aws:wafv2:us-east-1:<ACCOUNT>:regional/webacl/inf2006-grp21-fargate-waf/93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d,arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.alb_to_app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:listener/app/inf2006-grp21-fargate-alb/d6176765f700338a/fce661f7b9af3ae6][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_query_definition.problems_per_minute: Destruction complete after 0s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Destroying... [id=inf2006-grp21-fargate-no-healthy-hosts][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.db_from_app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_egress_rule.app_https: Destruction complete after 2s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Destroying... [id=/inf2006-grp21-fargate/app][0m[0m
+[0m[1mmodule.web_entry.aws_security_group.app: Destroying... [id=sg-0604681cf6bb68d4c][0m[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.target_5xx: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_lb_listener.http: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_log_group.app: Destruction complete after 0s[0m
+[0m[1mmodule.web_entry.aws_cloudwatch_metric_alarm.no_healthy_hosts: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2][0m[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_https: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_vpc_security_group_ingress_rule.alb_http: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_lb_target_group.app: Destruction complete after 0s[0m
+[0m[1mmodule.web_entry.aws_security_group.app: Destruction complete after 1s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl_association.app: Destruction complete after 3s[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Destroying... [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Destruction complete after 2s[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A, 00m10s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A, 00m20s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Still destroying... [id=Z09473223DWPUMU2OO4WR_shop-fargate.fourtytwofactors.me_A, 00m30s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_route53_record.app: Destruction complete after 33s[0m
+[0m[1mmodule.web_entry.aws_lb.app: Destroying... [id=arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:loadbalancer/app/inf2006-grp21-fargate-alb/d6176765f700338a][0m[0m
+[0m[1mmodule.web_entry.aws_lb.app: Still destroying... [id=arn:aws:elasticloadbalancing:us-east-1:...006-grp21-fargate-alb/d6176765f700338a, 00m10s elapsed][0m[0m
+[0m[1mmodule.web_entry.aws_lb.app: Destruction complete after 19s[0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Destroying... [id=sg-023baa0b88cf46edd][0m[0m
+[0m[1mmodule.web_entry.aws_security_group.alb: Destruction complete after 1s[0m
+[0m[1m[32m
+Destroy complete! Resources: 27 destroyed.[0m
+
+== Leftovers (each list should be empty) ==
+load balancers:
+instances:
+ECS clusters:
+NAT gateways:
+Done. Still running by design: the database, hosted zone, certificate, registry and secrets (base/).
+# exit: 0  end_utc: 2026-10-09T07:18:55Z

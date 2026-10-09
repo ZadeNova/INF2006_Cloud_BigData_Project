@@ -1,0 +1,8 @@
+{
+  "ts_utc": "2026-10-09T03:17:34.480Z",
+  "api_returned_utc": "2026-10-09T03:17:34.793Z",
+  "variant": "fargate",
+  "unit_id": "arn:aws:ecs:us-east-1:<ACCOUNT>:task/inf2006-grp21-fargate-cluster/46220bb434674c628b10d02267fcadf2",
+  "units_before": 2,
+  "mode": "graceful"
+}

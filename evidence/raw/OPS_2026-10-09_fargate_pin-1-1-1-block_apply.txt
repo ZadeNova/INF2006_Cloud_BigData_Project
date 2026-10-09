@@ -1,0 +1,31 @@
+# file: evidence/raw/OPS_2026-10-09_fargate_pin-1-1-1-block_apply.txt
+# date_utc: 2026-10-09T06:49:42Z
+# commit: e4bc928
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/tf.sh fargate apply
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Modifying... [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m[0m
+[0m[1mmodule.web_entry.aws_wafv2_web_acl.app: Modifications complete after 2s [id=93eaf88d-fd02-45e6-9a9d-0f96e8a8dc3d][0m
+[0m[1m[32m
+Apply complete! Resources: 0 added, 1 changed, 0 destroyed.[0m
+[0m[1m[32m
+Outputs:
+
+[0malb_dns_name = "inf2006-grp21-fargate-alb-2048941486.us-east-1.elb.amazonaws.com"
+cluster_name = "inf2006-grp21-fargate-cluster"
+hostname = "shop-fargate.fourtytwofactors.me"
+image_digest = "sha256:fa72e949b47de9cb5c6378608072cb3b376503de8dc11bbb34b98940ea8cb481"
+log_group_name = "/inf2006-grp21-fargate/app"
+security_group_ids = {
+  "alb" = "sg-023baa0b88cf46edd"
+  "app" = "sg-0604681cf6bb68d4c"
+}
+service_name = "inf2006-grp21-fargate-service"
+subnet_ids = [
+  "subnet-00a90504457c9cd4e",
+  "subnet-0455388ee1b027306",
+]
+target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2"
+task_definition_arn = "arn:aws:ecs:us-east-1:<ACCOUNT>:task-definition/inf2006-grp21-fargate-app:1"
+web_acl_name = "inf2006-grp21-fargate-waf"
+State backed up as fargate/terraform.tfstate.2026-10-09-1449.e4bc928.bak. Copy it off this laptop (it holds resource IDs and may hold sensitive values).
+Applied from commit e4bc928. Record it in evidence/aws-build-runbook.md.
+# exit: 0  end_utc: 2026-10-09T06:49:53Z

@@ -1,0 +1,14 @@
+[
+  {
+    "createdAt": "2026-10-09T02:36:28.072Z",
+    "message": "(service inf2006-grp21-fargate-service) has started 1 tasks: (task 407d188c5bf9447b852ed343b69c797b)."
+  },
+  {
+    "createdAt": "2026-10-09T02:36:56.795Z",
+    "message": "(service inf2006-grp21-fargate-service) registered 1 targets in (target-group arn:aws:elasticloadbalancing:us-east-1:<ACCOUNT>:targetgroup/inf2006-grp21-fargate-tg/df6826ccbeba56f2)"
+  },
+  {
+    "createdAt": "2026-10-09T02:37:05.760Z",
+    "message": "(service inf2006-grp21-fargate-service) has reached a steady state."
+  }
+]

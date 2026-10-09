@@ -1,0 +1,12 @@
+# file: evidence/raw/MON-03_2026-10-09_fargate_return-to-ok.txt
+# date_utc: 2026-10-09T04:11:17Z
+# commit: e4bc928
+# command: alarm_wait_ok inf2006-grp21-fargate-target-5xx
+04:11:19  ALARM
+04:11:36  ALARM
+04:11:53  ALARM
+04:12:10  ALARM
+04:12:27  ALARM
+04:12:44  ALARM
+04:13:01  OK
+# exit: 0  end_utc: 2026-10-09T04:13:01Z

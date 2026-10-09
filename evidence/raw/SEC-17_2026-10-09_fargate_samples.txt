@@ -1,0 +1,811 @@
+# file: evidence/raw/SEC-17_2026-10-09_fargate_samples.txt
+# date_utc: 2026-10-09T06:59:43Z
+# commit: e4bc928
+# command: waf_samples
+$ aws wafv2 get-sampled-requests --rule-metric-name inf2006-grp21-fargate-login-rate (last 30 min, headers removed)
+{
+  "PopulationSize": 687,
+  "SampledRequests": [
+    {
+      "Timestamp": "2026-10-09T14:39:02.173000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:34:44.009000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:30.859000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:01.976000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:26.519000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:51.095000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:24.634000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:18.434000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:30.749000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:38:28.977000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:46.626000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:21.287000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:38:14.014000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:35:01.445000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:56.761000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:36.731000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:35:43.234000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:58.863000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:15.616000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:41.316000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:41.955000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:58.974000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:34:48.879000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:41.925000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:42:44.201000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:35:40.590000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:50.536000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:05.141000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:53.884000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:34:21.239000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:35.414000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:52.425000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:12.840000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:35:31.425000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:50.164000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:42.524000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:45.419000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:51.375000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:49.869000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:14.129000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:23.470000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:36.757000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:15.537000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:54.407000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:38.173000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:38:37.469000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:34:42.596000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:56.877000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:38:05.095000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:41.644000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:52.858000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:16.101000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:54.596000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:35:48.172000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:42:17.602000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:29:52.857000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:44.870000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:06.408000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:29.770000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:33.289000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:31.630000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:56.317000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:59.589000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:03.888000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:08.845000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:46.187000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:05.349000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:28.131000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:11.258000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:35.810000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:15.736000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:11.418000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:36.514000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:15.001000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:42:43.645000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:59.778000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:33.437000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:52.872000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:52.527000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:29:50.673000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:29.354000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:52.367000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:42.057000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:56.925000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:40:02.916000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:20.736000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:45.341000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:36:43.214000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:37:59.179000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:05.295000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:31:47.815000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:30:12.333000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:40.838000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:33:00.364000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:01.935000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:41:18.917000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:39:18.242000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:32:48.653000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:42:27.171000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    },
+    {
+      "Timestamp": "2026-10-09T14:42:34.775000+08:00",
+      "Action": "COUNT",
+      "RuleNameWithinRuleGroup": null,
+      "ClientIP": "<PUBLIC-IP>",
+      "Method": "POST",
+      "URI": "/login/"
+    }
+  ]
+}
+# exit: 0  end_utc: 2026-10-09T06:59:49Z

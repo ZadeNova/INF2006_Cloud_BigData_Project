@@ -1,0 +1,45 @@
+# file: evidence/raw/SEC-11_2026-10-09_fargate_runtime.txt
+# date_utc: 2026-10-09T02:03:11Z
+# commit: 33963c5
+# command: sec11_runtime
+$ aws ecs describe-task-definition --task-definition inf2006-grp21-fargate-app --query taskDefinition.{task_role:taskRoleArn,execution_role:executionRoleArn,environment:containerDefinitions[0].environment,secrets:containerDefinitions[0].secrets}
+{
+    "task_role": "arn:aws:iam::<ACCOUNT>:role/LabRole",
+    "execution_role": "arn:aws:iam::<ACCOUNT>:role/LabRole",
+    "environment": [
+        {
+            "name": "APP_RELEASE_ID",
+            "value": "release-c19d547"
+        },
+        {
+            "name": "DJANGO_CSRF_TRUSTED_ORIGINS",
+            "value": "https://shop-fargate.fourtytwofactors.me"
+        },
+        {
+            "name": "AWS_REGION",
+            "value": "us-east-1"
+        },
+        {
+            "name": "DJANGO_ENV",
+            "value": "production"
+        },
+        {
+            "name": "DJANGO_ALLOWED_HOSTS",
+            "value": "shop-fargate.fourtytwofactors.me"
+        },
+        {
+            "name": "AWS_SECRET_ID",
+            "value": "inf2006-grp21/web"
+        },
+        {
+            "name": "DJANGO_HSTS_SECONDS",
+            "value": "3600"
+        },
+        {
+            "name": "DJANGO_TRUST_PROXY",
+            "value": "true"
+        }
+    ],
+    "secrets": null
+}
+# exit: 0  end_utc: 2026-10-09T02:03:13Z

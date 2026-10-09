@@ -1,0 +1,16 @@
+# file: evidence/raw/SEC-10_2026-10-09_fargate_smoke.txt
+# date_utc: 2026-10-09T02:02:47Z
+# commit: 33963c5
+# command: /home/nova/Personal/uni_work/year2_trimester_1/INF2006_Cloud_BigData_Project/src/infrastructure/scripts/smoke.sh fargate
+Smoke test: https://shop-fargate.fourtytwofactors.me
+PASS  /health/ returns 200
+PASS  HTTP redirects to HTTPS (301)
+PASS  certificate verifies (Verification: OK )
+PASS  /login/ returns 200
+PASS  /products/ lists products (12 distinct product links)
+PASS  header strict-transport-security present
+PASS  header x-content-type-options present
+PASS  header x-frame-options present
+
+All checks passed.
+# exit: 0  end_utc: 2026-10-09T02:02:53Z

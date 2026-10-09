@@ -1,0 +1,6 @@
+# file: evidence/raw/MON-03_2026-10-09_fargate_force.txt
+# date_utc: 2026-10-09T04:11:15Z
+# commit: e4bc928
+# command: run aws cloudwatch set-alarm-state --alarm-name inf2006-grp21-fargate-target-5xx --state-value ALARM --state-reason Evidence session: forced to test the alarm-to-email path
+$ aws cloudwatch set-alarm-state --alarm-name inf2006-grp21-fargate-target-5xx --state-value ALARM --state-reason Evidence session: forced to test the alarm-to-email path
+# exit: 0  end_utc: 2026-10-09T04:11:17Z
