@@ -124,17 +124,19 @@ def right(r, y):
 
 # ------------------------------------------------------------------ title
 d.text((40, 22), "42Factors shop on AWS: final architecture (variant B, ECS on Fargate)", font=F_TITLE, fill="#111111")
-d.text((40, 98), "INF2006 group 21 · region us-east-1 · every AWS resource is created by terraform apply from src/infrastructure/ "
-       "(base/, fargate/, modules/web-entry/)", font=F_SUB, fill="#333333")
+d.text((40, 98), "INF2006 group 21 · region us-east-1 · AWS resources are Terraform (src/infrastructure/: base/, fargate/, modules/web-entry/); "
+       "set by CLI: the S3 bucket, secret values, 2 service-linked roles", font=F_SUB, fill="#333333")
 d.text((40, 140), "Variant A (EC2 + Auto Scaling) is the evaluated alternative and is drawn dashed. Labels are Terraform resource "
        "names; evidence/architecture.md maps every label to its test evidence.", font=F_SUB, fill="#333333")
 
 # ------------------------------------------------------------------ zones
-zone(40, 200, 580, 2460, Z1, "#fdf3f2", "TRUST BOUNDARY 1", "Internet (untrusted) and the team laptop")
+zone(40, 200, 580, 2460, Z1, "#fdf3f2", "TRUST BOUNDARY 1", "Internet (untrusted) and the admin laptop")
 d.rounded_rectangle((620, 200, 3560, 2460), 30, outline="#888888", width=4)
-d.text((650, 214), "AWS Cloud · us-east-1 · Learner Lab account · one VPC (aws_vpc.main) · every role is LabRole",
+d.text((650, 214), "AWS Cloud · us-east-1 · Learner Lab account · task and execution roles are LabRole (the lab forbids custom roles)",
        font=F_ZONE, fill="#333333")
-zone(660, 260, 3520, 570, Z4, "#f3f8fd", "TRUST BOUNDARY 4 · AWS-managed services (edge and scaling)")
+zone(660, 260, 3520, 562, Z4, "#f3f8fd", "TRUST BOUNDARY 4 · AWS-managed services (edge and scaling)")
+d.rounded_rectangle((645, 574, 3535, 1760), 30, outline="#455a64", width=6)
+d.text((2700, 580), "VPC aws_vpc.main · 2 AZs (us-east-1a, us-east-1b)", font=F_EB, fill="#455a64")
 zone(660, 610, 2560, 1670, Z2, "#fffaf0", "TRUST BOUNDARY 2", "Public subnets, 2 AZs", "#8a5a00")
 d.text((1400, 622), "aws_subnet.public (a, b)", font=F_ZSUB, fill="#444444")
 d.text((1400, 656), "route 0.0.0.0/0 to aws_internet_gateway.main, no NAT gateway", font=F_ZSUB, fill="#444444")
@@ -147,9 +149,10 @@ d.text((684, 2386), "Reached over HTTPS 443 on public endpoints (sg-app egress 4
 # ------------------------------------------------------------------ zone 1
 browser = box(80, 300, 460, [("b", "Browser"), ("n", "customer and operator"), ("i", "manifest component 1")],
               "#fdecea", Z1)
-laptop = box(80, 1420, 460, [("b", "Team laptop (deploy-time)"), ("n", "terraform: scripts/tf.sh, up.sh"),
-                             ("n", "scripts/push-image.sh"), ("n", "scripts/jobs.sh, evidence.sh")], "#f2f2f2", "#555555")
-analytics = box(80, 1880, 460, [("b", "Offline analytics and ML"), ("n", "analytics/ (pandas, scikit-learn)"),
+laptop = box(80, 1890, 460, [("b", "Admin laptop (trusted)"), ("n", "holds the AWS lab credentials"),
+                             ("n", "terraform: scripts/tf.sh, up.sh"), ("n", "push-image.sh, jobs.sh,"),
+                             ("n", "secrets.sh, evidence.sh"), ("n", "aws s3 sync (dataset upload)")], "#eef3ee", "#555555")
+analytics = box(80, 1100, 460, [("b", "Offline analytics and ML"), ("n", "analytics/ (pandas, scikit-learn)"),
                                 ("n", "runs locally, outside the image"), ("n", "build_shoe_dataset.py"),
                                 ("n", "verify_refresh.py"), ("n", "segment_customers.py (not run"), ("n", "on AWS: DATA-02)"),
                                 ("i", "manifest component 12")], "#f2f2f2", "#555555")
@@ -159,8 +162,9 @@ mailbox = box(80, 2290, 460, [("b", "Operator mailbox"), ("n", "alarm email (ALA
 route53 = box(690, 330, 480, [("b", "Route 53"), ("n", "aws_route53_zone.main"), ("n", "aws_route53_record.app (alias)"),
                               ("n", "shop-fargate.fourtytwofactors.me")])
 acm = box(1210, 330, 470, [("b", "ACM certificate"), ("n", "aws_acm_certificate.shop"), ("n", "for the 443 listener, DNS-validated")])
-waf = box(1720, 330, 700, [("b", "WAF web ACL"), ("n", "aws_wafv2_web_acl.app, attached to the ALB"),
-                           ("n", "rule login-rate-limit: POST /login/"), ("n", "count by default, block tested (SEC-17)")])
+waf = box(1720, 330, 700, [("b", "WAF web ACL"), ("n", "aws_wafv2_web_acl.app, attached to ALB"),
+                           ("n", "rule login-rate-limit: POST /login/"), ("n", "count by default, block tested (SEC-17)"),
+                           ("n", "CloudWatch metrics only, no alarm")])
 appscale = box(2460, 330, 1020, [("b", "Application Auto Scaling"), ("n", "aws_appautoscaling_target.app + _policy.requests"),
                                  ("n", "ALBRequestCountPerTarget, 300 per target per minute")])
 
@@ -205,9 +209,10 @@ logs = box(2620, YA, 860, [("b", "CloudWatch Logs"), ("n", "aws_cloudwatch_log_g
 sns = box(700, YB, 530, [("b", "Amazon SNS (component 11)"), ("n", "aws_sns_topic.alarms"),
                          ("n", "+ aws_sns_topic_subscription"), ("n", ".alarm_email")])
 alarms = box(1330, YB, 610, [("b", "CloudWatch alarms"), ("n", "aws_cloudwatch_metric_alarm:"),
-                             ("n", "unhealthy_hosts, no_healthy_hosts,"), ("n", "target_5xx (WAF metrics also here)")])
+                             ("n", "unhealthy_hosts, no_healthy_hosts,"), ("n", "target_5xx (all on ALB metrics)")])
 insights = box(2620, YB, 860, [("b", "Logs Insights saved queries"), ("n", "aws_cloudwatch_query_definition:"),
-                               ("n", "recent_problems, problems_per_minute")])
+                               ("n", "recent_problems, problems_per_minute"),
+                               ("n", "MON-02: 1 of the 2 queries works")])
 for i, t in enumerate(("Manifest component 10: security groups", "as trust boundaries (sg-alb, sg-app,",
                        "sg-db), named on the arrows between", "the zones.")):
     d.text((1990, YB + 6 + 37 * i), t, font=F_I, fill="#444444")
@@ -217,8 +222,8 @@ arrow([right(browser, 400), left(route53, 400)], BLUE, 5)
 label(615, 355, "DNS", BLUE, center=True)
 arrow([(310, browser[3]), (310, 860), left(alb, 860)], BLUE, 9)
 label(335, 790, "HTTPS 443\n(80 redirects)", BLUE, True)
-arrow([bot(route53, 1100), top(alb, 1100)], BLUE, 5)
-label(1115, 700, "alias", BLUE)
+arrow([bot(route53, 1100), top(alb, 1100)], GREY, 4, head="none")
+label(1115, 700, "alias A record", "#444444")
 arrow([right(alb, 860), left(fargate, 860)], BLUE, 9)
 label(1480, 770, "HTTP 8000\n+ /health/", BLUE, True, center=True)
 label(1480, 885, "sg-app: only\nfrom sg-alb", BLUE, False, center=True)
@@ -236,20 +241,24 @@ arrow([right(jobs, 1200), (2900, 1200), bot(rds, 2900)], GREEN, 5)
 label(2510, 1215, "5432: migrate,\nimport, refresh", GREEN)
 arrow([right(varA, 1480), (3200, 1480), bot(rds, 3200)], GREY, 5, dashed=True)
 label(3215, 1260, "variant A:\n5432 from its\nown sg-app", "#555555")
-arrow([top(s3, 2250), bot(jobs, 2250)], GREEN, 5)
+arrow([bot(jobs, 2250), top(s3, 2250)], GREEN, 5)
 label(2265, 1640, "import: dataset\ndownload", GREEN)
-arrow([right(analytics, 2130), (2300, 2130), bot(s3, 2300)], GREEN, 5)
+arrow([bot(analytics, 480), top(laptop, 480)], GREEN, 5)
+label(300, 1640, "dataset files", GREEN)
+arrow([right(laptop, 2130), (2300, 2130), bot(s3, 2300)], GREEN, 5)
 label(1960, 2100, "dataset files: aws s3 sync (jobs.sh import)", GREEN)
 
 # ------------------------------------------------------------------ secrets (purple)
-arrow([bot(fargate, 1740), (1740, 1760), (1560, 1760), top(secrets, 1560)], PURPLE, 5)
+arrow([bot(fargate, 1740), (1740, 1738), (1560, 1738), top(secrets, 1560)], PURPLE, 5)
 label(1760, 1500, "read at start-up\nwith the task role", PURPLE)
-arrow([bot(jobs, 2000), (2000, 1790), (1850, 1790), top(secrets, 1850)], PURPLE, 5)
+arrow([bot(jobs, 2000), (2000, 1738), (1850, 1738), top(secrets, 1850)], PURPLE, 5)
 label(2010, 1580, "job secrets;\noperator written", PURPLE)
+arrow([top(laptop, 150), (150, 1788), (1420, 1788), top(secrets, 1420)], PURPLE, 5)
+label(165, 1700, "secrets.sh:\nput-secret-value", PURPLE)
 
 # ------------------------------------------------------------------ logs and metrics (orange)
 arrow([right(fargate, 990), (2490, 990), (2490, 1730), (3000, 1730), top(logs, 3000)], ORANGE, 5)
-label(2505, 1560, "awslogs: JSON\nlog lines", "#b35a00")
+label(2505, 1500, "awslogs: web and\njob tasks, JSON\nlog lines", "#b35a00")
 arrow([bot(rds, 3400), top(logs, 3400)], ORANGE, 5)
 label(3415, 1440, "PostgreSQL\nlog export", "#b35a00")
 arrow([bot(logs, 3300), top(insights, 3300)], ORANGE, 5)
@@ -264,11 +273,11 @@ arrow([bot(appscale, 2500), (2500, 590), (2300, 590), top(fargate, 2300)], ORANG
 label(2020, 598, "DesiredCount 1 to 2", "#b35a00")
 
 # ------------------------------------------------------------------ deploy-time (dark, hollow head)
-arrow([right(laptop, 1600), (600, 1600), (600, 1950), left(ecr, 1950)], DARK, 6, head="hollow")
-label(615, 1700, "docker push", DARK, True)
-arrow([top(ecr, 1050), (1050, 1730), (1650, 1730), bot(fargate, 1650)], DARK, 6, head="hollow")
-label(1305, 1690, "image pull by digest", DARK, True)
-arrow([right(laptop, 1490), (640, 1490), (640, 1330), left(jobs, 1330)], DARK, 6, head="hollow")
+arrow([right(laptop, 1960), left(ecr, 1960)], DARK, 6, head="hollow")
+label(556, 1972, "docker\npush", DARK, True)
+arrow([bot(fargate, 1650), (1650, 1712), (1050, 1712), top(ecr, 1050)], DARK, 6, head="hollow")
+label(1305, 1676, "pull image by digest", DARK, True)
+arrow([right(laptop, 1915), (640, 1915), (640, 1330), left(jobs, 1330)], DARK, 6, head="hollow")
 label(1330, 1288, "aws ecs run-task", DARK, True)
 
 # ------------------------------------------------------------------ legend
@@ -290,10 +299,10 @@ for col, wd, t, dashed, head in ((BLUE, 8, "user traffic", False, "solid"), (GRE
     arrow([(x, 2563), (x + 80, 2563)], col, wd, dashed=dashed, head=head)
     d.text((x + 92, 2546), t, font=F_E, fill="#222222")
     x += 92 + int(d.textlength(t, font=F_E)) + 30
-d.text((60, 2610), "Thick arrows are the main request path (browser, ALB, task, RDS). Grey lines without heads attach the "
-       "certificate and the web ACL to the ALB.", font=F_E, fill="#444444")
-d.text((60, 2646), "Dashed box and dashed arrow: variant A, built and measured, not part of the final flow. Names such as sg-alb, "
-       "sg-app and sg-db are the security groups that enforce the boundaries.", font=F_E, fill="#444444")
+d.text((60, 2610), "Arrows point from the caller to the service it calls. Thick arrows: the main request path. Grey lines without heads: "
+       "attachments (Route 53 alias, certificate, web ACL). sg-alb, sg-app and sg-db are the security groups that enforce the boundaries.", font=F_E, fill="#444444")
+d.text((60, 2646), "Dashed box and dashed arrow: variant A, built and measured, not part of the final flow. CloudTrail (the account's default "
+       "event history, not Terraform) is not drawn.", font=F_E, fill="#444444")
 
 img.save(OUT, dpi=(300, 300))
 print(OUT, img.size)
