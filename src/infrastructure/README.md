@@ -133,10 +133,12 @@ src/infrastructure/scripts/up.sh fargate    # variant B
 
 **What `up.sh fargate` does**
 
-1. Same image step. It also stops with a clear message if the shared database was never set up (**on a brand-new database run `up.sh ec2` once first**: setting up the database needs tools the frozen image lacks, so only variant A does it).
+1. Same image step. Then it decides whether the shared database is fresh (the shared secrets are incomplete or there is no operator login yet). **On a fresh database nothing else is needed, no variant A**: it fills the secrets, creates the stack with zero tasks (the apply would otherwise wait for tasks that cannot be healthy before the database exists), runs `jobs.sh fargate all` as one-off tasks, then applies again with one task. An already set-up database skips this and goes straight to the next step.
 2. `tf.sh fargate plan` (first checking that the Dockerfile's start command and the copy in `fargate/ecs.tf` agree, [ADR-016](../../docs/decisions/ADR-016-fargate-health-probe-host-override.md)), then your `yes`, then apply. The apply returns when the service is steady, so a task that cannot start fails the apply instead of looping quietly. Expect about 27 to add.
 3. `jobs.sh fargate check` runs `check_database` as a one-off task, proving a task can reach the database.
 4. `smoke.sh fargate`.
+
+The Fargate database jobs run from the unchanged image: `import` downloads the dataset from the bucket with boto3 and loads it, and `operator` generates the password inside the task and stores it in the operator secret with boto3 (never printed; [`scripts/fargate_jobs/`](scripts/fargate_jobs/)). `trainer-sql` stays on variant A: the trainer login only serves the offline ML training. **Status:** tested offline with a stubbed `aws` (routing, skip logic, task overrides, the two programs against a stubbed boto3). **Not yet run in AWS**, and a run from a completely empty account would need a new domain delegation, so it cannot be fully proven here.
 
 The shops are at **https://shop-ec2.fourtytwofactors.me** and **https://shop-fargate.fourtytwofactors.me**. A hostname follows a new load balancer automatically.
 
@@ -222,7 +224,7 @@ All scripts are under `src/infrastructure/scripts/`, stop at the first error, an
 | `down.sh <ec2\|fargate\|loadgen>` | destroy the stack, list leftovers | end of a session |
 | `smoke.sh <ec2\|fargate\|hostname>` | 8 outside-in checks, no credentials needed | after any change |
 | `jobs.sh ec2 <job>` | one job on the instance through SSM: `bootstrap`, `migrate`, `trainer-sql`, `restart`, `check`, `import`, `operator`, `refresh`, `all` | fresh database; `check` any time |
-| `jobs.sh fargate <job>` | one job as a one-off ECS task: `bootstrap`, `migrate`, `check`, `refresh` (the rest need tools the frozen image lacks; use `jobs.sh ec2`) | `check` any time |
+| `jobs.sh fargate <job>` | one job as a one-off ECS task: `bootstrap`, `migrate`, `check`, `import`, `operator`, `refresh`, `all` (`trainer-sql` and `restart` are variant A only) | fresh database; `check` any time |
 | `tf.sh <base\|ec2\|fargate\|loadgen> plan\|apply` | fmt check, validate, saved plan, records the commit; applies only that plan, then backs up the state | used by `up.sh`; use directly for a faster or partial run |
 | `secrets.sh fill\|check` | complete or check the secrets (prints key names and match/DIFFER only) | `up.sh ec2` runs `fill`; `check` any time |
 | `secrets.sh master-in\|master-out` | used by `jobs.sh bootstrap`; do not run by hand | |
@@ -268,7 +270,7 @@ Everything running continuously is about USD 4 per day for one variant; the lab 
 | `the plan was made from commit X, HEAD is Y` | You committed after planning. Plan again |
 | A plan shows a replace (`-/+`) or destroy you did not expect | Stop and ask; do not apply |
 | `STOP: src/Dockerfile's CMD is not the command in fargate/ecs.tf` | Someone changed the Dockerfile's start command. Make `web_command` in `fargate/ecs.tf` match it ([ADR-016](../../docs/decisions/ADR-016-fargate-health-probe-host-override.md)) |
-| `up.sh fargate`: the shared secrets are empty | The database was never set up. Run `up.sh ec2` once first |
+| `up.sh fargate` stops partway on a fresh database | Run `up.sh fargate` again: finished jobs are skipped. If it stopped between the two applies, the stack may hold zero tasks until the rerun finishes |
 | `jobs.sh ec2`: `is not Online in Systems Manager` | The instance is still booting (about 3 to 4 minutes after launch). Rerun |
 | Variant A: target unhealthy, site returns 502/503 | Start a session (above) and read `docker logs web` and the cloud-init log |
 | Variant B: the apply fails or waits on the service | `aws ecs describe-services` (events, above) and `aws logs tail` show why the task stopped (image pull, role, the probe-host lookup) |

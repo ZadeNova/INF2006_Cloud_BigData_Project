@@ -48,13 +48,13 @@ variable "waf_login_action" {
 # Pin by setting all three to the same number, apply, and unpin the same way afterwards. Applying also resets a task
 # count that scaling has moved, so a run starts where the variables say.
 variable "min_capacity" {
-  description = "Smallest number of tasks scaling keeps."
+  description = "Smallest number of tasks scaling keeps. 0 is only for the first bring-up on a fresh database (scripts/up.sh fargate), while the database jobs run before any task can start."
   type        = number
   default     = 1
 
   validation {
-    condition     = var.min_capacity >= 1
-    error_message = "min_capacity must be at least 1."
+    condition     = var.min_capacity >= 0
+    error_message = "min_capacity must be 0 or more."
   }
 }
 

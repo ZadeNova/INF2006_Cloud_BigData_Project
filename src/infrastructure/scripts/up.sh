@@ -8,10 +8,12 @@
 #
 # Every target shows the Terraform plan and waits for you to type yes (--yes skips that). A stack's steps:
 #   ec2      image (pushed if none chosen) -> plan -> apply -> secrets -> every database job still needed -> smoke test
-#   fargate  image -> plan -> apply -> database check as a one-off task -> smoke test
+#   fargate  image -> plan -> apply -> database check as a one-off task -> smoke test.
+#            On a fresh database it first fills the secrets, applies with zero tasks, runs every database job as a
+#            one-off task, then applies again: nothing needs variant A.
 #   loadgen  plan -> apply -> prints how to open a shell on it
 # Stops at the first failure. Safe to run again. Needs: lab credentials (run labcreds first), a clean committed tree.
-# fargate shares the database that variant A set up; on a brand-new database run `up.sh ec2` once first.
+# Both variants share one database in base/. Either one can set it up on a fresh account; the other finds it ready.
 set -euo pipefail
 
 INFRA="$(cd "$(dirname "$0")/.." && pwd)"
@@ -136,13 +138,34 @@ up_ec2() {
   "$INFRA/scripts/smoke.sh" ec2
 }
 
-up_fargate() {
-  need_base; need_image fargate
-  # The tasks read the shared secrets and database. If variant A never set them up, the tasks would fail to start.
+# A database is "fresh" until the shared secrets are complete and the operator login exists (the last thing the database
+# jobs create). A stack that is already set up goes straight to the apply.
+database_is_fresh() {
   local web
   web="$(aws secretsmanager get-secret-value --region "$REGION" --secret-id inf2006-grp21/web --query SecretString --output text 2>/dev/null || echo '{}')"
-  printf '%s' "$web" | jq -e 'has("POSTGRES_PASSWORD") and has("DJANGO_SECRET_KEY")' >/dev/null 2>&1 \
-    || die "the shared secrets are empty: the database was never set up. Run scripts/up.sh ec2 once first (it fills the secrets and seeds the database), then fargate"
+  printf '%s' "$web" | jq -e 'has("POSTGRES_PASSWORD") and has("DJANGO_SECRET_KEY")' >/dev/null 2>&1 || return 0
+  aws secretsmanager get-secret-value --region "$REGION" --secret-id inf2006-grp21/operator >/dev/null 2>&1 || return 0
+  return 1
+}
+
+up_fargate() {
+  need_base; need_image fargate
+  local bringup="$INFRA/fargate/bringup.auto.tfvars"
+  if database_is_fresh; then
+    # The service waits for healthy tasks, and a task cannot be healthy before the database is set up. So: fill the
+    # secrets, create the stack with zero tasks (cluster and task definition exist, nothing runs), set the database up
+    # with one-off tasks, then apply again with the normal task count.
+    echo "Fresh database: bringing the stack up in two steps (zero tasks first, then the database jobs, then one task)."
+    echo "(While no task runs, the no-healthy-hosts alarm may send one email. Ignore it.)"
+    "$INFRA/scripts/secrets.sh" fill
+    trap 'rm -f "$bringup"' EXIT   # a failed run must not leave the stack pinned at zero tasks
+    printf 'min_capacity     = 0\ndesired_capacity = 0\n' > "$bringup"
+    plan_and_apply fargate
+    "$INFRA/scripts/jobs.sh" fargate all
+    rm -f "$bringup"
+  else
+    rm -f "$bringup"   # left over from an interrupted first run
+  fi
   plan_and_apply fargate
   "$INFRA/scripts/jobs.sh" fargate check
   "$INFRA/scripts/smoke.sh" fargate

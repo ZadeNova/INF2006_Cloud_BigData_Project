@@ -2,18 +2,20 @@
 # The one-off database and data jobs, one command each (ADR-009, ADR-017).
 #
 #   scripts/jobs.sh ec2 <bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all>
-#   scripts/jobs.sh fargate <bootstrap|migrate|check|refresh>
-#   all = everything a fresh database needs, in order: bootstrap, migrate, trainer-sql, restart (ends with
-#   check_database), import, operator, refresh. Safe to repeat: each job skips or changes nothing the second time.
+#   scripts/jobs.sh fargate <bootstrap|migrate|check|import|operator|refresh|all>
+#   all = everything a fresh database needs, in order: bootstrap, migrate, [ec2 only: trainer-sql, restart], import,
+#   operator, refresh. Safe to repeat: bootstrap is skipped when check_database already passes, and every other job
+#   skips or changes nothing the second time.
 #
 # ec2: runs through SSM Run Command (aws ssm send-command) on the stack's instance: no interactive session, output
 # printed here. If the lab denies SendCommand it says so; the manual Session Manager commands in
 # evidence/aws-build-runbook.md (Procedures) still work.
 # fargate: each job is a one-off ECS task (aws ecs run-task) from the stack's task definition, with the job's command
 # and secret name overriding the web container's; the script waits for it to stop, prints its log and fails on a
-# non-zero exit code. Only the four jobs that need nothing but the app image are offered; trainer-sql, import and
-# operator need psql, the AWS CLI or a data folder the frozen image does not have, so run those on variant A (the
-# database is shared). Needs the fargate/ stack to be up.
+# non-zero exit code. The frozen image has no psql, AWS CLI or data folder, so import and operator run as small Python
+# programs (boto3 and psycopg are in requirements.txt): import downloads the dataset from the bucket, operator stores
+# the password with boto3. trainer-sql and restart are offered on variant A only: the trainer login serves the offline
+# ML training, which is not part of running the shop. Needs the fargate/ stack to exist (zero tasks is enough).
 # bootstrap copies the RDS master login into the bootstrap secret for the run only, and puts the placeholder
 # back on exit even if the job fails (RDS rotates that password every 7 days; it must not sit in the secret).
 # import builds data/derived/shoes if missing, checks it against checksums.txt, uploads it to the bucket, then loads it
@@ -35,13 +37,13 @@ die() { printf 'STOP: %s\n' "$*" >&2; exit 1; }
 VARIANT="${1:-}"; JOB="${2:-}"
 case "$VARIANT" in
   ec2) JOBS="bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all" ;;
-  fargate) JOBS="bootstrap|migrate|check|refresh" ;;
-  *) die "usage: $0 <ec2|fargate> <job>   (ec2: bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all; fargate: bootstrap|migrate|check|refresh)" ;;
+  fargate) JOBS="bootstrap|migrate|check|import|operator|refresh|all" ;;
+  *) die "usage: $0 <ec2|fargate> <job>   (ec2: bootstrap|migrate|trainer-sql|restart|check|import|operator|refresh|all; fargate: bootstrap|migrate|check|import|operator|refresh|all)" ;;
 esac
 case "$JOB" in
-  bootstrap|migrate|check|refresh) ;;
-  trainer-sql|restart|import|operator|all)
-    [ "$VARIANT" = ec2 ] || die "'$JOB' is not offered on fargate (it needs tools or files the frozen image lacks). Run it on variant A: scripts/jobs.sh ec2 $JOB   (offered on fargate: $JOBS)" ;;
+  bootstrap|migrate|check|import|operator|refresh|all) ;;
+  trainer-sql|restart)
+    [ "$VARIANT" = ec2 ] || die "'$JOB' is only offered on variant A (it needs psql or the instance's Docker; the trainer login serves the offline ML training). Offered on fargate: $JOBS" ;;
   *) die "unknown job '$JOB' (for $VARIANT: $JOBS)" ;;
 esac
 for t in aws jq terraform; do command -v "$t" >/dev/null || die "$t is required"; done
@@ -100,15 +102,18 @@ remote() {
 }
 
 # ecs_task <label> <secret> <command...>: one-off task from the fargate stack's task definition. The command replaces
-# the web container's start command and AWS_SECRET_ID names the secret the job may read.
+# the web container's start command and AWS_SECRET_ID names the secret the job may read. EXTRA_ENV (a JSON list of
+# {name,value}) adds plain settings the job needs, never secrets.
+EXTRA_ENV='[]'
 ecs_task() {
   local label="$1" secret="$2"; shift 2
   local task id exit_code reason result
   printf '\n== %s ==\n' "$label"
   # The command goes in as a JSON list built from NUL-separated words, so words that look like options
   # (--noinput, --as-of) are not mistaken for options by jq.
-  jq -n --arg secret "$PREFIX/$secret" --argjson cmd "$(printf '%s\0' "$@" | jq -Rsc 'split("\u0000")[:-1]')" \
-    '{containerOverrides: [{name: "web", command: $cmd, environment: [{name: "AWS_SECRET_ID", value: $secret}]}]}' > "$TMP"
+  jq -n --arg secret "$PREFIX/$secret" --argjson extra "$EXTRA_ENV" \
+    --argjson cmd "$(printf '%s\0' "$@" | jq -Rsc 'split("\u0000")[:-1]')" \
+    '{containerOverrides: [{name: "web", command: $cmd, environment: ([{name: "AWS_SECRET_ID", value: $secret}] + $extra)}]}' > "$TMP"
   task="$(aws ecs run-task --region "$REGION" --cluster "$CLUSTER" --task-definition "$TASK_DEF" --launch-type FARGATE --count 1 \
     --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$APP_SG],assignPublicIp=ENABLED}" \
     --overrides "file://$TMP" --query 'tasks[0].taskArn' --output text)" \
@@ -125,6 +130,7 @@ ecs_task() {
   aws logs get-log-events --region "$REGION" --log-group-name "$LOG_GROUP" --log-stream-name "web/web/$id" \
     --query 'events[].message' --output text 2>/dev/null | tr '\t' '\n' || echo "(no log lines found in $LOG_GROUP, stream web/web/$id)"
   [ "$exit_code" = 0 ] || die "$label: exit code ${exit_code:-none} ($reason)"
+  EXTRA_ENV='[]'   # the settings belong to this job only
   echo "$label: ok"
 }
 
@@ -183,6 +189,11 @@ job_check() {
 
 job_operator() {
   # Skips if the operator secret already holds a value, so a rerun never replaces a password the database does not have.
+  if [ "$VARIANT" = fargate ]; then
+    EXTRA_ENV="$(jq -nc --arg r "$REGION" '[{name:"JOB_REGION", value:$r}]')"
+    ecs_task "operator" web python -c "$(cat "$INFRA/scripts/fargate_jobs/create_operator.py")"
+    return
+  fi
   remote "operator" "NS='$NAMESPACE'; $(cat <<'EOS'
 if aws secretsmanager get-secret-value --secret-id inf2006-grp21/operator >/dev/null 2>&1; then
   echo "operator secret already set; leaving the operator account as it is"; exit 0
@@ -212,7 +223,13 @@ job_import() {
   [ -f "$dir/customers.csv" ] || (cd "$REPO" && python3 analytics/build_shoe_dataset.py)
   (cd "$dir" && sha256sum -c checksums.txt >/dev/null) || die "$dir does not match checksums.txt; rebuild it with analytics/build_shoe_dataset.py"
   echo "Dataset checksums match."
-  aws s3 sync "$REPO/data/derived/shoes" "s3://$BUCKET/data/derived/shoes/" --region "$REGION" --only-show-errors
+  aws s3 sync "$REPO/data/derived/shoes" "s3://$BUCKET/data/derived/shoes/" --region "$REGION" --only-show-errors --delete
+  if [ "$VARIANT" = fargate ]; then
+    EXTRA_ENV="$(jq -nc --arg r "$REGION" --arg b "$BUCKET" --arg n "$NAMESPACE" \
+      '[{name:"JOB_REGION", value:$r}, {name:"JOB_BUCKET", value:$b}, {name:"JOB_NAMESPACE", value:$n}]')"
+    ecs_task "import_dataset" web python -c "$(cat "$INFRA/scripts/fargate_jobs/import_dataset.py")"
+    return
+  fi
   # The data is not in the image, so mount a copy read-only into a throwaway container (same settings as app-job).
   remote "import_dataset" "BUCKET=$BUCKET; NS='$NAMESPACE'; $(cat <<'EOS'
 rm -rf /var/lib/inf2006-data && mkdir -p /var/lib/inf2006-data/derived/shoes
@@ -224,6 +241,19 @@ EOS
 )"
 }
 
+# Everything a fresh database needs. Bootstrap is not repeatable, so it runs only if the app cannot already use the
+# database; the check runs in a subshell so its failure is an answer, not the end of the script.
+job_all() {
+  if (job_check) >/dev/null 2>&1; then
+    echo "check_database passes: the database is already set up, so bootstrap is skipped."
+  else
+    job_bootstrap
+  fi
+  job_migrate
+  if [ "$VARIANT" = ec2 ]; then job_trainer_sql; job_restart; fi
+  job_import; job_operator; job_refresh
+}
+
 case "$JOB" in
   bootstrap) job_bootstrap ;;
   migrate) job_migrate ;;
@@ -233,6 +263,6 @@ case "$JOB" in
   import) job_import ;;
   operator) job_operator ;;
   refresh) job_refresh ;;
-  all) job_bootstrap; job_migrate; job_trainer_sql; job_restart; job_import; job_operator; job_refresh ;;
+  all) job_all ;;
 esac
 echo; echo "Done: $JOB"
