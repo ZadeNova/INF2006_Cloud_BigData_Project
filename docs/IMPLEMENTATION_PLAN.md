@@ -12,6 +12,7 @@ Status checked: 9 October 2026 (AWS bullets and the phase 3 row updated from the
   - Contract: [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md) (describes variant A; the plan governs where they differ until the post-sprint documentation sync).
 
 - **Security evidence.** A separate session is running scans and recording evidence: [plan](plans/security-evidence-20-percent.md), raw output in `evidence/raw/SCAN-*`, CI scanning added.
+  - **9 October CI secret-scan fix verified locally; independent review cleared; hosted rerun pending.** Five historical false positives have commit-and-path suppressions; the pinned history scan passes over 197 commits. The tracked-tree scan still reports four reviewed raw-evidence matches because commit-scoped suppressions do not apply there. [Triage](../evidence/security-scan-triage.md#scan-01-follow-up-9-october-2026); [review](reviews/gitleaks-ci-false-positives.md).
 
 - **Application, analytics and ML: complete locally** on the shoe catalogue baseline (registration to order history, the operator analytics page, descriptive RFM segmentation). Local functional, security and data/AI evidence was recorded in September (`evidence/test-functional.md`, `test-security.md`, `test-data-ai.md`). The backend review gate for `0442665..HEAD` is still open.
 

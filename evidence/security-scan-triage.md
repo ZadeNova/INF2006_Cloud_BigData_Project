@@ -1,6 +1,6 @@
 # Security scan record and triage
 
-Run on 2026-10-01 at commit `e6732ff` (application source unchanged since 27 September; the working tree also held uncommitted docs and infrastructure scripts, which no scan covers). All scans ran locally in Docker on the committed tree or the locally built image, not in CI. A `security` job in [ci.yml](../.github/workflows/ci.yml) runs the same tools (gitleaks, pip-audit and `check --deploy` blocking; bandit, hadolint and both Trivy scans report-only, raw output uploaded as the `security-scans` artefact). That job is written and its YAML parses, but it has **not run on GitHub yet**, so no CI result is claimed. The one gitleaks suppression lives in [.gitleaks.toml](../.gitleaks.toml), scoped to that commit and file. Raw output is unchanged in [raw/](raw/); nothing was filtered or silenced. No scan used AWS credentials.
+Original run on 2026-10-01 at commit `e6732ff` (application source unchanged since 27 September; the working tree also held uncommitted docs and infrastructure scripts, which no scan covers). Those scans ran locally in Docker on the committed tree or the locally built image, not in CI. A `security` job in [ci.yml](../.github/workflows/ci.yml) runs the same tools (gitleaks, pip-audit and `check --deploy` blocking; bandit, hadolint and both Trivy scans report-only, raw output uploaded as the `security-scans` artefact). The job had not run on GitHub at the original record date; see the 9 October follow-up below. Gitleaks suppressions live in [.gitleaks.toml](../.gitleaks.toml), scoped to recorded commits and files. Raw output is unchanged in [raw/](raw/). No scan used AWS credentials.
 
 **Dispositions:** *Fixed*, *Accepted* (reason given), *False positive* (reason given), or *Open* (needs a decision from the named owner). Backend, `src/Dockerfile` and `requirements.txt` are frozen ([AGENTS.md](../AGENTS.md)); a finding that needs a change there is reported, not fixed.
 
@@ -24,7 +24,29 @@ An earlier gitleaks attempt the same day scanned 0 commits because the container
 
 | Finding | Disposition | Reason |
 |---|---|---|
-| `generic-api-key`, `evidence/test-security.md` line 11, commit `51e4ec1` (12 September) | **False positive** | The matched text is the prose "Authentication, ownership/CSRF and cloud security demonstrations remain unrun". The rule's entropy test fired on the word-like string; the report redacts it. No credential is present. |
+| `generic-api-key`, `evidence/test-security.md` line 11, commit `51e4ec1` (12 September) | **False positive** | Ordinary prose describing unrun security demonstrations; no credential is present. The report redacts the matched text. |
+
+### SCAN-01 follow-up, 9 October 2026
+
+The CI history scan was reproduced locally at `22b1f57` with the workflow's pinned Gitleaks v8.30.1 image (`ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f`). It reported five additional `generic-api-key` matches:
+
+| Finding location at introduction | Disposition | Reason |
+|---|---|---|
+| `0c8f910`, `evidence/raw/OPS_2026-10-09_fargate_down.txt`, line 979 | **False positive** | AWS WAF optimistic-lock metadata for the destroyed Fargate WebACL; it is not an authentication credential. |
+| `33963c5`, `evidence/raw/OPS_2026-10-08_ec2_down.txt`, line 928 | **False positive** | The same kind of metadata for the destroyed EC2 WebACL. |
+| `b1dc3d9`, `evidence/security-scan-triage.md`, line 27 | **False positive** | The original triage quoted the prose already classified above. The current explanation now paraphrases it. |
+| `b1dc3d9`, `evidence/raw/SCAN-06_2026-10-01_trivy-image.json`, lines 55 and 168 | **False positive** | Public Python image GPG signing-key fingerprint, recorded twice in image metadata; no private signing material. |
+
+Each additional allowlist requires both the full introduction commit and the exact evidence path. Default detection rules remain enabled; raw evidence and workflow behaviour are unchanged. AWS describes the WAF value's concurrency purpose in the [UpdateWebACL API](https://docs.aws.amazon.com/waf/latest/APIReference/API_UpdateWebACL.html).
+
+Local verification used the pinned image above, `--config /repo/.gitleaks.toml --redact --no-banner --no-color --report-format json`, and temporary report paths outside the repository. Both `--exit-code 0` (collection) and `--exit-code 1` (blocking) were run:
+
+| Target / command | Actual result |
+|---|---|
+| `git /repo`, current configuration over history at `22b1f57` | 197 commits scanned; zero findings; both runs exited 0. This matches the CI secret-scan gate. |
+| `dir /repo`, `git archive HEAD` snapshot with the edited configuration and triage text overlaid | Four matches remain in unchanged raw evidence (the two WAF values and two public fingerprints above); collection exited 0, blocking exited 1. Directory scans have no commit metadata, so commit-scoped suppressions do not apply. |
+
+The current tracked tree therefore has four reviewed false positives, not a clean blocking directory scan. These suppressions fix the history gate only. Reports are temporary local verification output, not new committed raw evidence; the [review record](../docs/reviews/gitleaks-ci-false-positives.md) records the checks. A hosted CI rerun remains pending; no hosted pass is claimed.
 
 ### SCAN-02 bandit (98 findings, all LOW)
 
