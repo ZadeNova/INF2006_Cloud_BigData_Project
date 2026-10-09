@@ -1,9 +1,10 @@
 # Problem framing and architecture — roadmap to a top score
 
-This file plans how to score as close to full marks as possible on the **Problem framing and
-architecture** rubric criterion (15 of 100 marks). It is a roadmap, not the deliverable itself —
-the actual diagram, report and manifest are produced elsewhere (`evidence/architecture.png`,
-`report.pdf`, `project_manifest.yaml`). Nothing here is implemented yet.
+This file originated as the roadmap for the **Problem framing and architecture** rubric criterion
+(15 of 100 marks). It is not the deliverable itself: the current diagram and manifest are
+`evidence/architecture.png` and `project_manifest.yaml`, while the report is finalised separately.
+The action wording below records the planning process; current status is stated explicitly where
+it has changed.
 
 ## Why this file exists
 
@@ -42,11 +43,11 @@ The work here is mostly *extraction and packaging*, not new design:
 | User need | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §1 (twofold: reliable order placement for customers, understandable sales/inventory information for the store operator) |
 | Baseline architecture and flows | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §7, [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Alternatives already reasoned about (unpolished, needs rewriting as report prose) | [ARCHITECTURE.md](ARCHITECTURE.md)'s "Failure boundaries and alternatives" section |
-| Cost-control measures | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §7 "Budget plan" (USD 30 of 40 working cap, ASG max 2, Single-AZ RDS, short log retention) |
+| Cost-control measures | [PROJECT_SCOPE_INF2006.md](../PROJECT_SCOPE_INF2006.md) §7 "Budget plan" (USD 30 of 50 working cap, ASG max 2, Single-AZ RDS, short log retention) |
 | Expected workload | [cloud-independent-prep.md](archive/plans/cloud-independent-prep.md) B1 (browse-heavy mix, small checkout share) |
 
-**Gaps:** the diagram doesn't exist yet; `report.pdf` and `project_manifest.yaml` don't exist yet;
-`ARCHITECTURE.md`'s alternatives are terse status notes, not the justified prose the report needs.
+**Current gap:** a labelled draft diagram and the populated manifest now exist. The team still has
+to approve the diagram and insert it into the final `report.pdf`.
 
 ## Roadmap
 
@@ -62,7 +63,7 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
    **Decided: frame the store as local (Singapore/SEA), not global.** This isn't just the safer
    choice, it's the honest one — the scope doc already says "a **small** ecommerce application"
    and "a **small** store operator," and the actual build is single-region, Single-AZ RDS, no
-   CloudFront, on a four-week/USD 30–40 budget. A "global ecommerce" framing would raise the bar a
+   CloudFront, on a four-week/USD 30 working cap. A "global ecommerce" framing would raise the bar a
    marker grades against (CDN, multi-region redundancy, data residency, currency/i18n) without any
    of it being built — under the marker principle that's a scope-claim the evidence can't back, and
    it makes "coherent architecture" *harder* to score well on, not easier. Framing it as local
@@ -100,8 +101,8 @@ Do this first. A diagram drawn before the reasoning is settled gets redrawn.
      nothing extra to include since it's already reasoned in `ARCHITECTURE.md`.
 
 4. **Assumptions, constraints, workload, cost-control (§5.1 third bullet — easy to forget as its
-   own paragraph).** Pull directly from the Budget plan section: USD 30 of the USD 40 lab account
-   as a working cap (~USD 10 reserved), ASG minimum 1 / test maximum 2, RDS Single-AZ as an
+   own paragraph).** Pull directly from the Budget plan section: a USD 30 working cap on the USD 50 lab account
+   as a working cap (~USD 20 reserved), ASG minimum 1 / test maximum 2, RDS Single-AZ as an
    explicit, named compromise (not hidden), short CloudWatch log retention, and browse-heavy
    expected traffic with a small checkout share (from the load-test plan).
 
@@ -217,11 +218,9 @@ repo, not generic terms:
 | Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected; SNS alert to the team; CloudTrail event history for API audit |
 | Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP 8000, internal), app to RDS (5432, TLS), browser to app for static images and 3D models (served by WhiteNoise from the image; no browser-to-S3 arrow), S3 to import command to RDS (data pipeline), secrets and image at instance boot |
 
-A review draft following this checklist was drawn on 25 September 2026 (outside the repository);
-the submission copy is still to be drawn in draw.io.
-
-Save both `evidence/architecture.drawio` (source, for traceability) and `evidence/architecture.png`
-(the path the manifest schema requires exactly).
+A labelled draft following this checklist is committed as `evidence/architecture.png`, with
+`evidence/architecture.md` as the text specification and `evidence/architecture.src.py` as its
+reproducible source. The team still needs to approve the draft before inserting it into the report.
 
 ### Phase C — wire it into the deliverables
 

@@ -3,7 +3,7 @@
 **Status:** Agreed planning baseline, 11 September 2026  
 **Team:** Five members  
 **Deadline:** Sunday, 11 October 2026, 11:59 PM, Singapore time  
-**Budget:** User-reported AWS student accounts accessed through Canvas, USD 40 credits per member  
+**Budget:** AWS student accounts accessed through Canvas; the Learner Lab page showed USD 50 credits per member. Credits remain separate, and the integration account keeps a conservative USD 30 working cap.
 **Decision:** Analytics is required. Descriptive customer-segmentation ML is included.
 **Data:** Ecommerce Sales Dataset (Analytics Engineering) is the selected source, chosen 22 September 2026 after Hugging Face access to LaelaZ/synthetic-ecommerce was never granted; generate missing application fields separately.  
 **Progression:** The submitted INF2006 application becomes the foundation for INF2003, which expands its database functionality locally.
@@ -272,11 +272,11 @@ For trusted browser HTTPS at ALB, confirm access to a certificate for a hostname
 
 ### Budget plan
 
-- Treat USD 40 per member as separate balances, not a pooled USD 200 deployment allowance.
+- Treat USD 50 per member as separate balances, not a pooled USD 250 deployment allowance.
 - Select one permitted integration account. Other members develop locally or perform isolated, authorised experiments in their own accounts; do not share account credentials.
 - Develop locally with Docker PostgreSQL; provision AWS for short deployment, load-test and evidence sessions.
 - Before each cloud session, estimate regional EC2, RDS, ALB, IPv4, S3 storage/requests/versions, logs and any secrets/network charges using current prices and remaining lab credits.
-- Working cap: plan at most USD 30 of the integration account's initial USD 40, preserving roughly USD 10 for final verification. Recalculate against the actual remaining balance. This is a spending target, not a service-price estimate.
+- Working cap: plan at most USD 30 of the integration account's initial USD 50, preserving roughly USD 20 for final verification. Recalculate against the actual remaining balance. This is a spending target, not a service-price estimate.
 - Restrict ASG maximum capacity and test duration. Set short log retention and capture evidence before teardown.
 - Track credit usage at session start/end. Alerts are notifications, not guaranteed spending caps.
 - Tear down lab resources after evidence sessions, including ALB and unused storage/snapshots as appropriate. Stopping EC2 alone does not stop all charges.

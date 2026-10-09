@@ -3,7 +3,7 @@ project:
   title: "42Factors: a small online shoe shop with a sales and inventory analytics dashboard, deployed and measured on AWS"
   problem_statement: "A small online shoe shop has two users with different problems. Customers need to register, browse sized products, keep a cart and place a simulated order that is never duplicated or oversold. The store operator needs an understandable view of sales trends and which sizes need replenishing. The project builds that shop (Django, PostgreSQL) on synthetic data and runs it on AWS, then measures how it scales and recovers. Two compute layouts for the same image and database were built and compared, EC2 behind an Auto Scaling group (variant A) and containers on ECS Fargate (variant B), one repeat each. Scope and requirements: PROJECT_SCOPE_INF2006.md section 1."
   cloud_provider: "AWS"
-  repository_commit: "" # optional commit hash, fill in near submission time
+  repository_commit: "" # optional in the brief; leave empty unless the team records a stable source revision
 
 team:
   members:
@@ -94,15 +94,15 @@ local_release:
   hosted_ci: "unverified for this revision"
   aws_integration: "variants A and B verified on 2026-10-08 and 2026-10-09 (evidence/test-security.md SEC-09, SEC-10, SEC-11, SEC-18, and SEC-17 on B only; evidence/test-functional.md FUNC-03 part 1)"
   load: "variants A (2026-10-08) and B (2026-10-09) measured, one repeat per condition (evidence/test-resilience.md, evidence/test-performance.md, evidence/load-summary.md; raw index evidence/raw/INDEX.md)"
-  submission_gap: "evidence/architecture.png remains absent; original project/team placeholders still require human completion"
-  status: "Phase 6 local implementation and independent review clear on 2026-09-26; later changes (shoe catalogue from merge 0442665 onward) await their logged independent review; hosted/deployed/submission gates remain open"
+  submission_gap: "A draft diagram exists at evidence/architecture.png; final team approval and insertion into report.pdf remain. The report cover still requires the final member list and source revision. The backend review gate for later changes remains open."
+  status: "Phase 6 local implementation and independent review cleared on 2026-09-26; variants A and B were deployed and measured on 2026-10-08 and 2026-10-09; final report and packaging work is in progress; later changes from merge 0442665 onward still await their logged independent review"
 
 # Extra field (not part of the brief's required structure): which repository paths prove each marking criterion.
 # Explained, with what each path shows, in README.md#rubric-to-evidence-map. evidence/README.md is the current index
 # of every test case; evidence/raw/ holds the unedited output behind each claim (supporting proof, not a reading list).
 rubric_evidence_map:
   index: "evidence/README.md"
-  problem_framing_and_architecture: # 15 marks; evidence/architecture.png is not yet supplied
+  problem_framing_and_architecture: # 15 marks; draft evidence/architecture.png awaits final team approval and report insertion
     - "PROJECT_SCOPE_INF2006.md"
     - "docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md"
     - "docs/ARCHITECTURE.md"

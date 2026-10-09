@@ -227,7 +227,7 @@ The old plan ([aws-terraform.md](../archive/plans/aws-terraform.md) and the stag
 - [ ] Logs Insights: the queries are saved on variant A (ADR-012); run one and export the result (MON-02).
 - [ ] Success thresholds fixed before running; each run mapped to its evidence ID (RES-03, MON-02, SEC-09 to SEC-11); the local RES-01, RES-02 and MON-01 cases run as a safety net.
 - [ ] The reference IAM policies and the threat-row update (above).
-- [ ] The architecture diagram `evidence/architecture.drawio` and `.png` with `inf2006-grp21-*` names (the brief requires it; missing).
+- [x] A labelled architecture diagram is present at `evidence/architecture.png`, with reproducible source at `evidence/architecture.src.py`; final team approval and report insertion remain.
 - [ ] A pre-destroy export checklist: Terraform outputs, redacted `describe` outputs, alarm history, CloudTrail events, Locust results, session costs.
 - [ ] A cloud reproduction guide (tracked in the implementation tracker, Phase 4).
 
@@ -243,7 +243,7 @@ Until the data is in, the primary architecture is undecided, so the contract doc
 | [AWS_INFRASTRUCTURE.md](../AWS_INFRASTRUCTURE.md) | The runtime contract (secrets, environment, TLS, health) is still valid; the baseline and setup-order text describe variant A only | Banner added; status line, setup order and integration checklist corrected 3 October 2026; later generalise "ASG instance" to "compute unit" | after data |
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | Describes variant A only | Banner added; status line and archived links corrected 3 October 2026; rewrite for the primary architecture | after data |
 | [PROBLEM_FRAMING_AND_ARCHITECTURE.md](../PROBLEM_FRAMING_AND_ARCHITECTURE.md) | Fargate rejected on D5 by argument, not measurement | Banner added; rewrite that paragraph and the matrix from the data | after data |
-| [PROJECT_SCOPE_INF2006.md](../../PROJECT_SCOPE_INF2006.md) sections 3 and 7 | Name EC2 and ASG as the cloud stack; the scope budget is USD 40 per member while the runbook records USD 50 | **User decision:** amend the scope for the comparison; reconcile the budget figure | user, soon |
+| [PROJECT_SCOPE_INF2006.md](../../PROJECT_SCOPE_INF2006.md) sections 3 and 7 | Name EC2 and ASG as the baseline cloud stack; the runbook records the measured USD 50 allocation | **Resolved 9 October:** the scope now records USD 50 per member while retaining the conservative USD 30 integration-account cap | complete |
 | [IMPLEMENTATION_PLAN.md](../IMPLEMENTATION_PLAN.md) | Status owner; rewritten 3 October 2026 around this comparison | Update as each step completes | continuous |
 | [load-harness.md](load-harness.md) | Draft harness plan for the load runs | Answer its section 3, then implement | before step 7 |
 | [submissions-plans.md](submissions-plans.md) | Parked submission plan | Start only once engineering is done | after data |

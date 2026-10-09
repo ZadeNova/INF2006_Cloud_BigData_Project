@@ -177,10 +177,10 @@ Read directly from the files named above; nothing was run against AWS.
 
 ## Known gaps between the diagram and the rest of the repository
 
-These were found while drawing and are reported, not edited.
+These were found while drawing. Items not explicitly marked resolved remain open.
 
 1. [threat-control-map.md](threat-control-map.md) (T7) cites `src/infrastructure/ec2/waf.tf`, and T9 and T11 cite `ec2/security_groups.tf`. Neither file exists; the WAF and the two stack security groups are in `modules/web-entry/` (`waf.tf`, `security_groups.tf`).
 2. [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) still carries the 1 October sprint note and describes variant A as the architecture; its last paragraph says `evidence/architecture.png` is a planned output. [docs/AWS_INFRASTRUCTURE.md](../docs/AWS_INFRASTRUCTURE.md) has a section headed "Variant B ... (designed, not built)" with a status line saying it was built.
-3. [evidence/README.md](README.md) lists `architecture.png` as missing, and `project_manifest.yaml` (`local_release.submission_gap` and a comment on `problem_framing_and_architecture`) says it is absent. Both need a one-line update now that the file exists.
+3. **Resolved 9 October 2026:** [evidence/README.md](README.md), `README.md` and `project_manifest.yaml` now record the diagram as a draft awaiting final team approval and report insertion.
 4. `src/infrastructure/terraform.tfvars` (git-ignored) holds `app_hostname = "shop.fourtytwofactors.me"`, which no stack declares; the hostnames in use are `shop-ec2.` and `shop-fargate.` from `base/certificate.tf`.
 5. MON-02: one of the two saved Logs Insights queries is rejected as malformed on both variants. The diagram shows both queries because both exist in Terraform; the table says which works.

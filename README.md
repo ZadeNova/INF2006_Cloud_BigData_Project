@@ -31,7 +31,7 @@ Each marking criterion, with the repository paths that prove it (the same map is
 
 | Criterion (marks) | Where to look | What it shows |
 |---|---|---|
-| Problem framing and architecture (15) | [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); [docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md](docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md); [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); [docs/decisions/](docs/decisions/) (ADR-001 to ADR-017) | The problem, the scope, the components and trust boundaries, and why each AWS choice was made. `evidence/architecture.png` is **not yet supplied** |
+| Problem framing and architecture (15) | [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); [docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md](docs/PROBLEM_FRAMING_AND_ARCHITECTURE.md); [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); [docs/decisions/](docs/decisions/) (ADR-001 to ADR-019) | The problem, scope, components, trust boundaries and final architecture decision. A draft diagram is at `evidence/architecture.png`; final team approval and report insertion remain |
 | Cloud implementation (20) | [src/infrastructure/](src/infrastructure/README.md) (Terraform: `base/`, `ec2/`, `fargate/`, `modules/`); [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md); [evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt](evidence/raw/OPS_2026-10-08_ec2_up_rerun.txt); [evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt](evidence/raw/SEC-10_2026-10-08_ec2_smoke.txt) | What is built (25 resources applied on variant A in one `up`), how, when, what failed, and the live shop passing 8 of 8 outside-in checks |
 | Cloud data and analytics/AI (20) | [evidence/test-data-ai.md](evidence/test-data-ai.md); [data/README.md](data/README.md); [analytics/](analytics/README.md); [evidence/raw/DATA-01_2026-10-08_aws_refresh.txt](evidence/raw/DATA-01_2026-10-08_aws_refresh.txt) | Dataset provenance, the analytics refresh checked independently (0 mismatches, local), the segmentation and its hold-out result (no predictive claim), and the refresh run on the deployed database |
 | Security (15) | [evidence/test-security.md](evidence/test-security.md); [evidence/threat-control-map.md](evidence/threat-control-map.md); [evidence/security-scan-triage.md](evidence/security-scan-triage.md); [docs/SECURITY.md](docs/SECURITY.md) | 19 threats mapped to controls and tests, local cases SEC-01 to SEC-16 PASS, cloud cases SEC-09/10/11/18 PASS on variant A, seven scans triaged with 4 open findings; the WAF block test SEC-17 runs on variant B only |
@@ -101,7 +101,7 @@ Private S3 -> validated dataset import -> RDS -> analytics summaries -> operator
 CloudWatch <- sanitised application logs and infrastructure metrics
 ```
 
-Application instances share database sessions and carts; no sticky sessions. Baseline autoscaling uses ALB request count per target. A final labelled architecture image, including trust boundaries, is planned at `evidence/architecture.png`; it is not yet supplied.
+Application instances share database sessions and carts; no sticky sessions. Baseline autoscaling uses ALB request count per target. A labelled draft architecture image, including trust boundaries, is at `evidence/architecture.png`; final team approval and report insertion remain.
 
 See [architecture](docs/ARCHITECTURE.md) and [AWS infrastructure](docs/AWS_INFRASTRUCTURE.md) for boundaries, deployment gates and trade-offs. RDS Single-AZ and one-instance normal operation are budget compromises; they do not provide uninterrupted availability. Failure demonstrations require two healthy application instances.
 
@@ -130,7 +130,7 @@ For development, begin with:
 3. [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md): current task, blockers and phase status.
 4. Only the relevant feature contracts listed below.
 
-The delivered application must run locally without paid AWS access for marking. Cloud deployment will require verified student-account permissions, available credits, region and an HTTPS certificate arrangement. Treat USD 40 per member as separate balances, not a pooled deployment budget. Develop locally and capture cloud evidence in bounded sessions before teardown.
+The delivered application must run locally without paid AWS access for marking. Cloud deployment requires verified student-account permissions, available credits, region and an HTTPS certificate arrangement. The Learner Lab showed USD 50 per member; balances are separate, not a pooled deployment budget. Develop locally and capture cloud evidence in bounded sessions before teardown.
 
 ## Continuous integration
 
@@ -178,7 +178,7 @@ TEAM_CONTRIBUTIONS.md         Contribution record
 AI_USE_DECLARATION.md         Tools, verification, licences and attribution
 ```
 
-`evidence/architecture.png` (with its text version `evidence/architecture.md`) is in the repository; `report.pdf` is added at submission time.
+A draft `evidence/architecture.png` (with its text version `evidence/architecture.md`) is in the repository; the team will approve the final diagram before inserting it into `report.pdf`, which is added at submission time.
 
 ## Current limitations and continuation
 

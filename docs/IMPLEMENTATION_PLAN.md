@@ -1,8 +1,8 @@
 # Implementation plan
 
-Status checked: 9 October 2026 (AWS bullets and the phase 3 row updated from the 8 October session; other entries as of 3 October). This file owns implementation status; [scope](../PROJECT_SCOPE_INF2006.md) owns requirements and dates. Everything finished before 1 October (every batch, review and phase entry) is in the [status history](archive/status-history.md); review logs are in [docs/reviews/](reviews/).
+Status checked: 9 October 2026 (AWS evidence and submission-document reconciliation updated; older unchecked items retain their original status). This file owns implementation status; [scope](../PROJECT_SCOPE_INF2006.md) owns requirements and dates. Everything finished before 1 October (every batch, review and phase entry) is in the [status history](archive/status-history.md); review logs are in [docs/reviews/](reviews/).
 
-## Current state (3 October 2026)
+## Current state (9 October 2026)
 
 - **Backend freeze (user decision, 1 October 2026).** The backend is frozen unless the user confirms an emergency; remaining work is AWS infrastructure, testing and evidence. Rules, the emergency process and the pinned-image consequence are in [AGENTS.md](../AGENTS.md#current-phase-backend-freeze-decided-by-the-user-1-october-2026).
 
@@ -18,7 +18,8 @@ Status checked: 9 October 2026 (AWS bullets and the phase 3 row updated from the
 
 - **Machine learning stays an offline batch job** (train, then the load command). Lambda and saved-model inference are not part of the plan (user decision, 3 October 2026).
 
-- **Submission** is parked until engineering is done: [submissions-plans.md](plans/submissions-plans.md). Deadline 11 October 2026, 23:59 SGT.
+- **Submission is in progress.** The report, manifest, README and functional evidence have been reconciled with the recorded A/B results; the contribution and AI declarations are final. Final architecture-diagram approval and report insertion, the remaining review gates and ZIP preflight are still open. Plan: [submissions-plans.md](plans/submissions-plans.md). Deadline 11 October 2026, 23:59 SGT.
+  - **9 October report audit follow-up:** the previously unknown Dior model source is now attributed in `src/static/models/CREDITS.md` to its Sketchfab author under CC BY 4.0; Section 2 now distinguishes the offline Fargate import path from the recorded variant-A import; Section 6 compares the recorded A/B scaling and replacement values side by side; Section 7 uses the task-only per-request figure; and Section 9 is reduced to a pointer to the final declaration. A PDF export rendered cleanly at 11 pages total, with the assessed body ending on page 10 before the references and appendix; this is within the 8-12-page limit excluding those end sections. The architecture image still needs insertion by a signed-in Google Docs editor because anonymous editing disables image insertion.
 
 ## Phases
 
@@ -27,7 +28,7 @@ Status checked: 9 October 2026 (AWS bullets and the phase 3 row updated from the
 | 1. Foundation and feasibility | 11-17 Sep | Complete: local foundation and dataset; lab permissions verified; variant A deployed behind HTTPS with RDS on 1 October | Verify account, HTTPS and dataset; scaffold local app and first AWS smoke deployment |
 | 2. Ecommerce and analytics | 18-24 Sep | Complete locally with functional, security and data/AI evidence (26 Sep); on AWS the S3 import and the workflow ran on variant A; the backend review gate for `0442665..HEAD` is open | AWS workflow/S3 import work; correctness/security/analytics tests pass |
 | 3. Scaling and recovery | 25 Sep-1 Oct | Window ended with the 1 October feature freeze; the AWS comparison sprint ([plan](plans/aws-ecs-comparison.md)) now carries this phase: variant A load, scaling, recovery and monitoring evidence recorded on 8 October 2026; variant B measured on 9 October 2026 | Dated scaling, recovery and monitoring evidence; freeze features |
-| 4. Reproduction and packaging | 2-8 Oct | Not started | Clean-machine rehearsal (offline and cloud reproduction, see the Phase 4 checklist), report, manifest and declarations complete |
+| 4. Reproduction and packaging | 2-8 Oct | In progress: clean-clone rehearsal recorded; report, manifest and evidence reconciliation underway; final diagram and ZIP preflight remain | Clean-machine rehearsal (offline and cloud reproduction, see the Phase 4 checklist), report, manifest and declarations complete |
 | 5. Submission and preservation | 9-11 Oct | Not started | Submit by 11 Oct 23:59 SGT; archive ZIP and tag exact commit |
 
 ## Phase checklists
@@ -67,6 +68,7 @@ Method, fairness controls and measurements are in [aws-ecs-comparison.md](plans/
   - run the manifest's `run.prerequisites` and `run.commands` literally from that clone;
   - rewrite the README's AWS status once the comparison evidence exists; state the AMI drift ("latest Amazon Linux 2023") in the write-up.
 - [ ] Complete the report's required headings, the architecture diagram (`evidence/architecture.png`), manifest links, contribution/AI declarations and traceable evidence; check every claim against actual output.
+- [x] Reconcile FUNC-03 Part 2 as not evidenced, remove its blank placeholders, and align the manifest, README and problem-framing roadmap with the draft-diagram/final-approval state (9 October 2026).
 - [ ] Post-sprint documentation sync: make AWS_INFRASTRUCTURE.md, ARCHITECTURE.md and the README describe the chosen architecture, and archive the comparison plan.
 
 ### Phase 5: submission and preservation
@@ -78,10 +80,10 @@ Method, fairness controls and measurements are in [aws-ecs-comparison.md](plans/
 
 | Item | Required decision/evidence |
 |---|---|
-| Lab account, balance, cost | Region `us-east-1` and permissions verified. The Learner Lab page showed USD 50 on 29 September, against the scope's USD 40 planning figure and USD 30 cap with USD 10 reserve. Credits do not pool; record the measured cost of each cloud session in the runbook |
+| Lab account, balance, cost | Region `us-east-1` and permissions verified. The Learner Lab page showed USD 50 per member; the integration account retained a USD 30 working cap and roughly USD 20 reserve. Credits do not pool; measured session cost is recorded in the runbook |
 | Comparison criteria and weights | The user fixes them before the first comparison run, so the result cannot be bent to a preferred answer |
 | Load-harness decisions | Locked by the user on 3 October 2026 ([load-harness.md](plans/load-harness.md) section 2) |
 | ElastiCache | Conditional; requires explicit selection, lab support, budget and measured value |
 | Dataset | The user accepted descriptive use of the synthetic dataset on 22 September 2026 (DATA-003); weak weekly variation does not rule out flat noise. See the [profile](../data/PROFILE.md) and [review log](reviews/analytics-data-import.md) |
-| Submission group ID | Fill in for submission packaging; member-name assignment is not a development task |
+| Submission group ID | `G021` is recorded in the manifest; the ZIP filename must be `Group_G021_INF2006_Project.zip` |
 | INF2003 reuse | Confirm lecturer policy and contribution attribution |

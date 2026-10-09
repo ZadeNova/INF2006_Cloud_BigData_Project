@@ -75,7 +75,7 @@ Explicitly handle cache read/write connection failures and timeouts; fall back t
 
 ## Operations and teardown
 
-Monitor latency/errors, target health, DB pressure and analytics freshness. Capture dated outputs and interpretation for an operational query/alert. Start with a USD 30 planning cap against the integration account's initial USD 40, reserve USD 10, and recalculate actual remaining funds. (The account's Learner Lab page showed USD 50 on 29 September 2026; the team keeps the more conservative cap.)
+Monitor latency/errors, target health, DB pressure and analytics freshness. Capture dated outputs and interpretation for an operational query/alert. Use a USD 30 planning cap against the integration account's USD 50 allocation, reserve roughly USD 20, and recalculate actual remaining funds. The team keeps this conservative cap even though the Learner Lab page showed USD 50 on 29 September 2026.
 
 Develop locally and deploy for bounded tests. Inventory charges: compute, ALB, RDS, IPv4, storage/snapshots, S3 versions, logs, secrets, ECR, SNS, CloudTrail, WAF. Capture evidence before teardown. Stopping EC2 does not stop all charges. Verify lab-end behaviour and delete only intended test resources. Do not claim uninterrupted availability.
 
