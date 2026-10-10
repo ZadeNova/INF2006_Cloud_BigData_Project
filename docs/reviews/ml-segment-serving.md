@@ -61,7 +61,6 @@ Reviewer /root/phase2_reviewer, explicitly gpt-6-astra / medium, Independent (fr
 | docs/archive/AWS_CAPABILITY_CHECK.md | 07c29a3edd205551aad7b4678ff842c4cfa1506ca6f6365d3abfcd66733e99f6 |
 | docs/AWS_INFRASTRUCTURE.md | 0c713775e77987d11158e6ddac3c2a5abf99c386b907d84ff6f41e5d6bd93c0b |
 | docs/IMPLEMENTATION_PLAN.md | da62ce6915c892c37681948ea348524caeb028b038d5420e285f5e9efcfc6b21 |
-| docs/INF2003_BASELINE.md | cb43c79814d78751e2fe62a67b319b5362995a5733b79a0c0a4df2b38d05c29d |
 | docs/SECURITY.md | 29c09d7aca787d62be73349bbe9c796e7a9a280ea67365084f52fc8370689416 |
 | docs/archive/plans/backend-aws-readiness.md | ad8dd619708f07c1f4c528db4660967fe201ed636f5aaa8253abfddab395d38b |
 | docs/archive/plans/cloud-independent-prep.md | 64d1547b1d7b0dbbb85ffb2bad1d168b129fef3a687dd4f8d9f9124b53e17878 |

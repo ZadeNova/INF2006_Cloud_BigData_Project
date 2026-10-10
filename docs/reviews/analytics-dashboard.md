@@ -13,7 +13,7 @@ Phase 4 is complete locally. The review and cleanup concluded without a commit o
 - Coordinator `/root` managed delegation and this log/status documentation; did not review or fix implementation code.
 - No worktree, branch switch, pull, rebase, reset, staging, commit or push. Original draft below is preserved as historical implementer evidence, not independent clearance.
 
-Contracts: [review gate](../DEVELOPMENT.md#backend-review-gate), [6c](../archive/plans/batch-06c-dashboard.md), [scope](../../PROJECT_SCOPE_INF2006.md), [API](../API.md), [analytics](../ANALYTICS.md), [frontend](../FRONTEND.md), [architecture](../ARCHITECTURE.md), [schema](../SCHEMA.md), [security](../SECURITY.md), [testing](../TESTING.md), [INF2003](../INF2003_BASELINE.md), [design](../../DESIGN.md), current roadmap/status/tracker and existing reporting queries/ranges/models/refresh dependencies.
+Contracts: [review gate](../DEVELOPMENT.md#backend-review-gate), [6c](../archive/plans/batch-06c-dashboard.md), [scope](../../PROJECT_SCOPE_INF2006.md), [API](../API.md), [analytics](../ANALYTICS.md), [frontend](../FRONTEND.md), [architecture](../ARCHITECTURE.md), [schema](../SCHEMA.md), [security](../SECURITY.md), [testing](../TESTING.md), [design](../../DESIGN.md), current roadmap/status/tracker and existing reporting queries/ranges/models/refresh dependencies.
 
 Snapshot digest algorithm: SHA-256 of lexically sorted `path:lowercase-file-SHA256` lines, joined with LF and no trailing LF, encoded UTF-8.
 
@@ -99,7 +99,7 @@ Luna Max:
 - No comprehensive keyboard, screen-reader, cross-browser or viewport matrix; no forced browser 500/transport-error run. Actual 403 retention verified in round 1.
 - Final filled/outlined category styling was inspected against supported configuration but not visually rerun after browser capability became unavailable.
 - Vendor files matched recorded local checksums; upstream bytes were not downloaded again.
-- No AWS, deployment, load/performance, scheduler, cache, export, ML or INF2003 evidence or expansion.
+- No AWS, deployment, load/performance, scheduler, cache, export or ML evidence or expansion.
 - Reviewer round 1/2 resources fully removed; round 3 created none. One round 1 fixture date was initially rejected by the matching-cutoff guard and then corrected to explicit 2024-05-08 in disposable data.
 - Frontend fixer used the default `inf2006-foundation` project. Its initial `docker compose up --build -d --wait` created a network/volume but web startup failed because the pre-existing `inf2006-dashboard-frontend-web-1` occupied port 8000; that pre-existing project was not touched. Temporary port-8016 browser container was stopped/removed.
 - Automatic approval review rejected `docker compose down -v --remove-orphans`: the PostgreSQL volume might contain unrelated local data and deletion authority was not established. The coordinator therefore preserved it. Read-only metadata confirmed `inf2006-foundation_postgres_data` was created 2026-09-22T16:39:21Z with matching project labels; The coordinator then requested cleanup of only the three named task-created containers, this volume and its network, guarded by exact creation time/project-label checks. Automatic approval review rejected it before execution because explicit user authorization is required for force-removal and irreversible PostgreSQL volume deletion even after provenance verification. No cleanup workaround was attempted. The user subsequently explicitly authorized deletion; completion is recorded below.
@@ -134,7 +134,7 @@ Task: `analytics-dashboard`, 22 September 2026. **Phase 4 is implemented locally
 
 The checkout is `CL/Analytics` at the requested review base `df29b82311ec1a29ed0b21aa1e144de23af76186`. The frontend task preserved the uncommitted Astra backend changes already present. No reset, rebase, discard, staging, commit or push was performed.
 
-The integrated change covers the shared HTMX login mixin, reporting permission migration and seed grant, protected dashboard view/context, full and fragment templates, operator navigation, responsive dashboard styling, accessible table alternatives, Chart.js 4.4.7 vendoring and chart lifecycle/error handling. Analytics formulas, SQL queries, the Phase 3 pandas verifier, AWS, scheduling, caching, ML and INF2003 remain untouched.
+The integrated change covers the shared HTMX login mixin, reporting permission migration and seed grant, protected dashboard view/context, full and fragment templates, operator navigation, responsive dashboard styling, accessible table alternatives, Chart.js 4.4.7 vendoring and chart lifecycle/error handling. Analytics formulas, SQL queries, the Phase 3 pandas verifier, AWS, scheduling, caching and ML remain untouched.
 
 Requirements: [6c plan](../archive/plans/batch-06c-dashboard.md), [analytics contract](../ANALYTICS.md), [API/context](../API.md#analytics-backend-context), [review gate](../DEVELOPMENT.md#backend-review-gate).
 
@@ -174,6 +174,6 @@ Using the Codex in-app browser against the imported-data stack as `demo-operator
 - The JavaScript includes both `htmx:responseError` and `htmx:sendError` handling, with a safe `#analytics-panel` fallback for transport failures. This extends the 6c error contract without changing backend behaviour.
 - The mobile header controls now wrap within the viewport so the added Analytics link does not create page-level horizontal overflow at the requested mobile size. This is a scoped responsive fix in the shared stylesheet.
 - Direct Chart.js instance-count and visible failed-request-banner evidence are deferred because the available in-app browser exposes a read-only DOM/runtime bridge. Independent Astra Medium review and a normal-browser e2e run remain outstanding.
-- No production placeholder templates, analytics formula changes, query rewrites, cache integration, AWS changes, scheduler work, ML work or INF2003 work were added.
+- No production placeholder templates, analytics formula changes, query rewrites, cache integration, AWS changes, scheduler work or ML work were added.
 
 Independent Astra Medium review has **not run** and the Phase 4 gate is **not cleared**. The next reviewer should inspect the complete tracked/untracked diff, frontend/backend contract together and the verification limits above.

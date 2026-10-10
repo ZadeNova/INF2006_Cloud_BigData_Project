@@ -29,7 +29,7 @@ Fix statements that are false today. Do not restructure documents, rewrite histo
 **Not changed, and why**
 
 - `docs/reviews/*`: dated records of what a reviewer saw.
-- `PROJECT_SCOPE_INF2006.md`, `AGENTS.md`, `CLAUDE.md`, `docs/ANALYTICS.md`, `docs/SECURITY.md`, `docs/AWS_INFRASTRUCTURE.md`, `docs/DEVELOPMENT.md`, `docs/INF2003_BASELINE.md`: checked, no false statements found.
+- `PROJECT_SCOPE_INF2006.md`, `AGENTS.md`, `CLAUDE.md`, `docs/ANALYTICS.md`, `docs/SECURITY.md`, `docs/AWS_INFRASTRUCTURE.md`, `docs/DEVELOPMENT.md`: checked, no false statements found.
 - `analytics/README.md`, `data/DATA_DICTIONARY.md`, `data/PROFILE.md`: accurate and dated.
 - `project_manifest.yaml` (not Markdown): still has TODO fields; listed for the user.
 - `TEAM_CONTRIBUTIONS.md`, README team table, `AI_USE_DECLARATION.md`: need the team's own facts; inventing them would breach the attribution rule. Listed for the user.

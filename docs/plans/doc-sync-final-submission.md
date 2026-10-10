@@ -29,7 +29,7 @@ Goal: the brief's README contents and nothing else. Target about 100 lines (was 
 
 - **Keep:** title, one-paragraph problem, status, quickstart, architecture image, technology list, team, known limitations.
 - **Add:** a short results table (A and B, n = 1) and an evidence table keyed to the brief's test categories.
-- **Remove (already owned elsewhere):** the 600-word status paragraph and the rubric table (the manifest's `rubric_evidence_map` and [evidence/README.md](../../evidence/README.md)); the documentation index ([docs/GUIDE.md](../GUIDE.md)); agent and model-assignment text ([AGENTS.md](../../AGENTS.md)); CI, INF2003 and repository-history paragraphs.
+- **Remove (already owned elsewhere):** the 600-word status paragraph and the rubric table (the manifest's `rubric_evidence_map` and [evidence/README.md](../../evidence/README.md)); the documentation index ([docs/GUIDE.md](../GUIDE.md)); agent and model-assignment text ([AGENTS.md](../../AGENTS.md)); CI and repository-history paragraphs.
 - **Rule:** every figure is copied from a file in `evidence/`; no new claim.
 
 ## Verification

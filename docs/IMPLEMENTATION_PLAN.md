@@ -78,7 +78,7 @@ Method, fairness controls and measurements are in [aws-ecs-comparison.md](plans/
 ### Phase 5: submission and preservation
 
 - [ ] Validate ZIP structure, required artefacts, links and absence of secrets/personal data.
-- [ ] Submit by the deadline; preserve the exact ZIP and tag the INF2006 baseline for later INF2003 work.
+- [ ] Submit by the deadline; preserve the exact ZIP and tag its commit.
 
 ## Open items
 
@@ -90,4 +90,3 @@ Method, fairness controls and measurements are in [aws-ecs-comparison.md](plans/
 | ElastiCache                     | Conditional; requires explicit selection, lab support, budget and measured value                                                                                                                                                                    |
 | Dataset                         | The user accepted descriptive use of the synthetic dataset on 22 September 2026 (DATA-003); weak weekly variation does not rule out flat noise. See the [profile](../data/PROFILE.md) and [review log](reviews/analytics-data-import.md)            |
 | Submission group ID             | `G021` is recorded in the manifest; the ZIP filename must be `Group_G021_INF2006_Project.zip`                                                                                                                                                       |
-| INF2003 reuse                   | Confirm lecturer policy and contribution attribution                                                                                                                                                                                                |

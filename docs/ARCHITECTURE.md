@@ -30,11 +30,11 @@ Replaceable app instances do not guarantee invisible failures. Retry uncertain c
 If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded expiry and explicit database fallback. Cache outage increases database load; this does not classify the whole app as CP/AP.
 
 - One Django deployment reduces integration work compared with a separate SPA/API.
-- Managed RDS demonstrates cloud persistence; local Docker PostgreSQL supports reproducibility and INF2003.
+- Managed RDS demonstrates cloud persistence; local Docker PostgreSQL supports reproducibility.
 - The final architecture is variant B (ECS on Fargate, [ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)); the ALB/ASG variant A was measured against it as the evaluated alternative ([plan](plans/aws-ecs-comparison.md)). Queues/microservices are outside baseline.
 - CloudFront omitted for current workload/budget; private S3 retained for datasets and exports.
 - Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([comparison plan](plans/aws-ecs-comparison.md), [decisions](decisions/)).
 
-The submission diagram is [evidence/architecture.png](../evidence/architecture.png) (users, services, trust boundaries, flows, observability); its text version, with every label mapped to Terraform and evidence, is [evidence/architecture.md](../evidence/architecture.md). INF2003 extends the preserved submission later.
+The submission diagram is [evidence/architecture.png](../evidence/architecture.png) (users, services, trust boundaries, flows, observability); its text version, with every label mapped to Terraform and evidence, is [evidence/architecture.md](../evidence/architecture.md).
 
 Local startup uses root compose.yaml to include src/compose.yaml (Compose 2.20+). The one-off migrate service waits for healthy PostgreSQL; web waits for migration success. This preserves the existing local project/volume and does not change the separate AWS coordinated-migration strategy.

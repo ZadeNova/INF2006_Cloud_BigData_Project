@@ -2,8 +2,8 @@
 
 Every query takes one AnalyticsRun and never selects across runs (docs/ANALYTICS.md: readers select one
 completed run). All aggregation is SQL over the precomputed reporting_dailyproductsales rows and the sealed
-inventory snapshot, with the SQL kept as named constants so the same queries can be reused and explained
-(docs/INF2003_BASELINE.md rule 4). Dates are business dates (Singapore calendar dates).
+inventory snapshot, with the SQL kept as named constants so the same queries can be reused and explained.
+Dates are business dates (Singapore calendar dates).
 """
 from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP

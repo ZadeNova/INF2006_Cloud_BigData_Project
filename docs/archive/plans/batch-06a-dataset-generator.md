@@ -1,6 +1,6 @@
 # Batch 6a (alternative) — deterministic dataset generator
 
-Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Companion to [batch-06a-data-import.md](batch-06a-data-import.md). Contracts: [DATA_PIPELINE.md](../../DATA_PIPELINE.md), [SCHEMA.md](../../SCHEMA.md), [ANALYTICS.md](../../ANALYTICS.md), [INF2003 baseline](../../INF2003_BASELINE.md).
+Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Companion to [batch-06a-data-import.md](batch-06a-data-import.md). Contracts: [DATA_PIPELINE.md](../../DATA_PIPELINE.md), [SCHEMA.md](../../SCHEMA.md), [ANALYTICS.md](../../ANALYTICS.md).
 
 ## Context
 
@@ -9,7 +9,6 @@ Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Companio
 - **Fixtures the real dataset cannot provide:** the isolated, resettable load-test fixture with sufficient stock and repeatable shoppers, kept separate from historical data per DOC-002 (`PROJECT_SCOPE_INF2006.md`'s "maintain three fixtures" rule). The tiny hand-checkable correctness fixture is written inline in the import tests and does not need this generator.
 - **Better analytics story, if wanted:** patterns are planted and known, so the dashboard can be shown to recover them (weekly pattern, popular products, a price change). Whether the real dataset needs this supplement depends on what `analytics/profile_dataset.py` reports about its sales signal.
 - **Second-line fallback:** if profiling rejects the real dataset on integrity grounds, this becomes the primary source again, and the substitution is recorded.
-- **INF2003:** a seeded scale-up, if the real dataset's ~100,000 orders prove insufficient for that module's benchmarks.
 
 The generator writes the **same four-table CSV schema** as the source dataset, so `import_dataset` (6a) is unchanged and needs no second reader. Every planted parameter is documented, and results on it validate the method, not real demand (stated as a limitation in every place it is used).
 
@@ -18,7 +17,7 @@ The generator writes the **same four-table CSV schema** as the source dataset, s
 1. **Location and runner.** Core code in `src/config/dataset_generator.py` and a `generate_dataset` management command, beside the importer, **recommended**. The container image copies only `src/` and mounts only `tests/`, so a generator under `data/` or `analytics/` could not be tested in the project's Docker test flow. Run on the host through Compose: `docker compose run --rm --user "$(id -u):$(id -g)" -v "$PWD/data:/app/data" web python manage.py generate_dataset --out /app/data/generated` (the `--user` avoids root-owned output files).
 2. **Dependencies.** Python standard library only: `random.Random(seed)` for draws and `csv` for output. `pyarrow` is **not** needed — the source is CSV, so the importer reads CSV with `csv.DictReader` and the generator writes it the same way (the originally planned `pyarrow` dependency was dropped, see [batch-06a-data-import.md](batch-06a-data-import.md) decision 6). No numpy or pandas in the web image.
 3. **Timeline and timestamps.** Defaults are sized for the generator's actual purpose rather than mirroring a source dataset: enough customers, products and orders for a repeatable load fixture, over a window that includes a leap day so date handling is exercised. Proposed: 2,000 customers, 200 products, 20,000 orders, 366 days from 2024-01-01, all overridable by flag. (The earlier defaults mirrored the superseded LaelaZ dataset's shape and no longer track anything.) Order and signup times are naive local timestamps in the same textual form as the source CSVs; the import's timezone assumption applies.
-4. **Events table.** Not generated. It is not imported (INF2003 baseline rule 5 keeps it raw only for the real dataset), so generating it would be unused code. Documented as a difference.
+4. **Events table.** Not generated. It is not imported, so generating it would be unused code. Documented as a difference.
 5. **Planted customer segments and truth file.** Customers are drawn from four latent segments; an optional `customer_segments.csv` (customer ID and segment, never imported) records the truth, **recommended**. It allows K-means (batch 6d, if it happens) to be evaluated against known structure, with the caveat that we planted it.
 6. **Status mix.** 80% completed, 10% refunded, 10% cancelled (the source is about 67% completed). More completed sales give more analytics signal while still exercising exclusion.
 7. **Committing output.** Commit the generator, its documented parameters and checksums of the default output; commit the default output itself only if it is small (under about 20 MB), so a marker has sample data without generating. Larger scale outputs are never committed.
@@ -47,7 +46,7 @@ Orders are allocated to days by weighted sampling with the day weight (weekday x
 
 - **`src/config/dataset_generator.py`:** pure functions returning table data (lists of dicts or column lists) for customers, products, orders, order items and the optional truth table, plus `write_csv(tables, out_dir)` using the standard-library `csv` module, with the source's exact column names and textual formats (matching `data/raw/DATA_DICTIONARY.md` and the schema recorded in `data/DATA_DICTIONARY.md`). Parameters live in one documented constants block.
 - **`src/config/management/commands/generate_dataset.py`:** `--out DIR`, `--seed 42`, `--customers`, `--products`, `--orders`, `--start YYYY-MM-DD`, `--days 366`, `--with-truth`. Refuses to overwrite an existing output directory unless `--force`. Prints row counts, date range and the SHA-256 of each file.
-- **Scale option:** `--orders 1000000` streams rows straight to `csv.writer` day by day, so memory stays bounded without any chunking machinery. Measure and record the actual run time; do not quote a figure before measuring. Scale outputs are for load and INF2003 fixtures.
+- **Scale option:** `--orders 1000000` streams rows straight to `csv.writer` day by day, so memory stays bounded without any chunking machinery. Measure and record the actual run time; do not quote a figure before measuring. Scale outputs are for load fixtures.
 - **Compose:** a read-only `../data:/app/data:ro` mount on the `web` service so the importer can read `/app/data/...` in the container (also required by the import plan); the generator run overrides it read-write as shown above.
 - **Docs:** `data/README.md` (generator section: purpose, parameters table, how to run, checksums, "planted structure, not real behaviour"), `data/DATA_DICTIONARY.md` (fields of the generated tables), DATA_PIPELINE.md (record the substitution or the fixture role), `project_manifest.yaml` (`data_ai.dataset`, `reproducible_command`), `AI_USE_DECLARATION.md` (generator code is AI-assisted and verified by tests).
 - **Profile compatibility:** `analytics/profile_dataset.py` accepts `--source DIR` so the same profile runs on generated data and reports whether the planted structure is detectable.
@@ -69,4 +68,4 @@ Run `generate_dataset` through Compose with the default seed; record row counts,
 
 ## Out of scope
 
-Clickstream events, real-world realism claims, ML on the data (batch 6d), load user accounts (separate disposable load fixture), and any INF2003 schema.
+Clickstream events, real-world realism claims, ML on the data (batch 6d), load user accounts (separate disposable load fixture).

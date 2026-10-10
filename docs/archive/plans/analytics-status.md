@@ -52,7 +52,6 @@ The scheduler that triggers `refresh_analytics` periodically is deliberately **n
 - Aggregation is SQL (the view, `PUBLISH_SQL`, the constants in `queries.py`), not Python or the ORM. Checkout and cart stay on the ORM.
 - `refresh_analytics` never creates or falls back to an inventory; that is explicit (DOC-001).
 - Compare applies to sales metrics only, never to coverage or flags, and shows "insufficient history" or "n/a" rather than a percentage against zero.
-- INF2003 guardrails apply: [INF2003_BASELINE.md](../../INF2003_BASELINE.md).
 
 ## Practical gotchas
 

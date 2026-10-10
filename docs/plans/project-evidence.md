@@ -58,7 +58,7 @@ Sanitised request logging is implemented (`config/jsonlog.py`, `tests/test_reque
 
 ## C2 and C3: diagrams
 
-- **ER diagram** from the actual models (accounts, catalogue, cart, orders, reporting). One diagram serves both modules (INF2003 baseline rule 8): it needs one-to-many, many-to-one and many-to-many relationships, so check whether the current models show many-to-many before INF2003 relies on it.
+- **ER diagram** from the actual models (accounts, catalogue, cart, orders, reporting). It should show the one-to-many, many-to-one and many-to-many relationships.
 - **Architecture diagram** (`evidence/architecture.png`): show trust boundaries, data stores and data flows including the analytics refresh path. Mark anything not yet deployed as planned. Provide alternatives considered (for example a managed container service versus ASG on EC2) for the "two alternatives" criterion.
 
 ## C4: test results to record now
@@ -71,7 +71,7 @@ The application has an automated suite (the latest recorded count is in [tests/R
 
 ## Report and packaging
 
-Eight headings (scope §13): problem and users, solution and architecture, cloud choices and trade-offs, implementation and security, analytics with evaluation and limits, testing and scaling results, cost and operations, contribution and reflection. 8 to 12 pages excluding references and appendices. Packaging checks (later): ZIP structure `Group_Gxxx_INF2006_Project.zip`, manifest paths resolve, no secrets or personal data, clean-machine rehearsal by a teammate from the README, exact commit tagged for INF2003.
+Eight headings (scope §13): problem and users, solution and architecture, cloud choices and trade-offs, implementation and security, analytics with evaluation and limits, testing and scaling results, cost and operations, contribution and reflection. 8 to 12 pages excluding references and appendices. Packaging checks (later): ZIP structure `Group_Gxxx_INF2006_Project.zip`, manifest paths resolve, no secrets or personal data, clean-machine rehearsal by a teammate from the README, exact commit tagged.
 
 ## Order of work
 

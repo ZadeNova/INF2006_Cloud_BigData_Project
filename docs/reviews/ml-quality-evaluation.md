@@ -12,7 +12,7 @@ Implementer `/root/phase3_implementer`: explicit `gpt-6-astra`, reasoning `low`.
 
 Agreed implementer scope: `analytics/segment_customers.py`, new `analytics/evaluate_segments.py`, focused `analytics/tests/test_segment_customers.py` and producer/loader integration test as needed, `.github/workflows/ci.yml`, ML sections of `analytics/README.md` and `docs/ANALYTICS.md`, analytics CI/descriptive demo portions of `docs/TESTING.md`, short-history clarification in scope section 6, aggregate `evidence/ml-quality-evaluation.json`, its entry in `evidence/test-data-ai.md`, and `project_manifest.yaml` evaluation links. No loader, frontend, model, migration, production dependency or teammate data edits.
 
-Requirements: [analytics contract](../ANALYTICS.md), [data pipeline](../DATA_PIPELINE.md), [schema](../SCHEMA.md), [testing](../TESTING.md), [development gate](../DEVELOPMENT.md#backend-review-gate), [architecture](../ARCHITECTURE.md), [INF2003 isolation](../INF2003_BASELINE.md), scope sections 5–6; original M-01–07, M-12, READY-008/010 in [readiness dispositions](backend-aws-readiness.md) and [original Opus review](../archive/latest-opus5.5-review.md).
+Requirements: [analytics contract](../ANALYTICS.md), [data pipeline](../DATA_PIPELINE.md), [schema](../SCHEMA.md), [testing](../TESTING.md), [development gate](../DEVELOPMENT.md#backend-review-gate), [architecture](../ARCHITECTURE.md), scope sections 5–6; original M-01–07, M-12, READY-008/010 in [readiness dispositions](backend-aws-readiness.md) and [original Opus review](../archive/latest-opus5.5-review.md).
 
 ## Dataset decision
 

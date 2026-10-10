@@ -8,8 +8,6 @@
 **Budget:** AWS student accounts accessed through Canvas; the Learner Lab page showed USD 50 credits per member. Credits remain separate, and the integration account keeps a conservative USD 30 working cap.
 **Decision:** Analytics is required. Descriptive customer-segmentation ML is included.
 **Data:** Ecommerce Sales Dataset (Analytics Engineering) is the selected source, chosen 22 September 2026 after Hugging Face access to LaelaZ/synthetic-ecommerce was never granted; generate missing application fields separately.  
-**Progression:** The submitted INF2006 application becomes the foundation for INF2003, which expands its database functionality locally.
-
 ## 1. Purpose and intended outcome
 
 Build 42Factors, a small online shoe shop, where a customer can register, browse products, manage a cart, complete a simulated checkout, and view their orders. A store operator can use a protected analytics page to identify sales trends and products requiring replenishment attention.
@@ -151,7 +149,7 @@ Record the source URL, downloaded date, file checksums, licence notice and attri
 ### Where to download the dataset
 
 - Dataset and data dictionary: https://www.analyticsengineering.com/datasets/ecommerce-sales
-- Download the customers, products, orders and order_items tables (Parquet or CSV). Payments and refunds are published but not imported; retain them raw alongside the rest, per INF2003 baseline rule 5 (preserve source tables not currently imported).
+- Download the customers, products, orders and order_items tables (Parquet or CSV). Payments and refunds are published but not imported; retain them raw alongside the rest (source tables that are not imported are preserved).
 - Save the dataset's data dictionary page locally and record the CC BY 4.0 licence notice and attribution alongside the source records.
 - Preserve these inputs under `data/raw/` locally, record the downloaded date and SHA-256 checksums, then upload the same validated inputs to the private S3 data bucket for the cloud import demonstration.
 - Generate missing stock, lead times, fictional display names and demo account/cart records separately. Do not assume historical customer records contain working application credentials.
@@ -187,7 +185,7 @@ Keep original historical data, date-shifted demo fixtures and performance fixtur
 
 ### Dataset size and supplemental generation
 
-The brief states no minimum row count. The selected 100,000 orders and 237,537 line items are larger than the original 12,000/30,120 estimate from the since-superseded LaelaZ selection, and are imported in full: the row count adds no meaningful import-code complexity and has negligible storage/budget impact, and it gives `INF2003_BASELINE.md`'s later SQL-vs-NoSQL comparison a more credible base without a separate seeded scale-up. Increase volume further only when an experiment needs it; millions of stored rows are not necessary to demonstrate request-driven autoscaling.
+The brief states no minimum row count. The selected 100,000 orders and 237,537 line items are larger than the original 12,000/30,120 estimate from the since-superseded LaelaZ selection, and are imported in full: the row count adds no meaningful import-code complexity and has negligible storage/budget impact. Increase volume further only when an experiment needs it; millions of stored rows are not necessary to demonstrate request-driven autoscaling.
 
 Maintain three fixtures: a tiny independently hand-checkable correctness fixture, the validated imported historical dataset, and an isolated/resettable load-test fixture with sufficient stock and repeatable shoppers. Record seed, counts, date range and distribution assumptions for all generated additions. Larger fixtures must preserve valid relationships and plausible skew, not duplicate IDs or arbitrarily copy records.
 
@@ -221,7 +219,7 @@ The deterministic analytics criterion remains independently required; ML must no
 - **Static assets:** Browser -> HTTPS ALB -> application static-file handler (WhiteNoise). Package identical content-hashed CSS, JavaScript and product images into every application image.
 - **Data pipeline:** Private S3 data bucket -> authorised import/validation command -> RDS -> analytics summaries. S3 may also hold versioned analytics exports accessible only to authorised tooling.
 
-S3 remains required for dataset/export object storage. Block public access, restrict IAM permissions to needed objects/actions, and record source checksums and versions. Do not store sessions in S3. Preserve a local dataset-input/export option for reproducibility and INF2003.
+S3 remains required for dataset/export object storage. Block public access, restrict IAM permissions to needed objects/actions, and record source checksums and versions. Do not store sessions in S3. Preserve a local dataset-input/export option for reproducibility.
 
 CloudFront is excluded from the current implementation. Discuss it as an alternative for edge caching and reducing static-origin traffic; its omission reflects this workload, budget and deadline, not a claim that CDNs require geographically distributed users. An ElastiCache product-data cache remains a candidate, subject to explicit scope selection, lab support and measured value; it is not required for session continuity.
 
@@ -338,9 +336,9 @@ The phases below are completion gates, not five additional weeks. Members work i
 | 2. Working ecommerce and analytics | 18-24 September | Implement authentication, persistent carts, transactional/idempotent checkout and order history; import from S3; build and validate sales/inventory analytics | End-to-end workflow works in AWS; correctness, access-control and analytics fixtures pass |
 | 3. Scaling, recovery and measured improvements | 25 September-1 October | Exercise ALB/ASG, session continuity and monitoring; run security, load and failure tests; evaluate a small cache only if permissions, cost and time permit | Dated evidence exists for required test categories; failures and bottlenecks are understood; freeze features on 1 October |
 | 4. Reproduction and submission assembly | 2-8 October | Fix defects; rehearse clean local setup; complete report, manifest, evidence links, attribution and contributions | A different teammate reproduces the application and analytics and locates evidence for each assessment claim |
-| 5. Final verification and handover | 9-11 October | Check ZIP, secrets and required paths; preserve evidence; submit; archive exact submission and tag its commit | Submit by 11 October at 23:59 Singapore time; preserve the baseline for later INF2003 expansion |
+| 5. Final verification and handover | 9-11 October | Check ZIP, secrets and required paths; preserve evidence; submit; archive exact submission and tag its commit | Submit by 11 October at 23:59 Singapore time |
 
-ElastiCache remains conditional, not a prerequisite for completing these phases. Included descriptive ML must preserve required analytics and testing. Evidence is collected during each phase. INF2003 implementation begins after INF2006 submission, with its separate proposal work reserved before the 4 October deadline.
+ElastiCache remains conditional, not a prerequisite for completing these phases. Included descriptive ML must preserve required analytics and testing. Evidence is collected during each phase.
 
 ### Weekly milestone detail
 
@@ -352,7 +350,7 @@ ElastiCache remains conditional, not a prerequisite for completing these phases.
 | 2-8 October | Feature freeze; resolve defects; reproduce from clean setup; finish report, declarations and manifest | Another teammate can run local instructions and locate every claim's evidence |
 | 9-11 October | Submission preflight and contingency buffer | Verified ZIP submitted by 11 October, 11:59 PM |
 
-Any removal of included ML requires an explicit scope decision if required work falls behind. No new features after 1 October. INF2003's progress report is due 4 October at 11:30 PM, so reserve time for its database expansion plan without adding those features here.
+Any removal of included ML requires an explicit scope decision if required work falls behind. No new features after 1 October.
 
 ## 11. Five-person ownership plan
 
@@ -433,22 +431,9 @@ Provide a runnable local mode using Docker PostgreSQL, synthetic seed data and p
 
 Exclude passwords, tokens, credentials, private URLs, personal data and secret-containing Terraform state. Redact account IDs/public IPs as instructed by the brief. Declare AI assistance, source code, licences and verification. Cloud resources may be decommissioned after evidence capture; the brief explicitly permits assessment through retained configuration and evidence.
 
-## 14. INF2003 continuation
+## 14. After submission
 
-After submission, save the exact INF2006 ZIP and tag the commit, for example `inf2006-submission`. Start the database expansion from that baseline.
-
-- Keep Django, templates/design reference, ecommerce entities, validated dataset mappings/import tooling, checkout correctness, supplemental seeds and useful analytics.
-- Replace RDS with PostgreSQL in Docker, serve assets locally, read datasets/exports from local storage and remove AWS-specific operational integrations, including S3 dependencies.
-- Remove the isolated ML function for the local INF2003 scope without breaking checkout or retained analytics.
-- Add MongoDB through a separate data-access module and expand appropriate document-oriented workflows.
-- Extend SQL and NoSQL modelling, CRUD, constraints, aggregation, indexes and controlled benchmarks. Add documented synthetic reviews, richer attributes or other missing entities as required; the INF2006 dataset is a foundation, not a ceiling on the schema.
-- Define substantial database work for both stores. Avoid two authoritative copies of orders unless consistency management is an intentional, tested feature. A separate NoSQL order implementation can instead support equivalent-operation comparisons.
-- For benchmarks, record hardware/container limits, versions, data sizes, indexes, consistency requirements, workload, warmup and repeated results. Compare equivalent operations; report different responsibilities separately. Large row counts alone do not demonstrate database knowledge.
-- Prepare a separate INF2003 report, presentation and run instructions.
-
-The ecommerce domain can support INF2003's excellent-band expectations, but the INF2006 submission does not guarantee an INF2003 grade. INF2003 requires its own substantial implementation and evidence, plus proposal (10%), presentation (25%), final report (25%) and project quality/implementation (40%); peer review also affects outcomes. Benchmarking supports analysis but is not a substitute for modelling and working functionality.
-
-Do not implement INF2003 extensions during the cloud deadline. Confirm permitted cross-module reuse and member attribution with lecturers, particularly if membership differs. The briefs do not by themselves establish approval for shared assessed work.
+Save the exact submitted ZIP and tag its commit (for example `inf2006-submission`).
 
 ## 15. Risk register and mitigation
 
@@ -466,13 +451,12 @@ These are planning risks, not confirmed implementation failures. Owners refer to
 | Shared infrastructure failures | App instances recover but database or scheduler remains unavailable | State Single-AZ RDS and the designated scheduler limitation; demonstrate app failure with two healthy instances; document scheduler restart/re-run; never confirm checkout if the authoritative database is unavailable | Developers, with evidence lead: failure timeline, session continuity and repeatable analytics recovery |
 | Autoscaling does not improve the measured workload | Unsupported performance claims | Measure a fixed-capacity baseline; monitor DB and load-generator limits; sustain traffic through startup/warmup; separate cache, scaling and failure experiments; report bottlenecks honestly | Developers, with evidence/admin support: latency, throughput, errors, instance counts and interpretation |
 | Weak or late assessment evidence | Working features cannot receive associated evidence credit | Each owner saves dated commands, expected/actual results and redacted outputs as work is completed; verify manifest links and rehearse on a clean machine | All owners; evidence lead coordinates the evidence audit |
-| INF2003 reuse or attribution assumptions | Later submission may not meet module expectations | Confirm lecturer policy and membership attribution; archive the exact INF2006 submission; document substantive database additions separately | Team: policy clarification and baseline tag before continuation |
 
 Cache fallback is graceful degradation, not unlimited availability: RDS must absorb additional reads during an outage. If RDS is also unavailable, return a controlled temporary-unavailability response. Browsing and analytics may tolerate bounded staleness; checkout must preserve authoritative transaction correctness. Avoid labelling the whole application CP or AP solely because it uses a cache.
 
 ## 16. Sources and outstanding decisions
 
-Primary assessment source: `INF2006_Team_Project_Brief_2026.pdf`, sections 4-10 and Appendix A, supplied by the user. Continuation dates and requirements: `INF2003_project_description.pdf`, supplied by the user.
+Primary assessment source: `INF2006_Team_Project_Brief_2026.pdf`, sections 4-10 and Appendix A, supplied by the user.
 
 Dataset and design references:
 

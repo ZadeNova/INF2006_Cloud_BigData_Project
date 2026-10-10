@@ -99,7 +99,7 @@ Dataset acceptance is manual and limited to descriptive demonstrations. Raw sour
 
 Reviewer verification: 406 tests passed (including 25 import tests), full-source import/replay and SQL reconciliation passed, six raw checksums matched, profile reproduced exactly, system/database/migration checks passed. Only isolated disposable resources were used and removed. Actual HTTP checks remain implementer evidence; real-data analytics refresh, dashboard, ML, S3/AWS, load/recovery and browser visual QA remain outside this batch. Next is roadmap Phase 3, not overall project Phase 3.
 
-Update this file with substantive changes: status, evidence/commit references, blockers and next steps. Never mark a phase complete from code existence alone. For backend tasks, link the review log and record review status/round, unresolved finding IDs and next action. A repeated unresolved finding after Low remediation sets the task to Awaiting user manual Astra Medium escalation; do not mark it complete. Reserve proposal time for INF2003 before 4 October 23:30 without implementing its expansion here.
+Update this file with substantive changes: status, evidence/commit references, blockers and next steps. Never mark a phase complete from code existence alone. For backend tasks, link the review log and record review status/round, unresolved finding IDs and next action. A repeated unresolved finding after Low remediation sets the task to Awaiting user manual Astra Medium escalation; do not mark it complete.
 
 - 12 Sep 2026: one tracker combines active work, blockers and completed-history references.
 - 12 Sep 2026: backend Astra Low, frontend Luna Max; user controls backend Medium escalation.

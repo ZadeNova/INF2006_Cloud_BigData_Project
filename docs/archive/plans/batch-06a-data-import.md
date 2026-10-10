@@ -1,6 +1,6 @@
 # Batch 6a — dataset acceptance, import and seed
 
-Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. First of three analytics sub-batches: **6a data** (this file), **6b refresh and read queries** ([batch-06b-analytics-refresh.md](../../plans/batch-06b-analytics-refresh.md)), **6c dashboard page** (outlined at the end of 6b). Optional ML (K-means) is a later, gated batch 6d. Contracts: [ANALYTICS.md](../../ANALYTICS.md), [DATA_PIPELINE.md](../../DATA_PIPELINE.md), [SCHEMA.md](../../SCHEMA.md), [INF2003_BASELINE.md](../../INF2003_BASELINE.md).
+Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. First of three analytics sub-batches: **6a data** (this file), **6b refresh and read queries** ([batch-06b-analytics-refresh.md](../../plans/batch-06b-analytics-refresh.md)), **6c dashboard page** (outlined at the end of 6b). Optional ML (K-means) is a later, gated batch 6d. Contracts: [ANALYTICS.md](../../ANALYTICS.md), [DATA_PIPELINE.md](../../DATA_PIPELINE.md), [SCHEMA.md](../../SCHEMA.md).
 
 ## Context
 
@@ -22,7 +22,7 @@ Each has a recommendation; none is settled until the user agrees.
 
 ## Step 1: acquire and profile (the acceptance gate)
 
-- **Done 22 September 2026:** the six CSV source tables (customers, products, orders, order_items, payments, refunds) plus the publisher's `DATA_DICTIONARY.md`, `LICENSE.txt`, `README.md` and `starter/` examples, downloaded unchanged into `data/raw/`; SHA-256 checksums recorded in `data/raw/checksums.txt`. Record the download date and licence text in `data/README.md` when that file is written. Payments and refunds are kept raw, not imported (INF2003 baseline rule 5).
+- **Done 22 September 2026:** the six CSV source tables (customers, products, orders, order_items, payments, refunds) plus the publisher's `DATA_DICTIONARY.md`, `LICENSE.txt`, `README.md` and `starter/` examples, downloaded unchanged into `data/raw/`; SHA-256 checksums recorded in `data/raw/checksums.txt`. Record the download date and licence text in `data/README.md` when that file is written. Payments and refunds are kept raw, not imported.
 - `analytics/profile_dataset.py` (pandas; own `analytics/requirements.txt`; `--source DIR`, default `data/raw`) reads the files and writes `data/PROFILE.md`:
   - Verified counts and date range against the published figures.
   - Integrity: unique IDs, orphan foreign keys, statuses and how they map to completed/cancelled/refunded, nonnegative money, positive quantities, per-order sum of lines against the order total.
@@ -75,4 +75,4 @@ Tiny hand-checkable CSV fixtures written directly as plain text in `tmp_path` (a
 
 ## Out of scope
 
-Analytics code (6b), the dashboard (6c), ML (6d), S3 access and Terraform (cloud phase), a data reset command, and any INF2003 schema (variants, merchants, reviews).
+Analytics code (6b), the dashboard (6c), ML (6d), S3 access and Terraform (cloud phase), a data reset command.

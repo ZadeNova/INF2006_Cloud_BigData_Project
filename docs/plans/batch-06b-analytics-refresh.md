@@ -1,6 +1,6 @@
 # Batch 6b — analytics refresh and read queries
 
-Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Second of the analytics sub-batches; follows [batch-06a-data-import.md](../archive/plans/batch-06a-data-import.md). Contract: [ANALYTICS.md](../ANALYTICS.md) is authoritative for formulas, ranges, compare, retention and calendar rules; this file only says how they get built. Related: [SCHEMA.md](../SCHEMA.md), [INF2003_BASELINE.md](../INF2003_BASELINE.md).
+Written before implementation, per `CLAUDE.md`'s "Discuss / Plan" step. Second of the analytics sub-batches; follows [batch-06a-data-import.md](../archive/plans/batch-06a-data-import.md). Contract: [ANALYTICS.md](../ANALYTICS.md) is authoritative for formulas, ranges, compare, retention and calendar rules; this file only says how they get built. Related: [SCHEMA.md](../SCHEMA.md).
 
 ## Context
 
@@ -15,7 +15,7 @@ The reporting tables (`InventoryVersion`, `InventorySnapshot`, `AnalyticsRun`, `
 3. **Lock contention.** A second invocation while one holds the advisory lock prints "skipped: another refresh is running" and exits 0. It is the safety-net case, not a job failure. Choose exit non-zero instead if the user prefers loud failures.
 4. **`snapshot_inventory` is in scope.** A run needs a sealed inventory at exactly its cutoff. 6a seals one at the import cutoff; a live-demo refresh at a later cutoff needs another. A small create-only command builds it from current `Product` values. **Recommended**: about 30 lines, and it makes the "place order, refresh, see it on the dashboard" demo possible. `refresh_analytics` never creates snapshots implicitly (DOC-001: explicit selection, no fallback).
 5. **Read queries live here, not in 6c.** The dashboard's numbers are the correctness core and belong with their tests; 6c only wires them to a view and templates.
-6. **Home of the code.** SQL and query functions in one documented module, `src/reporting/queries.py` (SQL as named constants, thin functions using `connection.cursor()`); pure date logic in `src/reporting/ranges.py`; commands in `src/reporting/management/commands/`. **Recommended** over a `.sql` file directory: fewer moving parts, satisfies INF2003 baseline rule 4.
+6. **Home of the code.** SQL and query functions in one documented module, `src/reporting/queries.py` (SQL as named constants, thin functions using `connection.cursor()`); pure date logic in `src/reporting/ranges.py`; commands in `src/reporting/management/commands/`. **Recommended** over a `.sql` file directory: fewer moving parts.
 7. **Statement timeout.** `SET LOCAL statement_timeout` inside the publish transaction, default 300 seconds, overridable with `--timeout`.
 
 ## Implementation

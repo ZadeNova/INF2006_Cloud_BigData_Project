@@ -175,9 +175,11 @@ def check(zpath, group, commit):
             built = "build_shoe_dataset.py" in readme and readme.find("build_shoe_dataset.py") < m.start()
             say("PASS" if present or built else "FAIL",
                 f"README quickstart: import source {src_dir}/ is in the package or built first" + ("" if present or built else " (neither: the import would fail on a fresh checkout)"))
-    agent = [n for n in ("AGENTS.md", "CLAUDE.md") if n in names]
+    # A long AGENTS.md or CLAUDE.md is a set of working rules that an AI marker's tooling would load as its own
+    # instructions. Short descriptive guides are fine (the originals are archived under docs/archive/agent-instructions/).
+    agent = [n for n in ("AGENTS.md", "CLAUDE.md") if n in names and z.read(n).decode("utf-8", "replace").count("\n") > 30]
     if agent:
-        say("WARN", f"agent instruction files are in the package (an AI marker's tooling may load them as instructions): {agent}")
+        say("WARN", f"long agent instruction files are in the package (an AI marker's tooling may load them as instructions): {agent}")
     mb = Path(zpath).stat().st_size / 1e6
     say("PASS" if mb < 100 else "WARN", f"size {mb:.1f} MB")
     return results

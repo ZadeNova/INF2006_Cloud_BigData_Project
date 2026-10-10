@@ -12,7 +12,7 @@ Phase 3 evidence and prior Phase 1/2/3 reviews were inspected, not rerun as Phas
 
 ## Scope and contract
 
-Explicit completed run selection, source/run association, configuration identity distinct from batch identity, validated atomic local export, exact-file import and retry/recovery. Relevant original findings: M-08, M-11, READY-003/006 and the bounded batch portion of S-006. Specifications: [analytics](../ANALYTICS.md), [schema](../SCHEMA.md), [data pipeline](../DATA_PIPELINE.md), [runbook](../../analytics/README.md), [testing](../TESTING.md), architecture/security and INF2003 isolation contracts.
+Explicit completed run selection, source/run association, configuration identity distinct from batch identity, validated atomic local export, exact-file import and retry/recovery. Relevant original findings: M-08, M-11, READY-003/006 and the bounded batch portion of S-006. Specifications: [analytics](../ANALYTICS.md), [schema](../SCHEMA.md), [data pipeline](../DATA_PIPELINE.md), [runbook](../../analytics/README.md), [testing](../TESTING.md), architecture and security contracts.
 
 No scheduling, saved-model inference/registry, immutable feature snapshots, dashboard lifecycle/redesign, preprocessing experiment, shoe-data replacement, AWS provisioning/deployment or production TLS/Secrets Manager/bootstrap changes. Current eligible cohort validation does not establish immutable original RFM values. Preserve source/run ownership, no silent older-result fallback, no exactly-once claim.
 
