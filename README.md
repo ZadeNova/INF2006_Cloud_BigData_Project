@@ -46,7 +46,16 @@ On macOS and Linux use `python3`. Stop with `docker compose down` (keeps the dat
 - Operator login for `/analytics/` and the other routes: [src/README.md](src/README.md#demo-data).
 - Reproduce the analytics checks offline: [analytics/README.md](analytics/README.md).
 - Set up a blank machine: [docs/SETUP.md](docs/SETUP.md).
-- Rebuild on AWS (needs a Learner Lab account and a domain, costs money, not needed for marking): [src/infrastructure/README.md](src/infrastructure/README.md) and [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md).
+
+## Reproduce it
+
+Marking needs only level 1. Levels 2 and 3 are documented for anyone with their own AWS account; the stacks used for the evidence are torn down.
+
+| Level | What you need | Cost | Steps |
+|---|---|---|---|
+| 1. Offline: the shop, tests, data, analytics and load tables from the recorded raw files | Docker, Python 3 | none | Quickstart above; [docs/SETUP.md](docs/SETUP.md) |
+| 2. Cloud: variant B built from the Terraform | AWS Academy Learner Lab, a domain you control, Terraform, AWS CLI | about USD 3.5 per day while running, plus about USD 1.2 per day for the shared base (list prices, 9 October 2026) | [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) (also states what has and has not been proven), [src/infrastructure/README.md](src/infrastructure/README.md) |
+| 3. Load test against your own stack | Level 2 plus a load-generator instance | about USD 0.1 per hour for the generator | [docs/RUN_LOADTEST.md](docs/RUN_LOADTEST.md) |
 
 ## Architecture
 

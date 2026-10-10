@@ -19,12 +19,12 @@ docker compose run --rm web pytest -q -p no:cacheprovider /app/tests     # the a
 docker compose run --rm web python manage.py check_database              # expect it to report success
 ```
 
-Demo data (catalogue, history, operator login, analytics) and the analytics scripts: [src/README.md](../src/README.md) and [analytics/README.md](../analytics/README.md).
+Demo data: the README quickstart builds and imports the dataset, creates the operator login and refreshes the analytics. Details and the analytics scripts: [src/README.md](../src/README.md) and [analytics/README.md](../analytics/README.md).
 
 Re-derive the load-test tables from the recorded raw evidence (no cloud, any machine with Python 3):
 
 ```bash
-python tests/load/analyze.py --raw evidence/raw --out /tmp/load-summary.md     # compare with evidence/load-summary.md
+python tests/load/analyze.py --raw evidence/raw --out load-summary-check.md    # compare with evidence/load-summary.md
 python tests/load/selftest.py                                                  # the harness's own checks (16)
 ```
 
