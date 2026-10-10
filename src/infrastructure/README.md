@@ -185,7 +185,7 @@ If the apply laptop is lost or unavailable, use the next section in your own Lea
 
 ## Build everything from nothing in a new account
 
-For a teammate's own lab account, or to reproduce the build. About 45 minutes, most of it waiting. Everything is created fresh; nothing is shared with the team's account. You need a **domain you control** (HTTPS needs a certificate and the app enforces HTTPS); the team's `fourtytwofactors.me` can be delegated to only one Route 53 zone at a time, so another account must use its own domain.
+For a teammate's own lab account, or to reproduce the build. About 45 minutes, most of it waiting. Everything is created fresh; nothing is shared with the team's account. You need a **domain you control, or a subdomain delegated to you** (HTTPS needs a certificate and the app enforces HTTPS). **Do not use the team's `fourtytwofactors.me` itself**: it points at the team's AWS account, so a certificate requested in another account is never approved. Use your own domain, or a subdomain such as `yourname.fourtytwofactors.me` that the domain's owner delegates to you with `scripts/delegate-subdomain.sh` (details in [docs/REPRODUCE_CLOUD.md](../../docs/REPRODUCE_CLOUD.md)). The hostnames become `shop-fargate.<your domain>` and `shop-ec2.<your domain>`.
 
 1. **Clone and credentials**
    ```bash
@@ -198,7 +198,7 @@ For a teammate's own lab account, or to reproduce the build. About 45 minutes, m
    ```bash
    src/infrastructure/scripts/up.sh base
    ```
-   It asks for an alarm email address and your domain, creates the S3 bucket with the CLI (the lab denies a read Terraform's bucket resource needs; Terraform then manages every setting on it), writes `base/terraform.tfvars`, shows the plan (about 38 to add) and applies it. The RDS database takes about 9 minutes. **While the apply waits for the certificate, it prints four name servers: set them at your registrar** (Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick). The apply then finishes by itself within minutes. Click the confirmation link in the email AWS sends (check spam).
+   It asks for an alarm email address and your domain, creates the S3 bucket with the CLI (the lab denies a read Terraform's bucket resource needs; Terraform then manages every setting on it), writes `base/terraform.tfvars`, shows the plan (about 38 to add) and applies it. The RDS database takes about 9 minutes. **While the apply waits for the certificate, it prints four name servers: set them at your registrar** (Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick); **for a subdomain, send the four to the domain owner**, who runs `scripts/delegate-subdomain.sh <your subdomain> <the four> --apply`. The apply then finishes by itself within minutes. Click the confirmation link in the email AWS sends (check spam).
 
    Check delegation by hand if you like: `dig NS <domain> @a0.nic.me +norec | grep -A8 'AUTHORITY SECTION'` should show the AWS servers.
 

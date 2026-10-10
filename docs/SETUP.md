@@ -85,7 +85,7 @@ The cloud scripts are **bash**. On Windows, use **WSL 2** for everything in this
 
 Then you need:
 - **An AWS Academy Learner Lab** (the course provides it). Region `us-east-1`.
-- **A domain you control** (any registrar). HTTPS needs a certificate, and you will set the domain's name servers once.
+- **A domain you control, or a subdomain delegated to you.** HTTPS needs a certificate that AWS validates through DNS. Do not use the team's `fourtytwofactors.me` itself (it points at the team's AWS account); see "The domain" in [REPRODUCE_CLOUD.md](REPRODUCE_CLOUD.md#level-2-build-variant-b-in-your-own-learner-lab).
 - **Lab credentials in each terminal**: add the `labcreds` helper from [src/infrastructure/README.md](../src/infrastructure/README.md#tools-and-credentials) to `~/.bashrc` (or `~/.zshrc`), then run `labcreds` and paste the lab's "AWS CLI" block. They expire after about 4 hours.
 
 Check everything at once: `src/infrastructure/scripts/status.sh` lists missing tools and what to do next. Then follow [REPRODUCE_CLOUD.md](REPRODUCE_CLOUD.md), level 2: `up.sh base`, set the name servers at your registrar when asked, then `up.sh fargate`. **Always finish with `down.sh fargate`**, and with the "Final teardown" in the infrastructure README when you are done for good. Cost: about USD 3.5 per day while variant B runs, plus about USD 1.2 per day for the shared base (list prices checked 9 October 2026).

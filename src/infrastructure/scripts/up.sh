@@ -46,8 +46,21 @@ up_base() {
     email="${ALARM_EMAIL:-}"; domain="${DOMAIN_NAME:-}"
     if [ -z "$email" ]; then [ -t 0 ] || die "no terminal to ask on: set ALARM_EMAIL (and DOMAIN_NAME) and run again"; read -r -p "  Email address for alarm notifications: " email; fi
     if [ -z "$domain" ]; then
-      if [ -t 0 ]; then read -r -p "  Domain you control, registered anywhere [fourtytwofactors.me]: " domain; fi
-      domain="${domain:-fourtytwofactors.me}"
+      cat <<'EOT'
+
+  The HTTPS certificate is checked through DNS, so you need a domain (or subdomain) whose name servers YOU can set:
+    - your own domain, registered anywhere (you set its name servers at the registrar); or
+    - a subdomain of a domain someone else owns, such as team21.example.com: that owner must add one NS record for it
+      (the owner runs scripts/delegate-subdomain.sh with the four name servers printed below).
+  Do NOT use fourtytwofactors.me unless you are the team member who owns it: it points at the team's AWS account, so the
+  certificate in yours would wait forever.
+EOT
+      [ -t 0 ] || die "no terminal to ask on: set DOMAIN_NAME (and ALARM_EMAIL) and run again"
+      read -r -p "  Domain or subdomain you can delegate: " domain
+    fi
+    [ -n "$domain" ] || die "a domain is needed (see above)"
+    if [ "$domain" = fourtytwofactors.me ] && [ "${I_OWN_THE_TEAM_DOMAIN:-}" != 1 ]; then
+      die "fourtytwofactors.me is the team's domain and points at the team's AWS account. Use your own domain, or a subdomain delegated to you (for example mine.fourtytwofactors.me, which the domain owner delegates with scripts/delegate-subdomain.sh). The owner can set I_OWN_THE_TEAM_DOMAIN=1"
     fi
     [ -n "$email" ] || die "an email address is needed"
     # The lab denies a read that Terraform's bucket resource makes, so the bucket is created with the CLI; Terraform
@@ -92,7 +105,8 @@ up_base() {
         if [ "$delegated" != "$(printf '%s\n' $ns | sed 's/\.$//' | tr 'A-Z' 'a-z' | sort | tr '\n' ' ')" ]; then
           printf '\n>>> ACTION NEEDED NOW: at your domain registrar, set the name servers of %s to (custom DNS):\n' "$domain"
           printf '      %s\n' $ns
-          printf '    The apply is waiting for this and carries on by itself within minutes of the change.\n    Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick.\n\n'
+          printf '    The apply is waiting for this and carries on by itself within minutes of the change.\n    Namecheap: Domain List, Manage, Nameservers, Custom DNS, enter the four, click the green tick.\n'
+          printf '    If %s is a SUBDOMAIN of a domain someone else owns, send them the four name servers above. They run, with lab credentials:\n        scripts/delegate-subdomain.sh %s <the four name servers> --apply\n    (no registrar is involved; the certificate is approved a few minutes after that record exists).\n\n' "$domain" "$domain"
         fi
       fi
     fi

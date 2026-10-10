@@ -72,6 +72,7 @@ run:
   prerequisites:
     - "Docker Desktop with Linux containers and Docker Compose"
     - "Python 3 for the optional host environment initializer; Docker-only alternative in src/README.md"
+    - "Cloud reproduction only (optional, never needed for marking): an AWS Academy Learner Lab account, and a domain you own or a subdomain its owner delegates to you (HTTPS certificates are validated through DNS; about USD 1 to 3 for the first year at the cheapest registrars), plus Terraform and the AWS CLI; about USD 4.7 per day while the stack runs. See docs/REPRODUCE_CLOUD.md"
   commands:
     - "python src/tools/init_env.py"
     - "docker compose -f src/compose.yaml build"

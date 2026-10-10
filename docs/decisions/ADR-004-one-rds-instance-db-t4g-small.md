@@ -24,13 +24,14 @@ One small shop with one database; the comparison must not be limited or confound
 ## Consequences
 
 - Both stacks use this database; a stack's own `sg-db` rule opens 5432 from its own `sg-app`.
-- Single-AZ means a database failure takes the shop down; one controlled Multi-AZ failover test is planned (plan section 3, Availability).
+- Single-AZ means a database failure takes the shop down. A Multi-AZ failover test was planned and **not run**; the single point of failure is a stated limit (README, report section 3).
+- **Why one instance and not two.** A read replica spreads reads and gives no automatic failover; the app has no read routing and the measured RDS CPU was at most 10.46% (A) and 9.09% (B). Multi-AZ is the setting that fits availability (the subnet group already spans two AZs; `multi_az = true` is one change at about twice the instance charge). It was not enabled for cost and time. Automated backups (configured for 7 days, restore not tested) and a Terraform plus checksummed-dataset rebuild are the only recovery measures.
 - `skip_final_snapshot`, no deletion protection and `delete_automated_backups` let teardown finish in one command; a manual snapshot during the evidence runs is the recovery evidence.
 - Enhanced Monitoring is off: it needs an IAM role the lab cannot create.
 
 ## Evidence that will back it
 
-RDS pilot at the 1,000-user step with CPU, connections, free memory and credit balance captured; `describe-db-instances` showing private, encrypted, engine 17.x, backups 7 days; `rds.force_ssl` in the parameter group.
+RDS CPU, connections, free memory and credit balance read during the saturation run (the 1,000-user pilot was replaced by it; `evidence/test-performance.md` LOAD-01); `describe-db-instances` showing private, encrypted, engine 17.x, backups 7 days; `rds.force_ssl` in the parameter group.
 
 ## Revisit when
 

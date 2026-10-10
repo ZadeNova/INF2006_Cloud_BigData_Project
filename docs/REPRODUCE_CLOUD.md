@@ -30,7 +30,7 @@ python tests/load/selftest.py                                                  #
 
 ## Level 2: build variant B in your own Learner Lab
 
-**Prerequisites.** A Learner Lab (region `us-east-1`, the only one the lab offers). **A domain you control**: HTTPS needs a certificate and the app enforces HTTPS, so this is the one input that cannot be shared (our `fourtytwofactors.me` can point at only one Route 53 zone at a time). Tools: Terraform 1.10 or newer, AWS CLI v2, `jq`, `openssl`, `curl`, `git`, `python3`, Docker. Details and the `labcreds` helper: [src/infrastructure/README.md](../src/infrastructure/README.md#tools-and-credentials). Lab credentials last about 4 hours; the scripts check them first.
+**Prerequisites.** A Learner Lab (region `us-east-1`, the only one the lab offers). **A domain you control, or a subdomain delegated to you**: HTTPS needs a certificate and the app enforces HTTPS, so this is the one input that cannot be shared (see "The domain" below; do not use `fourtytwofactors.me` itself). Tools: Terraform 1.10 or newer, AWS CLI v2, `jq`, `openssl`, `curl`, `git`, `python3`, Docker. Details and the `labcreds` helper: [src/infrastructure/README.md](../src/infrastructure/README.md#tools-and-credentials). Lab credentials last about 4 hours; the scripts check them first.
 
 ```bash
 git clone <repo-url> && cd <repo>
@@ -39,7 +39,17 @@ src/infrastructure/scripts/status.sh              # tools and credentials ok? it
 src/infrastructure/scripts/up.sh base             # asks for an alarm email and your domain; shows the plan; type yes
 ```
 
-While `up.sh base` waits for the certificate it prints four name servers: set them at your registrar (custom DNS). RDS takes about 9 minutes. Then confirm the email AWS sends, or alarms reach no one.
+While `up.sh base` waits for the certificate it prints four name servers: set them at your registrar (custom DNS), or for a subdomain send them to the domain owner (below). RDS takes about 9 minutes. Then confirm the email AWS sends, or alarms reach no one.
+
+**The domain: the one input you must supply yourself.** HTTPS needs a certificate, and AWS approves it only after it sees DNS records in a zone that the *public internet* resolves to your account. So you need one of:
+
+1. **Your own domain**, registered anywhere (about USD 1 to 15 a year). `up.sh base` prints four name servers; set them as the domain's custom name servers at your registrar.
+2. **A subdomain of a domain someone else owns** (free; use this if a teammate owns `fourtytwofactors.me`). Run `up.sh base` with a name such as `yourname.fourtytwofactors.me`; it prints four name servers; send them to the domain owner, who runs, with lab credentials in the account that holds the parent zone:
+   `src/infrastructure/scripts/delegate-subdomain.sh yourname.fourtytwofactors.me <ns1> <ns2> <ns3> <ns4> --apply`
+   (a dry run is the default). No registrar is involved. The certificate is approved a few minutes later.
+
+**Do not use `fourtytwofactors.me` itself unless you own it.** It points at the team's AWS account, so a zone built in yours is never reached and the certificate waits forever (`up.sh base` refuses it unless `I_OWN_THE_TEAM_DOMAIN=1`). *Symptom if you did:* `up.sh base` sits at "Still creating... aws_acm_certificate_validation". *Fix:* stop it (Ctrl+C), edit `src/infrastructure/base/terraform.tfvars` so `domain_name` is a subdomain you can delegate (or your own domain), and run `up.sh base` again; the zone and certificate are replaced.
+
 
 ```bash
 src/infrastructure/scripts/up.sh fargate          # image, secrets, database jobs, the service, smoke test

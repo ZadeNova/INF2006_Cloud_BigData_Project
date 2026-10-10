@@ -8,9 +8,9 @@ A small online shoe shop has two users with different problems. **Customers** ne
 
 ## Status
 
-- **Final architecture: variant B**, containers on Amazon ECS on Fargate behind an HTTPS load balancer, with a private RDS PostgreSQL database ([ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)). Variant A (EC2 + Auto Scaling group) was built from the same module and measured as the evaluated alternative.
+- **Final architecture: variant B**, containers on Amazon ECS on Fargate behind an HTTPS load balancer, with a private RDS PostgreSQL database ([ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)). Variant A (EC2 + Auto Scaling group) was built from the same module and measured as the evaluated alternative. B was chosen for faster replacement (50 s against 114 s), faster scale-out and no host patching; A has the higher ceiling and the lower unit price (indicative, n = 1). Rejected as unsuited to a small Django shop: AWS Lambda, Amazon EKS, and Elastic Beanstalk or App Runner.
 - Both variants were deployed with Terraform, measured (A on 8 October, B on 9 October 2026) and torn down. **Nothing here needs a live cloud account**: the configuration and the dated, redacted evidence are in the repository.
-- The application and its automated suite run offline with Docker only (497 passed, 8 skipped, recorded 27 September 2026 in [tests/README.md](tests/README.md)).
+- The application and its automated suite run offline with Docker only (497 passed, 8 skipped, recorded 27 September 2026 in [tests/README.md](tests/README.md), and reproduced on a clean clone on 9 October 2026: [REPRO-01](evidence/raw/REPRO-01_2026-10-09_linux_clean-clone.txt)).
 
 Every result below is one repeat per condition (n = 1) and indicative only.
 
@@ -49,12 +49,12 @@ On macOS and Linux use `python3`. Stop with `docker compose down` (keeps the dat
 
 ## Reproduce it
 
-Marking needs only level 1. Levels 2 and 3 are documented for anyone with their own AWS account; the stacks used for the evidence are torn down.
+Marking needs only level 1: no cloud account and no purchase. Levels 2 and 3 are optional and need two things you must bring yourself: your own AWS Learner Lab, and **a domain you own (or a subdomain its owner delegates to you)**, because HTTPS needs a certificate that AWS validates through DNS. A domain costs about USD 1 to 3 for the first year at the cheapest registrars. This is an unavoidable cloud prerequisite: without a domain the cloud stack cannot be built, and the dated evidence in `evidence/` stands in for it. The stacks used for the evidence are torn down.
 
 | Level | What you need | Cost | Steps |
 |---|---|---|---|
 | 1. Offline: the shop, tests, data, analytics and load tables from the recorded raw files | Docker, Python 3 | none | Quickstart above; [docs/SETUP.md](docs/SETUP.md) |
-| 2. Cloud: variant B built from the Terraform | AWS Academy Learner Lab, a domain you control, Terraform, AWS CLI | about USD 3.5 per day while running, plus about USD 1.2 per day for the shared base (list prices, 9 October 2026) | [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) (also states what has and has not been proven), [src/infrastructure/README.md](src/infrastructure/README.md) |
+| 2. Cloud: variant B built from the Terraform | AWS Academy Learner Lab, a domain (or delegated subdomain) you control, Terraform, AWS CLI | about USD 3.5 per day while running, plus about USD 1.2 per day for the shared base (list prices, 9 October 2026) | [docs/REPRODUCE_CLOUD.md](docs/REPRODUCE_CLOUD.md) (also states what has and has not been proven), [src/infrastructure/README.md](src/infrastructure/README.md) |
 | 3. Load test against your own stack | Level 2 plus a load-generator instance | about USD 0.1 per hour for the generator | [docs/RUN_LOADTEST.md](docs/RUN_LOADTEST.md) |
 
 ## Architecture
@@ -94,6 +94,7 @@ Each record opens with a results table and gives the objective, setup, command, 
 | Data and AI validation | [test-data-ai.md](evidence/test-data-ai.md) | DATA-01 PASS (0 mismatches); DATA-02 PASS with no predictive claim; not run on AWS |
 | Scalability and resilience | [test-resilience.md](evidence/test-resilience.md), [test-performance.md](evidence/test-performance.md), [load-summary.md](evidence/load-summary.md) | Scale-out, replacement and saturation measured on A and B (n = 1); RES-04 session continuity held in the recorded sample |
 | Monitoring | [monitoring.md](evidence/monitoring.md) | MON-01 PASS with one deviation; MON-02 one of two queries defective; MON-03 partial; MON-04 PASS |
+| Reproduction | [REPRO-01](evidence/raw/REPRO-01_2026-10-09_linux_clean-clone.txt) | Clean clone, offline: build, 497 tests, demo data, analytics and load tables, about 2 minutes of machine time |
 | Machine-readable summary | [project_manifest.yaml](project_manifest.yaml) | Every path in it exists |
 | Report | `report.pdf` | Added at submission |
 | Declarations | [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md), [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md) | Review logs for AI-assisted changes: [docs/reviews/](docs/reviews/) |
@@ -111,11 +112,13 @@ Each record opens with a results table and gives the objective, setup, command, 
 ## Known limitations
 
 - **Load and recovery:** one repeat per condition; the replacement test is a graceful removal, not a crash; scale-in was not observed on A; no database failover test was run; RDS is single-AZ. The two variants ran on different CPU models and the 3D models are not fetched by the load test.
+- **Database availability:** one RDS instance, Single-AZ, with automated backups configured for 7 days (no restore was tested). It is a single point of failure by design: Multi-AZ is a one-setting change at about twice the instance charge, not enabled for cost and time, and no failover was tested. A read replica was not added because it spreads reads and gives no automatic failover, and measured RDS CPU never exceeded 10.46% ([ADR-004](docs/decisions/ADR-004-one-rds-instance-db-t4g-small.md)).
 - **Least privilege:** the Learner Lab forces the broad `LabRole` for every runtime role, so separation rests on security groups and separate database logins (threat T19, accepted). There is no app-level login throttling and no MFA; the WAF block was tested on B only.
 - **Data:** the dataset is synthetic with weak patterns, so the dashboard shows the mechanism, not real demand. Segmentation is descriptive. Neither the segmentation nor the independent refresh check was run on AWS.
 - **Monitoring:** one of two saved log queries is defective (fixed in code after the session, not re-run), and each alarm-email leg is recorded on one variant only.
-- **Not done:** a scheduler for the analytics refresh (it is a manual command), saved-model inference, hosted CI verification, and the logged independent review of the latest changes ([project_manifest.yaml](project_manifest.yaml), `local_release`).
+- **Not done:** a scheduler for the analytics refresh (it is a manual command), saved-model inference, hosted CI verification, and the logged independent review of the latest changes (open review gates are listed in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)).
 - **Region:** the lab offers only `us-east-1`; a Singapore shop would use `ap-southeast-1`.
+- **Cloud reproduction:** rebuilding the cloud stack in another account needs a domain or a delegated subdomain (see *Reproduce it*). No second-account build is recorded, and variant B's fresh-database bring-up was tested offline only ([ADR-019](docs/decisions/ADR-019-variant-b-sets-up-its-own-database.md)).
 
 ## Repository layout
 
@@ -128,4 +131,4 @@ evidence/       test records, diagram, raw/ command output
 docs/           contracts, decision records (docs/decisions/), review logs, plans
 ```
 
-New to the project? [docs/GUIDE.md](docs/GUIDE.md) explains where each claim is evidenced and what every script does. Coding-agent rules are in [AGENTS.md](AGENTS.md); requirements and dates are in [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); status is in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
+New to the project? [docs/GUIDE.md](docs/GUIDE.md) explains where each claim is evidenced and what every script does. [AGENTS.md](AGENTS.md) is a short repository guide (the original agent instruction files are archived in [docs/archive/agent-instructions/](docs/archive/agent-instructions/)); requirements and dates are in [PROJECT_SCOPE_INF2006.md](PROJECT_SCOPE_INF2006.md); status is in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md).
