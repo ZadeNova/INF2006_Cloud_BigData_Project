@@ -1,6 +1,6 @@
 # ADR-016: Start the Fargate task with a command that sets the health-probe host
 
-**Status:** drafted by the writing session for review (6 October 2026).
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 6 October 2026).
 
 ## Decision
 

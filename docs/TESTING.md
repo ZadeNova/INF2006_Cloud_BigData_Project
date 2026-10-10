@@ -1,6 +1,6 @@
 # Testing and evidence contract
 
-Status: the pytest suite exists and runs in CI (layout and the latest recorded full-suite result in [tests/README.md](../tests/README.md)); the Locust load harness is in [tests/load/](../tests/load/README.md) (built and verified locally, not yet run on AWS); evidence templates are not results. Use pytest/pytest-django and Locust. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
+Status: the pytest suite exists and runs in CI (layout and the latest recorded full-suite result in [tests/README.md](../tests/README.md)); the Locust load harness is in [tests/load/](../tests/load/README.md) and was run against both AWS variants on 8 and 9 October 2026 (results: [evidence/README.md](../evidence/README.md)). Use pytest/pytest-django and Locust. Run checks relevant to changes; broaden when dependencies, failures or risks justify it.
 
 | Area | Required behaviour/evidence |
 |---|---|
@@ -16,13 +16,13 @@ Status: the pytest suite exists and runs in CI (layout and the latest recorded f
 
 Separate correctness and load fixtures. Locking tests use real independent PostgreSQL transactions/connections; SQLite or mocks cannot prove concurrency. Fix clock/cutoff and seeds for analytics. Load tests use valid sessions/CSRF, sufficient stock and unique purchase IDs; distinguish sold-out responses from unexpected errors.
 
-Run/monitor load generators outside app instances. Keep workloads comparable and separate cache, scaling and failure phases. Establish supported load and numerical objectives before final comparison. The scope's p95 checkout below two seconds and unexpected errors below 1% are proposed objectives, not achieved results.
+Run/monitor load generators outside app instances. Keep workloads comparable and separate cache, scaling and failure phases. Establish supported load and numerical objectives before final comparison. The scope's p95 checkout below two seconds and unexpected errors below 1% were applied by `tests/load/analyze.py`, together with a page-action p95 limit of 800 ms. Errors stayed at 0; checkout p95 at a declared load was not established because the ladder run was dropped ([test-performance.md](../evidence/test-performance.md)).
 
 Verify frontend workflows through actual Django HTTP routes, including error/keyboard states. Screenshots alone do not demonstrate behaviour.
 
 ## Signature evidence demos
 
-**Planned 25 September 2026; subject to change** as the cloud build, lab permissions, budget and time settle. None has been run. They turn behaviour the local suite already proves into cloud evidence an ecommerce service is uniquely placed to show, and each feeds the brief's required test records (functional, security, data/AI, resilience) and the monitoring record. Write the Locust scenarios before the first cloud session so every run uses the same workload. Record each run in the evidence format below; a failed run is still recorded with its diagnosis and next step.
+**Planned 25 September 2026. Status on 10 October 2026:** demos 1, 2 and 3 were not run on AWS (their local equivalents are the tests named in the last column). Demo 4 ran in part on AWS: the login burst as SEC-17 on variant B and the anonymous S3 refusal in SEC-09; the other attacks ran locally as SEC-01, SEC-03 and SEC-04. Demo 5 ran in part: the refresh on RDS on variant A (DATA-01); the independent recomputation and the ML were not run on AWS. Executed cloud cases are indexed in [evidence/README.md](../evidence/README.md). They turn behaviour the local suite already proves into cloud evidence an ecommerce service is uniquely placed to show, and each feeds the brief's required test records (functional, security, data/AI, resilience) and the monitoring record. Write the Locust scenarios before the first cloud session so every run uses the same workload. Record each run in the evidence format below; a failed run is still recorded with its diagnosis and next step.
 
 | # | Demo | Setup | Steps | Expected result | Record | Builds on |
 |---|---|---|---|---|---|---|

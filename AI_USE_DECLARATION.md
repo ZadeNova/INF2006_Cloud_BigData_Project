@@ -4,7 +4,7 @@ Group 21. This file declares every AI tool, external library, asset and dataset 
 where it was used, how the team verified the result, and its licence. No external application
 template or another course's implementation was copied. The application is AI-assisted code written
 by the team, not an open-source baseline; third-party libraries, assets and data are listed below.
-The report summarises this declaration in sections 8 and 9. The dated records in the appendix give
+The report summarises this declaration in section 8. The dated records in the appendix give
 the detail behind the summary.
 
 ## AI tools
@@ -17,9 +17,12 @@ decisions, and approved a plan before each AI-assisted change.
 | Tool/source | Where used | Purpose | Verification performed | Licence/attribution |
 |---|---|---|---|---|
 | OpenAI Codex, with `gpt-6-astra` and `gpt-5.6-luna` agents | Local Docker and PostgreSQL foundation, dataset import, operator dashboard, ML batch handoff and display, production runtime security (`src/`, `analytics/`, `tests/`, `docs/`) | Setting up the local environment, implementing and debugging backend features, writing tests; separate read-only agents as reviewers | Test suite and focused checks on each change; written review records in [docs/reviews/](docs/reviews/) | AI-assisted work, declared here |
-| Claude Code (Claude Opus 5, Opus 5.5, Sonnet 5) | AWS infrastructure in Terraform for both variants ([src/infrastructure/](src/infrastructure/)), load test harness ([tests/load/](tests/load/README.md)), ML hold-out evaluation and fixes (`analytics/`), catalogue and cart features, evidence records and documentation | Setting up the cloud infrastructure, debugging deployment, configuration and code issues, writing scripts and tests, drafting documentation and reviewing changes | Plans written before each change (`docs/plans/`); Terraform plans reviewed before apply; test suite; deployed tests on AWS recorded in [evidence/](evidence/README.md); database cross-checks | AI-assisted work, declared here; commits carry a `Co-Authored-By` trailer |
+| Claude Code (Claude Opus 5, Opus 5.5, Sonnet 5, Sonnet 5.5) | AWS infrastructure in Terraform for both variants ([src/infrastructure/](src/infrastructure/)), load test harness ([tests/load/](tests/load/README.md)), ML hold-out evaluation and fixes (`analytics/`), catalogue and cart features, evidence records and documentation | Setting up the cloud infrastructure, debugging deployment, configuration and code issues, writing scripts and tests, drafting documentation and reviewing changes | Plans written before each change (`docs/plans/`); Terraform plans reviewed before apply; test suite; deployed tests on AWS recorded in [evidence/](evidence/README.md); database cross-checks | AI-assisted work, declared here; commits made by Claude Code carry a `Co-Authored-By` trailer, but only 22 of the 201 commits do, so the history under-reports AI assistance and this declaration is the record |
 | GitHub Copilot | First version of the optional ML customer segmentation workflow (24 September 2026) | Code assistance | Later reviewed and revised in the ML review rounds ([docs/reviews/ml-quality-evaluation.md](docs/reviews/ml-quality-evaluation.md)) | AI-assisted work, declared here |
 | Gemini (Google) | Dashboard description during the FUNC-02 browser walkthrough | Structuring a written description of what the dashboard showed | Each value cross-checked against the database (FUNC-02 step 7 in [evidence/test-functional.md](evidence/test-functional.md)) | AI-assisted wording |
+| Claude Code and OpenAI Codex agents | The report (Google Doc), including the 9 October audit revisions to sections 2, 6, 7 and 9 | Drafting and revising report text from the evidence records | The two developers (Lim Chee Long and Muhammad Erfan Bin Mohan) checked its numbers and paths against [evidence/](evidence/README.md) and the manifest; all members have read it, and the primary developer gives the final approval | AI-assisted work, declared here |
+| Claude Code and OpenAI Codex (`gpt-5.6-luna`) | Storefront redesign in the VoiceBox style, dark mode, motion, 42Factors branding and the pixel "67" mark (`src/templates/`, `src/static/`) | Front-end implementation assistance, led by Jun Keat Lim | Visual and UI checks by the team; frontend tests ([tests/test_frontend.py](tests/test_frontend.py)); FUNC-02 browser walkthrough | AI-assisted work, declared here |
+| Chat assistant for planning and advice (tool not recorded) | Architecture, cost and scope discussions before decisions were written down | Advice only | Decisions were then recorded by the team in [docs/decisions/](docs/decisions/) and the scope | AI-assisted advice |
 
 AI output was not accepted as fact; it was accepted only through recorded gates. Each backend change
 was reviewed by a separate, read-only reviewer agent against the written contracts, with findings,
@@ -27,7 +30,7 @@ fixes and re-reviews logged under [docs/reviews/](docs/reviews/). It was then ch
 automated tests, by deployed tests on AWS, by cross-checking results against the database, and by
 checking pages in the browser. Every result reported comes from a command whose raw output is saved
 under [evidence/raw/](evidence/raw/), not from an assistant's summary. Where an agent ran a check,
-the evidence says so and does not credit a human.
+the evidence says so and does not credit a human. The local functional and security test records were run and written by AI agents and then reviewed by the testing members; the FUNC-02 browser walkthrough was carried out by a person.
 
 ## Libraries, assets and data
 
@@ -38,12 +41,15 @@ the evidence says so and does not credit a human.
 | HTMX ([src/static/vendor/htmx/](src/static/vendor/htmx/LICENSE.md)) | Storefront and dashboard partials | Partial page updates | Vendored with recorded SHA-256 | Zero-Clause BSD |
 | Chart.js ([src/static/vendor/chartjs/](src/static/vendor/chartjs/LICENSE.md)) | Operator dashboard | Charts | Vendored with recorded SHA-256 | MIT |
 | model-viewer ([src/static/vendor/model-viewer/](src/static/vendor/model-viewer/LICENSE)) | Product pages | 3D shoe viewer | Vendored | Apache-2.0 |
-| 3D shoe models from Sketchfab ([src/static/models/CREDITS.md](src/static/models/CREDITS.md)) | Product pages | Product visuals, compressed and cut to a single shoe by the team | Credits recorded per file | Mostly CC BY 4.0; two CC BY-NC 4.0 (non-commercial course use); per-model authors in CREDITS.md |
+| 3D shoe models from Sketchfab ([src/static/models/CREDITS.md](src/static/models/CREDITS.md)) | Product pages | Product visuals, compressed with glTF-Transform (below) and cut to a single shoe by the team | Credits recorded per file | Mostly CC BY 4.0; two CC BY-NC 4.0 (non-commercial course use); per-model authors in CREDITS.md |
 | Google Fonts (Archivo Black, Space Mono, Work Sans, Inter, Manrope, Pixelify Sans) | Site typography | Fonts | Loaded from Google Fonts | SIL Open Font License 1.1 |
 | pandas, NumPy, scikit-learn | [analytics/](analytics/README.md) | Analytics verification and customer segmentation | Versions pinned; tests and reproducible evaluation in [evidence/test-data-ai.md](evidence/test-data-ai.md) | BSD-3-Clause |
 | Locust | [tests/load/](tests/load/README.md) | Load generation | Version pinned | MIT |
 | Terraform and the AWS provider | [src/infrastructure/](src/infrastructure/) | Infrastructure as code | Plans and applies recorded in [evidence/aws-build-runbook.md](evidence/aws-build-runbook.md) | Terraform BUSL-1.1; AWS provider MPL-2.0 |
 | Analytics Engineering, "Ecommerce Sales & Returns Dataset v1.0.0" | [data/](data/README.md), remapped to shoes | Synthetic source data | Checksums in `data/raw/checksums.txt`; import reconciliation | CC BY 4.0; notice in `data/raw/LICENSE.txt` |
+| glTF-Transform v4.5.0 | [src/static/models/](src/static/models/CREDITS.md) | Compressing the 3D models (WebP textures, quantized meshes) | The generator string is recorded in the header of each of the 12 files (read on 10 October 2026) and every texture is at most 1024 px. Who ran it, and the exact commands, were not recorded | MIT |
+| Phosphor Icons, regular weight | `src/static/img/icons.svg` | Interface icons, vendored as one SVG sprite | Licence notice is in the file header | MIT |
+| `DESIGN.md` ("VoiceBox" design reference) | Visual reference for the storefront CSS; included in this package for reference | Added as a Starbucks-inspired reference on 11 September 2026 (commit `c7ed9d1`, Lim Chee Long) and replaced by the VoiceBox version on 23 September 2026 (commit `d147c9d`, Jun Keat Lim) | Not possible: its original source was not recorded and could not be recovered | **Unknown, declared as such.** The fonts and icons the build loads are listed above under their own licences |
 
 ## Team decisions and modifications
 
@@ -54,11 +60,6 @@ results ([ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md)); w
 to fix and which to keep as documented limitations; the storefront redesign and 3D model choice;
 and reporting the finding that segments do not predict repurchase on this synthetic data as
 measured. Members reviewed AI output, ran the application and checked results against the evidence.
-
-**To confirm before submission (remove this paragraph once done):** add any other AI use (for
-example on the storefront redesign, dark mode, 3D model processing, branding, test write-ups or the
-report) to the table above and to report section 9; find the source and licence of
-`src/static/models/air-jordan-1-low-dior.glb` or remove that model.
 
 ## Appendix: dated AI-use records
 
@@ -98,7 +99,7 @@ OpenAI Codex coordinates Phase 6 on `erfan/analytics`, with explicit `gpt-6-astr
 | Tool/source | Where used | Purpose | Verification performed | Licence/attribution |
 |---|---|---|---|---|
 | Claude Code (Claude Opus 5.5) | `analytics/evaluate_holdout.py`, `analytics/segment_customers.py`, `src/reporting/segment_contract.py`, `src/catalogue/`, `src/cart/views.py`, related templates, CSS, tests, `evidence/` DATA-01/DATA-02 records and `docs/plans/` | Implementation and verification assistance on tasks chosen and approved by the team | Plans written before each change; full test suite, focused ML/loader suites, disposable-database reruns of import, refresh, independent pandas check, training, import and dashboard, and headless-browser screenshots, as recorded in `evidence/test-data-ai.md` and the plans; independent review pending | AI-assisted work |
-| Gemini (Google) | Dashboard description (reported by Hermann) | Structuring the wording of the dashboard description | Reviewed by the teammate who used it; exact location to be confirmed by that teammate | AI-assisted wording |
+| Gemini (Google) | Dashboard description (reported by Hermann) | Structuring the wording of the dashboard description | Used in FUNC-02 step 7 ([evidence/test-functional.md](evidence/test-functional.md)); each value cross-checked against the database | AI-assisted wording |
 
 Scope and decisions came from the team. Syahfariz chose which review findings to act on
 (M-02 hold-out check, M-05 subsample stability, M-03 feature fix; M-04 kept as a documented

@@ -1,6 +1,6 @@
 # ADR-004: One RDS PostgreSQL 17 instance, `db.t4g.small`, shared by both variants
 
-**Status:** drafted by the writing session for review (1 October 2026). Settings below are carried from the earlier stage 2 plan; the class and sharing are the new decisions.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). Settings below are carried from the earlier stage 2 plan; the class and sharing are the new decisions.
 
 ## Decision
 

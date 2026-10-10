@@ -1,6 +1,6 @@
 # ADR-002: Migrate stage 1 into `base/` with `terraform state mv`, recreate the rest, gate on a clean plan
 
-**Status:** drafted by the writing session for review (1 October 2026). Implements [ADR-001](ADR-001-split-terraform-into-base-and-stacks.md). Script: `src/infrastructure/scripts/migrate-state.sh`.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). Implements [ADR-001](ADR-001-split-terraform-into-base-and-stacks.md). Script: `src/infrastructure/scripts/migrate-state.sh`.
 
 ## Decision
 

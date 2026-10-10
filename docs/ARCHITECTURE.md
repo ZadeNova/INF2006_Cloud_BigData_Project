@@ -4,12 +4,12 @@
 
 > **Note (updated 9 October 2026):** this document describes both variants: A (EC2 + Auto Scaling group, the evaluated alternative) and B (ECS on Fargate). The final architecture is variant B ([ADR-018](decisions/ADR-018-final-architecture-ecs-fargate.md)).
 
-Status (3 October 2026): `base/` and variant A (`ec2/`) were applied and verified on 1 October 2026 and the `ec2/` stack is torn down between work sessions; variant B (`fargate/`) was applied and measured on 9 October 2026 and, like variant A (8 October), is torn down; only `base/` remains. Load, scaling and recovery results (one repeat each, indicative, n = 1) are in the [evidence index](../evidence/README.md) ([runbook](../evidence/aws-build-runbook.md), [how to run it](../src/infrastructure/README.md)). Read the [scope](../PROJECT_SCOPE_INF2006.md).
+Status (9 October 2026): `base/` and variant A (`ec2/`) were applied and verified on 1 October 2026 and the `ec2/` stack is torn down between work sessions; variant B (`fargate/`) was applied and measured on 9 October 2026 and, like variant A (8 October), is torn down; only `base/` remains. Load, scaling and recovery results (one repeat each, indicative, n = 1) are in the [evidence index](../evidence/README.md) ([runbook](../evidence/aws-build-runbook.md), [how to run it](../src/infrastructure/README.md)). Read the [scope](../PROJECT_SCOPE_INF2006.md).
 
 ## Flows and responsibilities
 
-- Browser -> HTTPS ALB -> Django/Gunicorn containers in EC2 ASG -> private RDS PostgreSQL.
-- Variant B (measured on 9 October 2026): Browser -> HTTPS ALB -> Django/Gunicorn container as an ECS Fargate task -> the same private RDS PostgreSQL. Only the compute layer differs; see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-built-and-measured-the-final-architecture).
+- Variant A, the evaluated alternative (measured on 8 October 2026): Browser -> HTTPS ALB -> Django/Gunicorn containers in EC2 ASG -> private RDS PostgreSQL.
+- Variant B, the final architecture (measured on 9 October 2026): Browser -> HTTPS ALB -> Django/Gunicorn container as an ECS Fargate task -> the same private RDS PostgreSQL. Only the compute layer differs; see [AWS_INFRASTRUCTURE.md](AWS_INFRASTRUCTURE.md#variant-b-ecs-on-fargate-built-and-measured-the-final-architecture).
 - Django renders templates and HTMX fragments. WhiteNoise serves packaged, versioned static assets. No independent frontend service.
 - Private S3 -> authorised validation/import command -> PostgreSQL -> aggregation command -> summary tables -> protected dashboard.
 - CloudWatch collects sanitised logs and infrastructure metrics; SNS alarm notifications and a regional WAF (one rate-based rule on `POST /login/`) are applied on both variants; CloudTrail is the account's default event history. Their behaviour under failure and attack was tested once per variant: see the [evidence index](../evidence/README.md).
@@ -35,6 +35,6 @@ If adopted, ElastiCache serves disposable catalogue/analytics reads with bounded
 - CloudFront omitted for current workload/budget; private S3 retained for datasets and exports.
 - Service-model alternatives (Lambda, EKS, Elastic Beanstalk, ECS Fargate, a separate analytics service) are argued against workload-derived decision drivers in [PROBLEM_FRAMING_AND_ARCHITECTURE.md](PROBLEM_FRAMING_AND_ARCHITECTURE.md). Provisioning is Terraform-first ([comparison plan](plans/aws-ecs-comparison.md), [decisions](decisions/)).
 
-Create the submission diagram during implementation with users, services, trust boundaries, flows and observability. Planned output: `evidence/architecture.png`; do not claim it exists before creation. INF2003 extends the preserved submission later.
+The submission diagram is [evidence/architecture.png](../evidence/architecture.png) (users, services, trust boundaries, flows, observability); its text version, with every label mapped to Terraform and evidence, is [evidence/architecture.md](../evidence/architecture.md). INF2003 extends the preserved submission later.
 
 Local startup uses root compose.yaml to include src/compose.yaml (Compose 2.20+). The one-off migrate service waits for healthy PostgreSQL; web waits for migration success. This preserves the existing local project/volume and does not change the separate AWS coordinated-migration strategy.

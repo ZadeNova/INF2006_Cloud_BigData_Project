@@ -1,6 +1,6 @@
 # ADR-008: ALB, TLS and health-check settings
 
-**Status:** drafted by the writing session for review (1 October 2026). The numeric values are starting points; the plan treats them as results-moving settings to be tuned and recorded.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). The numeric values are the ones in `src/infrastructure/modules/web-entry/alb.tf`; the 8 and 9 October runs used them.
 
 ## Decision
 

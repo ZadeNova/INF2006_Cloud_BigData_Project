@@ -18,6 +18,7 @@ Results are reported as **capacity per unit of compute** and as a **multiple of 
 | `aws_capture.py` | Laptop only: `watch` target health, `kill` replaces one unit gracefully, `cpu` records the CPU model, `export` CloudWatch/scaling data and redact |
 | `analyze.py` | Raw run folders to summary tables, timings, cost per 1,000 requests and weighted scores |
 | `selftest.py` | Checks of the harness's own logic (no network); `python selftest.py` |
+| `continuity.py` | RES-04: session and cart continuity across the removal, from a recorded replacement run (no network); `python continuity.py <run folder>` |
 | `reset_state.py` | Laptop: puts the shop data back after load tests (removes load-test orders, returns their stock); dry run by default |
 | `common.py`, `prices.json` | Shared helpers; hourly list prices (checked 9 October 2026) |
 | `requirements.in` / `.txt` | Locust and boto3, pinned by exact version. Separate from the application's requirements on purpose |

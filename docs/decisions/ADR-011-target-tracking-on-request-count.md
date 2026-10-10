@@ -1,6 +1,6 @@
 # ADR-011: Scale on requests per instance (target tracking), 1 to 2 instances
 
-**Status:** drafted by the writing session for review (1 October 2026). The target value is a starting point to be tuned from the load rehearsal and recorded.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). The target (300 requests per instance per minute) was not tuned: both variants ran with it, and it is a small fraction of the measured ceiling ([test-resilience.md](../../evidence/test-resilience.md), limit 4).
 
 ## Decision
 

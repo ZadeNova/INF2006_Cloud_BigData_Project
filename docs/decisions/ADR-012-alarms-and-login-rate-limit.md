@@ -1,6 +1,6 @@
 # ADR-012: Three alarms, saved log queries, and a WAF rate limit on `POST /login/`
 
-**Status:** drafted by the writing session for review (1 October 2026). Thresholds are starting points, recorded and tuned from the failure tests.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). The thresholds are the ones in `modules/web-entry/alarms.tf` and `waf.tf`, used in the 8 and 9 October runs.
 
 ## Decision
 

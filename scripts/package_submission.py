@@ -140,6 +140,44 @@ def check(zpath, group, commit):
     say("PASS" if not hits else "WARN", f"leak scan: {len(hits)} unexplained hits" + ("" if not hits else " (read each): " + "; ".join(hits[:10])))
     say("PASS" if not todo else "FAIL", "no TODO in the required top-level files" + (f": {todo}" if todo else ""))
     say("PASS" if not broken else "WARN", f"relative markdown links resolve ({len(broken)} broken)" + ("" if not broken else ": " + "; ".join(broken[:8])))
+    # Sync lint: phrases that mean "this file describes an earlier state". FAIL in the files a marker reads first,
+    # WARN in the living contracts under docs/ and the evidence records (dated history is not scanned).
+    stale = re.compile(r"not yet supplied|to be supplied|\*\*Missing\*\*|to confirm before submission|\bTBD\b|\(planned\)|"
+                       r"None has been run|designed, not built|not yet run on AWS|draft diagram|drafted by the writing session|"
+                       r"is a planned output|never tested", re.I)
+    first = {"README.md", "project_manifest.yaml", "TEAM_CONTRIBUTIONS.md", "AI_USE_DECLARATION.md"}
+    living = [n for n in names if n.endswith(".md") and not n.startswith(("docs/archive/", "docs/plans/", "docs/reviews/", "evidence/raw/", "src/static/"))
+              and (n in first or n.startswith(("evidence/", "docs/", "data/", "analytics/", "tests/", "src/")))]
+    stale_first, stale_other = [], []
+    for n in sorted(living):
+        for ln, line in enumerate(z.read(n).decode("utf-8", "replace").split("\n"), 1):
+            if stale.search(line):
+                (stale_first if n in first else stale_other).append(f"{n}:{ln}")
+    say("PASS" if not stale_first else "FAIL", f"sync lint, files a marker reads first: {len(stale_first)} stale phrases" + ("" if not stale_first else ": " + "; ".join(stale_first[:8])))
+    say("PASS" if not stale_other else "WARN", f"sync lint, evidence and contract docs: {len(stale_other)} stale phrases" + ("" if not stale_other else ": " + "; ".join(stale_other[:8])))
+    # Figures the README restates must still appear in the evidence records.
+    if "README.md" in names:
+        readme = z.read("README.md").decode("utf-8", "replace")
+        block = re.search(r"\| Measured on AWS.*?\n\n", readme, re.S)
+        corpus = "\n".join(z.read(n).decode("utf-8", "replace") for n in names
+                           if n in ("evidence/test-resilience.md", "evidence/test-performance.md", "evidence/load-summary.md"))
+        if block and corpus:
+            figs = sorted({f for f in re.findall(r"\d[\d,]*(?:\.\d+)?", block.group(0)) if len(f) >= 2 and f not in ("09", "10", "11", "18")})
+            absent = [f for f in figs if f not in corpus]
+            say("PASS" if not absent else "FAIL", f"README results table: {len(figs)} figures found in evidence" + ("" if not absent else f"; not found: {absent}"))
+    # Quickstart check: a command that reads files must either find them in the package or be preceded by the step that builds them.
+    if "README.md" in names:
+        readme = z.read("README.md").decode("utf-8", "replace")
+        m = re.search(r"import_dataset\s+--source\s+/app/(\S+)", readme)
+        if m:
+            src_dir = m.group(1).rstrip("/")
+            present = any(n.startswith(src_dir + "/") and n.endswith("customers.csv") for n in names)
+            built = "build_shoe_dataset.py" in readme and readme.find("build_shoe_dataset.py") < m.start()
+            say("PASS" if present or built else "FAIL",
+                f"README quickstart: import source {src_dir}/ is in the package or built first" + ("" if present or built else " (neither: the import would fail on a fresh checkout)"))
+    agent = [n for n in ("AGENTS.md", "CLAUDE.md") if n in names]
+    if agent:
+        say("WARN", f"agent instruction files are in the package (an AI marker's tooling may load them as instructions): {agent}")
     mb = Path(zpath).stat().st_size / 1e6
     say("PASS" if mb < 100 else "WARN", f"size {mb:.1f} MB")
     return results

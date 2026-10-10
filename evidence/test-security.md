@@ -1,5 +1,7 @@
 # Security control test
 
+**Owner and reviewer:** Phua Kia Wen Hermann (testing). The commands were executed by AI agents; see [AI_USE_DECLARATION.md](../AI_USE_DECLARATION.md).
+
 ## Results at a glance
 
 Cloud cases (AWS: variant A on 8 October 2026, variant B on 9 October 2026, UTC; one run each). Local cases SEC-01 to SEC-08, SEC-12 to SEC-16 and SEC-ALL are all PASS (26 September and 1 October 2026) and are listed with their commits in the Summary table below; the scans are in [security-scan-triage.md](security-scan-triage.md). The A and B columns use the same wording on purpose.
@@ -276,7 +278,7 @@ Reruns: `SEC-18` on A was run twice (the first at 17:52 UTC scanned 15,883 recor
 
 **Interpretation:** Production retrieves once and overrides plaintext credentials; a missing production selection cannot fall back to plaintext; incomplete or wrong secret schemas are refused; SDK errors are redacted with the cause suppressed; static SDK credentials are rejected; local mode never imports or calls AWS.
 
-**Limitations/follow-up:** The AWS call is mocked. Retrieval by a running instance is SEC-11 (planned).
+**Limitations/follow-up:** The AWS call is mocked. Retrieval by a running instance is SEC-11 (recorded below: PASS on variant A and variant B).
 
 ### SEC-14: Health endpoint and Host handling
 
@@ -308,7 +310,7 @@ Reruns: `SEC-18` on A was run twice (the first at 17:52 UTC scanned 15,883 recor
 
 **Interpretation:** One JSON line per request with documented fields; unsafe incoming request IDs are replaced and safe ones kept; no password, cookie, query string or exception message is logged; Django security-logger messages are replaced by a fixed one; logging never queries the database. SEC-08 selects three of these tests; this case runs the whole file.
 
-**Limitations/follow-up:** Local standard output only. CloudWatch ingestion and the 5xx alarm are MON-02 (planned).
+**Limitations/follow-up:** Local standard output only. CloudWatch ingestion is MON-01 and alarm delivery is MON-03 in [monitoring.md](monitoring.md) (both run on AWS, 8 and 9 October 2026).
 
 ### SEC-16: Imported customers cannot log in
 

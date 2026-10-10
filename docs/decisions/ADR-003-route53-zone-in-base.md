@@ -1,6 +1,6 @@
 # ADR-003: Route 53 hosted zone in `base/`, delegated from Namecheap, time-boxed
 
-**Status:** drafted by the writing session for review (1 October 2026).
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026).
 
 ## Decision
 

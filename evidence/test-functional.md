@@ -1,5 +1,7 @@
 # Functional workflow test
 
+**Owner and reviewer:** Phua Kia Wen Hermann (testing). The automated runs and checks were executed by AI agents; see [AI_USE_DECLARATION.md](../AI_USE_DECLARATION.md).
+
 ## Results at a glance
 
 | Case | What it proves | Result on A (EC2) | Result on B (Fargate) | Date | Key artefact A | Key artefact B |
@@ -75,6 +77,8 @@ pytest_exit=0
 **Objective:** Show that a person using a browser can complete the customer purchase flow end to end, and that an operator can manage products and open the analytics dashboard while a customer cannot.
 
 **Threat/requirement:** Brief section 5.2 test (1): functional workflow test.
+
+**Tester:** Phua Kia Wen Hermann performed the human browser steps; the read-only database and log checks recorded below were taken during the same session.
 
 **Setup:** Fresh local database loaded following the "Demo data" section of `src/README.md` after FUNC-01. This case will be run only after the human reviewer agrees to reset the disposable local database if existing data conflicts with the import.
 

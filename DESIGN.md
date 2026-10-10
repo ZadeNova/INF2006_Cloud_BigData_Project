@@ -451,5 +451,8 @@ below the palette in the same block and are built from these values.
   only the "67" brand mark, loaded from Google Fonts as a two-glyph subset.
 - **Icons**: Phosphor Icons regular weight, MIT, vendored as one SVG sprite at
   `src/static/img/icons.svg` with the licence in the file header.
-- **This design system**: supplied by the project owner. Its original source
-  and licence are **not yet recorded** and still need filling in here.
+- **This design system**: added to the repository as a Starbucks-inspired
+  reference by Lim Chee Long on 11 September 2026 (commit `c7ed9d1`) and replaced
+  by this VoiceBox version by Jun Keat Lim on 23 September 2026 (commit
+  `d147c9d`). Its original source and licence were not recorded and could not be
+  recovered; this is declared in AI_USE_DECLARATION.md.

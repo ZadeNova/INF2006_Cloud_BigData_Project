@@ -185,7 +185,8 @@ Needs: `tests/load/requirements.txt` (Locust, boto3; Python 3.12 or 3.14). `anal
 | `accounts.py` | `create` makes the synthetic test accounts through the normal registration form; `reset-carts` empties their carts between runs | generator or laptop |
 | `aws_capture.py` | `watch` records target health over time; `kill` removes one unit gracefully (asks first); `cpu` records the processor model; `export` copies CloudWatch, scaling and alarm data into the run folder and redacts it | the laptop (holds the lab credentials) |
 | `analyze.py` | Turns run folders into tables: latency, throughput, errors, scale-out and replacement times, cost per 1,000 requests, weighted comparison. Offline | any machine |
-| `selftest.py` | Checks the harness's own logic with no network (15 checks) | any machine |
+| `selftest.py` | Checks the harness's own logic with no network (16 checks) | any machine |
+| `continuity.py` | RES-04: session and cart continuity across the removal, from a recorded replacement run (`kill.json`, `requests-*.csv`; no network) | any machine |
 | `common.py` | Shared rules: allowed target hosts, redaction, percentiles | (imported) |
 
 ### Test helpers

@@ -1,6 +1,6 @@
 # ADR-007: Variant A compute: `c5.large`, one instance, public subnets, no NAT
 
-**Status:** drafted by the writing session for review (1 October 2026).
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026).
 
 ## Decision
 

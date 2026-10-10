@@ -1,6 +1,6 @@
 # ADR-015: The Fargate task and service
 
-**Status:** drafted by the writing session for review (6 October 2026). Settings are the starting values; the load runs measure them. Prices are from memory and unverified.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 6 October 2026). The settings are the values that were applied and measured. Prices were checked against the AWS pricing pages on 9 October 2026 (`tests/load/prices.json`).
 
 ## Decision
 

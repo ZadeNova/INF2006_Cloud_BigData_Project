@@ -1,6 +1,6 @@
 # ADR-009: Database and data jobs run by `jobs.sh` through SSM Run Command
 
-**Status:** drafted by the writing session for review (1 October 2026). Variant A only; the Fargate branch (`aws ecs run-task`) is added with `fargate/`.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026). Variant A uses SSM Run Command; the Fargate branch (`aws ecs run-task`) was added with `fargate/` and amended by [ADR-019](ADR-019-variant-b-sets-up-its-own-database.md).
 
 ## Decision
 

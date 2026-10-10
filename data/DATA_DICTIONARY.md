@@ -74,3 +74,22 @@ Rejected parents reject children; rejected lines invalidate their entire order. 
 creation (users, profiles, products, orders, lines, inventory/snapshots) shares one
 transaction. Historical import never deducts stock. Existing inventory triggers make
 the accepted fingerprint immutable; no migration/additional manifest table is needed.
+
+
+## Derived shoe dataset (`data/derived/shoes/`)
+
+Built from the unchanged `data/raw/` files by `analytics/build_shoe_dataset.py` (seed 42). Only `checksums.txt` and
+`product_map.csv` are committed; the other derived files (`customers.csv`, `products.csv`, `orders.csv`,
+`order_items.csv`) are regenerated and verified against `checksums.txt`. Their columns follow the source tables
+described above, with product identities, prices and line totals recomputed.
+
+`product_map.csv` (1,200 rows, one per source product; 20 distinct shoes; 6 source categories):
+
+| Column | Meaning |
+|---|---|
+| `source_product_id` | `product_id` of the source product in `data/raw/products.csv` (for example `P00001`) |
+| `source_category` | `category` of that source product; the shoe is chosen by a seeded weighted choice within this category |
+| `shoe_id` | Identifier of the shoe model it is re-pointed to (`S01` to `S20`, from `src/catalogue/shoes.py`) |
+| `shoe_name` | Display name of that shoe model |
+
+The size of each order line is assigned separately by a seeded weighted choice and is synthetic.

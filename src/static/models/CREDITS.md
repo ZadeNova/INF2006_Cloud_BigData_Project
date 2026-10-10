@@ -1,7 +1,7 @@
 # 3D model credits
 
-All models are from Sketchfab and have been compressed (textures resized to
-1024px or 512px, meshes simplified) for web use. Models supplied as a pair,
+All models are from Sketchfab and were processed with glTF-Transform v4.5.0 (WebP
+textures of at most 1024px, quantized mesh data) for web use. Models supplied as a pair,
 or with a shoebox, were cut down to a single shoe. CC BY models require
 attribution; CC BY-NC models are for non-commercial use only.
 
@@ -10,7 +10,7 @@ do not sponsor or endorse this educational project.
 
 | File | Source model | Author | Licence |
 |---|---|---|---|
-| air-jordan-1-high.glb | [Nike Air Jordan](https://sketchfab.com/3d-models/fd462c530d974f33a523d88a7562f1cf) (source unconfirmed) | ar41k | CC BY 4.0 |
+| air-jordan-1-high.glb | [Nike Air Jordan](https://sketchfab.com/3d-models/fd462c530d974f33a523d88a7562f1cf) (source page checked on 10 October 2026: title, author and licence match) | ar41k | CC BY 4.0 |
 | air-jordan-1-low-dior.glb | [AIR JORDAN 1 OG LOW DIOR](https://sketchfab.com/3d-models/air-jordan-1-og-low-dior-b427e4afad924f1588cf9fe820adcc1c) | SRUSH651 2th / surreal rush (`@THE-OFFICIAL-SRUSH651`) | CC BY 4.0 |
 | brown-sneaker.glb | [Brown Sneakers](https://sketchfab.com/3d-models/e6c51d2e77d945d1a0efbca530fb4b5b) | yanix | CC BY 4.0 |
 | converse-high.glb | [Converse — FREE](https://sketchfab.com/3d-models/bc791439d26f4dd9974819c168e12385) | yakaras | CC BY 4.0 |

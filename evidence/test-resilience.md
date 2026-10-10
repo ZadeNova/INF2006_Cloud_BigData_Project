@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|---|
 | RES-03a scale-out | The service adds a second healthy unit by itself after a load step | **PASS** for scale-out: alarm 299 s after the load step, scaling action 64 s after the alarm, second unit healthy 161 s after the alarm (460 s after the step), 0 errors. Scale-in not observed in the run or in the window before the next change | **PASS** for scale-out: alarm 305 s after the load step, scaling action 67 s after the alarm, second unit healthy 101 s after the alarm (407 s after the step), 0 errors. Scale-in observed after the run: the task was stopped at 03:03:08 UTC | A 2026-10-08; B 2026-10-09 | [raw/RES-03-ec2-scaleout-r1_2026-10-08/](raw/RES-03-ec2-scaleout-r1_2026-10-08/) | [raw/RES-03-fargate-scaleout-r1_2026-10-09/](raw/RES-03-fargate-scaleout-r1_2026-10-09/) |
 | RES-03b replacement | After one of two units is removed under 100 users, two healthy units return with no failed requests | **PASS**: removal seen in 2 s, two healthy again after 114 s, error window 0 s, 0 errors in 7,474 requests. A graceful removal, not a crash | **PASS**: removal seen in 18 s, two healthy again after 50 s, error window 0 s, 0 errors in 7,474 requests. A graceful removal, not a crash | A 2026-10-08; B 2026-10-09 | [raw/RES-03-ec2-replace-r1_2026-10-08/](raw/RES-03-ec2-replace-r1_2026-10-08/) | [raw/RES-03-fargate-replace-r1_2026-10-09/](raw/RES-03-fargate-replace-r1_2026-10-09/) |
-| RES-04 session continuity | Logged-in visitors keep their session and cart when their unit is removed | **Not analysed yet.** Indirect only: 0 errors in the replacement run | **Not analysed yet.** Indirect only: 0 errors in the replacement run | not analysed | same folder as RES-03b | same folder as RES-03b |
+| RES-04 session continuity | Logged-in visitors keep their session and cart when their unit is removed | **PASS (small sample)**: 11 visits had logged in before the removal and went on after it; 29 later requests, all ok; no second login; 6 orders confirmed after the removal. The log does not show which unit served a request | **PASS (small sample)**: 3 such visits; 8 later requests, all ok; no second login; 2 orders confirmed after the removal | analysis 2026-10-10 of the 8 and 9 October logs | [raw/RES-04_2026-10-10_ec2_continuity.txt](raw/RES-04_2026-10-10_ec2_continuity.txt) | [raw/RES-04_2026-10-10_fargate_continuity.txt](raw/RES-04_2026-10-10_fargate_continuity.txt) |
 | LOAD-03 saturation | Capacity of one unit and where it breaks | **Measured**: practical capacity 16 users (46.54 page actions/s), maximum 118.8 requests/s, 0 errors up to 512 users; instance CPU, not the database, is the limit; p95 at 16 users 783 ms | **Measured**: practical capacity 8 users (44.01 page actions/s), maximum 105.5 requests/s, 0 errors up to 512 users; task CPU, not the database, is the limit; p95 at 16 users 1204 ms. At 512 users the single task failed health checks and ECS replaced it | A 2026-10-08; B 2026-10-09 | [raw/LOAD-ec2-saturation-r1_2026-10-08/](raw/LOAD-ec2-saturation-r1_2026-10-08/) | [raw/LOAD-fargate-saturation-r1_2026-10-09/](raw/LOAD-fargate-saturation-r1_2026-10-09/) |
 
 Rerun and failed-attempt run folders: none (each run was run once and [load-summary.md](load-summary.md) marks all of them "valid"). Failed attempts that are not run folders (a failed capacity-pin plan on B and a failed first `up.sh ec2`) are listed in [raw/INDEX.md](raw/INDEX.md). Details, the numbers behind each cell and the interpretation: [test-performance.md](test-performance.md).
@@ -28,12 +28,57 @@ Rerun and failed-attempt run folders: none (each run was run once and [load-summ
 |---|---|---|---|---|---|
 | RES-03a scale-out | Load step to a second healthy unit, without a person | Alarm a few minutes after the load step; second unit healthy about 3 to 4 minutes later on A, sooner on B (no instance boot); scale-in after the load falls | PASS for scale-out; scale-in not observed | PASS for scale-out; scale-in observed after the run | [test-performance.md RES-03a](test-performance.md#res-03a-scale-out-1-to-2-units) |
 | RES-03b replacement | One of two units removed under 100 users; time to two healthy again and the error window | Detection about 30 s after the kill; replacement dominated by boot time; a short error burst or none (graceful removal drains first) | PASS (glance table above) | PASS (glance table above) | [test-performance.md RES-03b](test-performance.md#res-03b-replacement-of-a-killed-unit) |
-| RES-04 session continuity | Logged-in visitors keep their session and cart when the unit that served them is removed (no stickiness; sessions are in the database) | Visits that span the kill continue without a new login and without an error, apart from requests in flight at the kill | not analysed yet; 0 errors in the run | not analysed yet; 0 errors in the run | Analysed after the session from the RES-03b request log (`requests-*.csv`) |
+| RES-04 session continuity | Logged-in visitors keep their session and cart when the unit that served them is removed (no stickiness; sessions are in the database) | Visits that span the kill continue without a new login and without an error, apart from requests in flight at the kill | PASS on a small sample: 11 authenticated visits, 29 requests ok, no second login | PASS on a small sample: 3 authenticated visits, 8 requests ok, no second login | [RES-04 case record](#res-04-session-continuity) |
 
 Both variants use the same harness schedule, the same capacity pins and a graceful removal (ADR-017): A asks the Auto Scaling group to terminate the instance, B stops one task. The replacement test is therefore a planned removal, not a sudden crash; the report says so.
 
 Local foundation evidence (12 September 2026): [DB outage/readiness recovery and preserved migration metadata after container recreation](../docs/reviews/foundation-batch-4.md). The AWS scaling and replacement tests are the RES-03 rows above. Not run: an interrupted-checkout recovery test, a crash (as opposed to a graceful removal), a bad-image rollout and a database failover.
 
+
+## Case records (objective, setup, command, expected, actual, date, artefact)
+
+The brief asks each required test to record these fields. The tables above are the summary; the per-case record below is the complete one, and [test-performance.md](test-performance.md) holds the same cases with the full interpretation. Every result is one repeat per condition (n = 1).
+
+### RES-03a: Scale-out (1 to 2 units)
+
+- **Objective:** measure the time from the load step to a second healthy target, with no person acting.
+- **Setup:** autoscaling 1 to 2 units, target 300 requests per unit per minute (ADR-011); 10 users, stepped to 200, held, then back to 10; `aws_capture.py watch` running on the laptop.
+- **Command / steps:** `python aws_capture.py watch ...` (laptop); `python run.py scaleout --variant <ec2|fargate> --base-url <host> --repeat <n> --location us-east-1` (generator); then `aws_capture.py export`.
+- **Expected result:** alarm after the load step, then a new unit healthy about 3 to 4 minutes later on A, sooner on B; scale-in after the load falls.
+- **Actual result:** A: alarm 299 s after the load step, scaling action 64 s after the alarm, second unit healthy 161 s after the alarm (460 s after the step), 0 errors; scale-in not observed. B: 305 s, 67 s, 101 s (407 s after the step), 0 errors; scale-in observed after the run.
+- **Date (UTC):** A 2026-10-08, B 2026-10-09.
+- **Artefact path:** `evidence/raw/RES-03-ec2-scaleout-r1_2026-10-08/`; `evidence/raw/RES-03-fargate-scaleout-r1_2026-10-09/`.
+
+### RES-03b: Replacement of a removed unit
+
+- **Objective:** measure the time to two healthy units again, and the error window, after one unit is removed under load.
+- **Setup:** two units pinned, 100 users, `watch` running; one unit is removed gracefully about 5 minutes in (ADR-017).
+- **Command / steps:** `python run.py replace ...` (generator); at the prompt `python aws_capture.py kill --variant <v> --run-id <ID>` (laptop); then `export`.
+- **Expected result:** detection about 30 s after the removal (ADR-008), replacement dominated by boot time, a short burst of errors or none.
+- **Actual result:** A: removal seen in 2 s, two healthy again after 114 s, error window 0 s, 0 failed requests of 7,474. B: 18 s, 50 s, 0 s, 0 of 7,474. A graceful removal, not a crash.
+- **Date (UTC):** A 2026-10-08, B 2026-10-09.
+- **Artefact path:** `evidence/raw/RES-03-ec2-replace-r1_2026-10-08/`; `evidence/raw/RES-03-fargate-replace-r1_2026-10-09/`.
+
+### RES-04: Session continuity
+
+- **Objective:** show that logged-in visitors keep their session and cart when a unit is removed (no stickiness; sessions and carts are in the database).
+- **Setup:** the recorded RES-03b request logs (`requests-*.csv`) and `kill.json`; no cloud access needed. The harness marks `cart` ok only if the cart page lists its lines, `checkout_review` only if the review form is present and `checkout_place` only if the order page says it is confirmed.
+- **Command / steps:** `python tests/load/continuity.py evidence/raw/RES-03-ec2-replace-r1_2026-10-08 evidence/raw/RES-03-fargate-replace-r1_2026-10-09`.
+- **Expected result:** visits that span the removal continue without a new login and without an error, apart from requests in flight at the removal.
+- **Actual result:** A: 50 visits spanned the removal, 11 of them had logged in beforehand; their 29 later requests were all ok (11 cart views, 3 checkout reviews, 6 confirmed orders), with no second login and 0 non-ok requests in the whole run. B: 98 visits spanned it, 3 logged in beforehand; their 8 later requests were all ok (2 cart views, 2 confirmed orders), no second login, 0 non-ok in the run. **PASS on a small sample.**
+- **Limits:** the samples are small (11 and 3 authenticated visits); the request log does not record which unit served a request, so it cannot say which of these requests were on the removed unit; the removal was graceful, so an abrupt crash is not covered.
+- **Date (UTC):** analysis 2026-10-10, of the logs recorded on 2026-10-08 (A) and 2026-10-09 (B).
+- **Artefact path:** `evidence/raw/RES-04_2026-10-10_ec2_continuity.txt`; `evidence/raw/RES-04_2026-10-10_fargate_continuity.txt`; script `tests/load/continuity.py`.
+
+### LOAD-03: Saturation (capacity of one unit)
+
+- **Objective:** find the practical capacity (highest step meeting the limits) and the maximum throughput of one unit.
+- **Setup:** one unit, no think time, steps of 1, 2, 4, 8, 16, 32, 64, 128, 256 and 512 users for 120 s each (first 30 s of each step discarded).
+- **Command / steps:** `python run.py saturation --variant <ec2|fargate> --base-url <host> --repeat <n> --location us-east-1`.
+- **Expected result:** throughput rises then flattens; p95 and errors rise past the knee.
+- **Actual result:** A: practical capacity 16 users (46.54 page actions/s), maximum 118.8 requests/s, 0 errors up to 512 users; instance CPU is the limit. B: 8 users (44.01 page actions/s), 105.5 requests/s, 0 errors up to 512 users; task CPU is the limit.
+- **Date (UTC):** A 2026-10-08 18:20:58 to 18:41:00; B 2026-10-09 06:23:24 to 06:43:26.
+- **Artefact path:** `evidence/raw/LOAD-ec2-saturation-r1_2026-10-08/`; `evidence/raw/LOAD-fargate-saturation-r1_2026-10-09/`.
 
 ## Phase 6 local scope — 25–26 September 2026
 

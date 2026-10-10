@@ -6,34 +6,6 @@ and constraints.
 
 > **Which stack to work on.** Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
 
-## Operating Modes
-
-The user can explicitly choose between two modes.
-
-### Learning Mode — Default
-
-Goal: help the user understand the implementation while building it.
-
-- Explain relevant framework concepts and important design decisions.
-- Briefly explain request/data flow and unfamiliar patterns when useful.
-- Prefer simple, idiomatic solutions over clever abstractions.
-- Claude may implement the requested code; the user does not need to write
-  every line manually.
-- Keep explanations proportional to the complexity of the task.
-
-### Implementation Mode
-
-Goal: maximize implementation speed and efficiency.
-
-- Prioritize completing the agreed implementation.
-- Minimize explanations unless clarification is important.
-- Inspect the relevant code and documentation before editing.
-- Implement directly within the agreed scope.
-- Avoid unnecessary abstractions, refactors, and exploration.
-- Follow the same testing, review, commit, and push gates as Learning Mode.
-
-The user may switch modes at any time.
-
 ## Workflow
 
 Follow this workflow unless the user explicitly changes it:

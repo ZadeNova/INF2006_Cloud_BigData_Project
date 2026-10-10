@@ -1,0 +1,25 @@
+# file: evidence/raw/RES-04_2026-10-10_fargate_continuity.txt
+# date_utc: 2026-10-10T03:05:31Z
+# commit: 832f0cb (tests/load/continuity.py added in the working tree)
+# command: python tests/load/continuity.py evidence/raw/RES-03-fargate-replace-r1_2026-10-09
+# note: analysis of the recorded RES-03b request log; no AWS access. The log does not record which unit served a request.
+== RES-03-fargate-replace-r1_2026-10-09
+  variant: fargate
+  mode: graceful
+  kill_utc: 2026-10-09T03:17:34.480Z
+  requests_total: 7483
+  visits_total: 682
+  visits_spanning_kill: 98
+  spanning_by_kind: {'buyer': 4, 'abandoner': 10, 'shopper': 84}
+  authenticated_spanning_visits: 3
+  post_kill_requests_in_authenticated_visits: 8
+  post_kill_outcomes: {'ok': 8}
+  post_kill_auth_only_actions: {('checkout_place', 'ok'): 2, ('cart', 'ok'): 2}
+  visits_that_needed_a_second_login: 0
+  orders_confirmed_after_kill: 2
+  requests_in_120s_after_kill: 856
+  non_ok_in_120s_after_kill: 0
+  status_5xx_all_run: 0
+  non_ok_all_run: 0
+  RESULT: continuity held
+# exit: 0  end_utc: 2026-10-10T03:05:31Z

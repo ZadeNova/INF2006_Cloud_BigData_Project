@@ -2,9 +2,9 @@
 
 > Final architecture: variant B (ECS on Fargate), ADR-018. Variant A (EC2) = evaluated alternative.
 
-The single current index of the evidence. **Start with the five test records** (`test-functional.md`, `test-security.md`, `test-data-ai.md`, `test-resilience.md` with `test-performance.md`, and `monitoring.md`): each opens with a "Results at a glance" table (case, what it proves, result, date, one key file) and gives the full objective, setup, command, expected, actual, date and artefact path below it. **`raw/` is supporting proof**: the unedited command output those records cite (447 files, 296 of them inside eight run folders). Nobody is expected to read it in bulk: [raw/INDEX.md](raw/INDEX.md) lists every case and run folder once, with its authoritative file and a note on every superseded or failed attempt, and each run folder has a short `README.md` naming its key files and how to reproduce its numbers.
+The single current index of the evidence. **Start with the five test records** (`test-functional.md`, `test-security.md`, `test-data-ai.md`, `test-resilience.md` with `test-performance.md`, and `monitoring.md`): each opens with a "Results at a glance" table (case, what it proves, result, date, one key file) and gives the full objective, setup, command, expected, actual, date and artefact path below it. **`raw/` is supporting proof**: the unedited command output those records cite (448 files, 296 of them inside eight run folders). Nobody is expected to read it in bulk: [raw/INDEX.md](raw/INDEX.md) lists every case and run folder once, with its authoritative file and a note on every superseded or failed attempt, and each run folder has a short `README.md` naming its key files and how to reproduce its numbers.
 
-New here? [docs/GUIDE.md](../docs/GUIDE.md) explains the file names, how to check a claim, and where AWS logs and metrics end up. The mapping from the marking criteria to these files is in [README.md](../README.md#rubric-to-evidence-map) and in `project_manifest.yaml` (`rubric_evidence_map`).
+New here? [docs/GUIDE.md](../docs/GUIDE.md) explains the file names, how to check a claim, and where AWS logs and metrics end up. The mapping from the marking criteria to these files is in `project_manifest.yaml` (`rubric_evidence_map`) and summarised in the [README](../README.md#evidence).
 
 **State on 9 October 2026:** both variants were measured, one repeat each: variant A (EC2 behind an Auto Scaling group) on 8 October 2026 and variant B (ECS on Fargate) on 9 October 2026 (UTC), then both stacks were torn down. The A and B results sit side by side in the same tables. Evidence covers commits up to `e4bc928`.
 
@@ -34,7 +34,7 @@ Status words: `PASS` (ran and matched the expectation written first), `FAIL` (ra
 | FUNC-01 automated workflow suite (accounts, catalogue, cart, checkout, order history) | Local Docker | PASS (93 passed) | [raw/FUNC-01_2026-09-26.txt](raw/FUNC-01_2026-09-26.txt) | 2026-09-26 |
 | FUNC-02 manual browser walkthrough (customer and operator) | Local Docker | PASS | [test-functional.md](test-functional.md#func-02-manual-browser-walkthrough) | 2026-09-26 |
 | FUNC-03 part 1, variant A | AWS (EC2) | PASS, 2 orders, 0 errors | [raw/FUNC-03_2026-10-08_ec2_summary.txt](raw/FUNC-03_2026-10-08_ec2_summary.txt) | 2026-10-08 |
-| FUNC-03 part 2, variants A and B (browser steps) | AWS (EC2, Fargate) | No screenshots in `raw/`; to be stated by the team | [test-functional.md](test-functional.md#func-03-purchase-flow-on-the-deployed-shop-variant-a-and-variant-b) | |
+| FUNC-03 part 2, variants A and B (browser steps) | AWS (EC2, Fargate) | Not evidenced: no screenshots in `raw/`, so no human browser result is claimed | [test-functional.md](test-functional.md#func-03-purchase-flow-on-the-deployed-shop-variant-a-and-variant-b) | |
 | FUNC-03 part 1, variant B | AWS (Fargate) | PASS, 2 orders, 0 errors | [raw/FUNC-03_2026-10-09_fargate_summary.txt](raw/FUNC-03_2026-10-09_fargate_summary.txt) | 2026-10-09 |
 
 ### Security
@@ -73,11 +73,11 @@ Status words: `PASS` (ran and matched the expectation written first), `FAIL` (ra
 |---|---|---|---|---|
 | RES-03a scale-out 1 to 2 units | AWS (EC2) | PASS for scale-out (alarm 299 s after the load step, healthy 161 s after the alarm); scale-in not observed | [raw/RES-03-ec2-scaleout-r1_2026-10-08/](raw/RES-03-ec2-scaleout-r1_2026-10-08/) | 2026-10-08 |
 | RES-03b replacement of a removed unit under 100 users | AWS (EC2) | PASS (114 s to two healthy, 0 errors); graceful removal | [raw/RES-03-ec2-replace-r1_2026-10-08/](raw/RES-03-ec2-replace-r1_2026-10-08/) | 2026-10-08 |
-| RES-04 session continuity across the removal | AWS (EC2) | Not analysed yet | same folder as RES-03b | |
+| RES-04 session continuity across the removal | AWS (EC2) | PASS on a small sample: 11 logged-in visits, 29 requests ok, no second login | [raw/RES-04_2026-10-10_ec2_continuity.txt](raw/RES-04_2026-10-10_ec2_continuity.txt) | 2026-10-10 |
 | LOAD-03 saturation, 1 to 512 users | AWS (EC2) | Measured: practical capacity 16 users (46.54 page actions/s), maximum 118.8 requests/s, 0 errors; instance CPU is the limit | [raw/LOAD-ec2-saturation-r1_2026-10-08/](raw/LOAD-ec2-saturation-r1_2026-10-08/) | 2026-10-08 |
 | RES-03a scale-out 1 to 2 units | AWS (Fargate) | PASS for scale-out (alarm 305 s after the load step, healthy 101 s after the alarm); scale-in observed after the run | [raw/RES-03-fargate-scaleout-r1_2026-10-09/](raw/RES-03-fargate-scaleout-r1_2026-10-09/) | 2026-10-09 |
 | RES-03b replacement of a removed unit under 100 users | AWS (Fargate) | PASS (50 s to two healthy, 0 errors); graceful removal | [raw/RES-03-fargate-replace-r1_2026-10-09/](raw/RES-03-fargate-replace-r1_2026-10-09/) | 2026-10-09 |
-| RES-04 session continuity across the removal | AWS (Fargate) | Not analysed yet | same folder as RES-03b | |
+| RES-04 session continuity across the removal | AWS (Fargate) | PASS on a small sample: 3 logged-in visits, 8 requests ok, no second login | [raw/RES-04_2026-10-10_fargate_continuity.txt](raw/RES-04_2026-10-10_fargate_continuity.txt) | 2026-10-10 |
 | LOAD-03 saturation, 1 to 512 users | AWS (Fargate) | Measured: practical capacity 8 users (44.01 page actions/s), maximum 105.5 requests/s, 0 errors; task CPU is the limit | [raw/LOAD-fargate-saturation-r1_2026-10-09/](raw/LOAD-fargate-saturation-r1_2026-10-09/) | 2026-10-09 |
 | LOAD-01 RDS pilot, LOAD-02 ladder, LOAD-04 Singapore latency | AWS | NOT RUN (dropped for time) | — | |
 | RES-01, RES-02 database outage, local | Local Docker | NOT RUN | — | |
@@ -107,8 +107,8 @@ Record: [monitoring.md](monitoring.md).
 |---|---|---|---|
 | Build record, one dated entry per apply, with timings, defects and cost | Current to the 9 October session; lab balance at the end of both sessions recorded (USD 9.8 of 50 used) | [aws-build-runbook.md](aws-build-runbook.md) | 2026-10-08 |
 | Preflight checks (`PRE_*`), timed up/down/pin/reset (`OPS_*`), resource IDs (`SESSION_*`) | Variants A and B recorded | `raw/PRE_2026-10-08_*.txt`, `raw/OPS_2026-10-08_ec2_*.txt`, `raw/OPS_2026-10-09_fargate_*.txt`, `raw/SESSION_*` | 2026-10-08, 2026-10-09 |
-| `architecture.png` | **Missing**, to be supplied by the report lead | — | |
-| `report.pdf` | **Missing**, to be supplied | — | |
+| `architecture.png` | Present: final architecture (variant B), awaiting team sign-off and insertion into the report | [architecture.png](architecture.png), text version [architecture.md](architecture.md) | 2026-10-09 |
+| `report.pdf` | Present at the ZIP root (11 pages including references and appendix) | `report.pdf` | 2026-10-10 |
 
 ## Evidence rules
 

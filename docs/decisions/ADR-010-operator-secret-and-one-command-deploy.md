@@ -1,6 +1,6 @@
 # ADR-010: Operator login in its own secret, and the `up`, `down` and `smoke` scripts
 
-**Status:** drafted by the writing session for review (1 October 2026).
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 1 October 2026).
 
 ## Decision
 

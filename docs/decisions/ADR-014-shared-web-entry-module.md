@@ -1,6 +1,6 @@
 # ADR-014: One shared module for the web front door, used by both variants
 
-**Status:** drafted by the writing session for review (6 October 2026). Supersedes the "no child modules" part of [ADR-001](ADR-001-split-terraform-into-base-and-stacks.md); the rest of ADR-001 stands.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 6 October 2026). Supersedes the "no child modules" part of [ADR-001](ADR-001-split-terraform-into-base-and-stacks.md); the rest of ADR-001 stands.
 
 ## Decision
 

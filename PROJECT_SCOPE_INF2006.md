@@ -478,7 +478,7 @@ Dataset and design references:
 
 - [Selected synthetic dataset and published provenance/licence](https://www.analyticsengineering.com/datasets/ecommerce-sales)
 - [LaelaZ/synthetic-ecommerce](https://huggingface.co/datasets/LaelaZ/synthetic-ecommerce) — original selection, superseded 22 September 2026 after gated access was never granted
-- Selected `DESIGN.md` (VoiceBox) supplied by the user, adapted for this project; **original source and licence not yet recorded** — outstanding attribution task
+- Selected `DESIGN.md` (VoiceBox) supplied by the user, adapted for this project; **original source and licence not recorded and not recoverable**; declared in `AI_USE_DECLARATION.md`
 - Starbucks-inspired design reference — original selection, superseded 23 September 2026 when the storefront was reimplemented against VoiceBox
 - [Archivo Black](https://fonts.google.com/specimen/Archivo+Black), [Work Sans](https://fonts.google.com/specimen/Work+Sans) and [Space Mono](https://fonts.google.com/specimen/Space+Mono) — SIL Open Font License
 - [Phosphor Icons](https://github.com/phosphor-icons/core) — MIT License, vendored as one SVG sprite

@@ -25,6 +25,13 @@ Dates are UTC. Variant A is EC2 with an Auto Scaling group (`ec2`), variant B is
 
 No run was rerun and none failed: each is the only attempt and [load-summary.md](../load-summary.md) marks all eight "valid". The three A folders exported before commit `0276f52` (smoke, scale-out, replacement) have `<ACCOUNT>` inside some averages of `locust_stats*.csv` and `report.html` (a redaction defect, fixed afterwards); their `requests-*.csv`, which the numbers come from, are not affected. Folder contents, key files and how to reproduce each folder's numbers are in its `README.md`.
 
+## RES-04: session continuity (analysis of the RES-03b logs, 2026-10-10)
+
+| File | What it is | Variant |
+|---|---|---|
+| `RES-04_2026-10-10_ec2_continuity.txt` | `tests/load/continuity.py` over `RES-03-ec2-replace-r1_2026-10-08/` | A |
+| `RES-04_2026-10-10_fargate_continuity.txt` | the same over `RES-03-fargate-replace-r1_2026-10-09/` | B |
+
 ## PRE: preflight before the AWS session (2026-10-08, both variants)
 
 | Case | What it is | Authoritative file | Other files |

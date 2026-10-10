@@ -1,6 +1,6 @@
 # ADR-013: A separate load-generator stack, one-minute monitoring and capacity pinning
 
-**Status:** drafted by the writing session for review (6 October 2026). Written to the requirements in [load-harness.md](../plans/load-harness.md) section 10. Prices are from memory and unverified.
+**Status:** implemented; the stacks it describes were applied and measured on 8 and 9 October 2026 (first drafted 6 October 2026). Written to the requirements in [load-harness.md](../plans/load-harness.md) section 10. Prices are from memory and unverified.
 
 ## Decision
 
