@@ -107,7 +107,7 @@ Record: [monitoring.md](monitoring.md).
 |---|---|---|---|
 | Build record, one dated entry per apply, with timings, defects and cost | Current to the 9 October session; lab balance at the end of both sessions recorded (USD 9.8 of 50 used) | [aws-build-runbook.md](aws-build-runbook.md) | 2026-10-08 |
 | Preflight checks (`PRE_*`), timed up/down/pin/reset (`OPS_*`), resource IDs (`SESSION_*`) | Variants A and B recorded | `raw/PRE_2026-10-08_*.txt`, `raw/OPS_2026-10-08_ec2_*.txt`, `raw/OPS_2026-10-09_fargate_*.txt`, `raw/SESSION_*` | 2026-10-08, 2026-10-09 |
-| `architecture.png` | Present: final architecture (variant B), awaiting team sign-off and insertion into the report | [architecture.png](architecture.png), text version [architecture.md](architecture.md) | 2026-10-09 |
+| `architecture.png` | Present: final architecture (variant B), drawn in Lucidchart; the text version maps every label to its Terraform resource and evidence | [architecture.png](architecture.png), text version [architecture.md](architecture.md) | 2026-10-11 |
 | `report.pdf` | Present at the ZIP root (11 pages including references and appendix) | `report.pdf` | 2026-10-10 |
 
 ## Evidence rules

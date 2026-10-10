@@ -61,7 +61,7 @@ Marking needs only level 1: no cloud account and no purchase. Levels 2 and 3 are
 
 ![Architecture of the final system (variant B, ECS on Fargate)](evidence/architecture.png)
 
-Browser → HTTPS load balancer (WAF, ACM certificate) → one or two Fargate tasks running one Django container → private RDS PostgreSQL. There are no sticky sessions: sessions and carts live in PostgreSQL. Secrets come from Secrets Manager at start-up, the image from ECR, the dataset and exports from a private S3 bucket, and JSON logs and alarms go to CloudWatch and SNS. The diagram's labels are Terraform resource names; [evidence/architecture.md](evidence/architecture.md) maps each one to its file and its test.
+Browser → HTTPS load balancer (WAF, ACM certificate) → one or two Fargate tasks running one Django container → private RDS PostgreSQL. There are no sticky sessions: sessions and carts live in PostgreSQL. Secrets come from Secrets Manager at start-up, the image from ECR, the dataset and exports from a private S3 bucket, and JSON logs and alarms go to CloudWatch and SNS. The diagram labels components with their AWS service names (and the Terraform name on the main request path); [evidence/architecture.md](evidence/architecture.md) maps every label to its Terraform resource, its file and its test.
 
 Why this design and the alternatives that were rejected: [ADR-018](docs/decisions/ADR-018-final-architecture-ecs-fargate.md), [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/AWS_INFRASTRUCTURE.md](docs/AWS_INFRASTRUCTURE.md).
 

@@ -47,7 +47,7 @@ The work here is mostly *extraction and packaging*, not new design:
 | Expected workload | [cloud-independent-prep.md](archive/plans/cloud-independent-prep.md) B1 (browse-heavy mix, small checkout share) |
 
 **Current gap:** the diagram (`evidence/architecture.png`) and the populated manifest exist, and the
-diagram is in `report.pdf`. Team sign-off of the diagram is the remaining step.
+diagram was redrawn in Lucidchart on 11 October 2026 and is the final version. Its insertion into `report.pdf` remains.
 
 ## Roadmap
 
@@ -218,9 +218,9 @@ repo, not generic terms:
 | Observability | CloudWatch with arrows showing it receiving logs/metrics, not floating disconnected; SNS alert to the team; CloudTrail event history for API audit |
 | Data flows | Labeled arrows: browser to ALB (HTTPS/443), ALB to app (HTTP 8000, internal), app to RDS (5432, TLS), browser to app for static images and 3D models (served by WhiteNoise from the image; no browser-to-S3 arrow), S3 to import command to RDS (data pipeline), secrets and image at instance boot |
 
-A labelled diagram following this checklist is committed as `evidence/architecture.png`, with
-`evidence/architecture.md` as the text specification and `evidence/architecture.src.py` as its
-reproducible source. It is inserted in the report; team sign-off is the remaining step.
+A labelled diagram following this checklist is committed as `evidence/architecture.png` (drawn in
+Lucidchart; the repository holds the exported image, not the Lucidchart file), with
+`evidence/architecture.md` as the text specification. Its insertion into the report remains.
 
 ### Phase C — wire it into the deliverables
 
