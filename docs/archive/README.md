@@ -1,5 +1,7 @@
 # Archive
 
+> **Historical records.** Statements here were true when written and may be superseded by the evidence in [evidence/](../../evidence/README.md) and by [ADR-018](../decisions/ADR-018-final-architecture-ecs-fargate.md) (final architecture: variant B, ECS on Fargate). Where they differ, the evidence and the ADRs are authoritative.
+
 Finished or superseded planning records, moved out of the working set on 1 October 2026 with `git mv`, so their history is intact. Nothing here governs current work. Review logs stay in [docs/reviews/](../reviews/) because they are evidence of the independent-review process.
 
 Why files were archived: the plan or guide describes work that is complete, or its decisions were carried into a live document. Seven plans stay in [docs/plans/](../plans/) because source code, tests or active work still point to them.

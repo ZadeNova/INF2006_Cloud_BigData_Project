@@ -4,7 +4,7 @@
 
 Terraform and scripts that deploy 42Factors to AWS (Learner Lab, `us-east-1`) in two variants that are compared: **A, EC2 with an Auto Scaling group**, and **B, containers on ECS Fargate**. Decisions are in [docs/decisions/](../../docs/decisions/) (ADR-001 to ADR-019), the plan in [aws-ecs-comparison.md](../../docs/plans/aws-ecs-comparison.md) and [fargate-variant.md](../../docs/plans/fargate-variant.md), and what was actually applied, with dates and results, in [evidence/aws-build-runbook.md](../../evidence/aws-build-runbook.md).
 
-**Status (9 October 2026).** `base/` is applied and stays up. Variant A was applied and verified on 1 October: `https://shop-ec2.fourtytwofactors.me` served the shop, with `smoke.sh` passing 8 of 8. Since then the front door shared by both variants moved into a module (`modules/web-entry`), the Fargate stack (`fargate/`) and the load-generator stack (`loadgen/`) were written, and the scripts were extended. **All of that passed `terraform validate`.** Variant A and the load-generator stack were applied and used on 8 October (evidence in [evidence/README.md](../../evidence/README.md), the apply record in [aws-build-runbook.md](../../evidence/aws-build-runbook.md)); variant B (`fargate/`) was applied, measured and torn down on 9 October (the final architecture, [ADR-018](../../docs/decisions/ADR-018-final-architecture-ecs-fargate.md)). The earlier `up.sh` stop at `db_bootstrap` on an already-bootstrapped database is fixed in code (ADR-019, not re-run in AWS). Between work sessions the stacks are torn down to save money.
+**Status (9 October 2026).** `base/` was applied and stayed up between sessions; it is torn down after submission ("Final teardown" below). Variant A was applied and verified on 1 October: `https://shop-ec2.fourtytwofactors.me` served the shop, with `smoke.sh` passing 8 of 8. Since then the front door shared by both variants moved into a module (`modules/web-entry`), the Fargate stack (`fargate/`) and the load-generator stack (`loadgen/`) were written, and the scripts were extended. **All of that passed `terraform validate`.** Variant A and the load-generator stack were applied and used on 8 October (evidence in [evidence/README.md](../../evidence/README.md), the apply record in [aws-build-runbook.md](../../evidence/aws-build-runbook.md)); variant B (`fargate/`) was applied, measured and torn down on 9 October (the final architecture, [ADR-018](../../docs/decisions/ADR-018-final-architecture-ecs-fargate.md)). The earlier `up.sh` stop at `db_bootstrap` on an already-bootstrapped database is fixed in code (ADR-019, not re-run in AWS). Between work sessions the stacks are torn down to save money.
 
 ## Quick start
 
@@ -52,7 +52,7 @@ Every script says what it is doing, shows the Terraform plan before changing any
 
 ```
 src/infrastructure/
-  base/                 shared, stays up
+  base/                 shared; stays up between sessions, torn down at the end
   modules/web-entry/    the front door both variants use
   ec2/                  variant A
   fargate/              variant B
