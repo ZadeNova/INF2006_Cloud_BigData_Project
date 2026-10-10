@@ -47,7 +47,7 @@ The work here is mostly *extraction and packaging*, not new design:
 | Expected workload | [cloud-independent-prep.md](archive/plans/cloud-independent-prep.md) B1 (browse-heavy mix, small checkout share) |
 
 **Current gap:** the diagram (`evidence/architecture.png`) and the populated manifest exist, and the
-diagram was redrawn in Lucidchart on 11 October 2026 and is the final version. Its insertion into `report.pdf` remains.
+diagram was redrawn in Lucidchart on 11 October 2026 and is the final version. It is inserted in `report.pdf`.
 
 ## Roadmap
 

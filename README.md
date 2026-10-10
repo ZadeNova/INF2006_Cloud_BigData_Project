@@ -96,7 +96,7 @@ Each record opens with a results table and gives the objective, setup, command, 
 | Monitoring | [monitoring.md](evidence/monitoring.md) | MON-01 PASS with one deviation; MON-02 one of two queries defective; MON-03 partial; MON-04 PASS |
 | Reproduction | [REPRO-01](evidence/raw/REPRO-01_2026-10-09_linux_clean-clone.txt) | Clean clone, offline: build, 497 tests, demo data, analytics and load tables, about 2 minutes of machine time |
 | Machine-readable summary | [project_manifest.yaml](project_manifest.yaml) | Every path in it exists |
-| Report | `report.pdf` | Added at submission |
+| Report | [report.pdf](report.pdf) | 13 pages in total; sections 1 to 8 end on page 10 (limit 12 excluding references and appendices) |
 | Declarations | [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md), [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md) | Review logs for AI-assisted changes: [docs/reviews/](docs/reviews/) |
 
 ## Team
