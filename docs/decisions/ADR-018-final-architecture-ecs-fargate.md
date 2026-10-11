@@ -34,7 +34,7 @@ Weights were locked on 3 October 2026 (before any run) in [docs/plans/load-harne
 |---|---|---|---|
 | Operational burden (judgement 7 vs 9) | 25 | 7.8 | 10 |
 | Replacement time and error window | 25 | 7.2 | 10 |
-| Steady-state latency (low-load p95 within 5%, tie) | 20 | 10 | 10 |
+| Steady-state latency (planned as p95 at 10 and 100 users, which was not run; scored from a low-load p95 within 5%, tie) | 20 | 10 | 10 |
 | Cost per 1,000 requests | 15 | 10 | 8.0 |
 | Scale-out time | 10 | 6.3 | 10 |
 | Capacity per unit | 5 | 10 | 9.5 |
@@ -43,6 +43,7 @@ Weights were locked on 3 October 2026 (before any run) in [docs/plans/load-harne
 | If we change the inputs | A | B | Reading |
 |---|---|---|---|
 | As above | 8.4 | 9.7 | B ahead |
+| Latency dropped (its planned measure was not run), others renormalised | 8.0 | 9.6 | B still ahead |
 | Operational burden treated as equal | 8.9 | 9.7 | B still ahead (recovery and scale-out) |
 | Operational burden and replacement both neutral | 9.6 | 9.7 | **Tie** (0.1 apart, far inside the noise of n = 1) |
 | Cost weight raised to 40, others scaled down in proportion | 8.9 | 9.2 | B still ahead, narrowly |
@@ -55,7 +56,7 @@ Weights were locked on 3 October 2026 (before any run) in [docs/plans/load-harne
 | Alternative | Why not |
 |---|---|
 | **A: EC2 + Auto Scaling group** | Measured, sound, slightly cheaper and higher ceiling. Not chosen: hosts to patch, slower recovery, more to set up by hand. Kept as the comparison. |
-| **AWS Lambda / API Gateway** | The Django app is a long-running web process with a connection pool; a rewrite for cold starts and connection limits buys nothing at this scale. |
+| **AWS Lambda / API Gateway** | The Django app is a long-running web process that reuses persistent database connections (`CONN_MAX_AGE = 60`); adapting and re-validating the frozen app for cold starts and connection limits did not fit the four-week build. |
 | **Amazon EKS** | A control plane to run for a single service; far above a 1 to 3 engineer team's need. |
 | **Elastic Beanstalk / App Runner** | Hide the networking and scaling choices the project must show, and the Learner Lab restricts some of their roles. |
 

@@ -92,11 +92,11 @@ Each record opens with a results table and gives the objective, setup, command, 
 | Functional workflow | [test-functional.md](evidence/test-functional.md) | FUNC-01 and FUNC-02 PASS locally; FUNC-03 part 1 PASS on A and B; part 2 (browser steps on AWS) not evidenced |
 | Security control | [test-security.md](evidence/test-security.md), [threat-control-map.md](evidence/threat-control-map.md) | Local SEC-01 to 08 and 12 to 16 PASS; cloud SEC-09, 10, 11, 18 PASS on A and B; SEC-17 on B only; 19 threats mapped; 7 scans triaged, 4 findings open |
 | Data and AI validation | [test-data-ai.md](evidence/test-data-ai.md) | DATA-01 PASS (0 mismatches); DATA-02 PASS with no predictive claim; not run on AWS |
-| Scalability and resilience | [test-resilience.md](evidence/test-resilience.md), [test-performance.md](evidence/test-performance.md), [load-summary.md](evidence/load-summary.md) | Scale-out, replacement and saturation measured on A and B (n = 1); RES-04 session continuity held in the recorded sample |
+| Scalability and resilience | [test-resilience.md](evidence/test-resilience.md), [test-performance.md](evidence/test-performance.md), [load-summary.md](evidence/load-summary.md) | Scale-out, replacement and saturation measured on A and B (n = 1); RES-04 found no session or cart failures in the recorded sample (the logs do not record the serving unit) |
 | Monitoring | [monitoring.md](evidence/monitoring.md) | MON-01 PASS with one deviation; MON-02 one of two queries defective; MON-03 partial; MON-04 PASS |
 | Reproduction | [REPRO-01](evidence/raw/REPRO-01_2026-10-09_linux_clean-clone.txt) | Clean clone, offline: build, 497 tests, demo data, analytics and load tables, about 2 minutes of machine time |
 | Machine-readable summary | [project_manifest.yaml](project_manifest.yaml) | Every path in it exists |
-| Report | [report.pdf](report.pdf) | 13 pages in total; sections 1 to 8 end on page 10 (limit 12 excluding references and appendices) |
+| Report | [report.pdf](report.pdf) | 13 pages in total; sections 1 to 8 end on page 12 (limit 12 excluding references and appendices) |
 | Declarations | [TEAM_CONTRIBUTIONS.md](TEAM_CONTRIBUTIONS.md), [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md) | Review logs for AI-assisted changes: [docs/reviews/](docs/reviews/) |
 
 ## Team
@@ -119,7 +119,7 @@ Each record opens with a results table and gives the objective, setup, command, 
 - **Not done:** a scheduler for the analytics refresh (it is a manual command), saved-model inference, hosted CI verification, and the logged independent review of the latest changes (open review gates are listed in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)).
 - **Region:** the lab offers only `us-east-1`; a Singapore shop would use `ap-southeast-1`.
 - **Cloud reproduction:** rebuilding the cloud stack in another account needs a domain or a delegated subdomain (see *Reproduce it*). No second-account build is recorded, and variant B's fresh-database bring-up was tested offline only ([ADR-019](docs/decisions/ADR-019-variant-b-sets-up-its-own-database.md)).
-- **Local server:** run locally, the app is served by Gunicorn with two synchronous workers and no proxy in front. A browser's speculative (pre-opened) connection can hold a worker idle until the 30-second timeout, after which Gunicorn sends a plain "Internal Server Error" page on that connection; the next click can show it. Refreshing works. On AWS the load balancer forwards only complete requests, so this does not occur there. Not fixed, because the image (`src/Dockerfile`) is frozen.
+- **Local server:** run locally, the app is served by Gunicorn with two synchronous workers and no proxy in front. A browser's speculative (pre-opened) connection can hold a worker idle until the 30-second timeout, after which Gunicorn sends a plain "Internal Server Error" page on that connection; the next click can show it. Refreshing works. On AWS the load balancer forwards only complete requests, so it is not expected there. This diagnosis comes from Gunicorn's error-page format and source code and has not been reproduced with a saved log. Not fixed, because the image (`src/Dockerfile`) is frozen.
 - **Demo dates:** the demo data ends on 1 January 2026, so the dashboard's month-to-date and year-to-date ranges cover one day and show a single point instead of a line. Use 7, 30 or 90 days, or import with `--shift-anchor` to move every date forward.
 
 ## Repository layout

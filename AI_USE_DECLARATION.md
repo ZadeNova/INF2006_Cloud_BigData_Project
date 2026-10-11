@@ -24,9 +24,11 @@ decisions, and approved a plan before each AI-assisted change.
 | Claude Code and OpenAI Codex (`gpt-5.6-luna`) | Storefront redesign in the VoiceBox style, dark mode, motion, 42Factors branding and the pixel "67" mark (`src/templates/`, `src/static/`) | Front-end implementation assistance, led by Jun Keat Lim | Visual and UI checks by the team; frontend tests ([tests/test_frontend.py](tests/test_frontend.py)); FUNC-02 browser walkthrough | AI-assisted work, declared here |
 | Chat assistant for planning and advice (tool not recorded) | Architecture, cost and scope discussions before decisions were written down | Advice only | Decisions were then recorded by the team in [docs/decisions/](docs/decisions/) and the scope | AI-assisted advice |
 
-AI output was not accepted as fact; it was accepted only through recorded gates. Each backend change
-was reviewed by a separate, read-only reviewer agent against the written contracts, with findings,
-fixes and re-reviews logged under [docs/reviews/](docs/reviews/). It was then checked by the
+AI output was not accepted as fact; it was accepted only through recorded gates. Backend changes
+were reviewed by a separate, read-only reviewer agent against the written contracts, with findings,
+fixes and re-reviews logged under [docs/reviews/](docs/reviews/), except where a review is still open:
+the backend review of `0442665..HEAD` and the review of `ec2/` and the scripts are listed as open in
+[docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Changes were also checked by the
 automated tests, by deployed tests on AWS, by cross-checking results against the database, and by
 checking pages in the browser. Every result reported comes from a command whose raw output is saved
 under [evidence/raw/](evidence/raw/), not from an assistant's summary. Where an agent ran a check,
