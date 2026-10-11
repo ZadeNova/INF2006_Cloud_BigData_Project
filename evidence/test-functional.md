@@ -80,7 +80,7 @@ pytest_exit=0
 
 **Tester:** Phua Kia Wen Hermann performed the human browser steps; the read-only database and log checks recorded below were taken during the same session.
 
-**Setup:** Fresh local database loaded following the "Demo data" section of `src/README.md` after FUNC-01. This case will be run only after the human reviewer agrees to reset the disposable local database if existing data conflicts with the import.
+**Setup:** Fresh local database loaded following the "Demo data" section of `src/README.md` after FUNC-01. The disposable local database was reset before the import ([raw/FUNC-02_2026-09-26_setup.txt](raw/FUNC-02_2026-09-26_setup.txt)).
 
 **Command/steps and expected result for each step:**
 
@@ -95,7 +95,7 @@ pytest_exit=0
 | 7 | As the operator, open `/analytics/` | The dashboard renders |
 | 8 | As the customer, open `/analytics/` | Access is refused |
 
-**Actual result (in progress, 2026-09-26; each row records the tester's report):**
+**Actual result (2026-09-26; each row records the tester's report):**
 
 | Step | Reported result |
 |---|---|

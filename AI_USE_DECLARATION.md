@@ -26,9 +26,10 @@ decisions, and approved a plan before each AI-assisted change.
 
 AI output was not accepted as fact; it was accepted only through recorded gates. Backend changes
 were reviewed by a separate, read-only reviewer agent against the written contracts, with findings,
-fixes and re-reviews logged under [docs/reviews/](docs/reviews/), except where a review is still open:
-the backend review of `0442665..HEAD` and the review of `ec2/` and the scripts are listed as open in
-[docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Changes were also checked by the
+fixes and re-reviews logged under [docs/reviews/](docs/reviews/). The last two gates, the backend changes from
+`0442665` onward ([shoe-baseline-gate.md](docs/reviews/shoe-baseline-gate.md), verdict CLEAR) and `ec2/` with the
+scripts, were closed on 11 October 2026 by the team lead's recorded approval
+([docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)). Changes were also checked by the
 automated tests, by deployed tests on AWS, by cross-checking results against the database, and by
 checking pages in the browser. Recorded command-based results are backed by raw output under
 [evidence/raw/](evidence/raw/). Hermann's separate reproduction attempt has no saved raw log,
@@ -78,7 +79,7 @@ The records below were written as the work happened and are kept unchanged.
 | Django and Python official documentation | Runtime/framework selection and framework patterns | Supported Django 5.2 LTS / Python 3.13 baseline | Exact installed versions and dependency compatibility recorded in foundation evidence | https://docs.djangoproject.com/en/5.2/releases/5.2/ ; https://www.python.org/downloads/ |
 | PostgreSQL official documentation and Docker Official Images | Local PostgreSQL and Python containers | Reproducible local runtime | Image digests pinned; PostgreSQL constraints and migrations exercised | https://www.postgresql.org/docs/17/ ; upstream software/image licences apply |
 
-| Claude Code (Claude Opus 5.5) | Shoe catalogue with sizes, 26 September 2026: `src/catalogue/`, importer, `analytics/build_shoe_dataset.py`, storefront and dashboard changes, tests and docs | Implementation assistance under the user's approved plan (`docs/plans/shoe-sizes-catalogue.md`) | Full test suite, importer validation, disposable import/refresh and pandas cross-check, as recorded in the implementation plan; independent review pending | AI-assisted work |
+| Claude Code (Claude Opus 5.5) | Shoe catalogue with sizes, 26 September 2026: `src/catalogue/`, importer, `analytics/build_shoe_dataset.py`, storefront and dashboard changes, tests and docs | Implementation assistance under the user's approved plan (`docs/plans/shoe-sizes-catalogue.md`) | Full test suite, importer validation, disposable import/refresh and pandas cross-check, as recorded in the implementation plan; reviewed in [shoe-baseline-gate.md](docs/reviews/shoe-baseline-gate.md) (CLEAR) and approved by the team lead on 11 October 2026 | AI-assisted work |
 
 No external application template or another course's implementation was copied. Source dataset provenance and any frontend imagery/font attribution remain separate future records. This entry does not claim human team members performed the agent-run checks.
 
@@ -103,7 +104,7 @@ OpenAI Codex coordinates Phase 6 on `erfan/analytics`, with explicit `gpt-6-astr
 
 | Tool/source | Where used | Purpose | Verification performed | Licence/attribution |
 |---|---|---|---|---|
-| Claude Code (Claude Opus 5.5) | `analytics/evaluate_holdout.py`, `analytics/segment_customers.py`, `src/reporting/segment_contract.py`, `src/catalogue/`, `src/cart/views.py`, related templates, CSS, tests, `evidence/` DATA-01/DATA-02 records and `docs/plans/` | Implementation and verification assistance on tasks chosen and approved by the team | Plans written before each change; full test suite, focused ML/loader suites, disposable-database reruns of import, refresh, independent pandas check, training, import and dashboard, and headless-browser screenshots, as recorded in `evidence/test-data-ai.md` and the plans; independent review pending | AI-assisted work |
+| Claude Code (Claude Opus 5.5) | `analytics/evaluate_holdout.py`, `analytics/segment_customers.py`, `src/reporting/segment_contract.py`, `src/catalogue/`, `src/cart/views.py`, related templates, CSS, tests, `evidence/` DATA-01/DATA-02 records and `docs/plans/` | Implementation and verification assistance on tasks chosen and approved by the team | Plans written before each change; full test suite, focused ML/loader suites, disposable-database reruns of import, refresh, independent pandas check, training, import and dashboard, and headless-browser screenshots, as recorded in `evidence/test-data-ai.md` and the plans; reviewed in [shoe-baseline-gate.md](docs/reviews/shoe-baseline-gate.md) (CLEAR) and approved by the team lead on 11 October 2026 | AI-assisted work |
 | Gemini (Google) | Dashboard description (reported by Hermann) | Structuring the wording of the dashboard description | Used in FUNC-02 step 7 ([evidence/test-functional.md](evidence/test-functional.md)); each value cross-checked against the database | AI-assisted wording |
 
 Scope and decisions came from the team. Syahfariz chose which review findings to act on
