@@ -1,0 +1,40 @@
+VoiceBox design reference: attribution and licence
+
+Published author: Chef (@chef)
+Version: v1
+Source and MIT licence declaration: https://designmd.ai/chef/voicebox
+Download: https://designmd.ai/api/v1/kits/chef/voicebox/download
+Verified: 11 October 2026
+Downloaded file SHA-256:
+8568789cec8e224408212052a5bdf9187aa0f852da5575331e548cbe9592bf77
+
+The 287-line supplied reference in DESIGN.md matches the upstream download
+after normalising line endings and surrounding whitespace. The subsequent
+"As built in this project" section documents this team's adaptations.
+
+The source page explicitly labels this design system MIT. The downloaded
+Markdown supplies no copyright notice or year; none has been invented here.
+The published author is credited above. The standard MIT permission and
+warranty text below is reproduced from https://opensource.org/license/mit.
+This notice covers the VoiceBox reference, not the entire project or its
+separately licensed fonts, icons, models and dependencies.
+
+MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.

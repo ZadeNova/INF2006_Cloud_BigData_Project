@@ -30,8 +30,11 @@ fixes and re-reviews logged under [docs/reviews/](docs/reviews/), except where a
 the backend review of `0442665..HEAD` and the review of `ec2/` and the scripts are listed as open in
 [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md). Changes were also checked by the
 automated tests, by deployed tests on AWS, by cross-checking results against the database, and by
-checking pages in the browser. Every result reported comes from a command whose raw output is saved
-under [evidence/raw/](evidence/raw/), not from an assistant's summary. Where an agent ran a check,
+checking pages in the browser. Recorded command-based results are backed by raw output under
+[evidence/raw/](evidence/raw/). Hermann's separate reproduction attempt has no saved raw log,
+and the local Gunicorn diagnosis remains an AI-assisted explanation without a logged reproduction;
+these limitations are stated in the report, README and contribution reflection rather than presented
+as independently verified command results. Where an agent ran a check,
 the evidence says so and does not credit a human. The local functional and security test records were run and written by AI agents and then reviewed by the testing members; the FUNC-02 browser walkthrough was carried out by a person.
 
 ## Libraries, assets and data
@@ -51,7 +54,7 @@ the evidence says so and does not credit a human. The local functional and secur
 | Analytics Engineering, "Ecommerce Sales & Returns Dataset v1.0.0" | [data/](data/README.md), remapped to shoes | Synthetic source data | Checksums in `data/raw/checksums.txt`; import reconciliation | CC BY 4.0; notice in `data/raw/LICENSE.txt` |
 | glTF-Transform v4.5.0 | [src/static/models/](src/static/models/CREDITS.md) | Compressing the 3D models (WebP textures, quantized meshes) | The generator string is recorded in the header of each of the 12 files (read on 10 October 2026) and every texture is at most 1024 px. Who ran it, and the exact commands, were not recorded | MIT |
 | Phosphor Icons, regular weight | `src/static/img/icons.svg` | Interface icons, vendored as one SVG sprite | Licence notice is in the file header | MIT |
-| `DESIGN.md` ("VoiceBox" design reference) | Visual reference for the storefront CSS; included in this package for reference | Added as a Starbucks-inspired reference on 11 September 2026 (commit `c7ed9d1`, Lim Chee Long) and replaced by the VoiceBox version on 23 September 2026 (commit `d147c9d`, Jun Keat Lim) | Not possible: its original source was not recorded and could not be recovered | **Unknown, declared as such.** The fonts and icons the build loads are listed above under their own licences |
+| `DESIGN.md` ("VoiceBox" design reference) | Visual reference for the storefront CSS; included in this package for reference | [VoiceBox v1 by Chef (@chef)](https://designmd.ai/chef/voicebox), introduced by Jun Keat Lim on 23 September 2026 (commit `d147c9d`), replacing the earlier Starbucks-inspired reference | Source recovered on 11 October 2026: all 287 lines of the supplied reference match the upstream download after normalising line endings and surrounding whitespace; project adaptations are recorded in the "As built in this project" section | MIT, as declared on the source page; [licence text and verification details](docs/licenses/voicebox-MIT.txt). Fonts and icons retain their separate licences listed above |
 
 ## Team decisions and modifications
 

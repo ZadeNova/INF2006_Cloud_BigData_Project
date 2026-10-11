@@ -454,5 +454,10 @@ below the palette in the same block and are built from these values.
 - **This design system**: added to the repository as a Starbucks-inspired
   reference by Lim Chee Long on 11 September 2026 (commit `c7ed9d1`) and replaced
   by this VoiceBox version by Jun Keat Lim on 23 September 2026 (commit
-  `d147c9d`). Its original source and licence were not recorded and could not be
-  recovered; this is declared in AI_USE_DECLARATION.md.
+  `d147c9d`). The VoiceBox source was recovered on 11 October 2026:
+  [VoiceBox v1 by Chef (@chef)](https://designmd.ai/chef/voicebox), published
+  under the MIT License. All 287 lines of the supplied reference above match
+  the upstream download after normalising line endings and surrounding
+  whitespace. The "As built in this project" section records our adaptations.
+  See [licence text and verification details](docs/licenses/voicebox-MIT.txt)
+  and [AI_USE_DECLARATION.md](AI_USE_DECLARATION.md).
