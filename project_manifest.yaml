@@ -3,7 +3,7 @@ project:
   title: "42Factors: a small online shoe shop with a sales and inventory analytics dashboard, deployed and measured on AWS"
   problem_statement: "A small online shoe shop has two users with different problems. Customers need to register, browse sized products, keep a cart and place a simulated order that is never duplicated or oversold. The store operator needs an understandable view of sales trends and which sizes need replenishing. The project builds that shop (Django, PostgreSQL) on synthetic data and runs it on AWS, then measures how it scales and recovers. Two compute layouts for the same image and database were built and compared, EC2 behind an Auto Scaling group (variant A) and containers on ECS Fargate (variant B), one repeat each. Scope and requirements: PROJECT_SCOPE_INF2006.md section 1."
   cloud_provider: "AWS"
-  repository_commit: "57160de6abf6eec56413b9f923e024875b31fe91" # the content commit immediately before this manifest-only update; it contains everything except this field
+  repository_commit: "1cb3db4e27d84e752a98be96399718e4f04d6b66" # the content commit immediately before this manifest-only update; it contains everything except this field
 
 team:
   members:
