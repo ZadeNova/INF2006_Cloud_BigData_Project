@@ -120,6 +120,7 @@ Each record opens with a results table and gives the objective, setup, command, 
 - **Region:** the lab offers only `us-east-1`; a Singapore shop would use `ap-southeast-1`.
 - **Cloud reproduction:** rebuilding the cloud stack in another account needs a domain or a delegated subdomain (see *Reproduce it*). No second-account build is recorded, and variant B's fresh-database bring-up was tested offline only ([ADR-019](docs/decisions/ADR-019-variant-b-sets-up-its-own-database.md)).
 - **Local server:** run locally, the app is served by Gunicorn with two synchronous workers and no proxy in front. A browser's speculative (pre-opened) connection can hold a worker idle until the 30-second timeout, after which Gunicorn sends a plain "Internal Server Error" page on that connection; the next click can show it. Refreshing works. On AWS the load balancer forwards only complete requests, so this does not occur there. Not fixed, because the image (`src/Dockerfile`) is frozen.
+- **Demo dates:** the demo data ends on 1 January 2026, so the dashboard's month-to-date and year-to-date ranges cover one day and show a single point instead of a line. Use 7, 30 or 90 days, or import with `--shift-anchor` to move every date forward.
 
 ## Repository layout
 
