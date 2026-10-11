@@ -3,7 +3,7 @@ project:
   title: "42Factors: a small online shoe shop with a sales and inventory analytics dashboard, deployed and measured on AWS"
   problem_statement: "A small online shoe shop has two users with different problems. Customers need to register, browse sized products, keep a cart and place a simulated order that is never duplicated or oversold. The store operator needs an understandable view of sales trends and which sizes need replenishing. The project builds that shop (Django, PostgreSQL) on synthetic data and runs it on AWS, then measures how it scales and recovers. Two compute layouts for the same image and database were built and compared, EC2 behind an Auto Scaling group (variant A) and containers on ECS Fargate (variant B), one repeat each. Scope and requirements: PROJECT_SCOPE_INF2006.md section 1."
   cloud_provider: "AWS"
-  repository_commit: "6f836678c950fb6023ead18465934dd37f4e1de6" # the commit that contains everything except this field
+  repository_commit: "834da7ff19f4400d0cc32aca6677bdd06f47a5ac" # the content commit immediately before this manifest-only update; it contains everything except this field
 
 team:
   members:
@@ -97,7 +97,7 @@ local_release:
   hosted_ci: "unverified for this revision"
   aws_integration: "variants A and B verified on 2026-10-08 and 2026-10-09 (evidence/test-security.md SEC-09, SEC-10, SEC-11, SEC-18, and SEC-17 on B only; evidence/test-functional.md FUNC-03 part 1)"
   load: "variants A (2026-10-08) and B (2026-10-09) measured, one repeat per condition (evidence/test-resilience.md, evidence/test-performance.md, evidence/load-summary.md; raw index evidence/raw/INDEX.md)"
-  submission_gap: "evidence/architecture.png is the final diagram (variant B, drawn in Lucidchart on 11 October 2026); report.pdf is the exported final report (13 pages; sections 1 to 8 end on page 10) with the diagram inserted. The backend review gate for later changes remains open."
+  submission_gap: "evidence/architecture.png is the final diagram (variant B, drawn in Lucidchart on 11 October 2026); report.pdf is the exported final report (13 pages; sections 1 to 8 end on page 12) with the diagram inserted. The backend review gate for later changes remains open."
   status: "Phase 6 local implementation and independent review cleared on 2026-09-26; variants A and B were deployed and measured on 2026-10-08 and 2026-10-09; final report and packaging work is in progress; later changes from merge 0442665 onward still await their logged independent review"
 
 # Extra field (not part of the brief's required structure): which repository paths prove each marking criterion.
