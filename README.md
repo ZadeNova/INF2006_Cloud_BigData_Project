@@ -119,6 +119,7 @@ Each record opens with a results table and gives the objective, setup, command, 
 - **Not done:** a scheduler for the analytics refresh (it is a manual command), saved-model inference, hosted CI verification, and the logged independent review of the latest changes (open review gates are listed in [docs/IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)).
 - **Region:** the lab offers only `us-east-1`; a Singapore shop would use `ap-southeast-1`.
 - **Cloud reproduction:** rebuilding the cloud stack in another account needs a domain or a delegated subdomain (see *Reproduce it*). No second-account build is recorded, and variant B's fresh-database bring-up was tested offline only ([ADR-019](docs/decisions/ADR-019-variant-b-sets-up-its-own-database.md)).
+- **Local server:** run locally, the app is served by Gunicorn with two synchronous workers and no proxy in front. A browser's speculative (pre-opened) connection can hold a worker idle until the 30-second timeout, after which Gunicorn sends a plain "Internal Server Error" page on that connection; the next click can show it. Refreshing works. On AWS the load balancer forwards only complete requests, so this does not occur there. Not fixed, because the image (`src/Dockerfile`) is frozen.
 
 ## Repository layout
 
